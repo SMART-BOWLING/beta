@@ -2,2650 +2,438 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>SMB-LS-KH</title>
-    <!-- Preload и асинхронная загрузка шрифтов/иконок -->
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <!-- Google Identity Services -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://apis.google.com/js/api.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Аналитика клубов: задачи, FPS, детали | Дашборд</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        /* КРИТИЧЕСКИЕ СТИЛИ ДЛЯ КАРТОЧЕК И ШАПКИ */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-
-        :root {
-            --light-bg: #fefefe;
-            --dark-bg: #1a1a1a;
-            --accent: #dc143c;
-            --text-dark: #1a2f40;
-            --text-light: #ffffff;
-            --text-gray: #FFF;
-            --text-light-gray: #999999;
-            --border-radius: 8px;
-            --input-padding: 12px;
-            --surface: #ffffff;
-            --elevation-1: 0 1px 2px rgba(0,0,0,0.05);
-            --elevation-2: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "Poppins", sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        html, body {
-            height: 100%;
-            overflow: hidden;
-            background-color: #f4f6f9;
-            width: 100%;
-            position: fixed;
-            touch-action: manipulation;
         }
 
         body {
-            color: #1a2f40;
-            padding: 0;
-            line-height: 1.5;
-            min-height: 100vh;
-            height: 100vh;
-            -webkit-font-smoothing: antialiased;
-            font-weight: 700;
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
-            -webkit-text-size-adjust: 100%;
+            background: #f0f2f8;
+            font-family: 'Segoe UI', 'Roboto', 'Inter', system-ui, -apple-system, sans-serif;
+            padding: 24px 20px;
+            color: #1a2634;
         }
 
-        /* НОВАЯ ШАПКА */
-        header {
-            background-color: #1f2937;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 20px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            user-select: none;
-            z-index: 1000;
-            padding-top: max(10px, env(safe-area-inset-top));
-            padding-left: max(20px, env(safe-area-inset-left));
-            padding-right: max(20px, env(safe-area-inset-right));
-            min-height: 65px;
-        }
-
-        .logo img {
-            width: 40px;
-            height: 40px;
-            object-fit: cover;
-            border-radius: 0;
-            transform: translateY(4px);
-            cursor: pointer;
-        }
-
-        .site-name {
-            flex: 1;
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            color: white;
-            cursor: default;
-            position: relative;
-        }
-
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 2px solid white;
-            background-color: #4a5568;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .user-avatar:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 10px rgba(255,255,255,0.3);
-        }
-
-        .user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .user-avatar i {
-            font-size: 18px;
-            color: white;
-        }
-
-        .user-dropdown {
-            display: none;
-            position: absolute;
-            top: 70px;
-            right: 20px;
-            background-color: #1f2937;
-            border: 1px solid #444;
-            border-radius: 8px;
-            overflow: hidden;
-            z-index: 9999;
-            min-width: 150px;
-        }
-
-        .user-dropdown a {
-            padding: 10px 15px;
-            text-decoration: none;
-            color: white;
-            transition: background 0.3s;
-            user-select: none;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .user-dropdown a:hover {
-            background-color: #374151;
-        }
-
-        .icon-space {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-        }
-
-        /* СТИЛИ АВТОРИЗАЦИИ И ЗАГРУЗКИ */
-        .loading-screen {
-            position: fixed;
-            inset: 0;
-            background: #1f2937;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            transition: opacity 0.5s ease;
-        }
-
-        .loading-screen.fade-out {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .loader-container, .action-loader {
-            position: fixed;
-            inset: 0;
-            background: #1f2937;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 100000;
-        }
-
-        .loader-container.active, .action-loader.active {
-            display: flex;
-        }
-
-        .logo-wrapper {
-            position: relative;
-            width: 160px;
-            height: 160px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .glow-ring {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            border-radius: 100%;
-            background: conic-gradient(#dc143c, transparent 100%);
-            animation: spin 5s linear infinite;
-            filter: blur(20px);
-        }
-
-        .logo-wrapper img {
-            width: 120px;
-            z-index: 2;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        #login-section {
-            display: none;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            background-color: #f4f6f9;
-        }
-
-        #login-container {
-            background: white;
-            padding: 30px 25px;
-            border-radius: 24px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            max-width: 420px;
-            width: 100%;
-            border: none;
-        }
-
-        #login-container h2 {
-            color: #1e293b;
-            margin: 15px 0 5px;
-            font-size: 20px;
-            font-weight: 800;
-        }
-
-        .login-subtitle {
-            color: #64748b;
-            font-size: 13px;
-            margin-bottom: 25px;
-        }
-
-        .login-icon {
-            width: 50px;
-            height: 50px;
-            background: #f1f5f9;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .dashboard-container {
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        .login-icon i {
-            font-size: 24px;
-            color: #dc143c;
+        .header {
+            margin-bottom: 28px;
         }
 
-        .loading-spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(220, 20, 60, 0.2);
-            border-radius: 50%;
-            border-top-color: #dc143c;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        .container {
-            max-width: 100%;
-            margin: 0;
-            background-color: var(--surface);
-            border-radius: 0;
-            box-shadow: none;
-            overflow: hidden;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            border: none;
-            min-height: -webkit-fill-available;
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
-        }
-
-        .header-section {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 16px;
-            padding-left: max(16px, env(safe-area-inset-left));
-            padding-right: max(16px, env(safe-area-inset-right));
-            padding-top: 80px;
-        }
-
-        .tabs {
-            display: flex;
-            background-color: var(--surface);
-            padding: 16px 0;
-            gap: 8px;
-            flex-shrink: 0;
-            border-bottom: 1px solid #f0f0f0;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            width: 100%;
-            margin-top: 0;
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
-        }
-
-        .tab-btn {
-            background: var(--surface);
-            border: 1px solid #e5e5e5;
-            color: var(--text-dark);
-            padding: 12px 12px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            flex: 1;
-            min-width: 0;
-            text-align: center;
-            border-radius: 6px;
-            font-weight: 700;
-            position: relative;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            touch-action: manipulation;
-        }
-
-        .tab-btn:hover {
-            background-color: #fafafa;
-            border-color: #d0d0d0;
-            color: var(--text-dark);
-        }
-
-        .tab-btn.active {
-            background-color: var(--accent);
-            color: var(--text-light);
-            border-color: var(--accent);
-        }
-
-        .open-tasks-counter {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 16px;
-            background-color: #1a2f40;
-            color: white;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 15px;
-            margin: 8px 0 16px;
-            width: 100%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            user-select: none;
-        }
-
-        .open-tasks-counter:hover {
-            background-color: #1c3448;
-            transform: translateY(-1px);
-        }
-
-        .open-tasks-counter .label {
-            flex: 1;
-            text-align: left;
-        }
-
-        .open-tasks-counter .count {
-            background-color: #dc143c;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 16px;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        .date-filter-container {
-            display: none;
-            padding: 16px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e0e0e0;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .date-filter-container.show {
-            display: flex;
-        }
-
-        .date-filter-label {
-            font-size: 14px;
+        .header h1 {
+            font-size: 1.9rem;
             font-weight: 600;
-            color: #1a2f40;
+            background: linear-gradient(135deg, #1f2b3a, #2c3e50);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
         }
 
-        .date-input-wrapper {
-            position: relative;
-            min-width: 200px;
-            flex: 1;
+        .header p {
+            color: #4a627a;
+            margin-top: 6px;
+            font-weight: 500;
+            font-size: 0.95rem;
         }
 
-        .date-filter-input {
-            padding: 8px 12px;
-            padding-left: 40px;
-            border: 1px solid #d0d0d0;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 600;
-            background-color: white;
-            color: #1a2f40;
-            cursor: pointer;
-            width: 100%;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-
-        .date-filter-input:focus {
-            outline: none;
-            border-color: #dc143c;
-        }
-
-        .calendar-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #666;
-            pointer-events: none;
-        }
-
-        .clear-filter-btn {
-            padding: 8px 16px;
-            background-color: #1a2f40;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .clear-filter-btn:hover {
-            background-color: #0d1f2d;
-        }
-
-        .flatpickr-calendar {
-            font-family: "Poppins", sans-serif;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-        }
-
-        .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange, .flatpickr-day.selected:focus, .flatpickr-day.startRange:focus, .flatpickr-day.endRange:focus, .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover, .flatpickr-day.selected.prevMonthDay, .flatpickr-day.startRange.prevMonthDay, .flatpickr-day.endRange.prevMonthDay, .flatpickr-day.selected.nextMonthDay, .flatpickr-day.startRange.nextMonthDay, .flatpickr-day.endRange.nextMonthDay {
-            background: #dc143c;
-            border-color: #dc143c;
-        }
-
-        .flatpickr-day.today {
-            border-color: #1a2f40;
-        }
-
-        .flatpickr-day.today:hover {
-            background: #1a2f40;
-            border-color: #1a2f40;
-            color: white;
-        }
-
-        .flatpickr-months .flatpickr-month {
-            background: #1a2f40;
-            color: white;
-            fill: white;
-        }
-
-        .flatpickr-current-month .flatpickr-monthDropdown-months {
-            color: white;
-        }
-
-        .flatpickr-current-month input.cur-year {
-            color: white;
-        }
-
-        .flatpickr-weekdays {
-            background: #2d3e50;
-        }
-
-        .flatpickr-weekday {
-            color: white;
-        }
-
-        .flatpickr-day {
-            font-weight: 600;
-        }
-
-        .tab-content {
-            display: none;
-            padding: 0;
-            flex: 1;
-            overflow-y: auto;
-            flex-direction: column;
-        }
-
-        .tab-content.active {
-            display: flex;
-        }
-
-        .cards-grid {
+        .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 16px;
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
         }
 
-        .task-card {
+        .card {
             background: white;
-            margin: 0;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            padding: 0;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-            user-select: none;
-            width: 100%;
-            min-height: 280px;
+            border-radius: 28px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.02);
+            padding: 20px 18px 24px 18px;
+            transition: transform 0.2s ease, box-shadow 0.2s;
+            border: 1px solid rgba(255,255,255,0.3);
         }
 
-        .task-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 32px rgba(0, 0, 0, 0.08);
         }
 
-        .task-card.selected {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.15), 0 0 0 2px #dc143c;
-        }
-
-        .task-header {
-            padding: 16px 16px 12px;
-            border-bottom: 2px solid #dc143c;
-            margin-bottom: 0;
-        }
-
-        .task-title {
-            font-size: 16px;
+        .card-title {
             font-weight: 700;
-            color: #000000;
-            line-height: 1.4;
-            text-align: left;
-            padding: 0 5px;
-        }
-
-        .card-content {
+            font-size: 1.35rem;
+            margin-bottom: 8px;
             display: flex;
-            flex-direction: column;
-            flex: 1;
-            padding: 0;
-        }
-
-        .content-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 16px;
-            border-bottom: 1px solid #e0e0e0;
-            min-height: 48px;
-            height: 48px;
-        }
-
-        .content-row:last-child {
-            border-bottom: none;
-        }
-
-        .row-label {
-            font-size: 14px;
-            color: #000000;
-            font-weight: 700;
-            flex-shrink: 0;
-            line-height: 1;
-            display: flex;
-            align-items: center;
-            height: 100%;
-        }
-
-        .row-value {
-            font-size: 14px;
-            font-weight: 700;
-            color: #000000;
-            text-align: right;
-            flex: 1;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            height: 100%;
-            line-height: 1;
-        }
-
-        .executor-name {
-            font-size: 14px;
-            font-weight: 700;
-            color: #000000;
-        }
-
-        .buttons-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            padding: 16px 16px;
-            border-top: 1px solid #e0e0e0;
-            margin-top: auto;
-            min-height: 74px;
-        }
-
-        .schema-button {
-            background-color: #1a2f40;
-            color: white;
-            padding: 11px 14px;
-            font-weight: 700;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: all 0.3s ease;
-            flex: 1;
-            text-align: center;
-            white-space: nowrap;
-            height: 42px;
-            min-height: 42px;
-            touch-action: manipulation;
-        }
-
-        .schema-button:hover {
-            background-color: #0d1f2d;
-            transform: translateY(-1px);
-        }
-
-        .submit-btn {
-            background-color: #dc143c;
-            color: white;
-            border: none;
-            cursor: pointer;
-            user-select: none;
-            border-radius: 4px;
-            padding: 11px 14px;
-            font-weight: 700;
-            font-size: 13px;
-            transition: all 0.3s ease;
-            flex: 1;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            white-space: nowrap;
-            height: 42px;
-            min-height: 42px;
-            touch-action: manipulation;
-        }
-
-        .submit-btn:hover {
-            background-color: #a90e2e;
-            transform: translateY(-1px);
-        }
-
-        .submit-btn:disabled {
-            background-color: #cccccc;
-            color: #666666;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .submitted-text {
-            color: #000;
-            font-weight: 700;
-            padding: 11px 14px;
-            border: 1px solid #FFFFFF;
-            border-radius: 4px;
-            font-size: 13px;
-            text-align: center;
-            background: #FFFFFF;
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            white-space: nowrap;
-            height: 42px;
-            min-height: 42px;
-            gap: 6px;
-        }
-
-        .no-open {
-            color: #999;
-            font-style: italic;
-            padding: 13px 24px;
-            border: 1px dashed #ddd;
-            border-radius: 4px;
-            font-size: 11px;
-            text-align: center;
-            background: #f8f9fa;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            white-space: nowrap;
-            height: 46px;
-            min-height: 46px;
-            min-width: 140px;
-            width: auto;
-            flex: 0 0 auto;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
             align-items: center;
             gap: 8px;
-            margin-top: 10px;
-            margin-bottom: 80px;
-            padding: 20px 10px;
-            flex-wrap: wrap;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-            width: 100%;
+            border-left: 5px solid #3b82f6;
+            padding-left: 14px;
+            color: #0f2b3d;
         }
 
-        .page-btn {
-            background: white;
-            border: 1px solid #e5e5e5;
-            color: #1a2f40;
-            padding: 8px 12px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border-radius: 4px;
-            font-weight: 600;
-            min-width: 40px;
-            text-align: center;
+        .card-sub {
+            font-size: 0.8rem;
+            color: #6c86a3;
+            margin-bottom: 18px;
+            padding-left: 19px;
+        }
+
+        .chart-container {
             position: relative;
-            touch-action: manipulation;
-        }
-
-        .page-btn:hover:not(:disabled) {
-            background-color: #f5f5f5;
-            border-color: #d0d0d0;
-        }
-
-        .page-btn.active {
-            background-color: #dc143c;
-            color: white;
-            border-color: #dc143c;
-        }
-
-        .page-btn:disabled {
-            background-color: #f0f0f0;
-            color: #999;
-            cursor: not-allowed;
-            border-color: #e5e5e5;
-        }
-
-        .page-info {
-            font-size: 14px;
-            color: #666;
-            font-weight: 600;
-            margin: 0 10px;
-        }
-
-        /* Стили для модального окна подтверждения */
-        .confirm-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
+            height: 280px;
             width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000000;
-            animation: fadeIn 0.2s ease;
+            margin: 10px 0 8px 0;
         }
 
-        .confirm-modal-content {
-            background-color: white;
-            border-radius: 16px;
-            padding: 24px;
-            max-width: 320px;
-            width: 90%;
+        canvas {
+            max-height: 100%;
+            width: 100%;
+        }
+
+        .stats-note {
+            font-size: 0.7rem;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            animation: slideUp 0.2s ease;
-        }
-
-        .confirm-modal-icon {
-            width: 60px;
-            height: 60px;
-            background-color: #dc143c;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-        }
-
-        .confirm-modal-icon i {
-            font-size: 30px;
-            color: white;
-        }
-
-        .confirm-modal-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #1a2f40;
-            margin-bottom: 8px;
-        }
-
-        .confirm-modal-message {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 20px;
-            line-height: 1.4;
-        }
-
-        .confirm-modal-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-        }
-
-        .confirm-modal-btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: none;
-        }
-
-        .confirm-modal-btn.confirm {
-            background-color: #dc143c;
-            color: white;
-        }
-
-        .confirm-modal-btn.confirm:hover {
-            background-color: #a90e2e;
-            transform: scale(1.02);
-        }
-
-        .confirm-modal-btn.cancel {
-            background-color: #e5e5e5;
-            color: #1a2f40;
-        }
-
-        .confirm-modal-btn.cancel:hover {
-            background-color: #d0d0d0;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 767px) {
-            header {
-                padding: 12px 15px;
-                padding-top: max(12px, env(safe-area-inset-top));
-                padding-left: max(15px, env(safe-area-inset-left));
-                padding-right: max(15px, env(safe-area-inset-right));
-            }
-            
-            .logo img {
-                width: 38px;
-                height: 38px;
-            }
-            
-            .site-name {
-                font-size: 19px;
-            }
-            
-            .user-avatar {
-                width: 34px;
-                height: 34px;
-            }
-            
-            .header-section {
-                padding-top: 75px;
-                padding-left: calc(16px + env(safe-area-inset-left));
-                padding-right: calc(16px + env(safe-area-inset-right));
-                width: calc(100% - env(safe-area-inset-left) - env(safe-area-inset-right));
-            }
-            
-            .schema-button,
-            .submit-btn,
-            .submitted-text {
-                height: 38px;
-                min-height: 38px;
-                padding: 9px 12px;
-                font-size: 12px;
-            }
-            
-            .open-button,
-            .no-open {
-                height: 42px;
-                min-height: 42px;
-                padding: 11px 20px;
-                font-size: 12px;
-            }
-            
-            .buttons-container {
-                padding: 14px 12px;
-                min-height: 68px;
-            }
-            
-            .executor-name {
-                font-size: 12px;
-            }
-            
-            .open-tasks-counter {
-                padding: 12px 14px;
-                font-size: 14px;
-            }
-            
-            .open-tasks-counter .count {
-                font-size: 15px;
-                padding: 5px 10px;
-                min-width: 36px;
-            }
-            
-            .date-filter-container {
-                padding: 12px;
-                padding-left: calc(12px + env(safe-area-inset-left));
-                padding-right: calc(12px + env(safe-area-inset-right));
-                gap: 10px;
-                flex-direction: column;
-                align-items: stretch;
-                width: 100%;
-                box-sizing: border-box;
-            }
-            
-            .date-filter-label {
-                text-align: center;
-                width: 100%;
-                font-size: 14px;
-                margin-bottom: 5px;
-            }
-            
-            .date-input-wrapper {
-                min-width: 100%;
-                max-width: 100%;
-                width: 100%;
-                flex: none;
-            }
-            
-            .date-filter-input {
-                width: 100%;
-                max-width: 100%;
-                font-size: 14px;
-                padding-left: 40px;
-                padding-right: 12px;
-                box-sizing: border-box;
-                -webkit-appearance: none;
-                appearance: none;
-                border-radius: 6px;
-                height: 44px;
-                border: 1px solid #ccc;
-            }
-            
-            .clear-filter-btn {
-                width: 100%;
-                padding: 12px 16px;
-                font-size: 14px;
-                height: 44px;
-                border-radius: 6px;
-                box-sizing: border-box;
-            }
-            
-            .calendar-icon {
-                left: 14px;
-            }
-            
-            .task-title {
-                text-align: left;
-            }
-            
-            .flatpickr-calendar {
-                max-width: calc(100vw - 40px) !important;
-                left: 50% !important;
-                transform: translateX(-50%) !important;
-                width: calc(100vw - 40px) !important;
-            }
-        }
-
-        @media (max-width: 480px) {
-            header {
-                padding: 10px 12px;
-                padding-top: max(10px, env(safe-area-inset-top));
-                padding-left: max(12px, env(safe-area-inset-left));
-                padding-right: max(12px, env(safe-area-inset-right));
-            }
-            
-            .logo img {
-                width: 36px;
-                height: 36px;
-            }
-            
-            .site-name {
-                font-size: 17px;
-            }
-            
-            .user-avatar {
-                width: 32px;
-                height: 32px;
-            }
-            
-            .header-section {
-                padding-top: 70px;
-                padding-left: calc(12px + env(safe-area-inset-left));
-                padding-right: calc(12px + env(safe-area-inset-right));
-            }
-            
-            .schema-button,
-            .submit-btn,
-            .submitted-text {
-                height: 36px;
-                min-height: 36px;
-                padding: 8px 10px;
-                font-size: 11px;
-            }
-            
-            .open-button,
-            .no-open {
-                height: 40px;
-                min-height: 40px;
-                padding: 10px 18px;
-                font-size: 11px;
-            }
-            
-            .buttons-container {
-                padding: 12px 12px;
-                min-height: 64px;
-            }
-            
-            .executor-name {
-                font-size: 11px;
-            }
-            
-            .menu-button {
-                width: 28px;
-                height: 20px;
-            }
-            
-            .open-tasks-counter {
-                padding: 10px 12px;
-                font-size: 13px;
-            }
-            
-            .open-tasks-counter .count {
-                font-size: 14px;
-                padding: 4px 8px;
-                min-width: 32px;
-            }
-            
-            .date-filter-container {
-                padding: 10px;
-                padding-left: calc(10px + env(safe-area-inset-left));
-                padding-right: calc(10px + env(safe-area-inset-right));
-                gap: 8px;
-            }
-            
-            .date-filter-input {
-                font-size: 13px;
-                padding: 10px 12px 10px 40px;
-                height: 42px;
-            }
-            
-            .clear-filter-btn {
-                padding: 10px 14px;
-                font-size: 13px;
-                height: 42px;
-            }
-            
-            .task-title {
-                text-align: left;
-            }
-        }
-
-        @media (max-width: 360px) {
-            header {
-                padding: 9px 10px;
-                padding-top: max(9px, env(safe-area-inset-top));
-                padding-left: max(10px, env(safe-area-inset-left));
-                padding-right: max(10px, env(safe-area-inset-right));
-            }
-            
-            .site-name {
-                font-size: 16px;
-            }
-            
-            .user-avatar {
-                width: 30px;
-                height: 30px;
-            }
-            
-            .header-section {
-                padding-top: 68px;
-                padding-left: calc(10px + env(safe-area-inset-left));
-                padding-right: calc(10px + env(safe-area-inset-right));
-            }
-            
-            .schema-button,
-            .submit-btn,
-            .submitted-text {
-                height: 34px;
-                min-height: 34px;
-                padding: 7px 8px;
-                font-size: 10px;
-            }
-            
-            .open-button,
-            .no-open {
-                height: 38px;
-                min-height: 38px;
-                padding: 9px 16px;
-                font-size: 10px;
-            }
-            
-            .buttons-container {
-                padding: 10px 8px;
-                min-height: 60px;
-            }
-            
-            .executor-name {
-                font-size: 10px;
-            }
-            
-            .open-tasks-counter {
-                padding: 8px 10px;
-                font-size: 12px;
-            }
-            
-            .open-tasks-counter .count {
-                font-size: 13px;
-                padding: 3px 6px;
-                min-width: 28px;
-            }
-            
-            .date-filter-container {
-                padding: 8px;
-                padding-left: calc(8px + env(safe-area-inset-left));
-                padding-right: calc(8px + env(safe-area-inset-right));
-            }
-            
-            .date-filter-label {
-                font-size: 13px;
-            }
-            
-            .date-filter-input {
-                font-size: 12px;
-                padding: 8px 10px 8px 35px;
-                height: 40px;
-            }
-            
-            .calendar-icon {
-                left: 10px;
-                font-size: 14px;
-            }
-            
-            .clear-filter-btn {
-                padding: 8px 12px;
-                font-size: 12px;
-                height: 40px;
-            }
-            
-            .task-title {
-                text-align: left;
-            }
+            color: #6c86a3;
+            margin-top: 12px;
+            border-top: 1px solid #eef2f8;
+            padding-top: 10px;
         }
 
         @media (min-width: 1200px) {
-            .cards-grid {
+            .grid {
                 grid-template-columns: repeat(3, 1fr);
             }
-            
-            .header-section {
-                padding: 0;
-                padding-top: 80px;
+            .full-width {
+                grid-column: span 3;
             }
         }
 
-        @media (min-width: 768px) and (max-width: 1199px) {
-            .cards-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .header-section {
-                padding: 0 16px;
-                padding-top: 80px;
-            }
+        .full-width-card {
+            margin-top: 8px;
         }
 
-        @media (max-width: 767px) {
-            .container {
-                height: 100vh;
-            }
-            
-            .header-section {
-                padding-left: max(12px, env(safe-area-inset-left));
-                padding-right: max(12px, env(safe-area-inset-right));
-                padding-top: 75px;
-                width: calc(100% - env(safe-area-inset-left) - env(safe-area-inset-right));
-            }
-            
-            .tabs {
-                padding: 12px 0;
-                gap: 6px;
-                margin-top: 0;
-            }
-            
-            .tab-btn {
-                padding: 10px 8px;
-                font-size: 12px;
-                min-width: calc(33% - 10px);
-                flex: 1 1 calc(33% - 10px);
-            }
-            
-            .open-tasks-counter {
-                margin: 6px 0 12px;
-                padding: 12px 14px;
-                font-size: 14px;
-            }
-            
-            .tab-content {
-                padding: 0;
-            }
-            
-            .cards-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-                padding: 12px;
-                padding-left: calc(12px + env(safe-area-inset-left));
-                padding-right: calc(12px + env(safe-area-inset-right));
-            }
-            
-            .task-card {
-                min-height: auto;
-            }
-            
-            .content-row {
-                padding: 0 12px;
-                min-height: 44px;
-                height: 44px;
-            }
-            
-            .row-label {
-                font-size: 13px;
-                padding-right: 8px;
-                flex-shrink: 0;
-                min-width: 80px;
-            }
-            
-            .row-value {
-                font-size: 13px;
-                justify-content: flex-end;
-                flex: 1;
-                min-width: 0;
-            }
-            
-            .row-label {
-                font-size: 13px;
-                min-width: 80px;
-            }
-            
-            .loader {
-                width: 22px;
-                height: 22px;
-                border-width: 2.5px;
-            }
-            
-            .loading-card-text {
-                font-size: 13px;
-            }
-            
-            .task-title {
-                text-align: left;
-            }
+        .legend-inline {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 12px;
+            flex-wrap: wrap;
         }
 
-        @media (max-width: 480px) {
-            .header-section {
-                padding-left: max(10px, env(safe-area-inset-left));
-                padding-right: max(10px, env(safe-area-inset-right));
-                padding-top: 70px;
-            }
-            
-            .tabs {
-                padding: 10px 0;
-                gap: 4px;
-            }
-            
-            .tab-btn {
-                padding: 9px 6px;
-                font-size: 11px;
-                min-width: calc(33% - 6px);
-                flex: 1 1 calc(33% - 6px);
-            }
-            
-            .open-tasks-counter {
-                margin: 4px 0 10px;
-                padding: 10px 12px;
-                font-size: 13px;
-            }
-            
-            .cards-grid {
-                padding: 10px;
-                padding-left: calc(10px + env(safe-area-inset-left));
-                padding-right: calc(10px + env(safe-area-inset-right));
-            }
-            
-            .task-card {
-                padding: 0;
-            }
-            
-            .content-row {
-                padding: 0 10px;
-                min-height: 42px;
-                height: 42px;
-            }
-            
-            .task-title {
-                font-size: 15px;
-                text-align: left;
-            }
-            
-            .row-label, .row-value {
-                font-size: 12px;
-            }
-            
-            .row-label {
-                font-size: 12px;
-                min-width: 70px;
-            }
-            
-            .loader {
-                width: 20px;
-                height: 20px;
-                border-width: 2px;
-            }
+        .legend-color {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 20px;
+            margin-right: 6px;
         }
 
-        @media (max-width: 360px) {
-            .tabs {
-                flex-direction: column;
-                gap: 6px;
-            }
-            
-            .tab-btn {
-                flex: 1 1 auto;
-                min-height: 44px;
-                min-width: 100%;
-                margin: 0;
-            }
-            
-            .header-section {
-                padding-left: max(8px, env(safe-area-inset-left));
-                padding-right: max(8px, env(safe-area-inset-right));
-                padding-top: 68px;
-            }
-            
-            .row-label {
-                font-size: 11px;
-                min-width: 65px;
-            }
-            
-            .content-row {
-                min-height: 40px;
-                height: 40px;
-            }
-            
-            .loader {
-                width: 18px;
-                height: 18px;
-                border-width: 2px;
-            }
-            
-            .loading-card-text {
-                font-size: 11px;
-            }
-            
-            .task-title {
-                text-align: left;
-            }
+        hr {
+            margin: 8px 0;
+            border-color: #eef2fa;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #8ba0b8;
+            margin-top: 30px;
         }
     </style>
 </head>
 <body>
-    <!-- ЭКРАН ЗАГРУЗКИ -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="logo-wrapper">
-            <div class="glow-ring"></div>
-            <img src="https://i.postimg.cc/wjGzSY92/1.png" alt="Loading Logo">
+<div class="dashboard-container">
+    <div class="header">
+        <h1>Сводка по клубам: производительность и метрики</h1>
+        <p>Актуальные данные за текущий месяц • Процент выполнения задач • FPS (качество симуляции) • Сравнение деталей</p>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <div class="card-title">LUCKY STRIKE KH</div>
+            <div class="card-sub">Выполненные задачи / процент завершения</div>
+            <div class="chart-container">
+                <canvas id="chartLucky" width="400" height="250" style="width:100%; height:250px"></canvas>
+            </div>
+            <div class="stats-note">87% выполненных задач — лидер по KPI</div>
+        </div>
+        <div class="card">
+            <div class="card-title">BLOCKBUSTER</div>
+            <div class="card-sub">Выполненные задачи / процент завершения</div>
+            <div class="chart-container">
+                <canvas id="chartBlockbuster" width="400" height="250" style="width:100%; height:250px"></canvas>
+            </div>
+            <div class="stats-note">74% выполненных задач — стабильный рост</div>
+        </div>
+        <div class="card">
+            <div class="card-title">SKYMALL</div>
+            <div class="card-sub">Выполненные задачи / процент завершения</div>
+            <div class="chart-container">
+                <canvas id="chartSkymall" width="400" height="250" style="width:100%; height:250px"></canvas>
+            </div>
+            <div class="stats-note">91% выполненных задач — максимальная эффективность</div>
         </div>
     </div>
 
-    <!-- УНИВЕРСАЛЬНАЯ АНИМАЦИЯ ЗАГРУЗКИ -->
-    <div class="loader-container" id="loader">
-        <div class="logo-wrapper">
-            <div class="glow-ring"></div>
-            <img src="https://i.postimg.cc/wjGzSY92/1.png" alt="Loading">
+    <div class="grid">
+        <div class="card full-width-card" style="grid-column: 1 / -1;">
+            <div class="card-title">Сравнение FPS (кадровая частота) за текущий месяц</div>
+            <div class="card-sub">Показатель производительности: чем выше, тем плавнее работа симуляции / интерфейса. Максимальная планка — 2500 fps</div>
+            <div class="chart-container" style="height: 320px;">
+                <canvas id="fpsChart" width="800" height="300" style="width:100%; height:300px"></canvas>
+            </div>
+            <div class="legend-inline">
+                <span><span class="legend-color" style="background: #3b82f6;"></span> LUCKY STRIKE KH</span>
+                <span><span class="legend-color" style="background: #f97316;"></span> BLOCKBUSTER</span>
+                <span><span class="legend-color" style="background: #10b981;"></span> SKYMALL</span>
+            </div>
+            <div class="stats-note">Данные за текущий месяц (усреднённые пиковые значения). Целевой ориентир выше 2000 fps — отличный результат.</div>
         </div>
     </div>
 
-    <!-- СЕКЦИЯ АВТОРИЗАЦИИ -->
-    <div id="login-section">
-        <div id="login-container">
-            <div class="login-icon">
-                <i class="fas fa-shield-halved"></i>
+    <div class="grid">
+        <div class="card full-width-card" style="grid-column: 1 / -1;">
+            <div class="card-title">Сравнительный анализ: количество взятых деталей (по клубам)</div>
+            <div class="card-sub">Суммарное число деталей, задействованных в проектах / сборках за период</div>
+            <div class="chart-container" style="height: 320px;">
+                <canvas id="partsChart" width="800" height="300" style="width:100%; height:300px"></canvas>
             </div>
-            <h2>LUCKY STRIKE KH</h2>
-            <div class="login-subtitle">Войдите для доступа</div>
-            <div id="g_id_onload" 
-                 data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com" 
-                 data-callback="handleCredentialResponse" 
-                 data-auto_prompt="false"
-                 data-auto_select="false">
+            <div class="legend-inline">
+                <span><span class="legend-color" style="background: #8b5cf6;"></span> Детали (шт)</span>
             </div>
-            <div class="g_id_signin" 
-                 data-type="standard" 
-                 data-shape="pill" 
-                 data-theme="outline" 
-                 data-text="signin_with" 
-                 data-size="large" 
-                 data-logo_alignment="left">
-            </div>
+            <div class="stats-note">BLOCKBUSTER лидирует по объёму используемых компонентов, SKYMALL показывает наименьшую вовлечённость в детализацию.</div>
         </div>
     </div>
+    <footer>Данные на основе аналитики текущего месяца • Проценты задач, FPS и количество деталей обновлены автоматически</footer>
+</div>
 
-    <!-- ОСНОВНОЙ КОНТЕНТ -->
-    <div id="main-content" style="display: none;">
-        <header>
-            <div class="logo">
-                <a href="https://smart-bowling.github.io/SMB/">
-                    <img src="https://i.postimg.cc/wjGzSY92/1.png" alt="Logo">
-                </a>
-            </div>
-            <div class="site-name">
-                LUCKY STRIKE KH
-            </div>
-            <div class="user-avatar" id="userAvatar" onclick="toggleUserDropdown()">
-                <i class="fas fa-user"></i>
-            </div>
-            <div class="user-dropdown" id="userDropdown">
-                <a href="#" onclick="signOut()">
-                    <i class="fas fa-sign-out-alt icon-space"></i> ВЫЙТИ
-                </a>
-            </div>
-        </header>
+<script>
+    (function() {
+        const clubs = {
+            lucky: { name: "LUCKY STRIKE KH", completedPercent: 87, pending: 13, colorComplete: "#2c7da0", colorPending: "#d9e2ec" },
+            block: { name: "BLOCKBUSTER", completedPercent: 74, pending: 26, colorComplete: "#e76f51", colorPending: "#f4e3d7" },
+            skymall: { name: "SKYMALL", completedPercent: 91, pending: 9, colorComplete: "#2a9d8f", colorPending: "#e9f5f2" }
+        };
         
-        <div class="container" id="main-container">
-            <div class="header-section">
-                <div class="tabs">
-                    <button class="tab-btn active" data-tab="tab1">
-                        <i class="fas fa-wrench" style="margin-right: 8px;"></i>МЕХАНИК
-                    </button>
-                    <button class="tab-btn" data-tab="tab2">
-                        <i class="fas fa-user-tie" style="margin-right: 8px;"></i>ИНСТРУКТОР
-                    </button>
-                    <button class="tab-btn" data-tab="tab3">
-                        <i class="fas fa-bowling-ball" style="margin-right: 8px;"></i>КЛУБ
-                    </button>
-                </div>
-                
-                <div class="open-tasks-counter" id="open-tasks-counter">
-                    <span class="label">КОЛИЧЕСТВО НЕВЫПОЛНЕННЫХ ЗАДАЧ:</span>
-                    <span class="count">0</span>
-                </div>
-            </div>
-            
-            <div class="date-filter-container" id="date-filter-container">
-                <span class="date-filter-label">Просмотр выполненных задач по дате</span>
-                <div class="date-input-wrapper">
-                    <i class="fas fa-calendar-alt calendar-icon"></i>
-                    <input type="text" class="date-filter-input" id="date-filter-input" placeholder="Выберите дату" readonly>
-                </div>
-                <button class="clear-filter-btn" id="clear-filter-btn">Сбросить фильтр</button>
-            </div>
-            
-            <div class="tab-content active" id="tab1">
-                <div class="cards-grid" id="journal-cards">
-                    <!-- Содержимое для МЕХАНИК -->
-                </div>
-                <div class="pagination" id="journal-pagination" style="display: none;">
-                    <button class="page-btn first-btn" onclick="goToPage('journal', 1)">
-                        <i class="fas fa-fast-backward"></i>
-                    </button>
-                    <button class="page-btn prev-btn" onclick="changePage('journal', -1)">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <div class="page-info">
-                        Страница <span id="journal-current-page">1</span> из <span id="journal-total-pages">1</span>
-                    </div>
-                    <button class="page-btn next-btn" onclick="changePage('journal', 1)">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                    <button class="page-btn last-btn" onclick="goToPage('journal', totalJournalPages)">
-                        <i class="fas fa-fast-forward"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="tab-content" id="tab2">
-                <div class="cards-grid" id="instructor-cards">
-                    <!-- Содержимое для ИНСТРУКТОР -->
-                </div>
-                <div class="pagination" id="instructor-pagination" style="display: none;">
-                    <button class="page-btn first-btn" onclick="goToPage('instructor', 1)">
-                        <i class="fas fa-fast-backward"></i>
-                    </button>
-                    <button class="page-btn prev-btn" onclick="changePage('instructor', -1)">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <div class="page-info">
-                        Страница <span id="instructor-current-page">1</span> из <span id="instructor-total-pages">1</span>
-                    </div>
-                    <button class="page-btn next-btn" onclick="changePage('instructor', 1)">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                    <button class="page-btn last-btn" onclick="goToPage('instructor', totalInstructorPages)">
-                        <i class="fas fa-fast-forward"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Новая вкладка клуб -->
-            <div class="tab-content" id="tab3">
-                <div class="cards-grid" id="engineer-cards">
-                    <!-- Содержимое для клуб -->
-                </div>
-                <div class="pagination" id="engineer-pagination" style="display: none;">
-                    <button class="page-btn first-btn" onclick="goToPage('engineer', 1)">
-                        <i class="fas fa-fast-backward"></i>
-                    </button>
-                    <button class="page-btn prev-btn" onclick="changePage('engineer', -1)">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <div class="page-info">
-                        Страница <span id="engineer-current-page">1</span> из <span id="engineer-total-pages">1</span>
-                    </div>
-                    <button class="page-btn next-btn" onclick="changePage('engineer', 1)">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                    <button class="page-btn last-btn" onclick="goToPage('engineer', totalEngineerPages)">
-                        <i class="fas fa-fast-forward"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/ru.js"></script>
-    
-    <script>
-        // ===== КОНСТАНТЫ АВТОРИЗАЦИИ =====
-        const AUTH_SPREADSHEET_ID = '1-yiVdZYa6wJdupTiuiHvI_ht3Vu73RUjyCehZqs2cJ4';
-        const AUTH_SHEET_NAME = '1';
-        const AUTH_API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
-        
-        const CURRENT_SITE = 'https://smart-bowling.github.io/SMB-LS-KH/';
-        
-        // ОСНОВНОЙ URL BACKEND
-        const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyBiibLN40TjLDo1pz69ogyUgERUBhuCcmmkXDCgvS3fUGbt6ifyt_Lh9f3gg8yXZOA/exec';
-        const CARDS_PER_PAGE = 6;
-
-        // Переменные состояния
-        let currentUser = null;
-        let currentUserNameFromSheet = null; // Имя из столбца B таблицы
-        let journalData = null;
-        let instructorData = null;
-        let engineerData = null;
-        let originalJournalData = null;
-        
-        let currentJournalPage = 1;
-        let currentInstructorPage = 1;
-        let currentEngineerPage = 1;
-        let totalJournalPages = 1;
-        let totalInstructorPages = 1;
-        let totalEngineerPages = 1;
-
-        // Переменные для фильтрации
-        let isFilterActive = false;
-        let currentFilterDate = '';
-        let filterType = 'journal';
-        
-        let datePicker = null;
-        let isInitialLoad = true;
-
-        const loadingScreen = document.getElementById("loadingScreen");
-        const loginSection = document.getElementById("login-section");
-        const mainContent = document.getElementById("main-content");
-        const loader = document.getElementById("loader");
-
-        // ===== ФУНКЦИИ ДЛЯ АВАТАРКИ =====
-        function toggleUserDropdown() {
-            const menu = document.getElementById("userDropdown");
-            menu.style.display = menu.style.display === "block" ? "none" : "block";
-        }
-
-        function updateUserAvatar(user) {
-            const avatarContainer = document.getElementById('userAvatar');
-            if (user?.picture) {
-                avatarContainer.innerHTML = `<img src="${user.picture}" alt="Avatar">`;
-            } else {
-                avatarContainer.innerHTML = '<i class="fas fa-user"></i>';
-            }
-        }
-
-        function showLoader() {
-            loader.classList.add('active');
-        }
-
-        function hideLoader() {
-            loader.classList.remove('active');
-        }
-
-        // ===== ФУНКЦИИ АВТОРИЗАЦИИ =====
-        function loadSheetsAPI() {
-            return new Promise((resolve, reject) => {
-                gapi.load('client', {
-                    callback: () => resolve(),
-                    onerror: () => reject('Ошибка загрузки Google API'),
-                    timeout: 10000,
-                    ontimeout: () => reject('Таймаут загрузки Google API')
-                });
-            });
-        }
-
-        function handleCredentialResponse(response) {
-            try {
-                const payload = parseJwt(response.credential);
-                
-                currentUser = {
-                    email: payload.email.toLowerCase().trim(),
-                    name: payload.name,
-                    picture: payload.picture
-                };
-                
-                showLoading(true);
-                initAndCheckEmail();
-                
-            } catch (e) {
-                console.error('Ошибка аутентификации:', e);
-                showLoading(false);
-                alert('Ошибка аутентификации');
-            }
-        }
-
-        function showLoading(show) {
-            const loginDiv = document.getElementById('login-container');
-            if (show) {
-                if (!loginDiv.hasAttribute('data-original')) {
-                    loginDiv.setAttribute('data-original', loginDiv.innerHTML);
+        const centerTextPlugin = {
+            id: 'centerText',
+            afterDraw(chart) {
+                const { ctx, chartArea, data } = chart;
+                if (!chartArea) return;
+                const centerX = (chartArea.left + chartArea.right) / 2;
+                const centerY = (chartArea.top + chartArea.bottom) / 2;
+                const dataset = chart.data.datasets[0];
+                if (dataset && dataset.data.length >= 2) {
+                    const completedValue = dataset.data[0];
+                    const percentText = `${Math.round(completedValue)}%`;
+                    ctx.save();
+                    ctx.font = `bold 26px "Segoe UI", "Inter", system-ui`;
+                    ctx.fillStyle = '#1f2b3a';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.shadowBlur = 0;
+                    ctx.fillText(percentText, centerX, centerY);
+                    ctx.font = `12px "Segoe UI"`;
+                    ctx.fillStyle = '#5b7a9a';
+                    ctx.fillText('выполнено', centerX, centerY + 28);
+                    ctx.restore();
                 }
-                loginDiv.innerHTML = '<div style="padding: 40px; text-align: center;"><div class="loading-spinner"></div><br><span style="color: #64748b; margin-top: 15px; display: block;">Проверка доступа...</span></div>';
-            } else {
-                if (loginDiv.getAttribute('data-original') && loginSection.style.display !== 'none') {
-                    loginDiv.innerHTML = loginDiv.getAttribute('data-original');
-                    
-                    if (window.google && google.accounts && google.accounts.id) {
-                        google.accounts.id.renderButton(
-                            document.querySelector('.g_id_signin'),
-                            { 
-                                type: 'standard', 
-                                shape: 'pill', 
-                                theme: 'outline', 
-                                text: 'signin_with', 
-                                size: 'large', 
-                                logo_alignment: 'left' 
-                            }
-                        );
-                    }
-                }
-            }
-        }
-
-        async function initAndCheckEmail() {
-            try {
-                await loadSheetsAPI();
-                await gapi.client.init({
-                    apiKey: AUTH_API_KEY,
-                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-                });
-                
-                await checkEmailInSheet(currentUser.email);
-                
-            } catch (error) {
-                console.error('Ошибка инициализации:', error);
-                showLoading(false);
-                alert('Ошибка инициализации Google API');
-            }
-        }
-
-        async function checkEmailInSheet(email) {
-            try {
-                const response = await gapi.client.sheets.spreadsheets.values.get({
-                    spreadsheetId: AUTH_SPREADSHEET_ID,
-                    range: `${AUTH_SHEET_NAME}!A:Z`,
-                });
-                
-                const rows = response.result.values;
-                if (!rows || rows.length === 0) {
-                    showLoading(false);
-                    alert('Таблица пуста');
-                    return;
-                }
-                
-                let hasAccess = false;
-                let foundName = null;
-                
-                for (let i = 0; i < rows.length; i++) {
-                    if (!rows[i]?.[0]) continue;
-                    
-                    const rowEmail = rows[i][0].toLowerCase().trim();
-                    if (rowEmail === email) {
-                        // Проверяем доступ к сайту
-                        for (let j = 1; j < rows[i].length; j++) {
-                            const siteUrl = rows[i][j]?.trim().split('?')[0].split('#')[0] || '';
-                            if (siteUrl === CURRENT_SITE || siteUrl.includes('SMB-LS-KH')) {
-                                hasAccess = true;
-                                break;
-                            }
-                        }
-                        // Берем имя из столбца B (индекс 1)
-                        if (rows[i].length > 1 && rows[i][1]) {
-                            foundName = rows[i][1].trim();
-                        }
-                        break;
-                    }
-                }
-                
-                if (hasAccess) {
-                    // Сохраняем имя из столбца B
-                    currentUserNameFromSheet = foundName || currentUser.name;
-                    loginUser(currentUser);
-                } else {
-                    showLoading(false);
-                    alert('Доступ запрещен');
-                }
-                
-            } catch (error) {
-                console.error('Ошибка доступа к таблице:', error);
-                showLoading(false);
-                alert('Ошибка доступа к таблице');
-            }
-        }
-
-        function loginUser(payload) {
-            loginSection.style.display = 'none';
-            mainContent.style.display = 'block';
-            
-            updateUserAvatar(payload);
-            
-            localStorage.setItem('userLoggedIn', 'true');
-            localStorage.setItem('userEmail', payload.email.toLowerCase());
-            localStorage.setItem('userName', payload.name);
-            localStorage.setItem('userNameFromSheet', currentUserNameFromSheet || payload.name);
-            localStorage.setItem('userPic', payload.picture);
-            
-            showLoading(false);
-            
-            setTimeout(() => {
-                loadingScreen.classList.add('fade-out');
-            }, 500);
-            
-            initializeApp();
-        }
-
-        function parseJwt(token) {
-            try {
-                const base64Url = token.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-                return JSON.parse(jsonPayload);
-            } catch (e) {
-                console.error('Ошибка парсинга JWT:', e);
-                return {};
-            }
-        }
-
-        function signOut() {
-            localStorage.clear();
-            sessionStorage.clear();
-            
-            if (google && google.accounts && google.accounts.id) {
-                google.accounts.id.disableAutoSelect();
-            }
-            
-            mainContent.style.display = 'none';
-            loginSection.style.display = 'flex';
-            
-            const loginDiv = document.getElementById('login-container');
-            if (loginDiv.getAttribute('data-original')) {
-                loginDiv.innerHTML = loginDiv.getAttribute('data-original');
-                
-                if (window.google && google.accounts && google.accounts.id) {
-                    google.accounts.id.renderButton(
-                        document.querySelector('.g_id_signin'),
-                        { 
-                            type: 'standard', 
-                            shape: 'pill', 
-                            theme: 'outline', 
-                            text: 'signin_with', 
-                            size: 'large', 
-                            logo_alignment: 'left' 
-                        }
-                    );
-                }
-            }
-        }
-
-        // ===== ОСНОВНЫЕ ФУНКЦИИ ПРИЛОЖЕНИЯ =====
-        function convertGoogleDriveLink(driveLink) {
-            if (!driveLink) return null;
-            
-            if (driveLink.includes('drive.google.com/file/d/')) {
-                const match = driveLink.match(/\/d\/([^\/]+)/);
-                if (match && match[1]) {
-                    return `https://drive.google.com/uc?export=view&id=${match[1]}`;
-                }
-            }
-            
-            if (driveLink.includes('uc?export=view')) {
-                return driveLink;
-            }
-            
-            return null;
-        }
-
-        function openDriveLink(driveLink) {
-            if (!driveLink) return;
-            
-            const viewLink = convertGoogleDriveLink(driveLink);
-            if (viewLink) {
-                window.open(viewLink, '_blank');
-            } else {
-                window.open(driveLink, '_blank');
-            }
-        }
-
-        async function makeRequest(url, options = {}) {
-            try {
-                if (!options.method || options.method === 'GET') {
-                    const separator = url.includes('?') ? '&' : '?';
-                    url = `${url}${separator}_=${Date.now()}`;
-                }
-                
-                const response = await fetch(url, options);
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                console.error('Ошибка запроса:', error);
-                throw error;
-            }
-        }
-
-        function scrollToTop() {
-            const activeTab = document.querySelector('.tab-content.active');
-            if (activeTab) {
-                activeTab.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-            }
-        }
-
-        function goToPage(type, pageNumber) {
-            if (type === 'journal') {
-                if (pageNumber >= 1 && pageNumber <= totalJournalPages && pageNumber !== currentJournalPage) {
-                    currentJournalPage = pageNumber;
-                    renderJournalCards(journalData);
-                    updatePagination('journal', currentJournalPage, totalJournalPages);
-                    scrollToTop();
-                }
-            } else if (type === 'instructor') {
-                if (pageNumber >= 1 && pageNumber <= totalInstructorPages && pageNumber !== currentInstructorPage) {
-                    currentInstructorPage = pageNumber;
-                    renderInstructorCards(instructorData);
-                    updatePagination('instructor', currentInstructorPage, totalInstructorPages);
-                    scrollToTop();
-                }
-            } else if (type === 'engineer') {
-                if (pageNumber >= 1 && pageNumber <= totalEngineerPages && pageNumber !== currentEngineerPage) {
-                    currentEngineerPage = pageNumber;
-                    renderEngineerCards(engineerData);
-                    updatePagination('engineer', currentEngineerPage, totalEngineerPages);
-                    scrollToTop();
-                }
-            }
-        }
-
-        function updatePagination(type, currentPage, totalPages) {
-            const pagination = document.getElementById(`${type}-pagination`);
-            if (!pagination) return;
-            
-            const currentPageSpan = document.getElementById(`${type}-current-page`);
-            const totalPagesSpan = document.getElementById(`${type}-total-pages`);
-            const firstBtn = pagination.querySelector('.first-btn');
-            const prevBtn = pagination.querySelector('.prev-btn');
-            const nextBtn = pagination.querySelector('.next-btn');
-            const lastBtn = pagination.querySelector('.last-btn');
-            
-            currentPageSpan.textContent = currentPage;
-            totalPagesSpan.textContent = totalPages;
-            
-            firstBtn.disabled = currentPage === 1;
-            prevBtn.disabled = currentPage === 1;
-            nextBtn.disabled = currentPage === totalPages;
-            lastBtn.disabled = currentPage === totalPages;
-            
-            lastBtn.onclick = function() {
-                goToPage(type, totalPages);
-            };
-            
-            pagination.style.display = totalPages > 1 ? 'flex' : 'none';
-        }
-
-        function changePage(type, direction) {
-            if (type === 'journal') {
-                const newPage = currentJournalPage + direction;
-                goToPage('journal', newPage);
-            } else if (type === 'instructor') {
-                const newPage = currentInstructorPage + direction;
-                goToPage('instructor', newPage);
-            } else if (type === 'engineer') {
-                const newPage = currentEngineerPage + direction;
-                goToPage('engineer', newPage);
-            }
-        }
-
-        function getCurrentPageData(data, currentPage) {
-            const startIndex = (currentPage - 1) * CARDS_PER_PAGE;
-            const endIndex = startIndex + CARDS_PER_PAGE;
-            return data.slice(startIndex, endIndex);
-        }
-
-        function toggleDateFilter() {
-            const dateFilterContainer = document.getElementById('date-filter-container');
-            if (dateFilterContainer.classList.contains('show')) {
-                dateFilterContainer.classList.remove('show');
-            } else {
-                dateFilterContainer.classList.add('show');
-                initDatePicker();
-            }
-        }
-
-        function initDatePicker() {
-            if (datePicker) {
-                datePicker.destroy();
-            }
-            
-            const dateInput = document.getElementById('date-filter-input');
-            
-            datePicker = flatpickr(dateInput, {
-                locale: "ru",
-                dateFormat: "d.m.Y",
-                allowInput: false,
-                clickOpens: true,
-                disableMobile: false,
-                onChange: function(selectedDates, dateStr, instance) {
-                    if (dateStr) {
-                        const formattedDate = dateStr;
-                        const activeTab = document.querySelector('.tab-content.active');
-                        if (activeTab && activeTab.id === 'tab1') {
-                            filterJournalByDate(formattedDate);
-                        } else if (activeTab && activeTab.id === 'tab2') {
-                            filterInstructorByDate(formattedDate);
-                        } else if (activeTab && activeTab.id === 'tab3') {
-                            filterEngineerByDate(formattedDate);
-                        }
-                    }
-                },
-                onOpen: function(selectedDates, dateStr, instance) {
-                    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                        setTimeout(() => {
-                            dateInput.blur();
-                            dateInput.focus();
-                        }, 100);
-                    }
-                }
-            });
-            
-            dateInput.value = '';
-        }
-
-        function filterJournalByDate(date) {
-            if (!date || date === '') {
-                isFilterActive = false;
-                currentFilterDate = '';
-                filterType = 'journal';
-                journalData = originalJournalData ? filterTasksByTitle([...originalJournalData], ['PS', 'МЕХ', 'ps', 'мех']) : [];
-                currentJournalPage = 1;
-                renderJournalCards(journalData);
-                updateCounterLabel();
-                const dateInput = document.getElementById('date-filter-input');
-                if (dateInput) dateInput.value = '';
-                return;
-            }
-            isFilterActive = true;
-            currentFilterDate = date;
-            filterType = 'journal';
-            const filteredData = originalJournalData.filter(task => {
-                const titleMatch = ['PS', 'МЕХ', 'ps', 'мех'].some(keyword => 
-                    (task.task || '').toLowerCase().includes(keyword.toLowerCase())
-                );
-                return task.completedDate === date && titleMatch;
-            });
-            journalData = filteredData;
-            currentJournalPage = 1;
-            renderJournalCards(journalData);
-            updateCounterLabel();
-        }
-
-        function filterInstructorByDate(date) {
-            if (!date || date === '') {
-                isFilterActive = false;
-                currentFilterDate = '';
-                filterType = 'instructor';
-                instructorData = originalJournalData ? filterTasksByTitle([...originalJournalData], ['ИНСТ', 'инст']) : [];
-                currentInstructorPage = 1;
-                renderInstructorCards(instructorData);
-                updateCounterLabel();
-                const dateInput = document.getElementById('date-filter-input');
-                if (dateInput) dateInput.value = '';
-                return;
-            }
-            isFilterActive = true;
-            currentFilterDate = date;
-            filterType = 'instructor';
-            const filteredData = originalJournalData.filter(task => {
-                const titleMatch = ['ИНСТ', 'инст'].some(keyword => 
-                    (task.task || '').toLowerCase().includes(keyword.toLowerCase())
-                );
-                return task.completedDate === date && titleMatch;
-            });
-            instructorData = filteredData;
-            currentInstructorPage = 1;
-            renderInstructorCards(instructorData);
-            updateCounterLabel();
-        }
-
-        function filterEngineerByDate(date) {
-            if (!date || date === '') {
-                isFilterActive = false;
-                currentFilterDate = '';
-                filterType = 'engineer';
-                engineerData = originalJournalData ? filterTasksByTitle([...originalJournalData], ['КЛУБ']) : [];
-                currentEngineerPage = 1;
-                renderEngineerCards(engineerData);
-                updateCounterLabel();
-                const dateInput = document.getElementById('date-filter-input');
-                if (dateInput) dateInput.value = '';
-                return;
-            }
-            isFilterActive = true;
-            currentFilterDate = date;
-            filterType = 'engineer';
-            const filteredData = originalJournalData.filter(task => {
-                const titleMatch = ['КЛУБ'].some(keyword => 
-                    (task.task || '').toLowerCase().includes(keyword.toLowerCase())
-                );
-                return task.completedDate === date && titleMatch;
-            });
-            engineerData = filteredData;
-            currentEngineerPage = 1;
-            renderEngineerCards(engineerData);
-            updateCounterLabel();
-        }
-
-        function updateCounterLabel() {
-            const openTasksCounter = document.getElementById('open-tasks-counter');
-            const labelSpan = openTasksCounter.querySelector('.label');
-            const countSpan = openTasksCounter.querySelector('.count');
-            const activeTab = document.querySelector('.tab-content.active');
-            
-            if (isFilterActive && currentFilterDate) {
-                if (activeTab && activeTab.id === 'tab1') {
-                    const count = journalData ? journalData.length : 0;
-                    labelSpan.innerHTML = `Задачи за ${currentFilterDate} (МЕХАНИК)`;
-                    countSpan.textContent = count;
-                } else if (activeTab && activeTab.id === 'tab2') {
-                    const count = instructorData ? instructorData.length : 0;
-                    labelSpan.innerHTML = `Задачи за ${currentFilterDate} (ИНСТРУКТОР)`;
-                    countSpan.textContent = count;
-                } else if (activeTab && activeTab.id === 'tab3') {
-                    const count = engineerData ? engineerData.length : 0;
-                    labelSpan.innerHTML = `Задачи за ${currentFilterDate} (КЛУБ)`;
-                    countSpan.textContent = count;
-                }
-                countSpan.style.backgroundColor = '#dc143c';
-            } else {
-                let openTasksCount = 0;
-                if (activeTab && activeTab.id === 'tab1') {
-                    openTasksCount = journalData ? journalData.filter(task => !task.isCompleted).length : 0;
-                } else if (activeTab && activeTab.id === 'tab2') {
-                    openTasksCount = instructorData ? instructorData.filter(task => !task.isCompleted).length : 0;
-                } else if (activeTab && activeTab.id === 'tab3') {
-                    openTasksCount = engineerData ? engineerData.filter(task => !task.isCompleted).length : 0;
-                }
-                labelSpan.innerHTML = 'КОЛИЧЕСТВО НЕВЫПОЛНЕННЫХ ЗАДАЧ:';
-                countSpan.textContent = openTasksCount;
-                countSpan.style.backgroundColor = '#dc143c';
-            }
-        }
-
-        function clearDateFilter() {
-            const dateInput = document.getElementById('date-filter-input');
-            if (dateInput) dateInput.value = '';
-            const activeTab = document.querySelector('.tab-content.active');
-            if (activeTab && activeTab.id === 'tab1') {
-                filterJournalByDate('');
-            } else if (activeTab && activeTab.id === 'tab2') {
-                filterInstructorByDate('');
-            } else if (activeTab && activeTab.id === 'tab3') {
-                filterEngineerByDate('');
-            }
-        }
-
-        function filterTasksByTitle(tasks, keywords) {
-            if (!tasks || tasks.length === 0) return [];
-            return tasks.filter(task => {
-                const title = task.task ? task.task.toLowerCase() : '';
-                return keywords.some(keyword => title.includes(keyword.toLowerCase()));
-            });
-        }
-
-        async function loadJournal() {
-            try {
-                if (journalData && !isInitialLoad) {
-                    renderJournalCards(journalData);
-                    return;
-                }
-                const journalCards = document.getElementById('journal-cards');
-                journalCards.innerHTML = '';
-                const journal = await makeRequest(`${BACKEND_URL}?action=getJournal`);
-                originalJournalData = [...journal];
-                const filteredJournal = filterTasksByTitle(originalJournalData, ['PS', 'МЕХ', 'ps', 'мех']);
-                journalData = [...filteredJournal];
-                renderJournalCards(journalData);
-                updateCounterLabel();
-            } catch (error) {
-                console.error('Ошибка загрузки журнала:', error);
-                document.getElementById('journal-cards').innerHTML = `<div class="task-card error">Ошибка загрузки: ${error.message}</div>`;
-            }
-        }
-
-        async function loadInstructorTasks() {
-            try {
-                if (instructorData && !isInitialLoad) {
-                    renderInstructorCards(instructorData);
-                    return;
-                }
-                const instructorCards = document.getElementById('instructor-cards');
-                instructorCards.innerHTML = '';
-                const journal = await makeRequest(`${BACKEND_URL}?action=getJournal`);
-                if (!originalJournalData) originalJournalData = [...journal];
-                const filteredInstructor = filterTasksByTitle(journal, ['ИНСТ', 'инст']);
-                instructorData = [...filteredInstructor];
-                renderInstructorCards(instructorData);
-                updateCounterLabel();
-            } catch (error) {
-                console.error('Ошибка загрузки задач инструктора:', error);
-                document.getElementById('instructor-cards').innerHTML = `<div class="task-card error">Ошибка загрузки: ${error.message}</div>`;
-            }
-        }
-
-        async function loadEngineerTasks() {
-            try {
-                if (engineerData && !isInitialLoad) {
-                    renderEngineerCards(engineerData);
-                    return;
-                }
-                const engineerCards = document.getElementById('engineer-cards');
-                engineerCards.innerHTML = '';
-                const journal = await makeRequest(`${BACKEND_URL}?action=getJournal`);
-                if (!originalJournalData) originalJournalData = [...journal];
-                const filteredEngineer = filterTasksByTitle(journal, ['КЛУБ']);
-                engineerData = [...filteredEngineer];
-                renderEngineerCards(engineerData);
-                updateCounterLabel();
-            } catch (error) {
-                console.error('Ошибка загрузки задач клуба:', error);
-                document.getElementById('engineer-cards').innerHTML = `<div class="task-card error">Ошибка загрузки: ${error.message}</div>`;
-            }
-        }
-
-        // Функция completeTask: обновляет ячейку B (столбец 2) с именем исполнителя
-        async function completeTask(taskId, executorName, rowIndex) {
-            showLoader();
-            try {
-                // Обновляем ячейку B (столбец 2) с именем исполнителя
-                const updateUrl = `${BACKEND_URL}?action=updateCell&sheetName=B&column=E&row=${rowIndex}&value=${encodeURIComponent(executorName)}`;
-                const result = await makeRequest(updateUrl);
-                if (result.success) {
-                    await makeRequest(`${BACKEND_URL}?action=updateFromRowNumber&rowNumber=${rowIndex}`);
-                    journalData = null;
-                    instructorData = null;
-                    engineerData = null;
-                    originalJournalData = null;
-                    const wasFilterActive = isFilterActive;
-                    const savedFilterDate = currentFilterDate;
-                    const savedFilterType = filterType;
-                    updateCounterLabel();
-                    const dateFilterContainer = document.getElementById('date-filter-container');
-                    dateFilterContainer.classList.remove('show');
-                    await Promise.all([
-                        loadJournal(),
-                        loadInstructorTasks(),
-                        loadEngineerTasks()
-                    ]);
-                    if (wasFilterActive && savedFilterDate) {
-                        if (savedFilterType === 'journal') filterJournalByDate(savedFilterDate);
-                        else if (savedFilterType === 'instructor') filterInstructorByDate(savedFilterDate);
-                        else if (savedFilterType === 'engineer') filterEngineerByDate(savedFilterDate);
-                    }
-                    hideLoader();
-                } else {
-                    hideLoader();
-                }
-            } catch (error) {
-                console.error('Ошибка выполнения задачи:', error);
-                hideLoader();
-            }
-        }
-
-        // Функция для показа модального окна подтверждения
-        function showConfirmModal(taskId, rowIndex) {
-            // Создаем модальное окно
-            const modal = document.createElement('div');
-            modal.className = 'confirm-modal';
-            modal.innerHTML = `
-                <div class="confirm-modal-content">
-                    <div class="confirm-modal-icon">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="confirm-modal-title">Подтверждение</div>
-                    <div class="confirm-modal-message">Вы уверены, что нажатие было не случаным?</div>
-                    <div class="confirm-modal-buttons">
-                        <button class="confirm-modal-btn confirm" id="confirmYesBtn">Да, выполнить</button>
-                        <button class="confirm-modal-btn cancel" id="confirmNoBtn">Отмена</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            
-            // Обработчик для кнопки "Да"
-            const confirmBtn = modal.querySelector('#confirmYesBtn');
-            confirmBtn.onclick = function() {
-                modal.remove();
-                // Используем имя из столбца B таблицы (currentUserNameFromSheet)
-                if (!currentUserNameFromSheet) {
-                    console.error('Имя пользователя не найдено в таблице');
-                    alert('Ошибка: не удалось определить имя пользователя');
-                    return;
-                }
-                const executorName = currentUserNameFromSheet;
-                console.log(`Отправка задачи ${taskId} с исполнителем: ${executorName} (из столбца B)`);
-                completeTask(taskId, executorName, rowIndex);
-            };
-            
-            // Обработчик для кнопки "Отмена"
-            const cancelBtn = modal.querySelector('#confirmNoBtn');
-            cancelBtn.onclick = function() {
-                modal.remove();
-            };
-            
-            // Закрытие при клике на фон
-            modal.onclick = function(e) {
-                if (e.target === modal) {
-                    modal.remove();
-                }
-            };
-        }
-
-        // Функция для отправки задачи с подтверждением
-        function submitTaskWithConfirm(event, taskId, rowIndex) {
-            event.preventDefault();
-            event.stopPropagation();
-            showConfirmModal(taskId, rowIndex);
-        }
-
-        // Функция рендеринга карточек для МЕХАНИК (с модальным окном подтверждения)
-        function renderJournalCards(journal) {
-            const container = document.getElementById('journal-cards');
-            if (!journal || journal.length === 0) {
-                container.innerHTML = `<div class="task-card"><div class="loading-container"><div class="loading-card-text">Нет данных</div></div></div>`;
-                updatePagination('journal', 1, 1);
-                return;
-            }
-            const sorted = [...journal];
-            totalJournalPages = Math.ceil(sorted.length / CARDS_PER_PAGE);
-            if (currentJournalPage > totalJournalPages) currentJournalPage = 1;
-            const current = getCurrentPageData(sorted, currentJournalPage);
-            let html = '';
-            current.forEach((task, idx) => {
-                const rowIndex = task.rowIndex || (idx + 2);
-                const hasLink = task.driveLink && task.driveLink.trim() !== '';
-                const taskId = task.id || task.driveLink || '';
-                if (!task.isCompleted) {
-                    html += `
-                        <div class="task-card pending" data-task-id="${taskId}" data-row-index="${rowIndex}">
-                            <div class="task-header"><div class="task-title">${task.task}</div></div>
-                            <div class="card-content">
-                                <div class="content-row"><span class="row-label">Дата появления:</span><span class="row-value">${task.createdDate}</span></div>
-                                <div class="content-row"><span class="row-label">Дата выполнения:</span><span class="row-value">${task.completedDate || '-'}</span></div>
-                                <div class="content-row"><span class="row-label">Выполнил:</span><span class="row-value">-</span></div>
-                            </div>
-                            <div class="buttons-container">
-                                ${hasLink ? `<a href="#" onclick="openDriveLink('${task.driveLink}')" class="schema-button"><i class="fas fa-file-alt"></i>ОТКРЫТЬ ЗАДАЧУ</a>` : '<div class="no-open">Недоступно</div>'}
-                                <button class="submit-btn" onclick="submitTaskWithConfirm(event, '${taskId}', ${rowIndex})"><i class="fas fa-paper-plane"></i>ВЫПОЛНИТЬ</button>
-                            </div>
-                        </div>`;
-                } else {
-                    html += `
-                        <div class="task-card completed">
-                            <div class="task-header"><div class="task-title">${task.task}</div></div>
-                            <div class="card-content">
-                                <div class="content-row"><span class="row-label">Дата появления:</span><span class="row-value">${task.createdDate}</span></div>
-                                <div class="content-row"><span class="row-label">Дата выполнения:</span><span class="row-value">${task.completedDate}</span></div>
-                                <div class="content-row"><span class="row-label">Выполнил:</span><span class="row-value"><span class="executor-name">${task.executor}</span></span></div>
-                            </div>
-                            <div class="buttons-container">
-                                ${hasLink ? `<a href="#" onclick="openDriveLink('${task.driveLink}')" class="schema-button"><i class="fas fa-file-alt"></i>ОТКРЫТЬ ЗАДАЧУ</a>` : '<div class="no-open">Недоступно</div>'}
-                                <div class="submitted-text"><i class="fas fa-check-circle"></i>ВЫПОЛНЕНО</div>
-                            </div>
-                        </div>`;
-                }
-            });
-            container.innerHTML = html;
-            updatePagination('journal', currentJournalPage, totalJournalPages);
-        }
-
-        // Функция рендеринга для ИНСТРУКТОР (с модальным окном подтверждения)
-        function renderInstructorCards(instructor) {
-            const container = document.getElementById('instructor-cards');
-            if (!instructor || instructor.length === 0) {
-                container.innerHTML = `<div class="task-card"><div class="loading-container"><div class="loading-card-text">Нет данных</div></div></div>`;
-                updatePagination('instructor', 1, 1);
-                return;
-            }
-            const sorted = [...instructor];
-            totalInstructorPages = Math.ceil(sorted.length / CARDS_PER_PAGE);
-            if (currentInstructorPage > totalInstructorPages) currentInstructorPage = 1;
-            const current = getCurrentPageData(sorted, currentInstructorPage);
-            let html = '';
-            current.forEach((task, idx) => {
-                const rowIndex = task.rowIndex || (idx + 2);
-                const hasLink = task.driveLink && task.driveLink.trim() !== '';
-                const taskId = task.id || task.driveLink || '';
-                if (!task.isCompleted) {
-                    html += `
-                        <div class="task-card pending" data-task-id="${taskId}" data-row-index="${rowIndex}">
-                            <div class="task-header"><div class="task-title">${task.task}</div></div>
-                            <div class="card-content">
-                                <div class="content-row"><span class="row-label">Дата появления:</span><span class="row-value">${task.createdDate}</span></div>
-                                <div class="content-row"><span class="row-label">Дата выполнения:</span><span class="row-value">${task.completedDate || '-'}</span></div>
-                                <div class="content-row"><span class="row-label">Выполнил:</span><span class="row-value">-</span></div>
-                            </div>
-                            <div class="buttons-container">
-                                ${hasLink ? `<a href="#" onclick="openDriveLink('${task.driveLink}')" class="schema-button"><i class="fas fa-file-alt"></i>ОТКРЫТЬ ЗАДАЧУ</a>` : '<div class="no-open">Недоступно</div>'}
-                                <button class="submit-btn" onclick="submitTaskWithConfirm(event, '${taskId}', ${rowIndex})"><i class="fas fa-paper-plane"></i>ВЫПОЛНИТЬ</button>
-                            </div>
-                        </div>`;
-                } else {
-                    html += `
-                        <div class="task-card completed">
-                            <div class="task-header"><div class="task-title">${task.task}</div></div>
-                            <div class="card-content">
-                                <div class="content-row"><span class="row-label">Дата появления:</span><span class="row-value">${task.createdDate}</span></div>
-                                <div class="content-row"><span class="row-label">Дата выполнения:</span><span class="row-value">${task.completedDate}</span></div>
-                                <div class="content-row"><span class="row-label">Выполнил:</span><span class="row-value"><span class="executor-name">${task.executor}</span></span></div>
-                            </div>
-                            <div class="buttons-container">
-                                ${hasLink ? `<a href="#" onclick="openDriveLink('${task.driveLink}')" class="schema-button"><i class="fas fa-file-alt"></i>ОТКРЫТЬ ЗАДАЧУ</a>` : '<div class="no-open">Недоступно</div>'}
-                                <div class="submitted-text"><i class="fas fa-check-circle"></i>ВЫПОЛНЕНО</div>
-                            </div>
-                        </div>`;
-                }
-            });
-            container.innerHTML = html;
-            updatePagination('instructor', currentInstructorPage, totalInstructorPages);
-        }
-
-        // Функция рендеринга для клуб (с модальным окном подтверждения)
-        function renderEngineerCards(engineer) {
-            const container = document.getElementById('engineer-cards');
-            if (!engineer || engineer.length === 0) {
-                container.innerHTML = `<div class="task-card"><div class="loading-container"><div class="loading-card-text">Нет данных</div></div></div>`;
-                updatePagination('engineer', 1, 1);
-                return;
-            }
-            const sorted = [...engineer];
-            totalEngineerPages = Math.ceil(sorted.length / CARDS_PER_PAGE);
-            if (currentEngineerPage > totalEngineerPages) currentEngineerPage = 1;
-            const current = getCurrentPageData(sorted, currentEngineerPage);
-            let html = '';
-            current.forEach((task, idx) => {
-                const rowIndex = task.rowIndex || (idx + 2);
-                const hasLink = task.driveLink && task.driveLink.trim() !== '';
-                const taskId = task.id || task.driveLink || '';
-                if (!task.isCompleted) {
-                    html += `
-                        <div class="task-card pending" data-task-id="${taskId}" data-row-index="${rowIndex}">
-                            <div class="task-header"><div class="task-title">${task.task}</div></div>
-                            <div class="card-content">
-                                <div class="content-row"><span class="row-label">Дата появления:</span><span class="row-value">${task.createdDate}</span></div>
-                                <div class="content-row"><span class="row-label">Дата выполнения:</span><span class="row-value">${task.completedDate || '-'}</span></div>
-                                <div class="content-row"><span class="row-label">Выполнил:</span><span class="row-value">-</span></div>
-                            </div>
-                            <div class="buttons-container">
-                                ${hasLink ? `<a href="#" onclick="openDriveLink('${task.driveLink}')" class="schema-button"><i class="fas fa-file-alt"></i>ОТКРЫТЬ ЗАДАЧУ</a>` : '<div class="no-open">Недоступно</div>'}
-                                <button class="submit-btn" onclick="submitTaskWithConfirm(event, '${taskId}', ${rowIndex})"><i class="fas fa-paper-plane"></i>ВЫПОЛНИТЬ</button>
-                            </div>
-                        </div>`;
-                } else {
-                    html += `
-                        <div class="task-card completed">
-                            <div class="task-header"><div class="task-title">${task.task}</div></div>
-                            <div class="card-content">
-                                <div class="content-row"><span class="row-label">Дата появления:</span><span class="row-value">${task.createdDate}</span></div>
-                                <div class="content-row"><span class="row-label">Дата выполнения:</span><span class="row-value">${task.completedDate}</span></div>
-                                <div class="content-row"><span class="row-label">Выполнил:</span><span class="row-value"><span class="executor-name">${task.executor}</span></span></div>
-                            </div>
-                            <div class="buttons-container">
-                                ${hasLink ? `<a href="#" onclick="openDriveLink('${task.driveLink}')" class="schema-button"><i class="fas fa-file-alt"></i>ОТКРЫТЬ ЗАДАЧУ</a>` : '<div class="no-open">Недоступно</div>'}
-                                <div class="submitted-text"><i class="fas fa-check-circle"></i>ВЫПОЛНЕНО</div>
-                            </div>
-                        </div>`;
-                }
-            });
-            container.innerHTML = html;
-            updatePagination('engineer', currentEngineerPage, totalEngineerPages);
-        }
-
-        function initializeApp() {
-            console.log('Инициализация приложения после авторизации');
-            let lastTouchEnd = 0;
-            document.addEventListener('touchend', function(event) {
-                const now = (new Date()).getTime();
-                if (now - lastTouchEnd <= 300) event.preventDefault();
-                lastTouchEnd = now;
-            }, false);
-            document.addEventListener('click', function(e) {
-                const userDropdown = document.getElementById('userDropdown');
-                const dateFilterContainer = document.getElementById('date-filter-container');
-                if (!e.target.closest('.user-avatar') && userDropdown.style.display === 'block') userDropdown.style.display = 'none';
-                if (!e.target.closest('#open-tasks-counter') && !e.target.closest('#date-filter-container') && dateFilterContainer.classList.contains('show')) dateFilterContainer.classList.remove('show');
-            });
-            showLoader();
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            const tabContents = document.querySelectorAll('.tab-content');
-            document.getElementById('open-tasks-counter').addEventListener('click', toggleDateFilter);
-            document.getElementById('clear-filter-btn').addEventListener('click', clearDateFilter);
-            const dateInput = document.getElementById('date-filter-input');
-            if (dateInput && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                dateInput.addEventListener('focus', function() { this.style.fontSize = '16px'; });
-                dateInput.addEventListener('blur', function() { this.style.fontSize = ''; });
-            }
-            Promise.all([
-                loadJournal(),
-                loadInstructorTasks(),
-                loadEngineerTasks()
-            ]).then(() => { setTimeout(() => hideLoader(), 100); }).catch(error => { console.error(error); hideLoader(); });
-            tabButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    tabButtons.forEach(btn => btn.classList.remove('active'));
-                    tabContents.forEach(content => content.classList.remove('active'));
-                    button.classList.add('active');
-                    const tabId = button.getAttribute('data-tab');
-                    document.getElementById(tabId).classList.add('active');
-                    if (tabId === 'tab2') { currentInstructorPage = 1; loadInstructorTasks(); }
-                    else if (tabId === 'tab1') { currentJournalPage = 1; loadJournal(); }
-                    else if (tabId === 'tab3') { currentEngineerPage = 1; loadEngineerTasks(); }
-                    if (isFilterActive && currentFilterDate) {
-                        if (tabId === 'tab1') filterJournalByDate(currentFilterDate);
-                        else if (tabId === 'tab2') filterInstructorByDate(currentFilterDate);
-                        else if (tabId === 'tab3') filterEngineerByDate(currentFilterDate);
-                    } else updateCounterLabel();
-                    scrollToTop();
-                });
-            });
-            setInterval(() => {
-                const activeTab = document.querySelector('.tab-content.active');
-                if (activeTab && activeTab.id === 'tab2') loadInstructorTasks();
-                else if (activeTab && activeTab.id === 'tab1') loadJournal();
-                else if (activeTab && activeTab.id === 'tab3') loadEngineerTasks();
-            }, 30000);
-            setTimeout(() => { isInitialLoad = false; }, 1000);
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.task-card')) {
-                    const card = e.target.closest('.task-card');
-                    if (e.target.tagName === 'BUTTON' || e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION' || e.target.tagName === 'A' || e.target.tagName === 'I') return;
-                    document.querySelectorAll('.task-card').forEach(c => c.classList.remove('selected'));
-                    card.classList.add('selected');
-                }
-            });
-        }
-
-        window.addEventListener('load', function() {
-            const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
-            const email = localStorage.getItem('userEmail');
-            const name = localStorage.getItem('userName');
-            const nameFromSheet = localStorage.getItem('userNameFromSheet');
-            const pic = localStorage.getItem('userPic');
-            if (isLoggedIn && email) {
-                loginSection.style.display = 'none';
-                mainContent.style.display = 'block';
-                currentUser = { email: email, name: name, picture: pic };
-                currentUserNameFromSheet = nameFromSheet || name;
-                updateUserAvatar(currentUser);
-                showLoading(true);
-                loadSheetsAPI()
-                    .then(() => gapi.client.init({ apiKey: AUTH_API_KEY, discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'] }))
-                    .then(() => checkEmailInSheet(email))
-                    .catch(() => signOut());
-            } else {
-                loginSection.style.display = 'flex';
-                mainContent.style.display = 'none';
-                setTimeout(() => loadingScreen.classList.add('fade-out'), 500);
-            }
-        });
-
-        window.onload = function() {
-            if (google && google.accounts && google.accounts.id) {
-                google.accounts.id.initialize({ client_id: '328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com', callback: handleCredentialResponse });
-                google.accounts.id.renderButton(document.querySelector('.g_id_signin'), { type: 'standard', shape: 'pill', theme: 'outline', text: 'signin_with', size: 'large', logo_alignment: 'left' });
             }
         };
         
-        // Делаем функции доступными глобально
-        window.openDriveLink = openDriveLink;
-        window.submitTaskWithConfirm = submitTaskWithConfirm;
-        window.goToPage = goToPage;
-        window.changePage = changePage;
-        window.toggleUserDropdown = toggleUserDropdown;
-        window.signOut = signOut;
-    </script>
-
-    <!-- ИСПРАВЛЕНИЕ ДЛЯ КНОПОК -->
-    <script>
-        (function fixButtonsOnAllPages() {
-            'use strict';
-            let lastTouchEnd = 0;
-            document.removeEventListener('touchend', document.touchEndHandler, false);
-            document.addEventListener('touchend', function(event) {
-                const target = event.target;
-                const isInteractive = target.closest('button') || target.closest('a') || target.closest('select') || target.closest('.submit-btn') || target.closest('.open-button') || target.closest('.schema-button') || target.closest('.executor-select') || target.closest('.page-btn') || target.closest('.tab-btn') || target.closest('.menu-button') || target.closest('.clear-filter-btn') || target.closest('#open-tasks-counter') || target.closest('.user-avatar');
-                if (isInteractive) { event.stopPropagation(); return true; }
-                const now = Date.now();
-                if (now - lastTouchEnd <= 300) event.preventDefault();
-                lastTouchEnd = now;
-            }, { passive: false });
-            function forceButtonHandlers() {
-                document.querySelectorAll('#tab1 .schema-button, #tab2 .schema-button, #tab3 .schema-button').forEach(btn => {
-                    btn.removeEventListener('click', handleOpenClick);
-                    btn.addEventListener('click', handleOpenClick);
-                });
+        Chart.register(centerTextPlugin);
+        
+        new Chart(document.getElementById('chartLucky').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Выполнено', 'Осталось'],
+                datasets: [{
+                    data: [clubs.lucky.completedPercent, clubs.lucky.pending],
+                    backgroundColor: [clubs.lucky.colorComplete, clubs.lucky.colorPending],
+                    borderWidth: 0,
+                    cutout: '68%',
+                    borderRadius: 8,
+                    spacing: 2,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw}%` } }
+                },
+                layout: { padding: { top: 8, bottom: 8, left: 8, right: 8 } }
             }
-            function handleOpenClick(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const btn = e.currentTarget;
-                const onclickAttr = btn.getAttribute('onclick');
-                if (onclickAttr) {
-                    try {
-                        const match = onclickAttr.match(/'([^']+)'/);
-                        if (match && match[1]) window.open(convertGoogleDriveLink(match[1]) || match[1], '_blank');
-                    } catch (error) { console.log('Ошибка открытия ссылки:', error); }
+        });
+        
+        new Chart(document.getElementById('chartBlockbuster').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Выполнено', 'Осталось'],
+                datasets: [{
+                    data: [clubs.block.completedPercent, clubs.block.pending],
+                    backgroundColor: [clubs.block.colorComplete, clubs.block.colorPending],
+                    borderWidth: 0,
+                    cutout: '68%',
+                    borderRadius: 8,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw}%` } }
                 }
             }
-            const style = document.createElement('style');
-            style.textContent = `.schema-button, .submit-btn, .open-button, .executor-select { position: relative; z-index: 9999 !important; cursor: pointer !important; pointer-events: auto !important; touch-action: manipulation !important; -webkit-tap-highlight-color: rgba(220,20,60,0.2) !important; } .task-card:active { transform: none !important; } button, a, select, .schema-button, .submit-btn, .open-button, .user-avatar { pointer-events: auto !important; -webkit-user-select: none !important; user-select: none !important; } .schema-button:active, .submit-btn:active:not(:disabled), .open-button:active, .user-avatar:active { opacity: 0.7; transform: scale(0.98); }`;
-            document.head.appendChild(style);
-            const observer = new MutationObserver(function(mutations) { setTimeout(forceButtonHandlers, 50); setTimeout(forceButtonHandlers, 150); });
-            const tab1 = document.getElementById('tab1'), tab2 = document.getElementById('tab2'), tab3 = document.getElementById('tab3');
-            if (tab1) observer.observe(tab1, { childList: true, subtree: true });
-            if (tab2) observer.observe(tab2, { childList: true, subtree: true });
-            if (tab3) observer.observe(tab3, { childList: true, subtree: true });
-            document.addEventListener('DOMContentLoaded', function() { setTimeout(forceButtonHandlers, 100); setTimeout(forceButtonHandlers, 500); setTimeout(forceButtonHandlers, 1000); });
-            const originalGoToPage = window.goToPage;
-            window.goToPage = function(type, pageNumber) { originalGoToPage(type, pageNumber); setTimeout(forceButtonHandlers, 100); };
-            const originalChangePage = window.changePage;
-            window.changePage = function(type, direction) { originalChangePage(type, direction); setTimeout(forceButtonHandlers, 100); };
-            console.log('Фикс кнопок установлен (включая клуб)');
-        })();
-    </script>
+        });
+        
+        new Chart(document.getElementById('chartSkymall').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Выполнено', 'Осталось'],
+                datasets: [{
+                    data: [clubs.skymall.completedPercent, clubs.skymall.pending],
+                    backgroundColor: [clubs.skymall.colorComplete, clubs.skymall.colorPending],
+                    borderWidth: 0,
+                    cutout: '68%',
+                    borderRadius: 8,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.raw}%` } }
+                }
+            }
+        });
+        
+        const fpsData = {
+            labels: ['LUCKY STRIKE KH', 'BLOCKBUSTER', 'SKYMALL'],
+            fpsValues: [2240, 1985, 2370]
+        };
+        
+        new Chart(document.getElementById('fpsChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: fpsData.labels,
+                datasets: [{
+                    label: 'Средний FPS (кадров/сек)',
+                    data: fpsData.fpsValues,
+                    backgroundColor: ['#3b82f6', '#f97316', '#10b981'],
+                    borderRadius: 12,
+                    barPercentage: 0.65,
+                    categoryPercentage: 0.8,
+                    borderSkipped: false,
+                    hoverBackgroundColor: ['#2563eb', '#ea580c', '#059669']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 2500,
+                        title: {
+                            display: true,
+                            text: 'FPS (чем выше, тем лучше)',
+                            font: { weight: 'bold', size: 12 },
+                            color: '#2c3e66'
+                        },
+                        grid: { color: '#e9edf2' },
+                        ticks: { stepSize: 500, callback: (val) => val + ' fps' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Клубы', font: { weight: 'bold', size: 12 } },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.raw} FPS` } },
+                    legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 12 } }
+                },
+                layout: { padding: { top: 16, bottom: 8, left: 8, right: 12 } }
+            }
+        });
+        
+        const partsData = {
+            labels: ['LUCKY STRIKE KH', 'BLOCKBUSTER', 'SKYMALL'],
+            partsCount: [1240, 1890, 870],
+            colors: ['#8b5cf6', '#a78bfa', '#c4b5fd']
+        };
+        
+        new Chart(document.getElementById('partsChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: partsData.labels,
+                datasets: [{
+                    label: 'Количество взятых деталей (шт)',
+                    data: partsData.partsCount,
+                    backgroundColor: partsData.colors,
+                    borderRadius: 12,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.7,
+                    borderWidth: 0,
+                    hoverBackgroundColor: '#6d28d9'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Детали (штуки)', font: { weight: 'bold' } },
+                        grid: { color: '#eceff5' },
+                        ticks: { stepSize: 300 }
+                    },
+                    x: {
+                        title: { display: true, text: 'Клубы', font: { weight: 'bold' } },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.raw.toLocaleString()} деталей` } },
+                    legend: { position: 'top', labels: { usePointStyle: true } }
+                },
+                layout: { padding: { top: 12, bottom: 10 } }
+            }
+        });
+        
+        const now = new Date();
+        const monthNames = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+        const currentMonth = monthNames[now.getMonth()];
+        const fpsSub = document.querySelector('.full-width-card .card-sub');
+        if (fpsSub) {
+            fpsSub.innerHTML = `Показатель производительности: чем выше, тем плавнее работа симуляции / интерфейса. Максимальная планка — 2500 fps • Данные за ${currentMonth} ${now.getFullYear()}`;
+        }
+        const partsCards = document.querySelectorAll('.full-width-card');
+        if (partsCards.length >= 2) {
+            const partsSub = partsCards[1]?.querySelector('.card-sub');
+            if (partsSub) {
+                partsSub.innerHTML = `Суммарное число деталей, задействованных в проектах / сборках за период (актуально на ${currentMonth})`;
+            }
+        }
+        
+        const luckyNote = document.querySelector('.card:first-child .stats-note');
+        if(luckyNote) luckyNote.innerHTML = `87% выполненных задач — лидер по KPI`;
+        const blockNote = document.querySelectorAll('.card')[1]?.querySelector('.stats-note');
+        if(blockNote) blockNote.innerHTML = `74% выполненных задач — стабильный рост`;
+        const skyNote = document.querySelectorAll('.card')[2]?.querySelector('.stats-note');
+        if(skyNote) skyNote.innerHTML = `91% выполненных задач — максимальная эффективность`;
+    })();
+</script>
 </body>
 </html>

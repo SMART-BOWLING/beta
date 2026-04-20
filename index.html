@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
-  <title>Бильярд · Брони | Полноэкранная таблица</title>
-  <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
+  <title>Бильярд · Брони | Full‑screen таблица</title>
+  <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png"/>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     * {
@@ -14,24 +14,29 @@
     }
 
     :root {
-      --bg: #f2f2f5;
-      --surface: #ffffff;
-      --surface2: #f8f8fc;
-      --border: rgba(0, 0, 0, 0.06);
-      --border2: rgba(0, 0, 0, 0.12);
-      --ink: #1c1c1e;
-      --ink2: #3a3a3c;
-      --ink3: #6c6c70;
-      --ink4: #8e8e93;
-      --blue: #0066cc;
-      --blue-h: #0055b3;
-      --blue-dim: rgba(0, 102, 204, 0.1);
-      --green: #28a745;
-      --red: #dc3545;
-      --amber: #ff9f0a;
-      --r: 12px;
-      --r2: 20px;
-      --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --bg:       #f5f5f7;
+      --surface:  #ffffff;
+      --surface2: #f5f5f7;
+      --border:   rgba(0,0,0,.08);
+      --border2:  rgba(0,0,0,.14);
+      --ink:      #1d1d1f;
+      --ink2:     #3d3d3f;
+      --ink3:     #6e6e73;
+      --ink4:     #aeaeb2;
+      --blue:     #0071e3;
+      --blue-h:   #0077ed;
+      --blue-dim: rgba(0,113,227,.08);
+      --green:    #34c759;
+      --red:      #ff3b30;
+      --amber:    #ff9f0a;
+      --r:  12px;
+      --r2: 18px;
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+      
+      /* 🖥️ РАЗМЕРЫ ДЛЯ ПК (крупно, на весь экран) */
+      --cell-h: 58px;      /* высота строки (столы) */
+      --cell-w: 68px;      /* ширина колонки времени */
+      --lane-w: 100px;     /* ширина левой колонки (№ стола) */
     }
 
     body {
@@ -44,194 +49,140 @@
 
     /* LOGIN */
     #login {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      z-index: 9999;
-      padding: 32px;
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 20px; z-index: 9999; padding: 32px;
     }
-    .login-glyph { font-size: 56px; }
-    .login-title { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; }
-    .login-sub { font-size: 16px; color: var(--ink3); margin-top: -6px; }
-    .login-sep { width: 1px; height: 28px; background: var(--border2); }
+    .login-glyph { font-size: 58px; }
+    .login-title { font-size: 32px; font-weight: 700; letter-spacing: -.5px; }
+    .login-sub   { font-size: 16px; color: var(--ink3); margin-top: -8px; }
+    .login-sep   { width: 1px; height: 28px; background: var(--border2); }
 
     /* APP */
     #content { display: none; min-height: 100vh; }
 
     /* NAVBAR */
     .nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(18px);
-      border-bottom: 0.5px solid var(--border2);
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: .5px solid var(--border2);
+      height: 60px; display: flex; align-items: center;
+      justify-content: space-between; padding: 0 28px;
     }
-    .nav-title {
-      font-size: 19px;
-      font-weight: 600;
-      letter-spacing: -0.3px;
-      background: linear-gradient(135deg, #1e3c72, #2b4c7c);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
+    .nav-title { font-size: 20px; font-weight: 600; letter-spacing: -.3px; }
     .nav-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--surface);
-      border: 0.5px solid var(--border2);
-      border-radius: 40px;
-      padding: 8px 18px;
-      font-family: var(--font);
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--blue);
-      cursor: pointer;
-      transition: all 0.2s ease;
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface); border: .5px solid var(--border2);
+      border-radius: 980px; padding: 8px 18px;
+      font-family: var(--font); font-size: 14px; font-weight: 500; color: var(--blue);
+      cursor: pointer; transition: background .15s;
     }
-    .nav-btn:hover { background: var(--blue-dim); transform: scale(0.97); }
+    .nav-btn:hover { background: var(--blue-dim); }
 
-    /* PAGE — теперь на всю ширину, без максимальной ширины */
+    /* PAGE */
     .page {
-      width: 100%;
-      padding: 24px 24px 48px 24px;
+      max-width: 1600px;      /* шире, чтобы таблица дышала */
+      margin: 0 auto;
+      padding: 24px 24px 80px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
     }
 
-    /* Управление */
+    /* CONTROLS */
     .ctrl {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      flex-wrap: wrap;
-      background: var(--surface);
-      border-radius: var(--r2);
-      padding: 16px 24px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02), 0 1px 0 var(--border);
+      display: flex; gap: 18px; align-items: center; flex-wrap: wrap;
+      background: var(--surface); border-radius: var(--r2);
+      padding: 18px 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.04);
     }
     .date-field {
-      flex: 1;
-      min-width: 200px;
-      max-width: 260px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--surface2);
-      border-radius: 12px;
-      padding: 0 16px;
-      height: 46px;
-      border: 0.5px solid var(--border2);
+      flex: 1; min-width: 220px; max-width: 280px;
+      display: flex; align-items: center; gap: 12px;
+      background: var(--surface2); border-radius: 14px;
+      padding: 0 18px; height: 52px; border: .5px solid var(--border2);
     }
+    .date-field svg { flex-shrink: 0; color: var(--ink3); width: 18px; height: 18px; }
     #dateInput {
-      flex: 1;
-      border: none;
-      background: transparent;
-      font-family: var(--font);
-      font-size: 16px;
-      font-weight: 500;
-      color: var(--ink);
+      flex: 1; border: none; background: transparent;
+      font-family: var(--font); font-size: 17px; font-weight: 500; color: var(--ink);
       cursor: pointer;
     }
+    #dateInput:focus { outline: none; }
     .btn-book {
-      height: 46px;
-      padding: 0 28px;
-      background: var(--blue);
-      color: white;
-      border: none;
-      border-radius: 40px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s;
-      box-shadow: 0 2px 6px rgba(0, 102, 204, 0.3);
+      height: 52px; padding: 0 32px;
+      background: var(--blue); color: white; border: none; border-radius: 980px;
+      font-family: var(--font); font-size: 17px; font-weight: 600;
+      cursor: pointer; transition: all .15s;
+      box-shadow: 0 2px 6px rgba(0,113,227,.3);
     }
     .btn-book:hover { background: var(--blue-h); transform: scale(0.98); }
 
-    /* Легенда */
-    .pills {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
+    /* LEGEND */
+    .pills { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
     .pill {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--ink2);
-      background: var(--surface);
-      border: 0.5px solid var(--border2);
-      border-radius: 40px;
-      padding: 6px 16px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 500; color: var(--ink3);
+      background: var(--surface); border: .5px solid var(--border2);
+      border-radius: 980px; padding: 6px 16px;
     }
     .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot-navy { background: #2c6e9e; }
-    .dot-sage { background: #2e8b57; }
-    .dot-rust { background: #c95a2e; }
+    .dot-navy  { background: #3a7bd5; }
+    .dot-sage  { background: #30a862; }
+    .dot-rust  { background: #e05c2a; }
     .dot-amber { background: var(--amber); }
     .dot-green { background: var(--green); }
-    .dot-red { background: var(--red); }
+    .dot-red   { background: var(--red); }
 
-    /* КАРТОЧКА С ТАБЛИЦЕЙ — растягивается на всю ширину */
+    /* GRID CARD */
     .grid-card {
-      background: var(--surface);
-      border-radius: var(--r2);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+      background: var(--surface); border-radius: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.06);
       overflow: hidden;
-      width: 100%;
+      border: .5px solid var(--border);
     }
     .grid-scroll {
       overflow-x: auto;
+      overflow-y: visible;
       -webkit-overflow-scrolling: touch;
       position: relative;
       width: 100%;
     }
 
-    /* ========= ДЕСКТОПНАЯ ТАБЛИЦА (НА ВЕСЬ ЭКРАН) ========= */
+    /* ========== ДЕСКТОПНАЯ ТАБЛИЦА (строки = столы) ========== */
     #tableDesktop {
       display: table;
       border-collapse: collapse;
       table-layout: fixed;
       width: 100%;
-      min-width: 1000px;
+      min-width: 1100px;
+      user-select: none;
       font-size: 14px;
     }
-    /* Заголовки времени — увеличенные, кликабельные */
     #tableDesktop thead th {
-      height: 52px;
-      font-size: 14px;
+      height: var(--cell-h);
+      font-size: 13px;
       font-weight: 600;
-      color: var(--ink2);
+      letter-spacing: .2px;
+      color: var(--ink4);
       border-bottom: 1px solid var(--border2);
-      border-right: 0.5px solid var(--border);
+      border-right: .5px solid var(--border);
       text-align: center;
+      vertical-align: middle;
       background: var(--surface2);
       position: sticky;
       top: 0;
       z-index: 3;
     }
+    #tableDesktop thead th:last-child { border-right: none; }
     #tableDesktop thead th.corner {
-      width: 90px;
-      min-width: 90px;
+      width: var(--lane-w);
+      min-width: var(--lane-w);
       background: var(--surface2);
       font-size: 13px;
       font-weight: 600;
-      color: var(--ink3);
+      color: var(--ink2);
       border-right: 1px solid var(--border2);
       position: sticky;
       left: 0;
@@ -239,258 +190,216 @@
     }
     #tableDesktop thead th.th-time {
       cursor: pointer;
-      width: 70px;
-      min-width: 70px;
-      transition: 0.1s;
+      width: var(--cell-w);
+      min-width: var(--cell-w);
+      transition: all .12s;
     }
-    #tableDesktop thead th.th-time:hover {
-      background: #fff0db;
-      color: var(--amber);
-    }
-    /* Ячейки строк (столы) */
-    #tableDesktop tbody tr {
-      height: 56px;
-    }
+    #tableDesktop thead th.th-time:hover { background: #fff4e0; color: var(--amber); }
+    #tableDesktop thead th.th-time.hl { background: #fff4e0 !important; color: var(--amber) !important; }
+
+    /* строки */
+    #tableDesktop tbody tr { height: var(--cell-h); }
     #tableDesktop tbody td.lane-hdr {
-      width: 90px;
-      min-width: 90px;
-      font-size: 16px;
+      width: var(--lane-w);
+      min-width: var(--lane-w);
+      font-size: 17px;
       font-weight: 700;
-      border-bottom: 0.5px solid var(--border2);
+      border-bottom: .5px solid var(--border2);
       border-right: 1px solid var(--border2);
       text-align: center;
+      vertical-align: middle;
       background: var(--surface2);
       position: sticky;
       left: 0;
       z-index: 2;
     }
-    .lane-hdr.grp-navy { background: #eef3fc !important; color: #1e5a8a; }
-    .lane-hdr.grp-sage { background: #eef7ef !important; color: #2c6e3c; }
-    .lane-hdr.grp-rust { background: #fef2ec !important; color: #b44d26; }
+    .lane-hdr.grp-navy { color: #1d4f9f; background: #eef3fc !important; }
+    .lane-hdr.grp-sage { color: #1a6640; background: #edf7f0 !important; }
+    .lane-hdr.grp-rust { color: #a83418; background: #fdf0ea !important; }
+    #tableDesktop tbody td.lane-hdr.hl-row { background: #fff4e0 !important; color: var(--amber) !important; }
 
+    /* слоты */
     #tableDesktop tbody td.slot {
       cursor: pointer;
-      border-bottom: 0.5px solid var(--border);
-      border-right: 0.5px solid var(--border);
+      border-bottom: .5px solid var(--border);
+      border-right: .5px solid var(--border);
+      vertical-align: middle;
       text-align: center;
-      font-size: 13px;
-      font-weight: 500;
-      transition: 0.08s linear;
+      font-size: 12px;
+      transition: background 0.08s;
     }
-    #tableDesktop tbody td.slot.shade { background: rgba(0, 0, 0, 0.02); }
-    #tableDesktop tbody tr.row-navy td.slot { background: #f9fbfe; }
-    #tableDesktop tbody tr.row-sage td.slot { background: #f9fdfa; }
-    #tableDesktop tbody tr.row-rust td.slot { background: #fefaf7; }
-    #tableDesktop tbody td.slot:hover { background: #fff6e8 !important; }
+    #tableDesktop tbody td:last-child { border-right: none; }
+    #tableDesktop tbody td.slot.shade { background: rgba(0,0,0,.02); }
+
+    /* группы строк */
+    #tableDesktop tbody tr.row-navy td.slot { background: #f8fafd; }
+    #tableDesktop tbody tr.row-sage td.slot { background: #f6fcf8; }
+    #tableDesktop tbody tr.row-rust td.slot { background: #fef8f4; }
+
+    #tableDesktop tbody td.slot:hover { background: #fff8ec !important; }
     #tableDesktop tbody td.slot.selected {
-      background: #fee8c3 !important;
+      background: #fff3c4 !important;
       border-top: 2px solid var(--amber);
       border-bottom: 2px solid var(--amber);
     }
-    #tableDesktop tbody td.slot.sel-left {
-      border-left: 2px solid var(--amber);
-      border-radius: 6px 0 0 6px;
-    }
-    #tableDesktop tbody td.slot.sel-right {
-      border-right: 2px solid var(--amber);
-      border-radius: 0 6px 6px 0;
-    }
-    #tableDesktop tbody td.slot.anchored {
-      background: #ffe5aa !important;
-      outline: 2px solid var(--amber);
-      outline-offset: -2px;
-    }
-    #tableDesktop tbody td.slot.vline { background: #fff2e0 !important; }
+    #tableDesktop tbody td.slot.sel-left  { border-left: 2px solid var(--amber); border-radius: 6px 0 0 6px; }
+    #tableDesktop tbody td.slot.sel-right { border-right: 2px solid var(--amber) !important; border-radius: 0 6px 6px 0; }
+    #tableDesktop tbody td.slot.anchored { background: #ffe7a3 !important; outline: 2px solid var(--amber); outline-offset: -2px; border-radius: 8px; }
+    #tableDesktop tbody td.slot.vline { background: #fffdf5; }
 
-    /* ========= МОБИЛЬНАЯ ТАБЛИЦА (при ширине < 800px) ========= */
-    @media (max-width: 799px) {
-      #tableDesktop { display: none; }
-      #tableMobile { display: table; }
-      .page { padding: 16px 12px 40px; }
-      .ctrl { flex-direction: column; align-items: stretch; }
-      .date-field { max-width: 100%; }
-      .btn-book { width: 100%; }
-    }
-    @media (min-width: 800px) {
-      #tableMobile { display: none; }
-    }
-
+    /* ========== МОБИЛЬНАЯ ТАБЛИЦА (скрыта на ПК) ========== */
     #tableMobile {
+      display: none;
       border-collapse: collapse;
       width: 100%;
-      font-size: 12px;
     }
+    @media (max-width: 800px) {
+      #tableDesktop { display: none; }
+      #tableMobile { display: table; }
+      :root {
+        --cell-h: 48px;
+        --cell-w: 52px;
+        --lane-w: 80px;
+      }
+      .page { padding: 16px 12px 70px; gap: 16px; }
+      .ctrl { flex-direction: column; align-items: stretch; }
+      .btn-book { width: 100%; justify-content: center; }
+      .nav-title { font-size: 18px; }
+    }
+
     #tableMobile thead th {
-      height: 44px;
-      font-size: 13px;
-      font-weight: 600;
-      border-bottom: 1px solid var(--border2);
-      border-right: 0.5px solid var(--border);
-      background: var(--surface2);
-    }
-    #tableMobile th.tcol {
-      background: var(--surface2);
-      color: var(--ink3);
-      font-size: 11px;
-      cursor: pointer;
-      min-width: 52px;
-    }
-    #tableMobile td.slot {
-      cursor: pointer;
-      height: 40px;
-      border-bottom: 0.5px solid var(--border);
-      border-right: 0.5px solid var(--border);
+      height: 44px; font-size: 13px; font-weight: 600;
+      border-bottom: .5px solid var(--border2);
+      border-right: .5px solid var(--border);
       text-align: center;
     }
-    #tableMobile td.slot.selected {
-      background: #fee8c3 !important;
-      border-left: 2px solid var(--amber);
-      border-right: 2px solid var(--amber);
+    #tableMobile thead th.hdr-navy { background: #eef3fc; color: #1d4f9f; }
+    #tableMobile thead th.hdr-sage { background: #edf7f0; color: #1a6640; }
+    #tableMobile thead th.hdr-rust { background: #fdf0ea; color: #a83418; }
+    #tableMobile thead th.hl { background: #fff4e0 !important; color: var(--amber) !important; }
+    #tableMobile th.tcol {
+      background: var(--surface2); color: var(--ink4); font-size: 11px; font-weight: 600;
+      border-left: .5px solid var(--border2); cursor: pointer;
+      position: sticky; top: 0; z-index: 3;
     }
-    #tableMobile td.slot.sel-top {
-      border-top: 2px solid var(--amber);
-      border-radius: 6px 6px 0 0;
+    #tableMobile td {
+      height: 42px; border-bottom: .5px solid var(--border);
+      border-right: .5px solid var(--border); text-align: center;
+      font-size: 11px; cursor: pointer;
     }
-    #tableMobile td.slot.sel-bot {
-      border-bottom: 2px solid var(--amber);
-      border-radius: 0 0 6px 6px;
-    }
-    #tableMobile td.slot.anchored { background: #ffe5aa !important; outline: 2px solid var(--amber); }
+    #tableMobile td.slot.selected { background: #fff3c4 !important; border-left: 2px solid var(--amber); border-right: 2px solid var(--amber); }
+    #tableMobile td.slot.sel-top { border-top: 2px solid var(--amber); border-radius: 6px 6px 0 0; }
+    #tableMobile td.slot.sel-bot { border-bottom: 2px solid var(--amber) !important; border-radius: 0 0 6px 6px; }
+    #tableMobile td.slot.anchored { background: #ffe7a3 !important; outline: 2px solid var(--amber); outline-offset: -2px; border-radius: 8px; }
+    #tableMobile td.slot.vline { background: #fffdf0; }
 
-    /* Слайдеры (полосы брони) */
+    /* SLIDERS LAYER (поверх таблицы) */
     #slidersLayer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 10;
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 10;
     }
     .slider {
-      position: absolute;
-      border-radius: 10px;
-      pointer-events: auto;
-      cursor: pointer;
-      padding: 4px 8px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      transition: 0.1s;
-      backdrop-filter: blur(1px);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      position: absolute; border-radius: 12px;
+      pointer-events: auto; cursor: pointer;
+      padding: 6px 10px; overflow: hidden;
+      display: flex; flex-direction: column; justify-content: center;
+      gap: 2px; transition: all 0.1s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     }
-    .slider:hover { transform: scale(1.01); opacity: 0.9; z-index: 20; }
-    .slider.pending   { background: rgba(255, 159, 10, 0.25); border-left: 3px solid #ff9f0a; }
-    .slider.confirmed { background: rgba(40, 167, 69, 0.25); border-left: 3px solid #28a745; }
-    .slider.rejected  { background: rgba(220, 53, 69, 0.2); border-left: 3px solid #dc3545; }
-    .sl-name { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sl-time { font-size: 10px; opacity: 0.85; }
+    .slider:hover { opacity: 0.92; transform: scale(1.01); z-index: 20; }
+    .slider.pending   { background: rgba(255,159,10,0.2); border: 1px solid rgba(255,159,10,0.7); }
+    .slider.confirmed { background: rgba(52,199,89,0.2); border: 1px solid rgba(52,199,89,0.7); }
+    .slider.rejected  { background: rgba(255,59,48,0.2); border: 1px solid rgba(255,59,48,0.7); }
+    .sl-name { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sl-time { font-size: 9px; opacity: 0.8; white-space: nowrap; }
+    .pending  .sl-name, .pending  .sl-time { color: #7d4a00; }
+    .confirmed .sl-name, .confirmed .sl-time { color: #1a5e2a; }
+    .rejected  .sl-name, .rejected  .sl-time { color: #8c1a14; }
 
-    /* Карточки броней */
-    #cardsContainer {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 4px;
-    }
+    /* CARDS */
+    #cardsContainer { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
     .bcard {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--surface);
-      border: 0.5px solid var(--border2);
-      border-radius: 16px;
-      padding: 10px 16px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      display: flex; align-items: center; gap: 14px;
+      background: var(--surface); border: .5px solid var(--border2);
+      border-radius: 20px; padding: 12px 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.05);
     }
-    .bcard-title { font-size: 14px; font-weight: 600; }
-    .bcard-sub { font-size: 12px; color: var(--ink3); }
+    .bcard-title { font-size: 15px; font-weight: 700; }
+    .bcard-sub { font-size: 13px; color: var(--ink3); margin-top: 4px; }
     .bcard-rm {
-      width: 28px;
-      height: 28px;
-      border-radius: 30px;
-      background: var(--surface2);
-      border: 0.5px solid var(--border2);
-      font-size: 16px;
-      cursor: pointer;
-      transition: 0.15s;
+      width: 30px; height: 30px; border-radius: 30px;
+      background: var(--surface2); border: .5px solid var(--border2);
+      font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
     }
-    .bcard-rm:hover { background: rgba(220,53,69,0.1); color: var(--red); }
 
-    /* Модалки */
+    /* OVERLAY / MODAL */
     .overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(8px);
-      z-index: 2000;
-      justify-content: center;
-      align-items: center;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4); backdrop-filter: blur(10px);
+      z-index: 2000; justify-content: center; align-items: flex-end;
     }
     .overlay.open { display: flex; }
+    @media(min-width: 560px) {
+      .overlay { align-items: center; padding: 24px; }
+      .sheet { border-radius: 32px !important; max-width: 480px; }
+    }
     .sheet {
-      background: var(--surface);
-      border-radius: 28px;
-      max-width: 480px;
-      width: 90%;
-      animation: fadeUp 0.2s ease;
-      overflow: hidden;
+      background: var(--surface); border-radius: 28px 28px 0 0;
+      width: 100%; box-shadow: 0 -4px 30px rgba(0,0,0,.2);
+      animation: sheetUp .28s ease;
     }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px);}
-      to { opacity: 1; transform: translateY(0);}
+    @keyframes sheetUp { from{transform:translateY(60px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .sheet-handle { width: 40px; height: 5px; background: var(--border2); border-radius: 4px; margin: 14px auto 0; }
+    .sheet-head { padding: 20px 24px 8px; display: flex; justify-content: space-between; align-items: center; }
+    .sheet-title { font-size: 24px; font-weight: 700; letter-spacing: -0.3px; }
+    .sheet-x {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--surface2); border: .5px solid var(--border2);
+      font-size: 20px; cursor: pointer;
     }
-    .sheet-head { padding: 20px 24px 0; display: flex; justify-content: space-between; align-items: center; }
-    .sheet-title { font-size: 24px; font-weight: 700; }
-    .sheet-x { width: 32px; height: 32px; border-radius: 30px; background: var(--surface2); border: none; cursor: pointer; font-size: 18px; }
-    .sheet-body { padding: 20px 24px 28px; }
+    .sheet-body { padding: 12px 24px 28px; }
+    .f-group { margin-bottom: 20px; }
+    .f-label { font-size: 13px; font-weight: 600; color: var(--ink3); margin-bottom: 6px; display: block; }
     .f-input {
-      width: 100%;
-      padding: 12px 16px;
-      background: var(--surface2);
-      border: 0.5px solid var(--border2);
-      border-radius: 14px;
-      font-size: 15px;
+      width: 100%; background: var(--surface2); border: .5px solid var(--border2);
+      border-radius: 14px; font-size: 16px; padding: 14px 16px;
     }
+    .f-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,113,227,.1); background: white; }
+    .f-actions { display: flex; gap: 12px; margin-top: 24px; }
     .f-btn-ok {
-      background: var(--blue);
-      color: white;
-      border: none;
-      border-radius: 40px;
-      padding: 12px 20px;
-      font-weight: 600;
-      cursor: pointer;
+      flex:1; height: 52px; background: var(--blue); color: white; border: none;
+      border-radius: 980px; font-weight: 600; font-size: 16px; cursor: pointer;
     }
-    .info-list { border-radius: 16px; background: var(--surface2); padding: 8px 0; margin-bottom: 20px; }
-    .info-row { display: flex; justify-content: space-between; padding: 12px 16px; border-bottom: 0.5px solid var(--border); }
-    .del-btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: 40px;
-      background: transparent;
-      border: 0.5px solid var(--border2);
-      margin-top: 12px;
-      cursor: pointer;
+    .f-btn-cancel {
+      height: 52px; padding: 0 24px; background: var(--surface2);
+      border: .5px solid var(--border2); border-radius: 980px; font-size: 16px; cursor: pointer;
     }
-    .del-btn:hover { background: rgba(220,53,69,0.08); color: var(--red); }
-    .cb-yes, .cb-no { padding: 10px 16px; border-radius: 40px; border: none; font-weight: 600; cursor: pointer; }
-    .cb-yes { background: #d4edda; color: #155724; }
-    .cb-no { background: #f8d7da; color: #721c24; }
+    .info-list { border-radius: 18px; border: .5px solid var(--border2); margin-bottom: 24px; overflow: hidden; }
+    .info-row { display: flex; justify-content: space-between; padding: 14px 18px; border-bottom: .5px solid var(--border); background: var(--surface2); }
+    .info-lbl { font-weight: 500; color: var(--ink3); }
+    .info-val { font-weight: 600; text-align: right; }
+    .confirm-btns { display: flex; gap: 12px; margin: 12px 0 16px; }
+    .cb-yes, .cb-no { flex:1; height: 48px; border-radius: 980px; font-weight: 600; border: none; cursor: pointer; }
+    .cb-yes { background: rgba(52,199,89,.15); color: #1a6630; }
+    .cb-no  { background: rgba(255,59,48,.1); color: #a81a10; }
+    .del-btn { width:100%; height: 48px; background: transparent; border: .5px solid var(--border2); border-radius: 980px; margin-top: 12px; cursor: pointer; }
 
-    #loader {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.3);
-      backdrop-filter: blur(3px);
-      z-index: 3000;
-      justify-content: center;
-      align-items: center;
+    /* IMAGE POPUP */
+    #imgPopup {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(14px);
+      z-index:3000; justify-content:center; align-items:center;
     }
-    .loader-box { background: white; padding: 24px 36px; border-radius: 32px; display: flex; gap: 16px; align-items: center; }
-    .spin { width: 28px; height: 28px; border: 3px solid #ddd; border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    #imgPopup.open { display:flex; }
+    .img-wrap { background:white; border-radius: 32px; padding: 8px; max-width: 92vw; max-height: 88vh; overflow: auto; position: relative; }
+    .img-wrap img { max-width: 100%; max-height: 84vh; display: block; border-radius: 24px; }
+    .img-x { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border-radius: 36px; background: rgba(0,0,0,0.6); color: white; border: none; font-size: 20px; cursor: pointer; }
+
+    /* LOADER */
+    #loader { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.3); backdrop-filter: blur(4px); z-index:5000; align-items:center; justify-content:center; }
+    .loader-box { background: white; border-radius: 32px; padding: 28px 40px; text-align: center; }
+    .spin { width: 38px; height: 38px; border: 3px solid #ddd; border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 14px; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
@@ -510,15 +419,16 @@
 
 <div id="content">
   <nav class="nav">
-    <span class="nav-title">🎱 Lucky Strike · Бильярд</span>
-    <button class="nav-btn" onclick="openImg()">📐 Схема столов</button>
+    <span class="nav-title">🎱 LUCKY STRIKE · БРОНЬ</span>
+    <button class="nav-btn" onclick="openImg()">📐 Схема зала</button>
   </nav>
   <div class="page">
     <div class="ctrl">
       <div class="date-field">
-        📅 <input type="date" id="dateInput" style="font-weight:500;">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <input type="date" id="dateInput"/>
       </div>
-      <button class="btn-book" onclick="openBookModal()">+ Новая бронь</button>
+      <button class="btn-book" onclick="openBookModal()">➕ Новая бронь</button>
     </div>
     <div class="pills">
       <div class="pill"><div class="dot dot-navy"></div>Столы 1–3</div>
@@ -532,7 +442,7 @@
     <div class="grid-card">
       <div class="grid-scroll" id="gridScroll">
         <table id="tableDesktop">
-          <thead id="dtHead"><tr><th class="corner">Стол / Время</th></tr></thead>
+          <thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead>
           <tbody id="dtBody"></tbody>
         </table>
         <table id="tableMobile">
@@ -546,112 +456,111 @@
   </div>
 </div>
 
-<div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Новое бронирование</div><button class="sheet-x" onclick="closeBookModal()">✕</button></div><div class="sheet-body"><div class="f-group"><input class="f-input" id="nameInput" placeholder="Имя клиента *"></div><div class="f-group"><input class="f-input" id="phoneInput" placeholder="Телефон *"></div><div class="f-group"><textarea class="f-input" id="commentInput" rows="2" placeholder="Комментарий"></textarea></div><div class="f-actions" style="display:flex; gap:12px; margin-top:16px;"><button class="f-btn-ok" onclick="submitForm()">Сохранить</button><button class="f-btn-cancel" onclick="closeBookModal()" style="background:#f0f0f0;">Отмена</button></div></div></div></div>
-<div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали</div><button class="sheet-x" onclick="closeInfoModal()">✕</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><span id="i-table"></span></div><div class="info-row"><span>Дата</span><span id="i-date"></span></div><div class="info-row"><span>Время</span><span id="i-time"></span></div><div class="info-row"><span>Имя</span><span id="i-name"></span></div><div class="info-row"><span>Телефон</span><span id="i-phone"></span></div><div class="info-row"><span>Комментарий</span><span id="i-comment"></span></div><div class="info-row"><span>Статус</span><span id="i-status"></span></div></div><div style="margin-top:12px;"><div class="confirm-lbl" style="font-weight:600;">Подтверждение визита</div><div style="display:flex; gap:12px; margin:12px 0;"><button class="cb-yes" onclick="confirmBooking(true)">✅ Да, были</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">🗑 Удалить бронь</button></div></div></div></div>
-<div id="imgPopup" class="overlay"><div class="sheet" style="max-width:90vw; background:transparent; box-shadow:none;"><img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width:100%; border-radius:28px;"/><button onclick="closeImg()" style="position:absolute; top:20px; right:20px; background:white; border-radius:40px; width:40px;">✕</button></div></div>
-<div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
+<!-- MODALS -->
+<div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="sheet-title">Новая бронь</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div class="f-group"><label class="f-label">Имя клиента</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+380 99 123 45 67"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания..."></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitForm()">Подтвердить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
+
+<div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="sheet-title">Детали</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span class="info-lbl">Стол</span><span id="i-table"></span></div><div class="info-row"><span class="info-lbl">Дата</span><span id="i-date"></span></div><div class="info-row"><span class="info-lbl">Время</span><span id="i-time"></span></div><div class="info-row"><span class="info-lbl">Имя</span><span id="i-name"></span></div><div class="info-row"><span class="info-lbl">Телефон</span><span id="i-phone"></span></div><div class="info-row"><span class="info-lbl">Комментарий</span><span id="i-comment"></span></div><div class="info-row"><span class="info-lbl">Статус</span><span id="i-status"></span></div></div><div class="confirm-lbl">Подтверждение визита</div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Состоялось</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">🗑 Удалить бронь</button></div></div></div></div>
+
+<div id="imgPopup"><div class="img-wrap"><button class="img-x" onclick="closeImg()">×</button><img src="https://i.postimg.cc/52ZDKDDw/55.png" alt="Схема столов"/></div></div>
+<div id="loader"><div class="loader-box"><div class="spin"></div><div class="loader-txt">Загрузка...</div></div></div>
 
 <script>
   const GAS = "https://script.google.com/macros/s/AKfycbxfRLDGA29FrqKS61HmYN_FUnDwOydeCaEdeW4oc4wyroQzvb4h1OnwQ5HeotIHhcj9/exec";
   const ALLOWED = ["vadiksss900@gmail.com","sergey99belov@gmail.com","popadinecvasil3@gmail.com","veronicadiakova04@gmail.com","info.luckystrike.kh@gmail.com","sashavolobuev123890@gmail.com","egorgorbushko@gmail.com","shatrava.o@gmail.com","Craftmax30@gmail.com","bowlingblock.b@gmail.com","lana.arnaut@gmail.com","polosinnikita1224@gmail.com","sofialat1506@gmail.com","ll3991940@gmail.com","ken040888@gmail.com"];
-  function parseJwt(t){return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));}
-  function handleCredentialResponse(r){const d=parseJwt(r.credential);if(ALLOWED.includes(d.email)){localStorage.setItem("ue",d.email);location.reload();}else alert("Доступ запрещён: "+d.email);}
-  window.onload=()=>{if(localStorage.getItem("ue")&&ALLOWED.includes(localStorage.getItem("ue"))){document.getElementById("login").style.display="none";document.getElementById("content").style.display="block";init();}};
-  
-  const SH=11,EH=22,LANES=12;
-  const slots=[];
-  for(let h=SH;h<=EH;h++){slots.push({label:`${h}:00`,key:h});if(h<EH)slots.push({label:`${h}:30`,key:h+0.5});}
-  const LANE_GROUPS=[0,0,0,1,1,1,2,2,2,2,2,2];
-  const GRP_CLASS=["grp-navy","grp-sage","grp-rust"];
-  const ROW_CLASS=["row-navy","row-sage","row-rust"];
-  
-  let ivs={}, selLane=null, selStart=null, curId=null;
-  const $=id=>document.getElementById(id);
-  function qsa(s){return Array.from(document.querySelectorAll(s));}
-  function qs(s){return document.querySelector(s);}
-  function fmt(v){return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`;}
-  
+  const LANES = 12, SH = 11, EH = 22;
+  const slots = []; for(let h=SH; h<=EH; h++) { slots.push({ label: `${h}:00`, key: h }); if(h<EH) slots.push({ label: `${h}:30`, key: h+0.5 }); }
+  const LANE_GROUPS = [0,0,0,1,1,1,2,2,2,2,2,2];
+  const GRP_CLASS = ['grp-navy','grp-sage','grp-rust'];
+  const ROW_CLASS = ['row-navy','row-sage','row-rust'];
+
+  let ivs = {};
+  let selLane = null, selStart = null, curId = null;
+  const $ = id => document.getElementById(id);
+  const qs = (s, p=document) => p.querySelector(s);
+  const qsa = (s, p=document) => Array.from(p.querySelectorAll(s));
+
+  function parseJwt(t){ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
+  function handleCredentialResponse(r){ let d=parseJwt(r.credential); if(ALLOWED.includes(d.email)){ localStorage.setItem("ue",d.email); location.reload(); } else alert("Доступ запрещён"); }
+  window.onload = ()=>{ if(localStorage.getItem("ue") && ALLOWED.includes(localStorage.getItem("ue"))){ $("login").style.display="none"; $("content").style.display="block"; init(); } };
+
+  function init(){
+    let today = new Date().toISOString().split('T')[0];
+    $("dateInput").min = today; $("dateInput").value = today;
+    buildDesktopTable(); buildMobileTable();
+    $("tableDesktop").addEventListener("click", onDesktopClick);
+    $("tableDesktop").addEventListener("dblclick", onDesktopDbl);
+    $("tableMobile").addEventListener("click", onMobileClick);
+    $("tableMobile").addEventListener("dblclick", onMobileDbl);
+    $("dateInput").addEventListener("change", ()=>{ resetSel(); loadSliders(); });
+    renderCards(); loadSliders();
+  }
   function buildDesktopTable(){
-    const headRow=$('dtHead').rows[0];
-    slots.forEach((sl,si)=>{let th=document.createElement('th');th.className='th-time';th.dataset.si=si;th.dataset.key=sl.key;th.textContent=sl.label;headRow.appendChild(th);});
-    const body=$('dtBody');
-    for(let lane=0;lane<LANES;lane++){
-      let tr=document.createElement('tr');tr.className=ROW_CLASS[LANE_GROUPS[lane]];tr.dataset.lane=lane;
-      let lhdr=document.createElement('td');lhdr.className=`lane-hdr ${GRP_CLASS[LANE_GROUPS[lane]]}`;lhdr.textContent=`№ ${lane+1}`;tr.appendChild(lhdr);
-      slots.forEach((sl,si)=>{let td=document.createElement('td');td.className='slot'+(si%2===1?' shade':'');td.dataset.lane=lane;td.dataset.time=sl.key;td.dataset.si=si;tr.appendChild(td);});
+    let headRow = qs("tr", $("dtHead"));
+    slots.forEach((sl,i)=>{ let th=document.createElement("th"); th.className="th-time"; th.dataset.si=i; th.dataset.key=sl.key; th.textContent=sl.label; headRow.appendChild(th); });
+    let body=$("dtBody");
+    for(let lane=0; lane<LANES; lane++){
+      let tr=document.createElement("tr"); tr.className=ROW_CLASS[LANE_GROUPS[lane]]; tr.dataset.lane=lane;
+      let lhdr=document.createElement("td"); lhdr.className=`lane-hdr ${GRP_CLASS[LANE_GROUPS[lane]]}`; lhdr.textContent=`№ ${lane+1}`; tr.appendChild(lhdr);
+      slots.forEach((sl,si)=>{ let td=document.createElement("td"); td.className="slot"+(si%2===1?" shade":""); td.dataset.lane=lane; td.dataset.time=sl.key; td.dataset.si=si; tr.appendChild(td); });
       body.appendChild(tr);
     }
   }
   function buildMobileTable(){
-    const mtBody=$('mtBody'); const mtHead=$('mtHeadRow');
-    for(let l=0;l<LANES;l++){let th=document.createElement('th');th.textContent=l+1;th.className=LANE_GROUPS[l]===0?'hdr-navy':LANE_GROUPS[l]===1?'hdr-sage':'hdr-rust';mtHead.appendChild(th);}
-    let thTime=document.createElement('th');thTime.className='tcol no-click';thTime.textContent='⏱️';mtHead.appendChild(thTime);
-    slots.forEach(sl=>{
-      let tr=document.createElement('tr');
-      for(let lane=0;lane<LANES;lane++){let td=document.createElement('td');td.className='slot';td.dataset.lane=lane;td.dataset.time=sl.key;tr.appendChild(td);}
-      let th=document.createElement('th');th.className='tcol';th.textContent=sl.label;tr.appendChild(th);
-      mtBody.appendChild(tr);
+    let mtHead=$("mtHeadRow");
+    for(let i=0;i<LANES;i++){ let th=document.createElement("th"); let grp=LANE_GROUPS[i]; th.className=grp===0?"hdr-navy":grp===1?"hdr-sage":"hdr-rust"; th.textContent=i+1; mtHead.appendChild(th); }
+    let thTime=document.createElement("th"); thTime.className="tcol no-click"; thTime.textContent="ВРЕМЯ"; mtHead.appendChild(thTime);
+    let mtBody=$("mtBody");
+    slots.forEach(sl=>{ let tr=document.createElement("tr");
+      for(let lane=0; lane<LANES; lane++){ let td=document.createElement("td"); td.className="slot"; td.dataset.lane=lane; td.dataset.time=sl.key; tr.appendChild(td); }
+      let th=document.createElement("th"); th.className="tcol"; th.textContent=sl.label; tr.appendChild(th); mtBody.appendChild(tr);
     });
   }
-  
-  function renderCards(){
-    qsa('#tableDesktop td.slot.selected, #tableDesktop td.slot.sel-left, #tableDesktop td.slot.sel-right').forEach(c=>c.classList.remove('selected','sel-left','sel-right'));
-    qsa('#tableMobile td.slot.selected, #tableMobile td.slot.sel-top, #tableMobile td.slot.sel-bot').forEach(c=>c.classList.remove('selected','sel-top','sel-bot'));
-    for(let k in ivs){let lane=+k;(ivs[lane]||[]).forEach(iv=>{let s=Math.min(iv.start,iv.end),e=Math.max(iv.start,iv.end);
-      qsa(`#tableDesktop td.slot[data-lane="${lane}"]`).forEach(td=>{let t=+td.dataset.time;if(t>=s&&t<=e)td.classList.add('selected');});
-      let left=qs(`#tableDesktop td.slot[data-lane="${lane}"][data-time="${s}"]`),right=qs(`#tableDesktop td.slot[data-lane="${lane}"][data-time="${e}"]`);
-      if(left)left.classList.add('sel-left'); if(right)right.classList.add('sel-right');
-      qsa(`#tableMobile td.slot[data-lane="${lane}"]`).forEach(td=>{let t=parseFloat(td.dataset.time);if(t>=s&&t<=e)td.classList.add('selected');});
-      let top=qs(`#tableMobile td.slot[data-lane="${lane}"][data-time="${s}"]`),bot=qs(`#tableMobile td.slot[data-lane="${lane}"][data-time="${e}"]`);
-      if(top)top.classList.add('sel-top'); if(bot&&s!==e)bot.classList.add('sel-bot');
-    });}
-    const dd=$('dateInput').value.split('-').reverse().join('.');
-    $('cardsContainer').innerHTML='';
-    for(let k in ivs){let lane=+k;(ivs[lane]||[]).forEach((iv,idx)=>{let s=Math.min(iv.start,iv.end),e=Math.max(iv.start,iv.end);
-      let div=document.createElement('div');div.className='bcard';div.innerHTML=`<div><div class="bcard-title">Стол №${lane+1}</div><div class="bcard-sub">${dd} · ${fmt(s)} – ${fmt(e)}</div></div>`;
-      let rm=document.createElement('button');rm.className='bcard-rm';rm.textContent='✕';rm.onclick=()=>{ivs[lane].splice(idx,1);renderCards();};
-      div.appendChild(rm);$('cardsContainer').appendChild(div);
-    });
-  }
-  
+  function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
   function onDesktopClick(e){
     let el=e.target;
-    if(el.classList.contains('slot')&&selStart===null){selLane=+el.dataset.lane;clearHighlights();qsa(`#tableDesktop td.slot[data-lane="${selLane}"]`).forEach(c=>c.classList.add('vline'));let hdr=$('dtBody').rows[selLane]?.cells[0];if(hdr)hdr.classList.add('hl-row');return;}
-    if(el.classList.contains('th-time')&&selLane!==null&&selStart===null){selStart=+el.dataset.key;clearHighlights();let anchor=qs(`#tableDesktop td.slot[data-lane="${selLane}"][data-time="${selStart}"]`);if(anchor)anchor.classList.add('anchored');let hdr=$('dtBody').rows[selLane]?.cells[0];if(hdr)hdr.classList.add('hl-row');return;}
-    if(el.classList.contains('th-time')&&selLane!==null&&selStart!==null){let t=+el.dataset.key;if(t<=selStart){alert("Конец должен быть позже");return;}if(!ivs[selLane])ivs[selLane]=[];ivs[selLane].push({start:selStart,end:t});selLane=selStart=null;clearHighlights();renderCards();}
+    if(el.classList.contains("slot") && selStart===null){ selLane=+el.dataset.lane; clearDtHighlights(); let lhdr=$("dtBody").rows[selLane]?.cells[0]; if(lhdr)lhdr.classList.add("hl-row"); qsa(`#tableDesktop td.slot[data-lane="${selLane}"]`).forEach(c=>c.classList.add("vline")); return; }
+    if(el.classList.contains("th-time") && selLane!==null && selStart===null){ selStart=+el.dataset.key; clearDtHighlights(); let lhdr=$("dtBody").rows[selLane]?.cells[0]; if(lhdr)lhdr.classList.add("hl-row"); let anc=qs(`#tableDesktop td.slot[data-lane="${selLane}"][data-time="${selStart}"]`); if(anc)anc.classList.add("anchored"); return; }
+    if(el.classList.contains("th-time") && selLane!==null && selStart!==null){ let t=+el.dataset.key; if(t<=selStart){ alert("Конец должен быть позже начала"); return; } if(!ivs[selLane])ivs[selLane]=[]; ivs[selLane].push({start:selStart,end:t}); selLane=selStart=null; clearDtHighlights(); renderCards(); }
   }
+  function onDesktopDbl(e){ let el=e.target; if(!el.classList.contains("slot"))return; let lane=+el.dataset.lane, time=+el.dataset.time; if(ivs[lane]){ let idx=ivs[lane].findIndex(iv=>time>=Math.min(iv.start,iv.end) && time<=Math.max(iv.start,iv.end)); if(idx!==-1){ ivs[lane].splice(idx,1); renderCards(); } } }
   function onMobileClick(e){
     let el=e.target;
-    if(el.classList.contains('slot')&&selStart===null){selLane=+el.dataset.lane;qsa('#tableMobile td.slot.vline').forEach(c=>c.classList.remove('vline'));qsa('#tableMobile thead th.hl').forEach(c=>c.classList.remove('hl'));qsa(`#tableMobile td.slot[data-lane="${selLane}"]`).forEach(c=>c.classList.add('vline'));let th=$('mtHeadRow')?.cells[selLane];if(th)th.classList.add('hl');return;}
-    if(el.classList.contains('tcol')&&selLane!==null&&selStart===null){let raw=el.textContent;let t=raw.includes(':30')?parseFloat(raw.replace(':30','.5')):parseFloat(raw.replace(':00','.0'));selStart=t;qs(`#tableMobile td.slot[data-lane="${selLane}"][data-time="${selStart}"]`)?.classList.add('anchored');return;}
-    if(el.classList.contains('tcol')&&selLane!==null&&selStart!==null){let raw=el.textContent;let t=raw.includes(':30')?parseFloat(raw.replace(':30','.5')):parseFloat(raw.replace(':00','.0'));if(t<=selStart){alert("Конец больше начала");return;}if(!ivs[selLane])ivs[selLane]=[];ivs[selLane].push({start:selStart,end:t});selLane=selStart=null;qsa('#tableMobile td.slot.vline, #tableMobile thead th.hl, #tableMobile td.slot.anchored').forEach(c=>c.classList.remove('vline','hl','anchored'));renderCards();}
+    if(el.classList.contains("slot") && selStart===null){ selLane=+el.dataset.lane; qsa("#tableMobile td.slot.vline").forEach(c=>c.classList.remove("vline")); qsa("#tableMobile thead th.hl").forEach(c=>c.classList.remove("hl")); $("mtHeadRow")?.cells[selLane]?.classList.add("hl"); qsa(`#tableMobile td.slot[data-lane="${selLane}"]`).forEach(c=>c.classList.add("vline")); return; }
+    if(el.classList.contains("tcol") && selLane!==null && selStart===null){ let txt=el.textContent; selStart=parseFloat(txt.includes(":30")?txt.replace(":30",".5"):txt.replace(":00",".0")); qsa("#tableMobile td.slot.anchored").forEach(c=>c.classList.remove("anchored")); let anc=qs(`#tableMobile td.slot[data-lane="${selLane}"][data-time="${selStart}"]`); if(anc)anc.classList.add("anchored"); return; }
+    if(el.classList.contains("tcol") && selLane!==null && selStart!==null){ let txt=el.textContent; let t=parseFloat(txt.includes(":30")?txt.replace(":30",".5"):txt.replace(":00",".0")); if(t<=selStart){ alert("Конец должен быть позже"); return; } if(!ivs[selLane])ivs[selLane]=[]; ivs[selLane].push({start:selStart,end:t}); selLane=selStart=null; qsa("#tableMobile td.slot.vline").forEach(c=>c.classList.remove("vline")); qsa("#tableMobile thead th.hl").forEach(c=>c.classList.remove("hl")); renderCards(); }
   }
-  function clearHighlights(){qsa('#tableDesktop td.slot.vline, #tableDesktop td.lane-hdr.hl-row, #tableDesktop thead th.th-time.hl, #tableDesktop td.slot.anchored').forEach(c=>c.classList.remove('vline','hl-row','hl','anchored'));}
-  function resetSel(){selLane=selStart=null;ivs={};clearHighlights();qsa('#tableMobile td.slot.vline, #tableMobile thead th.hl, #tableMobile td.slot.anchored').forEach(c=>c.classList.remove('vline','hl','anchored'));renderCards();}
-  function openBookModal(){if(!Object.values(ivs).some(a=>a.length))return alert("Выберите интервал на сетке");$('bookModal').classList.add('open');}
-  function closeBookModal(){$('bookModal').classList.remove('open');}
-  async function submitForm(){
-    let name=$('nameInput').value.trim(),phone=$('phoneInput').value.trim(),comment=$('commentInput').value.trim(),date=$('dateInput').value;
-    if(!name||!phone)return alert("Заполните имя и телефон");
-    let bookings=[];
-    for(let k in ivs)(ivs[k]||[]).forEach(iv=>bookings.push({date,tableNumber:+k+1,start:iv.start,end:iv.end,name,phone,comment}));
-    if(!bookings.length)return;
-    showLoad();
-    try{await Promise.all(bookings.map(b=>fetch(GAS,{method:'POST',mode:'no-cors',body:JSON.stringify({bookings:[b]})})));closeBookModal();$('nameInput').value='';$('phoneInput').value='';$('commentInput').value='';resetSel();await loadSliders();}catch(e){alert("Ошибка")}finally{hideLoad();}
+  function onMobileDbl(e){ if(!e.target.classList.contains("slot"))return; let lane=+e.target.dataset.lane, time=parseFloat(e.target.dataset.time); if(ivs[lane]){ let idx=ivs[lane].findIndex(iv=>time>=Math.min(iv.start,iv.end) && time<=Math.max(iv.start,iv.end)); if(idx!==-1){ ivs[lane].splice(idx,1); renderCards(); } } }
+  function clearDtHighlights(){ qsa("#tableDesktop td.slot.vline").forEach(c=>c.classList.remove("vline")); qsa("#tableDesktop td.slot.anchored").forEach(c=>c.classList.remove("anchored")); qsa("#tableDesktop td.lane-hdr.hl-row").forEach(c=>c.classList.remove("hl-row")); qsa("#tableDesktop thead th.th-time.hl").forEach(c=>c.classList.remove("hl")); }
+  function renderCards(){
+    qsa("#tableDesktop td.slot.selected, #tableDesktop td.slot.sel-left, #tableDesktop td.slot.sel-right").forEach(c=>c.classList.remove("selected","sel-left","sel-right"));
+    qsa("#tableMobile td.slot.selected, #tableMobile td.slot.sel-top, #tableMobile td.slot.sel-bot").forEach(c=>c.classList.remove("selected","sel-top","sel-bot"));
+    for(let k in ivs){ let lane=+k; (ivs[lane]||[]).forEach(iv=>{ let s=Math.min(iv.start,iv.end), e=Math.max(iv.start,iv.end);
+      qsa(`#tableDesktop td.slot[data-lane="${lane}"]`).forEach(td=>{ let t=+td.dataset.time; if(t>=s && t<=e) td.classList.add("selected"); });
+      let lc=qs(`#tableDesktop td.slot[data-lane="${lane}"][data-time="${s}"]`), rc=qs(`#tableDesktop td.slot[data-lane="${lane}"][data-time="${e}"]`); if(lc)lc.classList.add("sel-left"); if(rc)rc.classList.add("sel-right");
+      qsa(`#tableMobile td.slot[data-lane="${lane}"]`).forEach(td=>{ let t=parseFloat(td.dataset.time); if(t>=s && t<=e) td.classList.add("selected"); });
+      let topCell=qs(`#tableMobile td.slot[data-lane="${lane}"][data-time="${s}"]`); if(topCell)topCell.classList.add("sel-top"); if(s!==e){ let bot=qs(`#tableMobile td.slot[data-lane="${lane}"][data-time="${e}"]`); if(bot)bot.classList.add("sel-bot"); }
+    }); }
+    $("cardsContainer").innerHTML=""; let dd=$("dateInput").value.split("-").reverse().join(".");
+    for(let k in ivs){(ivs[k]||[]).forEach((iv,idx)=>{ let s=Math.min(iv.start,iv.end), e=Math.max(iv.start,iv.end); let div=document.createElement("div"); div.className="bcard"; div.innerHTML=`<div class="bcard-info"><div class="bcard-title">Стол №${+k+1}</div><div class="bcard-sub">${dd} · ${fmt(s)} – ${fmt(e)}</div></div>`; let rm=document.createElement("button"); rm.className="bcard-rm"; rm.innerHTML="✕"; rm.onclick=ev=>{ ev.stopPropagation(); ivs[k].splice(idx,1); renderCards(); }; div.appendChild(rm); $("cardsContainer").appendChild(div); }); }
   }
-  async function loadSliders(){showLoad();$('slidersLayer').innerHTML='';try{let res=await fetch(GAS+'?action=get&date='+$('dateInput').value);let data=await res.json();if(!data.bookings?.length)return;const isDesktop=window.innerWidth>=800;if(isDesktop)renderSlidersDesktop(data.bookings);else renderSlidersMobile(data.bookings);}catch(e){}finally{hideLoad();}}
-  function renderSlidersDesktop(bookings){let rows=Array.from($('dtBody').querySelectorAll('tr'));let colMap={};slots.forEach((sl,i)=>colMap[sl.key]=i+1);bookings.forEach(b=>{if(b.date!==$('dateInput').value)return;let lane=b.table-1,start=+b.start,end=+b.end,si=colMap[start],ei=colMap[end];if(si==null||ei==null)return;let row=rows[lane];if(!row)return;let sc=row.cells[si],ec=row.cells[ei];if(!sc||!ec)return;let left=sc.offsetLeft+1,top=row.offsetTop+1,width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2,height=row.offsetHeight-2;let div=makeSliderDiv(b,start,end);div.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;$('slidersLayer').appendChild(div);});}
-  function renderSlidersMobile(bookings){let rows=Array.from($('mtBody').querySelectorAll('tr'));let rowByKey={};slots.forEach((sl,i)=>rowByKey[sl.key]=rows[i]);bookings.forEach(b=>{if(b.date!==$('dateInput').value)return;let lane=b.table-1,start=+b.start,end=+b.end,startRow=rowByKey[start],endRow=rowByKey[end];if(!startRow||!endRow)return;let cell=startRow.cells[lane];if(!cell)return;let left=cell.offsetLeft+1,top=startRow.offsetTop+1,width=cell.offsetWidth-2,height=(endRow.offsetTop+endRow.offsetHeight)-startRow.offsetTop-2;let div=makeSliderDiv(b,start,end);div.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;$('slidersLayer').appendChild(div);});}
-  function makeSliderDiv(b,st,et){let el=document.createElement('div');el.className=`slider ${b.confirmed==='Да'?'confirmed':b.confirmed==='Нет'?'rejected':'pending'}`;el.innerHTML=`<div class="sl-name">${b.name||'—'}</div><div class="sl-time">${fmt(st)} – ${fmt(et)}</div>`;el.addEventListener('click',e=>{e.stopPropagation();showInfoModal(b);});return el;}
-  function showInfoModal(b){$('i-table').textContent='№ '+b.table;$('i-date').textContent=b.date.split('-').reverse().join('.');$('i-time').textContent=`${fmt(+b.start)} – ${fmt(+b.end)}`;$('i-name').textContent=b.name;$('i-phone').textContent=b.phone;$('i-comment').textContent=b.comment||'—';let st=$('i-status');if(b.confirmed==='Да')st.innerHTML='<span style="background:#d4edda;padding:2px 12px;border-radius:40px;">✓ Подтверждено</span>';else if(b.confirmed==='Нет')st.innerHTML='<span style="background:#f8d7da;padding:2px 12px;border-radius:40px;">✕ Отменено</span>';else st.innerHTML='<span style="background:#fff3cd;padding:2px 12px;border-radius:40px;">⏳ Ожидает</span>';curId=b.id;$('infoModal').classList.add('open');}
-  function closeInfoModal(){$('infoModal').classList.remove('open');curId=null;}
-  async function confirmBooking(yes){if(!curId)return;showLoad();await fetch(GAS,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'confirm',id:curId,confirmed:yes})});closeInfoModal();await loadSliders();hideLoad();}
-  async function deleteBooking(){if(!curId||!confirm("Удалить бронь?"))return;showLoad();await fetch(GAS,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'delete',id:curId})});closeInfoModal();await loadSliders();hideLoad();}
-  function showLoad(){$('loader').style.display='flex';} function hideLoad(){$('loader').style.display='none';}
-  function openImg(){$('imgPopup').classList.add('open');} function closeImg(){$('imgPopup').classList.remove('open');}
-  function init(){let today=new Date().toISOString().split('T')[0];$('dateInput').min=$('dateInput').value=today;buildDesktopTable();buildMobileTable();$('tableDesktop').addEventListener('click',onDesktopClick);$('tableMobile').addEventListener('click',onMobileClick);$('dateInput').addEventListener('change',()=>{resetSel();loadSliders();});renderCards();loadSliders();}
-  ['bookModal','infoModal','imgPopup'].forEach(id=>{$(id)?.addEventListener('click',e=>{if(e.target===$(id))$(id).classList.remove('open');});});
-  let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if($('content').style.display==='block')loadSliders();},150);});
+  function resetSel(){ selLane=selStart=null; Object.keys(ivs).forEach(k=>ivs[k]=[]); clearDtHighlights(); qsa("#tableMobile td.slot.vline").forEach(c=>c.classList.remove("vline")); qsa("#tableMobile thead th.hl").forEach(c=>c.classList.remove("hl")); renderCards(); }
+  function openBookModal(){ if(!Object.values(ivs).some(a=>a.length)) return alert("Выберите интервалы на сетке"); $("bookModal").classList.add("open"); }
+  function closeBookModal(){ $("bookModal").classList.remove("open"); }
+  async function submitForm(){ let name=$("nameInput").value.trim(), phone=$("phoneInput").value.trim(), comment=$("commentInput").value.trim(), date=$("dateInput").value; if(!name||!phone) return alert("Введите имя и телефон"); let bookings=[]; for(let k in ivs) (ivs[k]||[]).forEach(iv=>bookings.push({date,tableNumber:+k+1,start:iv.start,end:iv.end,name,phone,comment})); if(!bookings.length) return; showLoad(); try{ await Promise.all(bookings.map(b=>fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({bookings:[b]})}))); closeBookModal(); $("nameInput").value=$("phoneInput").value=$("commentInput").value=""; resetSel(); await loadSliders(); } catch(e){ alert("Ошибка"); } finally{ hideLoad(); } }
+  function showInfoModal(b){ $("i-table").textContent="№ "+b.table; $("i-date").textContent=b.date.split("-").reverse().join("."); $("i-time").textContent=`${fmt(+b.start)} – ${fmt(+b.end)}`; $("i-name").textContent=b.name; $("i-phone").textContent=b.phone; $("i-comment").textContent=b.comment||"—"; let s=$("i-status"); if(b.confirmed==="Да") s.innerHTML='<span style="background:#e0f7e8; padding:4px 12px; border-radius:40px;">✓ Подтверждено</span>'; else if(b.confirmed==="Нет") s.innerHTML='<span style="background:#ffe5e2; padding:4px 12px; border-radius:40px;">✕ Не состоялось</span>'; else s.innerHTML='<span style="background:#fff1df; padding:4px 12px; border-radius:40px;">⏳ Ожидает</span>'; curId=b.id; $("infoModal").classList.add("open"); }
+  function closeInfoModal(){ $("infoModal").classList.remove("open"); curId=null; }
+  async function confirmBooking(yes){ if(!curId)return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:curId,confirmed:yes})}); closeInfoModal(); await loadSliders(); } catch(e){} finally{ hideLoad(); } }
+  async function deleteBooking(){ if(!curId||!confirm("Удалить бронь?"))return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:curId})}); closeInfoModal(); await loadSliders(); } catch(e){} finally{ hideLoad(); } }
+  function isDesktop(){ return window.innerWidth>800; }
+  async function loadSliders(){ showLoad(); $("slidersLayer").innerHTML=""; try{ let res=await fetch(GAS+"?action=get&date="+$("dateInput").value); let data=await res.json(); if(!data.bookings?.length) return; if(isDesktop()) renderSlidersDesktop(data.bookings); else renderSlidersMobile(data.bookings); } catch(e){} finally{ hideLoad(); } }
+  function renderSlidersDesktop(bookings){ let rows=Array.from($("dtBody").querySelectorAll("tr")); let colByKey={}; slots.forEach((sl,i)=>{ colByKey[sl.key]=i+1; }); bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return; let laneIdx=b.table-1, start=+b.start, end=+b.end, si=colByKey[start], ei=colByKey[end]; if(si==null||ei==null)return; let row=rows[laneIdx]; if(!row)return; let sc=row.cells[si], ec=row.cells[ei]; if(!sc||!ec)return; let left=sc.offsetLeft+1, top=row.offsetTop+1, width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2, height=row.offsetHeight-2; let slider=makeSlider(b,start,end); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; $("slidersLayer").appendChild(slider); }); }
+  function renderSlidersMobile(bookings){ let mtRows=Array.from($("mtBody").querySelectorAll("tr")); let rowByKey={}; slots.forEach((sl,i)=>{ rowByKey[sl.key]=mtRows[i]; }); bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return; let laneIdx=b.table-1, start=+b.start, end=+b.end, startRow=rowByKey[start], endRow=rowByKey[end]; if(!startRow||!endRow)return; let cell=startRow.cells[laneIdx]; if(!cell)return; let left=cell.offsetLeft+1, top=startRow.offsetTop+1, width=cell.offsetWidth-2, height=(endRow.offsetTop+endRow.offsetHeight)-startRow.offsetTop-2; let slider=makeSlider(b,start,end); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; $("slidersLayer").appendChild(slider); }); }
+  function makeSlider(b,start,end){ let el=document.createElement("div"); el.className="slider "+(b.confirmed==="Да"?"confirmed":b.confirmed==="Нет"?"rejected":"pending"); let nd=document.createElement("div"); nd.className="sl-name"; nd.textContent=b.name||"—"; let td=document.createElement("div"); td.className="sl-time"; td.textContent=`${fmt(start)} – ${fmt(end)}`; el.append(nd,td); el.addEventListener("click",e=>{ e.stopPropagation(); showInfoModal(b); }); return el; }
+  function showLoad(){ $("loader").style.display="flex"; } function hideLoad(){ $("loader").style.display="none"; }
+  function openImg(){ $("imgPopup").classList.add("open"); } function closeImg(){ $("imgPopup").classList.remove("open"); }
+  ["bookModal","infoModal"].forEach(id=>{ $(id).addEventListener("click",e=>{ if(e.target===$(id)){ $(id).classList.remove("open"); if(id==="infoModal")curId=null; } }); });
+  $("imgPopup").addEventListener("click",e=>{ if(e.target===$("imgPopup")) closeImg(); });
+  let lastDesktop=isDesktop(); window.addEventListener("resize",()=>{ if(isDesktop()!==lastDesktop){ lastDesktop=isDesktop(); loadSliders(); } });
 </script>
 </body>
 </html>

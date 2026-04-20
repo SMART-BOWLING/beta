@@ -8,94 +8,85 @@
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png"/>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    /* ─── TOKENS ─── */
     :root {
-      --bg:        #f5f5f7;
-      --surface:   #ffffff;
-      --surface2:  #f5f5f7;
-      --border:    rgba(0,0,0,.08);
-      --border2:   rgba(0,0,0,.14);
-      --ink:       #1d1d1f;
-      --ink2:      #3d3d3f;
-      --ink3:      #6e6e73;
-      --ink4:      #aeaeb2;
-      --blue:      #0071e3;
-      --blue-h:    #0077ed;
-      --blue-dim:  rgba(0,113,227,.08);
+      --bg:       #f5f5f7;
+      --surface:  #ffffff;
+      --surface2: #f5f5f7;
+      --border:   rgba(0,0,0,.08);
+      --border2:  rgba(0,0,0,.14);
+      --ink:      #1d1d1f;
+      --ink2:     #3d3d3f;
+      --ink3:     #6e6e73;
+      --ink4:     #aeaeb2;
+      --blue:     #0071e3;
+      --blue-h:   #0077ed;
+      --blue-dim: rgba(0,113,227,.08);
+      --green:    #34c759;
+      --red:      #ff3b30;
+      --amber:    #ff9f0a;
+      --r:  12px;
+      --r2: 18px;
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
 
 ```
-  --navy-bg:   #e8eef8;
-  --sage-bg:   #e6f2ec;
-  --rust-bg:   #fceee8;
-
-  --green:     #34c759;
-  --red:       #ff3b30;
-  --amber:     #ff9f0a;
-
-  --r:  12px;
-  --r2: 18px;
-  --cell: 44px;
-  --time-w: 52px;
-
-  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+  /* Desktop cell sizes */
+  --cell-h: 42px;   /* row height  = table row */
+  --cell-w: 48px;   /* col width   = time slot */
+  --lane-w: 72px;   /* left column = table label */
 }
 
-/* ─── RESET ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--font); background: var(--bg); color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
-/* ─── LOGIN ─── */
+/* ════ LOGIN ════ */
 #login {
   position: fixed; inset: 0; background: var(--bg);
   display: flex; flex-direction: column; align-items: center;
   justify-content: center; gap: 20px; z-index: 9999; padding: 32px;
 }
 .login-glyph { font-size: 52px; line-height: 1; }
-.login-title { font-size: 28px; font-weight: 700; letter-spacing: -.5px; color: var(--ink); }
+.login-title { font-size: 28px; font-weight: 700; letter-spacing: -.5px; }
 .login-sub   { font-size: 15px; color: var(--ink3); margin-top: -8px; }
 .login-sep   { width: 1px; height: 28px; background: var(--border2); }
 
-/* ─── APP SHELL ─── */
+/* ════ APP ════ */
 #content { display: none; min-height: 100vh; }
 
-/* ─── NAVBAR ─── */
+/* ════ NAVBAR ════ */
 .nav {
   position: sticky; top: 0; z-index: 100;
   background: rgba(255,255,255,.82);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: .5px solid var(--border2);
-  height: 52px;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 20px;
+  height: 52px; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 20px;
 }
-.nav-title { font-size: 17px; font-weight: 600; letter-spacing: -.2px; color: var(--ink); }
+.nav-title { font-size: 17px; font-weight: 600; letter-spacing: -.2px; }
 .nav-btn {
-  display: flex; align-items: center; gap: 5px;
+  display: flex; align-items: center; gap: 6px;
   background: var(--surface); border: .5px solid var(--border2);
   border-radius: 980px; padding: 6px 14px;
   font-family: var(--font); font-size: 13px; font-weight: 500; color: var(--blue);
-  cursor: pointer; transition: background .15s;
+  cursor: pointer; transition: background .15s; white-space: nowrap;
 }
 .nav-btn:hover { background: var(--blue-dim); }
 
-/* ─── PAGE ─── */
-.page { max-width: 960px; margin: 0 auto; padding: 20px 16px 80px; display: flex; flex-direction: column; gap: 16px; }
+/* ════ PAGE ════ */
+.page { max-width: 1100px; margin: 0 auto; padding: 20px 16px 80px; display: flex; flex-direction: column; gap: 16px; }
 
-/* ─── CONTROLS ─── */
+/* ════ CONTROLS ════ */
 .ctrl {
   display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
   background: var(--surface); border-radius: var(--r2);
   padding: 14px 16px;
   box-shadow: 0 1px 0 var(--border), 0 2px 8px rgba(0,0,0,.04);
 }
-
 .date-field {
   flex: 1; min-width: 160px; max-width: 220px;
   display: flex; align-items: center; gap: 10px;
   background: var(--surface2); border-radius: 10px;
-  padding: 0 14px; height: 40px;
-  border: .5px solid var(--border2);
+  padding: 0 14px; height: 40px; border: .5px solid var(--border2);
 }
 .date-field svg { flex-shrink: 0; color: var(--ink3); }
 #dateInput {
@@ -105,20 +96,18 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 }
 #dateInput:focus { outline: none; }
 #dateInput::-webkit-calendar-picker-indicator { cursor: pointer; opacity: .5; width: 16px; }
-
 .btn-book {
   height: 40px; padding: 0 20px;
   background: var(--blue); color: #fff; border: none; border-radius: 980px;
-  font-family: var(--font); font-size: 15px; font-weight: 600; letter-spacing: -.2px;
+  font-family: var(--font); font-size: 15px; font-weight: 600;
   cursor: pointer; transition: background .15s, transform .1s;
-  white-space: nowrap;
-  box-shadow: 0 1px 3px rgba(0,113,227,.3);
+  white-space: nowrap; box-shadow: 0 1px 3px rgba(0,113,227,.3);
 }
 .btn-book:hover  { background: var(--blue-h); }
 .btn-book:active { transform: scale(.97); }
 
-/* ─── STATUS PILLS ─── */
-.pills { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 2px; }
+/* ════ LEGEND ════ */
+.pills { display: flex; gap: 6px; flex-wrap: wrap; }
 .pill {
   display: flex; align-items: center; gap: 5px;
   font-size: 12px; font-weight: 500; color: var(--ink3);
@@ -133,126 +122,183 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 .dot-green { background: var(--green); }
 .dot-red   { background: var(--red); }
 
-/* ─── GRID CARD ─── */
+/* ════ GRID CARD ════ */
 .grid-card {
-  background: var(--surface);
-  border-radius: var(--r2);
+  background: var(--surface); border-radius: var(--r2);
   box-shadow: 0 1px 0 var(--border), 0 2px 12px rgba(0,0,0,.05);
   overflow: hidden;
 }
+/* position:relative is THE key — sliders anchor here */
+.grid-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; position: relative; }
 
-/* The scroll wrapper — sliders are INSIDE here so they scroll with content */
-.grid-scroll {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  /* Must be position:relative so absolute children anchor here */
-  position: relative;
-}
+/* ════════════════════════════════════════
+   DESKTOP TABLE  (столы = строки, время = столбцы)
+   Shown when viewport ≥ 700px
+════════════════════════════════════════ */
+#tableDesktop { display: table; }
+#tableMobile  { display: none; }
 
-/* ─── TABLE ─── */
-table {
+#tableDesktop {
   border-collapse: collapse;
   table-layout: fixed;
   width: 100%;
-  min-width: 660px;
+  min-width: 780px;
   user-select: none;
 }
 
-thead th {
-  height: 42px;
-  font-size: 13px; font-weight: 600; letter-spacing: -.1px;
-  border-bottom: .5px solid var(--border2);
-  border-right: .5px solid var(--border);
+/* Header row (time labels) */
+#tableDesktop thead th {
+  height: var(--cell-h);
+  font-size: 11px; font-weight: 600; letter-spacing: .2px; color: var(--ink4);
+  border-bottom: .5px solid var(--border2); border-right: .5px solid var(--border);
   text-align: center; vertical-align: middle;
-  position: sticky; top: 0; z-index: 2;
-  transition: background .15s, color .15s;
-}
-thead th:last-child { border-right: none; }
-
-.hdr-navy { color: #1d4f9f; background: var(--navy-bg); }
-.hdr-sage { color: #1a6640; background: var(--sage-bg); }
-.hdr-rust { color: #a83418; background: var(--rust-bg); }
-
-thead th.hl { background: #fff4e0 !important; color: var(--amber) !important; }
-
-th.tcol {
-  background: var(--surface2) !important;
-  color: var(--ink4);
-  font-size: 11px; font-weight: 600; letter-spacing: .3px;
-  border-left: .5px solid var(--border2); border-right: none;
-  min-width: var(--time-w); cursor: pointer;
+  background: var(--surface2);
   position: sticky; top: 0; z-index: 3;
+  white-space: nowrap;
+}
+#tableDesktop thead th:last-child { border-right: none; }
+
+/* First header cell = corner */
+#tableDesktop thead th.corner {
+  width: var(--lane-w); min-width: var(--lane-w);
+  background: var(--surface2);
+  font-size: 11px; color: var(--ink4);
+  border-right: .5px solid var(--border2);
+  position: sticky; top: 0; left: 0; z-index: 5;
+}
+
+/* Time header cells — clickable for start/end selection */
+#tableDesktop thead th.th-time {
+  cursor: pointer; width: var(--cell-w); min-width: var(--cell-w);
   transition: background .12s, color .12s;
 }
-th.tcol:hover { background: #fff4e0 !important; color: var(--amber) !important; }
-th.tcol.no-click { cursor: default; pointer-events: none; }
+#tableDesktop thead th.th-time:hover { background: #fff4e0; color: var(--amber); }
+#tableDesktop thead th.th-time.hl    { background: #fff4e0 !important; color: var(--amber) !important; }
 
-td {
-  height: var(--cell);
-  border-bottom: .5px solid var(--border);
-  border-right: .5px solid var(--border);
+/* Body rows */
+#tableDesktop tbody tr { height: var(--cell-h); }
+
+/* Row header = table number */
+#tableDesktop tbody td.lane-hdr {
+  width: var(--lane-w); min-width: var(--lane-w);
+  font-size: 13px; font-weight: 600;
+  border-bottom: .5px solid var(--border2); border-right: .5px solid var(--border2);
+  text-align: center; vertical-align: middle;
+  background: var(--surface2);
+  position: sticky; left: 0; z-index: 2;
+}
+/* Colour groups for row headers */
+.lane-hdr.grp-navy { color: #1d4f9f; background: #e8eef8 !important; }
+.lane-hdr.grp-sage { color: #1a6640; background: #e6f2ec !important; }
+.lane-hdr.grp-rust { color: #a83418; background: #fceee8 !important; }
+#tableDesktop tbody td.lane-hdr.hl-row { background: #fff4e0 !important; color: var(--amber) !important; }
+
+/* Slot cells */
+#tableDesktop tbody td.slot {
+  cursor: pointer;
+  border-bottom: .5px solid var(--border); border-right: .5px solid var(--border);
   vertical-align: middle; text-align: center;
   font-size: 11px; position: relative;
   transition: background .1s;
 }
-td:last-child { border-right: none; }
-td.slot { cursor: pointer; }
+#tableDesktop tbody td:last-child { border-right: none; }
 
-/* subtle half-hour dash */
-tr:nth-child(even) td { border-bottom-style: dashed; }
+/* Alternating time column shade (every 2 = one hour) */
+#tableDesktop tbody td.slot.shade { background: rgba(0,0,0,.018); }
 
-td.slot[data-lane="0"],td.slot[data-lane="1"],td.slot[data-lane="2"] { background: #f0f5fc; }
-td.slot[data-lane="3"],td.slot[data-lane="4"],td.slot[data-lane="5"] { background: #f0f8f3; }
-td.slot[data-lane="6"],td.slot[data-lane="7"],td.slot[data-lane="8"],
-td.slot[data-lane="9"],td.slot[data-lane="10"],td.slot[data-lane="11"] { background: #fdf3ef; }
+/* Group row background */
+#tableDesktop tbody tr.row-navy td.slot { background: #f4f7fd; }
+#tableDesktop tbody tr.row-sage td.slot { background: #f2f9f5; }
+#tableDesktop tbody tr.row-rust td.slot { background: #fdf4f1; }
 
-td.slot:hover    { background: #fff8ec !important; }
-td.slot.vline    { background: #fffaea !important; }
-td.slot.selected { background: #fff3c4 !important; border-left: 1.5px solid var(--amber); border-right: 1.5px solid var(--amber); }
-td.slot.sel-top  { border-top: 1.5px solid var(--amber); border-radius: 4px 4px 0 0; }
-td.slot.sel-bot  { border-bottom: 1.5px solid var(--amber) !important; border-radius: 0 0 4px 4px; }
-td.slot.anchored { background: #fff3c4 !important; outline: 2px solid var(--amber); outline-offset: -2px; border-radius: 4px; }
+#tableDesktop tbody td.slot:hover { background: #fff8ec !important; }
 
-/* ─── SLIDERS ─────────────────────────────────────────────
-   KEY FIX: position:absolute inside .grid-scroll which is
-   position:relative. Left/top come from cell.offsetLeft and
-   row.offsetTop — these never depend on viewport scroll.
-──────────────────────────────────────────────────────────── */
-#slidersLayer {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  z-index: 4;
+/* Selected range: horizontal highlight */
+#tableDesktop tbody td.slot.selected {
+  background: #fff3c4 !important;
+  border-top: 1.5px solid var(--amber); border-bottom: 1.5px solid var(--amber);
 }
+#tableDesktop tbody td.slot.sel-left  { border-left:  1.5px solid var(--amber); border-radius: 4px 0 0 4px; }
+#tableDesktop tbody td.slot.sel-right { border-right: 1.5px solid var(--amber) !important; border-radius: 0 4px 4px 0; }
+#tableDesktop tbody td.slot.anchored  { background: #fff3c4 !important; outline: 2px solid var(--amber); outline-offset: -2px; border-radius: 4px; }
+#tableDesktop tbody td.slot.vline     { background: #fffaea !important; }
 
+/* ════════════════════════════════════════
+   MOBILE TABLE  (время = строки, столы = столбцы)
+   Shown when viewport < 700px
+════════════════════════════════════════ */
+#tableMobile {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  min-width: 0;
+  user-select: none;
+}
+#tableMobile thead th {
+  height: 38px; font-size: 12px; font-weight: 600;
+  border-bottom: .5px solid var(--border2); border-right: .5px solid var(--border);
+  text-align: center; vertical-align: middle;
+  position: sticky; top: 0; z-index: 3;
+}
+#tableMobile thead th:last-child { border-right: none; }
+#tableMobile thead th.hdr-navy { color: #1d4f9f; background: #e8eef8; }
+#tableMobile thead th.hdr-sage { color: #1a6640; background: #e6f2ec; }
+#tableMobile thead th.hdr-rust { color: #a83418; background: #fceee8; }
+#tableMobile thead th.hl       { background: #fff4e0 !important; color: var(--amber) !important; }
+#tableMobile th.tcol {
+  background: var(--surface2) !important; color: var(--ink4);
+  font-size: 10px; font-weight: 600; letter-spacing: .3px;
+  border-left: .5px solid var(--border2); border-right: none;
+  min-width: 42px; cursor: pointer;
+  position: sticky; top: 0; z-index: 4;
+  transition: background .12s, color .12s;
+}
+#tableMobile th.tcol:hover    { background: #fff4e0 !important; color: var(--amber) !important; }
+#tableMobile th.tcol.no-click { cursor: default; pointer-events: none; }
+#tableMobile td {
+  height: 36px; border-bottom: .5px solid var(--border); border-right: .5px solid var(--border);
+  vertical-align: middle; text-align: center; font-size: 11px; position: relative;
+  transition: background .1s;
+}
+#tableMobile td:last-child { border-right: none; }
+#tableMobile tr:nth-child(even) td { border-bottom-style: dashed; }
+#tableMobile td.slot { cursor: pointer; }
+#tableMobile td.slot[data-lane="0"],#tableMobile td.slot[data-lane="1"],#tableMobile td.slot[data-lane="2"] { background: #f0f5fc; }
+#tableMobile td.slot[data-lane="3"],#tableMobile td.slot[data-lane="4"],#tableMobile td.slot[data-lane="5"] { background: #f0f8f3; }
+#tableMobile td.slot[data-lane="6"],#tableMobile td.slot[data-lane="7"],#tableMobile td.slot[data-lane="8"],
+#tableMobile td.slot[data-lane="9"],#tableMobile td.slot[data-lane="10"],#tableMobile td.slot[data-lane="11"] { background: #fdf4f0; }
+#tableMobile td.slot:hover    { background: #fff8ec !important; }
+#tableMobile td.slot.vline    { background: #fffaea !important; }
+#tableMobile td.slot.selected { background: #fff3c4 !important; border-left: 1.5px solid var(--amber); border-right: 1.5px solid var(--amber); }
+#tableMobile td.slot.sel-top  { border-top: 1.5px solid var(--amber); border-radius: 4px 4px 0 0; }
+#tableMobile td.slot.sel-bot  { border-bottom: 1.5px solid var(--amber) !important; border-radius: 0 0 4px 4px; }
+#tableMobile td.slot.anchored { background: #fff3c4 !important; outline: 2px solid var(--amber); outline-offset: -2px; border-radius: 4px; }
+
+/* ════ SLIDERS LAYER ════ */
+#slidersLayer {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none; z-index: 4;
+}
 .slider {
-  position: absolute;
-  border-radius: 7px;
-  pointer-events: auto;
-  cursor: pointer;
-  padding: 4px 7px;
-  display: flex; flex-direction: column; justify-content: flex-start; gap: 1px;
-  overflow: hidden;
+  position: absolute; border-radius: 6px;
+  pointer-events: auto; cursor: pointer;
+  padding: 3px 6px; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center; gap: 1px;
   transition: opacity .15s, transform .15s;
 }
-.slider:hover { opacity: .88; transform: scale(1.015); z-index: 10; }
-.slider.pending   { background: rgba(255,159,10,.18);  border: 1px solid rgba(255,159,10,.55); }
-.slider.confirmed { background: rgba(52,199,89,.18);   border: 1px solid rgba(52,199,89,.55);  }
-.slider.rejected  { background: rgba(255,59,48,.18);   border: 1px solid rgba(255,59,48,.55);  }
-
+.slider:hover { opacity: .85; transform: scale(1.015); z-index: 10; }
+.slider.pending   { background: rgba(255,159,10,.2);  border: 1px solid rgba(255,159,10,.6); }
+.slider.confirmed { background: rgba(52,199,89,.2);   border: 1px solid rgba(52,199,89,.6);  }
+.slider.rejected  { background: rgba(255,59,48,.2);   border: 1px solid rgba(255,59,48,.6);  }
 .sl-name { font-size: 9px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sl-time { font-size: 8px; opacity: .7; white-space: nowrap; }
-.pending   .sl-name { color: #7d4a00; }
-.confirmed .sl-name { color: #1a5e2a; }
-.rejected  .sl-name { color: #8c1a14; }
-.pending   .sl-time { color: #a06200; }
-.confirmed .sl-time { color: #228038; }
-.rejected  .sl-time { color: #b02318; }
+.sl-time { font-size: 8px; opacity: .75; white-space: nowrap; }
+.pending  .sl-name { color: #7d4a00; } .pending  .sl-time { color: #a06200; }
+.confirmed .sl-name{ color: #1a5e2a; } .confirmed .sl-time{ color: #228038; }
+.rejected  .sl-name{ color: #8c1a14; } .rejected  .sl-time{ color: #b02318; }
 
-/* ─── BOOKING CARDS ─── */
+/* ════ BOOKING CARDS ════ */
 #cardsContainer { display: flex; flex-wrap: wrap; gap: 8px; }
-
 .bcard {
   display: flex; align-items: center; gap: 10px;
   background: var(--surface); border: .5px solid var(--border2);
@@ -260,9 +306,9 @@ td.slot.anchored { background: #fff3c4 !important; outline: 2px solid var(--ambe
   box-shadow: 0 1px 4px rgba(0,0,0,.05);
   animation: fadeUp .2s ease;
 }
-@keyframes fadeUp { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
 .bcard-info { flex: 1; }
-.bcard-title { font-size: 13px; font-weight: 600; color: var(--ink); }
+.bcard-title { font-size: 13px; font-weight: 600; }
 .bcard-sub   { font-size: 12px; color: var(--ink3); margin-top: 1px; }
 .bcard-rm {
   width: 22px; height: 22px; border-radius: 50%;
@@ -273,169 +319,98 @@ td.slot.anchored { background: #fff3c4 !important; outline: 2px solid var(--ambe
 }
 .bcard-rm:hover { background: rgba(255,59,48,.1); color: var(--red); border-color: rgba(255,59,48,.3); }
 
-/* ─── OVERLAY / SHEET ─── */
+/* ════ OVERLAY / SHEET ════ */
 .overlay {
   display: none; position: fixed; inset: 0;
   background: rgba(0,0,0,.35); backdrop-filter: blur(8px);
   z-index: 1000; justify-content: center; align-items: flex-end;
-  padding: 0;
 }
 .overlay.open { display: flex; }
-
-@media (min-width: 540px) {
+@media(min-width:540px) {
   .overlay { align-items: center; padding: 20px; }
-  .sheet { border-radius: var(--r2) !important; max-width: 420px; }
+  .sheet    { border-radius: var(--r2) !important; max-width: 420px; }
 }
-
 .sheet {
-  background: var(--surface);
-  border-radius: 20px 20px 0 0;
-  width: 100%; max-width: 100%;
-  box-shadow: 0 -2px 40px rgba(0,0,0,.14);
-  animation: sheetUp .28s cubic-bezier(.32,1,.28,1);
-  overflow: hidden;
+  background: var(--surface); border-radius: 20px 20px 0 0;
+  width: 100%; box-shadow: 0 -2px 40px rgba(0,0,0,.14);
+  animation: sheetUp .26s cubic-bezier(.32,1,.28,1); overflow: hidden;
 }
-@keyframes sheetUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-.sheet-handle {
-  width: 36px; height: 4px; background: var(--border2); border-radius: 2px;
-  margin: 10px auto 0;
-}
-.sheet-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 20px 0;
-}
-.sheet-title { font-size: 20px; font-weight: 700; letter-spacing: -.4px; color: var(--ink); }
+@keyframes sheetUp { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
+.sheet-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 10px auto 0; }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 0; }
+.sheet-title { font-size: 20px; font-weight: 700; letter-spacing: -.4px; }
 .sheet-x {
   width: 30px; height: 30px; border-radius: 50%;
   background: var(--surface2); border: .5px solid var(--border2);
   color: var(--ink3); font-size: 16px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background .15s;
+  display: flex; align-items: center; justify-content: center; transition: background .15s;
 }
 .sheet-x:hover { background: rgba(255,59,48,.1); color: var(--red); }
 .sheet-body { padding: 20px; }
-
-/* Form */
 .f-group { margin-bottom: 14px; }
-.f-label {
-  display: block; font-size: 12px; font-weight: 600;
-  letter-spacing: -.1px; color: var(--ink3); margin-bottom: 6px;
-}
+.f-label { display: block; font-size: 12px; font-weight: 600; color: var(--ink3); margin-bottom: 6px; }
 .f-input {
-  width: 100%;
-  background: var(--surface2); border: .5px solid var(--border2);
-  border-radius: 10px; color: var(--ink);
-  font-family: var(--font); font-size: 15px; padding: 11px 14px;
-  transition: border-color .15s, box-shadow .15s;
+  width: 100%; background: var(--surface2); border: .5px solid var(--border2);
+  border-radius: 10px; color: var(--ink); font-family: var(--font);
+  font-size: 15px; padding: 11px 14px; transition: border-color .15s, box-shadow .15s;
 }
 .f-input::placeholder { color: var(--ink4); }
 .f-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,113,227,.12); background: #fff; }
 textarea.f-input { resize: vertical; min-height: 76px; line-height: 1.5; }
-
 .f-actions { display: flex; gap: 8px; margin-top: 18px; }
-.f-btn-primary {
-  flex: 1; height: 44px;
-  background: var(--blue); color: #fff; border: none; border-radius: 980px;
+.f-btn-ok {
+  flex: 1; height: 44px; background: var(--blue); color: #fff; border: none; border-radius: 980px;
   font-family: var(--font); font-size: 15px; font-weight: 600; cursor: pointer;
-  transition: background .15s, transform .1s;
-}
-.f-btn-primary:hover  { background: var(--blue-h); }
-.f-btn-primary:active { transform: scale(.97); }
-.f-btn-ghost {
-  height: 44px; padding: 0 20px;
-  background: var(--surface2); color: var(--ink2); border: .5px solid var(--border2);
-  border-radius: 980px; font-family: var(--font); font-size: 15px; font-weight: 500; cursor: pointer;
   transition: background .15s;
 }
-.f-btn-ghost:hover { background: var(--bg); }
-
-/* Info sheet */
-.info-list { border-radius: 12px; overflow: hidden; border: .5px solid var(--border2); margin-bottom: 16px; }
-.info-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 11px 16px; background: var(--surface2); border-bottom: .5px solid var(--border);
+.f-btn-ok:hover { background: var(--blue-h); }
+.f-btn-cancel {
+  height: 44px; padding: 0 20px; background: var(--surface2); color: var(--ink2);
+  border: .5px solid var(--border2); border-radius: 980px;
+  font-family: var(--font); font-size: 15px; font-weight: 500; cursor: pointer;
 }
+.f-btn-cancel:hover { background: var(--bg); }
+.info-list { border-radius: 12px; overflow: hidden; border: .5px solid var(--border2); margin-bottom: 16px; }
+.info-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 16px; background: var(--surface2); border-bottom: .5px solid var(--border); }
 .info-row:last-child { border-bottom: none; }
 .info-lbl { font-size: 13px; color: var(--ink3); flex-shrink: 0; }
-.info-val { font-size: 13px; font-weight: 600; color: var(--ink); text-align: right; word-break: break-word; max-width: 58%; }
-
+.info-val { font-size: 13px; font-weight: 600; text-align: right; word-break: break-word; max-width: 60%; }
 .sbadge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; border-radius: 980px; padding: 2px 10px; }
 .sb-amber { background: rgba(255,159,10,.12); color: #9a5a00; }
 .sb-green { background: rgba(52,199,89,.12);  color: #1a6630; }
 .sb-red   { background: rgba(255,59,48,.12);  color: #a81a10; }
-
-.confirm-label { font-size: 12px; font-weight: 600; color: var(--ink3); margin-bottom: 9px; }
-.confirm-btns  { display: flex; gap: 8px; margin-bottom: 12px; }
-.cb-yes {
-  flex: 1; height: 42px; border-radius: 980px; border: none; cursor: pointer;
-  background: rgba(52,199,89,.12); color: #1a6630;
-  font-family: var(--font); font-size: 14px; font-weight: 600; transition: background .15s;
-}
-.cb-yes:hover { background: rgba(52,199,89,.22); }
-.cb-no {
-  flex: 1; height: 42px; border-radius: 980px; border: none; cursor: pointer;
-  background: rgba(255,59,48,.1); color: #a81a10;
-  font-family: var(--font); font-size: 14px; font-weight: 600; transition: background .15s;
-}
-.cb-no:hover { background: rgba(255,59,48,.18); }
-.del-btn {
-  width: 100%; height: 40px; border-radius: 980px;
-  border: .5px solid var(--border2); background: transparent;
-  font-family: var(--font); font-size: 13px; font-weight: 500;
-  color: var(--ink4); cursor: pointer; transition: all .15s;
-}
-.del-btn:hover { background: rgba(255,59,48,.08); color: var(--red); border-color: rgba(255,59,48,.3); }
+.confirm-lbl { font-size: 12px; font-weight: 600; color: var(--ink3); margin-bottom: 9px; }
+.confirm-btns { display: flex; gap: 8px; margin-bottom: 12px; }
+.cb-yes { flex:1; height:42px; border-radius:980px; border:none; cursor:pointer; background:rgba(52,199,89,.12); color:#1a6630; font-family:var(--font); font-size:14px; font-weight:600; transition:background .15s; }
+.cb-yes:hover { background:rgba(52,199,89,.22); }
+.cb-no  { flex:1; height:42px; border-radius:980px; border:none; cursor:pointer; background:rgba(255,59,48,.1); color:#a81a10; font-family:var(--font); font-size:14px; font-weight:600; transition:background .15s; }
+.cb-no:hover  { background:rgba(255,59,48,.18); }
+.del-btn { width:100%; height:40px; border-radius:980px; border:.5px solid var(--border2); background:transparent; font-family:var(--font); font-size:13px; font-weight:500; color:var(--ink4); cursor:pointer; transition:all .15s; }
+.del-btn:hover { background:rgba(255,59,48,.08); color:var(--red); border-color:rgba(255,59,48,.3); }
 
 /* Image popup */
-#imgPopup {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.6); backdrop-filter: blur(12px);
-  z-index: 9000; justify-content: center; align-items: center; padding: 20px;
-}
-#imgPopup.open { display: flex; }
-.img-wrap { position: relative; border-radius: var(--r2); overflow: hidden; background: #fff; max-width: 90vw; max-height: 90vh; }
-.img-wrap img { display: block; max-width: 100%; max-height: 86vh; }
-.img-x {
-  position: absolute; top: 10px; right: 10px;
-  width: 30px; height: 30px; border-radius: 50%;
-  background: rgba(255,255,255,.9); border: none;
-  color: var(--ink2); font-size: 16px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background .15s;
-}
-.img-x:hover { background: rgba(255,59,48,.15); color: var(--red); }
+#imgPopup { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(12px); z-index:9000; justify-content:center; align-items:center; padding:20px; }
+#imgPopup.open { display:flex; }
+.img-wrap { position:relative; border-radius:var(--r2); overflow:hidden; background:#fff; max-width:90vw; max-height:90vh; }
+.img-wrap img { display:block; max-width:100%; max-height:86vh; }
+.img-x { position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.9); border:none; color:var(--ink2); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s; }
+.img-x:hover { background:rgba(255,59,48,.15); color:var(--red); }
 
-/* Loading */
-#loader {
-  display: none; position: fixed; inset: 0;
-  background: rgba(245,245,247,.7); backdrop-filter: blur(2px);
-  z-index: 5000; justify-content: center; align-items: center;
-}
-.loader-box {
-  background: var(--surface); border-radius: 16px;
-  padding: 24px 36px; display: flex; flex-direction: column;
-  align-items: center; gap: 13px;
-  box-shadow: 0 8px 32px rgba(0,0,0,.1);
-}
-.spin {
-  width: 32px; height: 32px;
-  border: 2.5px solid var(--border2); border-top-color: var(--blue);
-  border-radius: 50%; animation: spin .65s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loader-txt { font-size: 13px; font-weight: 500; color: var(--ink3); }
+/* Loader */
+#loader { display:none; position:fixed; inset:0; background:rgba(245,245,247,.7); backdrop-filter:blur(2px); z-index:5000; justify-content:center; align-items:center; }
+.loader-box { background:var(--surface); border-radius:16px; padding:24px 36px; display:flex; flex-direction:column; align-items:center; gap:13px; box-shadow:0 8px 32px rgba(0,0,0,.1); }
+.spin { width:32px; height:32px; border:2.5px solid var(--border2); border-top-color:var(--blue); border-radius:50%; animation:spin .65s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.loader-txt { font-size:13px; font-weight:500; color:var(--ink3); }
 
-/* ─── MOBILE ─── */
-@media (max-width: 600px) {
-  :root { --cell: 36px; --time-w: 42px; }
+/* ════ RESPONSIVE ════ */
+@media(max-width:700px) {
+  #tableDesktop { display: none; }
+  #tableMobile  { display: table; }
   .page { padding: 14px 10px 60px; gap: 12px; }
-  .ctrl { padding: 12px; gap: 8px; }
-  .date-field { max-width: 100%; }
   .ctrl { flex-direction: column; }
-  .btn-book { width: 100%; justify-content: center; display: flex; align-items: center; }
-  thead th { font-size: 12px; height: 38px; }
-  th.tcol { font-size: 10px; min-width: var(--time-w); }
+  .date-field { max-width: 100%; }
+  .btn-book { width: 100%; display: flex; align-items: center; justify-content: center; }
   .sl-time { display: none; }
 }
 ```
@@ -461,28 +436,25 @@ textarea.f-input { resize: vertical; min-height: 76px; line-height: 1.5; }
 <!-- APP -->
 
 <div id="content">
-
   <nav class="nav">
     <span class="nav-title">🎱 Бильярд · Брони</span>
     <button class="nav-btn" onclick="openImg()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-      Схема
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      Схема столов
     </button>
   </nav>
 
   <div class="page">
 
 ```
-<!-- Controls -->
 <div class="ctrl">
   <div class="date-field">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
     <input type="date" id="dateInput"/>
   </div>
   <button class="btn-book" onclick="openBookModal()">+ Забронировать</button>
 </div>
 
-<!-- Legends -->
 <div class="pills">
   <div class="pill"><div class="dot dot-navy"></div>Столы 1–3</div>
   <div class="pill"><div class="dot dot-sage"></div>Столы 4–6</div>
@@ -492,17 +464,26 @@ textarea.f-input { resize: vertical; min-height: 76px; line-height: 1.5; }
   <div class="pill"><div class="dot dot-red"></div>Отменено</div>
 </div>
 
-<!-- Grid -->
 <div class="grid-card">
-  <!--
-    IMPORTANT: .grid-scroll is position:relative
-    #slidersLayer is absolute inside it
-    so sliders move WITH horizontal scroll — no drift ever
-  -->
   <div class="grid-scroll" id="gridScroll">
-    <table id="bookingTable">
-      <thead>
+
+    <!-- ═══ DESKTOP TABLE: rows=tables, cols=time ═══ -->
+    <table id="tableDesktop">
+      <thead id="dtHead">
         <tr>
+          <th class="corner">Стол</th>
+          <!-- time th's injected by JS -->
+        </tr>
+      </thead>
+      <tbody id="dtBody">
+        <!-- rows injected by JS -->
+      </tbody>
+    </table>
+
+    <!-- ═══ MOBILE TABLE: rows=time, cols=tables ═══ -->
+    <table id="tableMobile">
+      <thead>
+        <tr id="mtHeadRow">
           <th class="hdr-navy">1</th><th class="hdr-navy">2</th><th class="hdr-navy">3</th>
           <th class="hdr-sage">4</th><th class="hdr-sage">5</th><th class="hdr-sage">6</th>
           <th class="hdr-rust">7</th><th class="hdr-rust">8</th><th class="hdr-rust">9</th>
@@ -510,21 +491,20 @@ textarea.f-input { resize: vertical; min-height: 76px; line-height: 1.5; }
           <th class="tcol no-click">ВРЕМЯ</th>
         </tr>
       </thead>
-      <tbody id="tbody"></tbody>
+      <tbody id="mtBody"></tbody>
     </table>
-    <!-- Sliders live INSIDE grid-scroll so they scroll with the table -->
+
     <div id="slidersLayer"></div>
   </div>
 </div>
 
-<!-- Selected interval cards -->
 <div id="cardsContainer"></div>
 ```
 
-  </div><!-- /page -->
-</div><!-- /content -->
+  </div>
+</div>
 
-<!-- BOOK MODAL -->
+<!-- BOOK SHEET -->
 
 <div id="bookModal" class="overlay">
   <div class="sheet">
@@ -534,27 +514,18 @@ textarea.f-input { resize: vertical; min-height: 76px; line-height: 1.5; }
       <button class="sheet-x" onclick="closeBookModal()">×</button>
     </div>
     <div class="sheet-body">
-      <div class="f-group">
-        <label class="f-label">Имя клиента</label>
-        <input class="f-input" id="nameInput" autocomplete="off" placeholder="Иван Иванов"/>
-      </div>
-      <div class="f-group">
-        <label class="f-label">Телефон</label>
-        <input class="f-input" id="phoneInput" type="tel" inputmode="tel" placeholder="+380 xx xxx xx xx"/>
-      </div>
-      <div class="f-group">
-        <label class="f-label">Комментарий</label>
-        <textarea class="f-input" id="commentInput" placeholder="Дополнительная информация..."></textarea>
-      </div>
+      <div class="f-group"><label class="f-label">Имя клиента</label><input class="f-input" id="nameInput" autocomplete="off" placeholder="Иван Иванов"/></div>
+      <div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" type="tel" inputmode="tel" placeholder="+380 xx xxx xx xx"/></div>
+      <div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" placeholder="Дополнительная информация..."></textarea></div>
       <div class="f-actions">
-        <button class="f-btn-primary" onclick="submitForm()">Подтвердить</button>
-        <button class="f-btn-ghost"   onclick="closeBookModal()">Отмена</button>
+        <button class="f-btn-ok" onclick="submitForm()">Подтвердить</button>
+        <button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- INFO MODAL -->
+<!-- INFO SHEET -->
 
 <div id="infoModal" class="overlay">
   <div class="sheet">
@@ -565,15 +536,15 @@ textarea.f-input { resize: vertical; min-height: 76px; line-height: 1.5; }
     </div>
     <div class="sheet-body">
       <div class="info-list">
-        <div class="info-row"><span class="info-lbl">Стол</span>    <span id="i-table"   class="info-val"></span></div>
-        <div class="info-row"><span class="info-lbl">Дата</span>    <span id="i-date"    class="info-val"></span></div>
-        <div class="info-row"><span class="info-lbl">Время</span>   <span id="i-time"    class="info-val"></span></div>
-        <div class="info-row"><span class="info-lbl">Имя</span>     <span id="i-name"    class="info-val"></span></div>
-        <div class="info-row"><span class="info-lbl">Телефон</span> <span id="i-phone"   class="info-val"></span></div>
+        <div class="info-row"><span class="info-lbl">Стол</span>       <span id="i-table"   class="info-val"></span></div>
+        <div class="info-row"><span class="info-lbl">Дата</span>       <span id="i-date"    class="info-val"></span></div>
+        <div class="info-row"><span class="info-lbl">Время</span>      <span id="i-time"    class="info-val"></span></div>
+        <div class="info-row"><span class="info-lbl">Имя</span>        <span id="i-name"    class="info-val"></span></div>
+        <div class="info-row"><span class="info-lbl">Телефон</span>    <span id="i-phone"   class="info-val"></span></div>
         <div class="info-row"><span class="info-lbl">Комментарий</span><span id="i-comment" class="info-val"></span></div>
-        <div class="info-row"><span class="info-lbl">Статус</span>  <span id="i-status"  class="info-val"></span></div>
+        <div class="info-row"><span class="info-lbl">Статус</span>     <span id="i-status"  class="info-val"></span></div>
       </div>
-      <div class="confirm-label">Посещение состоялось?</div>
+      <div class="confirm-lbl">Посещение состоялось?</div>
       <div class="confirm-btns">
         <button class="cb-yes" onclick="confirmBooking(true)">✓ Да, состоялось</button>
         <button class="cb-no"  onclick="confirmBooking(false)">✕ Не пришли</button>
@@ -583,7 +554,7 @@ textarea.f-input { resize: vertical; min-height: 76px; line-height: 1.5; }
   </div>
 </div>
 
-<!-- IMAGE POPUP -->
+<!-- IMAGE -->
 
 <div id="imgPopup">
   <div class="img-wrap">
@@ -595,14 +566,11 @@ textarea.f-input { resize: vertical; min-height: 76px; line-height: 1.5; }
 <!-- LOADER -->
 
 <div id="loader">
-  <div class="loader-box">
-    <div class="spin"></div>
-    <div class="loader-txt">Загрузка…</div>
-  </div>
+  <div class="loader-box"><div class="spin"></div><div class="loader-txt">Загрузка…</div></div>
 </div>
 
 <script>
-/* ─── AUTH ─── */
+/* ═══ AUTH ═══ */
 const ALLOWED = [
   "vadiksss900@gmail.com","sergey99belov@gmail.com","popadinecvasil3@gmail.com",
   "veronicadiakova04@gmail.com","info.luckystrike.kh@gmail.com","sashavolobuev123890@gmail.com",
@@ -628,17 +596,16 @@ window.onload = () => {
   }
 };
 
-/* ─── CONFIG ─── */
-const GAS = "https://script.google.com/macros/s/AKfycbxfRLDGA29FrqKS61HmYN_FUnDwOydeCaEdeW4oc4wyroQzvb4h1OnwQ5HeotIHhcj9/exec";
+/* ═══ CONSTANTS ═══ */
+const GAS   = "https://script.google.com/macros/s/AKfycbxfRLDGA29FrqKS61HmYN_FUnDwOydeCaEdeW4oc4wyroQzvb4h1OnwQ5HeotIHhcj9/exec";
 const LANES = 12, SH = 11, EH = 22;
-
 const $ = id => document.getElementById(id);
-const dateInput   = $('dateInput');
-const tbody       = $('tbody');
-const cards       = $('cardsContainer');
-const slidersLayer= $('slidersLayer');
-const gridScroll  = $('gridScroll');
-const loader      = $('loader');
+
+const dateInput    = $('dateInput');
+const cards        = $('cardsContainer');
+const slidersLayer = $('slidersLayer');
+const gridScroll   = $('gridScroll');
+const loader       = $('loader');
 
 /* Time slots 11:00–22:00 */
 const slots = [];
@@ -647,11 +614,75 @@ for (let h = SH; h <= EH; h++) {
   if (h < EH) slots.push({ label: `${h}:30`, key: h + .5 });
 }
 
-/* ─── INIT ─── */
+const LANE_GROUPS = [0,0,0,1,1,1,2,2,2,2,2,2]; // 0=navy,1=sage,2=rust
+const GRP_CLASS = ['grp-navy','grp-sage','grp-rust'];
+const ROW_CLASS = ['row-navy','row-sage','row-rust'];
+
+/* ═══ INIT ═══ */
 function init() {
   const today = new Date().toISOString().split('T')[0];
   dateInput.min = dateInput.value = today;
 
+  buildDesktopTable();
+  buildMobileTable();
+
+  $('tableDesktop').addEventListener('click', onDesktopClick);
+  $('tableDesktop').addEventListener('dblclick', onDesktopDbl);
+  $('tableMobile').addEventListener('click', onMobileClick);
+  $('tableMobile').addEventListener('dblclick', onMobileDbl);
+
+  dateInput.addEventListener('change', () => { resetSel(); loadSliders(); });
+  renderCards();
+  loadSliders();
+}
+
+/* ─── Build desktop table ───
+   Header row: corner + one <th> per time slot
+   Body rows:  one <tr> per table/lane, cells = time slots
+*/
+function buildDesktopTable() {
+  const headRow = $('dtHead').rows[0];
+  slots.forEach((sl, si) => {
+    const th = document.createElement('th');
+    th.className = 'th-time';
+    th.dataset.si = si;
+    th.dataset.key = sl.key;
+    th.textContent = sl.label;
+    headRow.appendChild(th);
+  });
+
+  const dtBody = $('dtBody');
+  for (let lane = 0; lane < LANES; lane++) {
+    const tr = document.createElement('tr');
+    tr.className = ROW_CLASS[LANE_GROUPS[lane]];
+    tr.dataset.lane = lane;
+
+    // Row header cell
+    const lhdr = document.createElement('td');
+    lhdr.className = 'lane-hdr ' + GRP_CLASS[LANE_GROUPS[lane]];
+    lhdr.textContent = `№ ${lane + 1}`;
+    tr.appendChild(lhdr);
+
+    // Slot cells
+    slots.forEach((sl, si) => {
+      const td = document.createElement('td');
+      td.className = 'slot' + (si % 2 === 1 ? ' shade' : '');
+      td.dataset.lane = lane;
+      td.dataset.time = sl.key;
+      td.dataset.si   = si;
+      tr.appendChild(td);
+    });
+
+    dtBody.appendChild(tr);
+  }
+}
+
+/* ─── Build mobile table ───
+   Header row: lane numbers
+   Body rows:  one <tr> per time slot, cells = lanes
+*/
+function buildMobileTable() {
+  const mtBody = $('mtBody');
   slots.forEach(sl => {
     const tr = document.createElement('tr');
     for (let lane = 0; lane < LANES; lane++) {
@@ -665,74 +696,110 @@ function init() {
     th.className = 'tcol';
     th.textContent = sl.label;
     tr.appendChild(th);
-    tbody.appendChild(tr);
+    mtBody.appendChild(tr);
   });
-
-  tbody.addEventListener('click', onCellClick);
-  tbody.addEventListener('dblclick', onCellDbl);
-  dateInput.addEventListener('change', () => { resetSel(); loadSliders(); });
-
-  renderCards();
-  loadSliders();
 }
 
-/* ─── SELECTION STATE ─── */
-const ivs = {};  // { lane: [{start,end},...] }
+/* ═══ SELECTION STATE ═══ */
+const ivs = {};
 let selLane = null, selStart = null, curId = null;
 
-const fmt = v => `${Math.floor(v)}:${v%1===.5?'30':'00'}`;
-const parseT = txt => parseFloat(txt.includes(':30') ? txt.replace(':30','.5') : txt.replace(':00','.0'));
+const fmt = v => `${Math.floor(v)}:${v % 1 === .5 ? '30' : '00'}`;
 
-function resetSel() {
-  selLane = selStart = null;
-  Object.keys(ivs).forEach(k => { ivs[k] = []; });
-  qsa('td.slot.anchored').forEach(c => c.classList.remove('anchored'));
-  qsa('thead th.hl').forEach(t => t.classList.remove('hl'));
-  qsa('td.slot.vline').forEach(t => t.classList.remove('vline'));
-  renderCards();
-}
-const qsa = sel => Array.from(document.querySelectorAll(sel));
-const qs  = sel => document.querySelector(sel);
-
-/* ─── CLICK ─── */
-function onCellClick(e) {
+/* ─── Desktop click handler ───
+   Step 1: click a slot cell  → select lane (row)
+   Step 2: click a time th    → set start
+   Step 3: click a time th    → set end
+*/
+function onDesktopClick(e) {
   const el = e.target;
 
-  /* Step 1: pick a column */
   if (el.classList.contains('slot') && selStart === null) {
     const lane = +el.dataset.lane;
     selLane = lane;
-    qsa('td.slot.anchored').forEach(c => c.classList.remove('anchored'));
-    qsa('thead th.hl').forEach(t => t.classList.remove('hl'));
-    qsa('td.slot.vline').forEach(t => t.classList.remove('vline'));
-    qsa('thead th')[lane]?.classList.add('hl');
-    qsa(`td.slot[data-lane="${lane}"]`).forEach(td => td.classList.add('vline'));
+    clearDtHighlights();
+    // Highlight the row header
+    const lhdr = $('dtBody').rows[lane]?.cells[0];
+    if (lhdr) lhdr.classList.add('hl-row');
+    // Highlight all cells in this row
+    qsa(`#tableDesktop td.slot[data-lane="${lane}"]`).forEach(c => c.classList.add('vline'));
     return;
   }
 
-  /* Step 2: pick start time from time column */
-  if (el.classList.contains('tcol') && selLane !== null && selStart === null) {
-    selStart = parseT(el.textContent);
-    qsa('td.slot.anchored').forEach(c => c.classList.remove('anchored'));
-    qs(`td.slot[data-lane="${selLane}"][data-time="${selStart}"]`)?.classList.add('anchored');
+  if (el.classList.contains('th-time') && selLane !== null && selStart === null) {
+    selStart = +el.dataset.key;
+    clearDtHighlights();
+    // Keep row highlight
+    const lhdr = $('dtBody').rows[selLane]?.cells[0];
+    if (lhdr) lhdr.classList.add('hl-row');
+    // Anchor the start cell
+    const anchor = qs(`#tableDesktop td.slot[data-lane="${selLane}"][data-time="${selStart}"]`);
+    if (anchor) anchor.classList.add('anchored');
     return;
   }
 
-  /* Step 3: pick end time */
-  if (el.classList.contains('tcol') && selLane !== null && selStart !== null) {
-    const t = parseT(el.textContent);
+  if (el.classList.contains('th-time') && selLane !== null && selStart !== null) {
+    const t = +el.dataset.key;
     if (t <= selStart) { alert('Время конца должно быть больше начала.'); return; }
     if (!ivs[selLane]) ivs[selLane] = [];
     ivs[selLane].push({ start: selStart, end: t });
     selLane = selStart = null;
-    qsa('td.slot.anchored').forEach(c => c.classList.remove('anchored'));
-    qsa('thead th.hl').forEach(t => t.classList.remove('hl'));
-    qsa('td.slot.vline').forEach(t => t.classList.remove('vline'));
+    clearDtHighlights();
     renderCards();
   }
 }
 
-function onCellDbl(e) {
+function onDesktopDbl(e) {
+  const el = e.target;
+  if (!el.classList.contains('slot')) return;
+  const lane = +el.dataset.lane, time = +el.dataset.time;
+  if (!ivs[lane]) return;
+  const i = ivs[lane].findIndex(iv => time >= Math.min(iv.start,iv.end) && time <= Math.max(iv.start,iv.end));
+  if (i !== -1) { ivs[lane].splice(i, 1); renderCards(); }
+}
+
+function clearDtHighlights() {
+  qsa('#tableDesktop td.slot.vline').forEach(c => c.classList.remove('vline'));
+  qsa('#tableDesktop td.slot.anchored').forEach(c => c.classList.remove('anchored'));
+  qsa('#tableDesktop td.lane-hdr.hl-row').forEach(c => c.classList.remove('hl-row'));
+  qsa('#tableDesktop thead th.th-time.hl').forEach(c => c.classList.remove('hl'));
+}
+
+/* ─── Mobile click handler ─── */
+function onMobileClick(e) {
+  const el = e.target;
+
+  if (el.classList.contains('slot') && selStart === null) {
+    selLane = +el.dataset.lane;
+    qsa('#tableMobile td.slot.vline').forEach(c=>c.classList.remove('vline'));
+    qsa('#tableMobile thead th.hl').forEach(c=>c.classList.remove('hl'));
+    qsa('#tableMobile td.slot.anchored').forEach(c=>c.classList.remove('anchored'));
+    $('mtHeadRow')?.cells[selLane]?.classList.add('hl');
+    qsa(`#tableMobile td.slot[data-lane="${selLane}"]`).forEach(c=>c.classList.add('vline'));
+    return;
+  }
+
+  if (el.classList.contains('tcol') && selLane !== null && selStart === null) {
+    selStart = parseFloat(el.textContent.includes(':30') ? el.textContent.replace(':30','.5') : el.textContent.replace(':00','.0'));
+    qsa('#tableMobile td.slot.anchored').forEach(c=>c.classList.remove('anchored'));
+    qs(`#tableMobile td.slot[data-lane="${selLane}"][data-time="${selStart}"]`)?.classList.add('anchored');
+    return;
+  }
+
+  if (el.classList.contains('tcol') && selLane !== null && selStart !== null) {
+    const t = parseFloat(el.textContent.includes(':30') ? el.textContent.replace(':30','.5') : el.textContent.replace(':00','.0'));
+    if (t <= selStart) { alert('Время конца должно быть больше начала.'); return; }
+    if (!ivs[selLane]) ivs[selLane] = [];
+    ivs[selLane].push({ start: selStart, end: t });
+    selLane = selStart = null;
+    qsa('#tableMobile td.slot.vline').forEach(c=>c.classList.remove('vline'));
+    qsa('#tableMobile thead th.hl').forEach(c=>c.classList.remove('hl'));
+    qsa('#tableMobile td.slot.anchored').forEach(c=>c.classList.remove('anchored'));
+    renderCards();
+  }
+}
+
+function onMobileDbl(e) {
   if (!e.target.classList.contains('slot')) return;
   const lane = +e.target.dataset.lane, time = parseFloat(e.target.dataset.time);
   if (!ivs[lane]) return;
@@ -740,113 +807,127 @@ function onCellDbl(e) {
   if (i !== -1) { ivs[lane].splice(i, 1); renderCards(); }
 }
 
-/* ─── RENDER SELECTION HIGHLIGHTS + CARDS ─── */
+/* ═══ RENDER SELECTION + CARDS ═══ */
 function renderCards() {
-  /* clear selected */
-  qsa('td.slot.selected').forEach(c => c.classList.remove('selected','sel-top','sel-bot'));
+  // Clear desktop selection
+  qsa('#tableDesktop td.slot.selected').forEach(c => c.classList.remove('selected','sel-left','sel-right'));
+  // Clear mobile selection
+  qsa('#tableMobile td.slot.selected').forEach(c => c.classList.remove('selected','sel-top','sel-bot'));
 
-  /* apply */
   for (const k in ivs) {
     const lane = +k;
     (ivs[lane]||[]).forEach(iv => {
       const s = Math.min(iv.start, iv.end), e = Math.max(iv.start, iv.end);
-      qsa(`td.slot[data-lane="${lane}"]`).forEach(td => {
+
+      // Desktop: highlight cells in the row for this lane between start/end time slots
+      qsa(`#tableDesktop td.slot[data-lane="${lane}"]`).forEach(td => {
+        const t = +td.dataset.time;
+        if (t >= s && t <= e) td.classList.add('selected');
+      });
+      const leftCell  = qs(`#tableDesktop td.slot[data-lane="${lane}"][data-time="${s}"]`);
+      const rightCell = qs(`#tableDesktop td.slot[data-lane="${lane}"][data-time="${e}"]`);
+      if (leftCell)  leftCell.classList.add('sel-left');
+      if (rightCell) rightCell.classList.add('sel-right');
+
+      // Mobile
+      qsa(`#tableMobile td.slot[data-lane="${lane}"]`).forEach(td => {
         const t = parseFloat(td.dataset.time);
         if (t >= s && t <= e) td.classList.add('selected');
       });
-      qs(`td.slot[data-lane="${lane}"][data-time="${s}"]`)?.classList.add('sel-top');
-      if (s !== e) qs(`td.slot[data-lane="${lane}"][data-time="${e}"]`)?.classList.add('sel-bot');
+      qs(`#tableMobile td.slot[data-lane="${lane}"][data-time="${s}"]`)?.classList.add('sel-top');
+      if (s !== e) qs(`#tableMobile td.slot[data-lane="${lane}"][data-time="${e}"]`)?.classList.add('sel-bot');
     });
   }
 
-  /* cards */
+  // Cards
   cards.innerHTML = '';
   const dd = dateInput.value.split('-').reverse().join('.');
   for (const k in ivs) {
     const lane = +k;
     (ivs[lane]||[]).forEach((iv, idx) => {
-      const s = Math.min(iv.start, iv.end), e = Math.max(iv.start, iv.end);
+      const s = Math.min(iv.start,iv.end), e = Math.max(iv.start,iv.end);
       const card = document.createElement('div'); card.className = 'bcard';
-      card.innerHTML = `
-        <div class="bcard-info">
-          <div class="bcard-title">Стол № ${lane+1}</div>
-          <div class="bcard-sub">${dd} · ${fmt(s)} – ${fmt(e)}</div>
-        </div>`;
-      const rm = document.createElement('button'); rm.className = 'bcard-rm'; rm.innerHTML = '×';
+      card.innerHTML = `<div class="bcard-info"><div class="bcard-title">Стол № ${lane+1}</div><div class="bcard-sub">${dd} · ${fmt(s)} – ${fmt(e)}</div></div>`;
+      const rm = document.createElement('button'); rm.className='bcard-rm'; rm.innerHTML='×';
       rm.onclick = ev => { ev.stopPropagation(); ivs[lane].splice(idx,1); renderCards(); };
-      card.appendChild(rm);
-      cards.appendChild(card);
+      card.appendChild(rm); cards.appendChild(card);
     });
   }
 }
 
-/* ─── MODALS ─── */
+function resetSel() {
+  selLane = selStart = null;
+  Object.keys(ivs).forEach(k => { ivs[k] = []; });
+  clearDtHighlights();
+  qsa('#tableMobile td.slot.vline').forEach(c=>c.classList.remove('vline'));
+  qsa('#tableMobile thead th.hl').forEach(c=>c.classList.remove('hl'));
+  qsa('#tableMobile td.slot.anchored').forEach(c=>c.classList.remove('anchored'));
+  renderCards();
+}
+
+/* ═══ MODALS ═══ */
 function openBookModal() {
-  if (!Object.values(ivs).some(a => a.length)) return alert('Сначала выберите время на сетке.');
+  if (!Object.values(ivs).some(a=>a.length)) return alert('Сначала выберите время на сетке.');
   $('bookModal').classList.add('open');
 }
 function closeBookModal() { $('bookModal').classList.remove('open'); }
 
 async function submitForm() {
-  const name    = $('nameInput').value.trim();
-  const phone   = $('phoneInput').value.trim();
-  const comment = $('commentInput').value.trim();
-  const date    = dateInput.value;
-  if (!name || !phone) return alert('Введите имя и телефон.');
-  const bookings = [];
-  for (const k in ivs)
-    (ivs[k]||[]).forEach(iv => bookings.push({ date, tableNumber: +k+1, start: iv.start, end: iv.end, name, phone, comment }));
+  const name=$('nameInput').value.trim(), phone=$('phoneInput').value.trim();
+  const comment=$('commentInput').value.trim(), date=dateInput.value;
+  if (!name||!phone) return alert('Введите имя и телефон.');
+  const bookings=[];
+  for(const k in ivs) (ivs[k]||[]).forEach(iv=>bookings.push({date,tableNumber:+k+1,start:iv.start,end:iv.end,name,phone,comment}));
   if (!bookings.length) return alert('Нет выбранных интервалов.');
   showLoad();
   try {
-    await Promise.all(bookings.map(b => fetch(GAS, { method:'POST', mode:'no-cors', body: JSON.stringify({ bookings:[b] }) })));
+    await Promise.all(bookings.map(b=>fetch(GAS,{method:'POST',mode:'no-cors',body:JSON.stringify({bookings:[b]})})));
     closeBookModal();
-    ['nameInput','phoneInput','commentInput'].forEach(id => $(id).value = '');
+    ['nameInput','phoneInput','commentInput'].forEach(id=>$(id).value='');
     resetSel(); await loadSliders();
-  } catch(e) { alert('Ошибка: '+e.message); }
-  finally { hideLoad(); }
+  } catch(e){alert('Ошибка: '+e.message);}finally{hideLoad();}
 }
 
 function showInfoModal(b) {
-  $('i-table').textContent   = '№ ' + b.table;
+  $('i-table').textContent   = '№ '+b.table;
   $('i-date').textContent    = b.date.split('-').reverse().join('.');
   $('i-time').textContent    = `${fmt(+b.start)} – ${fmt(+b.end)}`;
   $('i-name').textContent    = b.name;
   $('i-phone').textContent   = b.phone;
-  $('i-comment').textContent = b.comment || '—';
-  const s = $('i-status');
-  if      (b.confirmed === 'Да')  s.innerHTML = '<span class="sbadge sb-green">✓ Подтверждено</span>';
-  else if (b.confirmed === 'Нет') s.innerHTML = '<span class="sbadge sb-red">✕ Не состоялось</span>';
-  else                            s.innerHTML = '<span class="sbadge sb-amber">⏳ Ожидает</span>';
-  curId = b.id;
-  $('infoModal').classList.add('open');
+  $('i-comment').textContent = b.comment||'—';
+  const s=$('i-status');
+  if(b.confirmed==='Да') s.innerHTML='<span class="sbadge sb-green">✓ Подтверждено</span>';
+  else if(b.confirmed==='Нет') s.innerHTML='<span class="sbadge sb-red">✕ Не состоялось</span>';
+  else s.innerHTML='<span class="sbadge sb-amber">⏳ Ожидает</span>';
+  curId=b.id; $('infoModal').classList.add('open');
 }
-function closeInfoModal() { $('infoModal').classList.remove('open'); curId = null; }
+function closeInfoModal(){$('infoModal').classList.remove('open');curId=null;}
 
-async function confirmBooking(yes) {
-  if (!curId) return;
-  showLoad();
-  try {
-    await fetch(GAS, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'confirm', id:curId, confirmed:yes }) });
-    closeInfoModal(); await loadSliders();
-  } catch(e) { alert(e.message); } finally { hideLoad(); }
+async function confirmBooking(yes){
+  if(!curId)return; showLoad();
+  try{await fetch(GAS,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'confirm',id:curId,confirmed:yes})});closeInfoModal();await loadSliders();}
+  catch(e){alert(e.message);}finally{hideLoad();}
 }
-async function deleteBooking() {
-  if (!curId || !confirm('Удалить бронирование?')) return;
-  showLoad();
-  try {
-    await fetch(GAS, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'delete', id:curId }) });
-    closeInfoModal(); await loadSliders();
-  } catch(e) { alert(e.message); } finally { hideLoad(); }
+async function deleteBooking(){
+  if(!curId||!confirm('Удалить бронирование?'))return; showLoad();
+  try{await fetch(GAS,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'delete',id:curId})});closeInfoModal();await loadSliders();}
+  catch(e){alert(e.message);}finally{hideLoad();}
 }
 
-/* ─── LOAD & RENDER SLIDERS ────────────────────────────────────────
-   POSITIONING STRATEGY:
-   - We iterate over <tr> rows in tbody to get their offsetTop
-   - We get cell.offsetLeft + cell.offsetWidth from the actual DOM cell
-   - Both are relative to the table / grid-scroll container — NOT viewport
-   - Result: sliders stay locked to cells regardless of scroll or zoom
-──────────────────────────────────────────────────────────────────── */
+/* ═══ LOAD SLIDERS ═══
+   Desktop: slider spans horizontally across a ROW (lane row),
+            left = start-cell.offsetLeft, width = endCell.right - startCell.left,
+            top = row.offsetTop, height = row.offsetHeight - 2px padding.
+
+   Mobile:  slider spans vertically down a COLUMN (lane column),
+            left = startCell.offsetLeft, width = cell.offsetWidth - 2,
+            top = startRow.offsetTop, height = endRow.bottom - startRow.top.
+
+   Both use offsetLeft/offsetTop relative to gridScroll (position:relative).
+   Never touches getBoundingClientRect — immune to scroll & zoom.
+═══ */
+function isDesktop() { return window.innerWidth > 700; }
+
 async function loadSliders() {
   showLoad();
   slidersLayer.innerHTML = '';
@@ -855,59 +936,106 @@ async function loadSliders() {
     const data = await res.json();
     if (!data.bookings?.length) return;
 
-    /* Build lookup: time key → row element */
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-    const rowByKey = {};
-    slots.forEach((sl, i) => { rowByKey[sl.key] = rows[i]; });
-
-    data.bookings.forEach(b => {
-      if (b.date !== dateInput.value) return;
-      const laneIdx = b.table - 1;
-      const start   = +b.start, end = +b.end;
-
-      const startRow = rowByKey[start];
-      const endRow   = rowByKey[end];
-      if (!startRow || !endRow) return;
-
-      /* Cell in the start row for this lane */
-      const cell = startRow.cells[laneIdx];
-      if (!cell) return;
-
-      /*
-        offsetTop/offsetLeft are relative to the offsetParent.
-        Since grid-scroll is position:relative and is the offsetParent
-        of all rows/cells, these coordinates are stable.
-      */
-      const left   = cell.offsetLeft;
-      const top    = startRow.offsetTop;
-      const width  = cell.offsetWidth - 2;
-      const height = endRow.offsetTop + endRow.offsetHeight - startRow.offsetTop;
-
-      const el = document.createElement('div');
-      el.className = 'slider ' + (b.confirmed === 'Да' ? 'confirmed' : b.confirmed === 'Нет' ? 'rejected' : 'pending');
-      el.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
-
-      const nd = document.createElement('div'); nd.className = 'sl-name'; nd.textContent = b.name || '—';
-      const td = document.createElement('div'); td.className = 'sl-time'; td.textContent = `${fmt(start)} – ${fmt(end)}`;
-      el.append(nd, td);
-      el.addEventListener('click', e => { e.stopPropagation(); showInfoModal(b); });
-      slidersLayer.appendChild(el);
-    });
-  } catch(e) { console.error('loadSliders:', e); }
+    if (isDesktop()) {
+      renderSlidersDesktop(data.bookings);
+    } else {
+      renderSlidersMobile(data.bookings);
+    }
+  } catch(e){ console.error('loadSliders:', e); }
   finally { hideLoad(); }
 }
 
-/* ─── HELPERS ─── */
-function showLoad() { loader.style.display = 'flex'; }
-function hideLoad() { loader.style.display = 'none'; }
-function openImg()  { $('imgPopup').classList.add('open'); }
-function closeImg() { $('imgPopup').classList.remove('open'); }
+function renderSlidersDesktop(bookings) {
+  // Build lookup: laneIndex → <tr>
+  const dtRows = Array.from($('dtBody').querySelectorAll('tr'));
 
-/* Close on backdrop tap */
-['bookModal','infoModal'].forEach(id => {
-  $(id).addEventListener('click', e => { if (e.target === $(id)) { $(id).classList.remove('open'); if (id==='infoModal') curId=null; }});
+  // Build lookup: slotKey → column index (1-based because col 0 = lane header)
+  const colByKey = {};
+  slots.forEach((sl, i) => { colByKey[sl.key] = i + 1; }); // +1 for lane-hdr cell
+
+  bookings.forEach(b => {
+    if (b.date !== dateInput.value) return;
+    const laneIdx = b.table - 1;
+    const start = +b.start, end = +b.end;
+    const si = colByKey[start], ei = colByKey[end];
+    if (si == null || ei == null) return;
+
+    const row = dtRows[laneIdx];
+    if (!row) return;
+
+    const startCell = row.cells[si];
+    const endCell   = row.cells[ei];
+    if (!startCell || !endCell) return;
+
+    // offsetLeft/offsetTop relative to gridScroll (position:relative)
+    const left   = startCell.offsetLeft + 1;
+    const top    = row.offsetTop + 1;
+    const width  = (endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft - 2;
+    const height = row.offsetHeight - 2;
+
+    const el = makeSlider(b, start, end);
+    el.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+    el.querySelector('.sl-name').style.display = 'block';
+    el.querySelector('.sl-time').style.display = 'block';
+    slidersLayer.appendChild(el);
+  });
+}
+
+function renderSlidersMobile(bookings) {
+  const mtRows = Array.from($('mtBody').querySelectorAll('tr'));
+  const rowByKey = {};
+  slots.forEach((sl, i) => { rowByKey[sl.key] = mtRows[i]; });
+
+  bookings.forEach(b => {
+    if (b.date !== dateInput.value) return;
+    const laneIdx = b.table - 1;
+    const start = +b.start, end = +b.end;
+    const startRow = rowByKey[start], endRow = rowByKey[end];
+    if (!startRow || !endRow) return;
+
+    const cell = startRow.cells[laneIdx];
+    if (!cell) return;
+
+    const left   = cell.offsetLeft + 1;
+    const top    = startRow.offsetTop + 1;
+    const width  = cell.offsetWidth - 2;
+    const height = (endRow.offsetTop + endRow.offsetHeight) - startRow.offsetTop - 2;
+
+    const el = makeSlider(b, start, end);
+    el.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+    slidersLayer.appendChild(el);
+  });
+}
+
+function makeSlider(b, start, end) {
+  const el = document.createElement('div');
+  el.className = 'slider ' + (b.confirmed==='Да'?'confirmed':b.confirmed==='Нет'?'rejected':'pending');
+  const nd = document.createElement('div'); nd.className='sl-name'; nd.textContent = b.name||'—';
+  const td = document.createElement('div'); td.className='sl-time'; td.textContent = `${fmt(start)} – ${fmt(end)}`;
+  el.append(nd, td);
+  el.addEventListener('click', e => { e.stopPropagation(); showInfoModal(b); });
+  return el;
+}
+
+/* ═══ HELPERS ═══ */
+const qsa = sel => Array.from(document.querySelectorAll(sel));
+const qs  = sel => document.querySelector(sel);
+function showLoad(){loader.style.display='flex';}
+function hideLoad(){loader.style.display='none';}
+function openImg() {$('imgPopup').classList.add('open');}
+function closeImg(){$('imgPopup').classList.remove('open');}
+
+['bookModal','infoModal'].forEach(id=>{
+  $(id).addEventListener('click',e=>{if(e.target===$(id)){$(id).classList.remove('open');if(id==='infoModal')curId=null;}});
 });
-$('imgPopup').addEventListener('click', e => { if (e.target === $('imgPopup')) closeImg(); });
+$('imgPopup').addEventListener('click',e=>{if(e.target===$('imgPopup'))closeImg();});
+
+// Re-render sliders on resize (layout switches at 700px)
+let _lastDesktop = isDesktop();
+window.addEventListener('resize', () => {
+  const now = isDesktop();
+  if (now !== _lastDesktop) { _lastDesktop = now; loadSliders(); }
+});
 </script>
 
 </body>

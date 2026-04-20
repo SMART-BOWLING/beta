@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
-  <title>Бильярд · Брони | На весь экран без скролла</title>
+  <title>Бильярд · Брони | Адаптивная таблица</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png"/>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
@@ -33,10 +33,9 @@
       --r2: 18px;
       --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
       
-      /* 🖥️ РАЗМЕРЫ ДЛЯ ПК — широко, без скролла */
-      --cell-h: 64px;      /* высота строки (столы) */
-      --cell-w: 88px;      /* ширина колонки времени */
-      --lane-w: 110px;     /* ширина левой колонки (№ стола) */
+      /* Базовые размеры — будут масштабироваться через flex/grid */
+      --cell-h: 58px;
+      --lane-w: 100px;
     }
 
     body {
@@ -80,8 +79,9 @@
     }
     .nav-btn:hover { background: var(--blue-dim); }
 
-    /* PAGE — максимальная ширина, чтобы таблица дышала */
+    /* PAGE — ширина на всю доступную область */
     .page {
+      width: 100%;
       max-width: 100%;
       margin: 0 auto;
       padding: 28px 32px 80px;
@@ -136,7 +136,7 @@
     .dot-green { background: var(--green); }
     .dot-red   { background: var(--red); }
 
-    /* GRID CARD — без скролла на ПК */
+    /* GRID CARD — адаптивный, без горизонтального скролла на ПК */
     .grid-card {
       background: var(--surface); border-radius: 28px;
       box-shadow: 0 6px 24px rgba(0,0,0,.06);
@@ -151,26 +151,56 @@
       position: relative;
       width: 100%;
     }
-    /* На ПК отключаем скролл, таблица занимает всю ширину */
-    @media (min-width: 1024px) {
+    /* На ПК (шире 1000px) убираем скролл, таблица сама растягивается */
+    @media (min-width: 1000px) {
       .grid-scroll {
         overflow-x: visible;
       }
     }
 
-    /* ========== ДЕСКТОПНАЯ ТАБЛИЦА (строки = столы) ========== */
+    /* ========== ДЕСКТОПНАЯ ТАБЛИЦА — АДАПТИВНАЯ ========== */
     #tableDesktop {
       display: table;
       border-collapse: collapse;
       table-layout: fixed;
       width: 100%;
-      min-width: 100%;
       user-select: none;
-      font-size: 15px;
+      font-size: 14px;
     }
+    
+    /* Автоматическое распределение ширины колонок времени */
+    #tableDesktop thead th.th-time {
+      width: auto;
+      min-width: 70px;
+      cursor: pointer;
+      transition: all .12s;
+      text-align: center;
+      padding: 0 8px;
+    }
+    
+    /* Фиксированная ширина для столбца "Стол" */
+    #tableDesktop thead th.corner,
+    #tableDesktop tbody td.lane-hdr {
+      width: var(--lane-w);
+      min-width: var(--lane-w);
+      max-width: var(--lane-w);
+    }
+    
+    /* Остальные колонки равномерно растягиваются */
+    #tableDesktop {
+      table-layout: auto;
+    }
+    #tableDesktop thead th.th-time {
+      width: auto;
+    }
+    /* Для стабильности задаем минимальную ширину */
+    #tableDesktop colgroup col.time-col {
+      min-width: 72px;
+    }
+
     #tableDesktop thead th {
       height: var(--cell-h);
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
       letter-spacing: .2px;
       color: var(--ink4);
@@ -185,8 +215,6 @@
     }
     #tableDesktop thead th:last-child { border-right: none; }
     #tableDesktop thead th.corner {
-      width: var(--lane-w);
-      min-width: var(--lane-w);
       background: var(--surface2);
       font-size: 16px;
       font-weight: 700;
@@ -196,21 +224,13 @@
       left: 0;
       z-index: 5;
     }
-    #tableDesktop thead th.th-time {
-      cursor: pointer;
-      width: var(--cell-w);
-      min-width: var(--cell-w);
-      transition: all .12s;
-    }
     #tableDesktop thead th.th-time:hover { background: #fff4e0; color: var(--amber); }
     #tableDesktop thead th.th-time.hl { background: #fff4e0 !important; color: var(--amber) !important; }
 
     /* строки */
     #tableDesktop tbody tr { height: var(--cell-h); }
     #tableDesktop tbody td.lane-hdr {
-      width: var(--lane-w);
-      min-width: var(--lane-w);
-      font-size: 19px;
+      font-size: 18px;
       font-weight: 700;
       border-bottom: .5px solid var(--border2);
       border-right: 1px solid var(--border2);
@@ -235,6 +255,8 @@
       text-align: center;
       font-size: 13px;
       transition: background 0.08s;
+      padding: 0 6px;
+      white-space: nowrap;
     }
     #tableDesktop tbody td:last-child { border-right: none; }
     #tableDesktop tbody td.slot.shade { background: rgba(0,0,0,.02); }
@@ -255,18 +277,17 @@
     #tableDesktop tbody td.slot.anchored { background: #ffe7a3 !important; outline: 2px solid var(--amber); outline-offset: -2px; border-radius: 10px; }
     #tableDesktop tbody td.slot.vline { background: #fffdf5; }
 
-    /* ========== МОБИЛЬНАЯ ТАБЛИЦА (скрыта на ПК) ========== */
+    /* ========== МОБИЛЬНАЯ ТАБЛИЦА ========== */
     #tableMobile {
       display: none;
       border-collapse: collapse;
       width: 100%;
     }
-    @media (max-width: 900px) {
+    @media (max-width: 999px) {
       #tableDesktop { display: none; }
       #tableMobile { display: table; }
       :root {
         --cell-h: 52px;
-        --cell-w: 62px;
         --lane-w: 85px;
       }
       .page { padding: 16px 12px 70px; gap: 16px; }
@@ -277,7 +298,7 @@
     }
 
     #tableMobile thead th {
-      height: 48px; font-size: 14px; font-weight: 600;
+      height: 48px; font-size: 13px; font-weight: 600;
       border-bottom: .5px solid var(--border2);
       border-right: .5px solid var(--border);
       text-align: center;
@@ -287,14 +308,15 @@
     #tableMobile thead th.hdr-rust { background: #fdf0ea; color: #a83418; }
     #tableMobile thead th.hl { background: #fff4e0 !important; color: var(--amber) !important; }
     #tableMobile th.tcol {
-      background: var(--surface2); color: var(--ink4); font-size: 12px; font-weight: 600;
+      background: var(--surface2); color: var(--ink4); font-size: 11px; font-weight: 600;
       border-left: .5px solid var(--border2); cursor: pointer;
       position: sticky; top: 0; z-index: 3;
+      min-width: 60px;
     }
     #tableMobile td {
-      height: 46px; border-bottom: .5px solid var(--border);
+      height: 44px; border-bottom: .5px solid var(--border);
       border-right: .5px solid var(--border); text-align: center;
-      font-size: 12px; cursor: pointer;
+      font-size: 11px; cursor: pointer;
     }
     #tableMobile td.slot.selected { background: #fff3c4 !important; border-left: 2px solid var(--amber); border-right: 2px solid var(--amber); }
     #tableMobile td.slot.sel-top { border-top: 2px solid var(--amber); border-radius: 8px 8px 0 0; }
@@ -302,7 +324,7 @@
     #tableMobile td.slot.anchored { background: #ffe7a3 !important; outline: 2px solid var(--amber); outline-offset: -2px; border-radius: 10px; }
     #tableMobile td.slot.vline { background: #fffdf0; }
 
-    /* SLIDERS LAYER (поверх таблицы) */
+    /* SLIDERS LAYER */
     #slidersLayer {
       position: absolute; top: 0; left: 0;
       width: 100%; height: 100%;
@@ -343,7 +365,7 @@
       display: flex; align-items: center; justify-content: center;
     }
 
-    /* OVERLAY / MODAL */
+    /* OVERLAY */
     .overlay {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.45); backdrop-filter: blur(12px);
@@ -395,7 +417,7 @@
     .cb-no  { background: rgba(255,59,48,.1); color: #a81a10; }
     .del-btn { width:100%; height: 52px; background: transparent; border: .5px solid var(--border2); border-radius: 980px; margin-top: 16px; cursor: pointer; font-size: 15px; }
 
-    /* IMAGE POPUP */
+    /* IMAGE */
     #imgPopup {
       display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(16px);
       z-index:3000; justify-content:center; align-items:center;
@@ -428,7 +450,7 @@
 
 <div id="content">
   <nav class="nav">
-    <span class="nav-title">🎱 LUCKY STRIKE · БРОНЬ (полноэкранный режим)</span>
+    <span class="nav-title">🎱 LUCKY STRIKE · БРОНЬ (адаптивная таблица)</span>
     <button class="nav-btn" onclick="openImg()">📐 Схема зала</button>
   </nav>
   <div class="page">
@@ -502,7 +524,9 @@
     $("tableMobile").addEventListener("dblclick", onMobileDbl);
     $("dateInput").addEventListener("change", ()=>{ resetSel(); loadSliders(); });
     renderCards(); loadSliders();
+    window.addEventListener("resize", () => { setTimeout(() => { loadSliders(); }, 50); });
   }
+  
   function buildDesktopTable(){
     let headRow = qs("tr", $("dtHead"));
     slots.forEach((sl,i)=>{ let th=document.createElement("th"); th.className="th-time"; th.dataset.si=i; th.dataset.key=sl.key; th.textContent=sl.label; headRow.appendChild(th); });
@@ -560,16 +584,16 @@
   function closeInfoModal(){ $("infoModal").classList.remove("open"); curId=null; }
   async function confirmBooking(yes){ if(!curId)return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:curId,confirmed:yes})}); closeInfoModal(); await loadSliders(); } catch(e){} finally{ hideLoad(); } }
   async function deleteBooking(){ if(!curId||!confirm("Удалить бронь?"))return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:curId})}); closeInfoModal(); await loadSliders(); } catch(e){} finally{ hideLoad(); } }
-  function isDesktop(){ return window.innerWidth>900; }
+  function isDesktop(){ return window.innerWidth>999; }
   async function loadSliders(){ showLoad(); $("slidersLayer").innerHTML=""; try{ let res=await fetch(GAS+"?action=get&date="+$("dateInput").value); let data=await res.json(); if(!data.bookings?.length) return; if(isDesktop()) renderSlidersDesktop(data.bookings); else renderSlidersMobile(data.bookings); } catch(e){} finally{ hideLoad(); } }
-  function renderSlidersDesktop(bookings){ let rows=Array.from($("dtBody").querySelectorAll("tr")); let colByKey={}; slots.forEach((sl,i)=>{ colByKey[sl.key]=i+1; }); bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return; let laneIdx=b.table-1, start=+b.start, end=+b.end, si=colByKey[start], ei=colByKey[end]; if(si==null||ei==null)return; let row=rows[laneIdx]; if(!row)return; let sc=row.cells[si], ec=row.cells[ei]; if(!sc||!ec)return; let left=sc.offsetLeft+1, top=row.offsetTop+1, width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2, height=row.offsetHeight-2; let slider=makeSlider(b,start,end); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; $("slidersLayer").appendChild(slider); }); }
-  function renderSlidersMobile(bookings){ let mtRows=Array.from($("mtBody").querySelectorAll("tr")); let rowByKey={}; slots.forEach((sl,i)=>{ rowByKey[sl.key]=mtRows[i]; }); bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return; let laneIdx=b.table-1, start=+b.start, end=+b.end, startRow=rowByKey[start], endRow=rowByKey[end]; if(!startRow||!endRow)return; let cell=startRow.cells[laneIdx]; if(!cell)return; let left=cell.offsetLeft+1, top=startRow.offsetTop+1, width=cell.offsetWidth-2, height=(endRow.offsetTop+endRow.offsetHeight)-startRow.offsetTop-2; let slider=makeSlider(b,start,end); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; $("slidersLayer").appendChild(slider); }); }
+  function renderSlidersDesktop(bookings){ let rows=Array.from($("dtBody").querySelectorAll("tr")); let colMap={}; slots.forEach((sl,i)=>{ let headers=Array.from($("dtHead").querySelectorAll("th.th-time")); if(headers[i]) colMap[sl.key]=headers[i]; }); bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return; let laneIdx=b.table-1, start=+b.start, end=+b.end, startTh=colMap[start], endTh=colMap[end]; if(!startTh||!endTh)return; let row=rows[laneIdx]; if(!row)return; let startCell=row.cells[startTh.cellIndex], endCell=row.cells[endTh.cellIndex]; if(!startCell||!endCell)return; let left=startCell.offsetLeft+1, top=row.offsetTop+1, width=(endCell.offsetLeft+endCell.offsetWidth)-startCell.offsetLeft-2, height=row.offsetHeight-2; if(width<10)return; let slider=makeSlider(b,start,end); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; $("slidersLayer").appendChild(slider); }); }
+  function renderSlidersMobile(bookings){ let mtRows=Array.from($("mtBody").querySelectorAll("tr")); let rowByKey={}; slots.forEach((sl,i)=>{ rowByKey[sl.key]=mtRows[i]; }); bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return; let laneIdx=b.table-1, start=+b.start, end=+b.end, startRow=rowByKey[start], endRow=rowByKey[end]; if(!startRow||!endRow)return; let cell=startRow.cells[laneIdx]; if(!cell)return; let left=cell.offsetLeft+1, top=startRow.offsetTop+1, width=cell.offsetWidth-2, height=(endRow.offsetTop+endRow.offsetHeight)-startRow.offsetTop-2; if(height<10)return; let slider=makeSlider(b,start,end); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; $("slidersLayer").appendChild(slider); }); }
   function makeSlider(b,start,end){ let el=document.createElement("div"); el.className="slider "+(b.confirmed==="Да"?"confirmed":b.confirmed==="Нет"?"rejected":"pending"); let nd=document.createElement("div"); nd.className="sl-name"; nd.textContent=b.name||"—"; let td=document.createElement("div"); td.className="sl-time"; td.textContent=`${fmt(start)} – ${fmt(end)}`; el.append(nd,td); el.addEventListener("click",e=>{ e.stopPropagation(); showInfoModal(b); }); return el; }
   function showLoad(){ $("loader").style.display="flex"; } function hideLoad(){ $("loader").style.display="none"; }
   function openImg(){ $("imgPopup").classList.add("open"); } function closeImg(){ $("imgPopup").classList.remove("open"); }
   ["bookModal","infoModal"].forEach(id=>{ $(id).addEventListener("click",e=>{ if(e.target===$(id)){ $(id).classList.remove("open"); if(id==="infoModal")curId=null; } }); });
   $("imgPopup").addEventListener("click",e=>{ if(e.target===$("imgPopup")) closeImg(); });
-  let lastDesktop=isDesktop(); window.addEventListener("resize",()=>{ if(isDesktop()!==lastDesktop){ lastDesktop=isDesktop(); loadSliders(); } });
+  let lastDesktop=isDesktop(); window.addEventListener("resize",()=>{ let now=isDesktop(); if(now!==lastDesktop){ lastDesktop=now; setTimeout(()=>{ loadSliders(); }, 60); } else { setTimeout(()=>{ loadSliders(); }, 60); } });
 </script>
 </body>
 </html>

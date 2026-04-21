@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
-  <title>Бильярд · Брони | Интерактивные ползунки (ресайз и протяжка)</title>
+  <title>Бильярд · Брони | Улучшенный ресайз ползунков</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png"/>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
@@ -233,7 +233,6 @@
       .ctrl { flex-direction: column; align-items: stretch; }
       .btn-book { width: 100%; justify-content: center; }
     }
-    #tableMobile thead th, #tableMobile td { border: .5px solid var(--border2); text-align: center; }
 
     #slidersLayer {
       position: absolute;
@@ -255,9 +254,13 @@
       flex-direction: column;
       justify-content: center;
       gap: 2px;
-      transition: all 0.1s;
+      transition: box-shadow 0.1s, opacity 0.1s;
       box-shadow: 0 2px 6px rgba(0,0,0,0.08);
       background-clip: padding-box;
+    }
+    .slider.resizing {
+      opacity: 0.9;
+      transition: none;
     }
     .slider:hover { opacity: 0.92; transform: scale(1.01); z-index: 20; }
     .slider.pending   { background: rgba(255,159,10,0.25); border: 1px solid rgba(255,159,10,0.8); }
@@ -278,16 +281,17 @@
     .resize-handle-left, .resize-handle-right {
       position: absolute;
       top: 0;
-      width: 14px;
+      width: 16px;
       height: 100%;
       cursor: ew-resize;
-      background: rgba(0,0,0,0.08);
+      background: rgba(0,0,0,0.1);
       z-index: 15;
       pointer-events: auto;
       border-radius: 12px;
-      transition: background 0.1s;
+      transition: background 0.15s;
     }
-    .resize-handle-left:hover, .resize-handle-right:hover { background: rgba(0,0,0,0.25); }
+    .resize-handle-left:hover, .resize-handle-right:hover { background: rgba(0,0,0,0.3); }
+    .resize-handle-left:active, .resize-handle-right:active { background: rgba(0,0,0,0.4); }
     .resize-handle-left { left: 0; border-radius: 12px 0 0 12px; }
     .resize-handle-right { right: 0; border-radius: 0 12px 12px 0; }
 
@@ -410,6 +414,7 @@
   let nextTempId = 1;
   let dragState = { active: false, lane: null, startIdx: null, currentIdx: null };
   let curInfoBooking = null;
+  let resizeState = { active: false, edge: null, localRef: null, lane: null, startX: 0, originalStart: null, originalEnd: null };
 
   const $ = id => document.getElementById(id);
   const qs = (s, p=document) => p.querySelector(s);
@@ -501,6 +506,11 @@
     }catch(e){ console.warn(e); } finally{ hideLoad(); }
   }
 
+  function getSlotIndexByTime(timeValue){
+    for(let i=0; i<slots.length; i++) if(slots[i].key === timeValue) return i;
+    return -1;
+  }
+
   function renderAllSliders(){
     $("slidersLayer").innerHTML = "";
     if(!isDesktop()) return;
@@ -544,9 +554,62 @@
     updateCardsList();
   }
 
-  function getSlotIndexByTime(timeValue){
-    for(let i=0; i<slots.length; i++) if(slots[i].key === timeValue) return i;
-    return -1;
+  function startResize(localRef, laneIdx, edge, e){
+    e.stopPropagation();
+    resizeState.active = true;
+    resizeState.edge = edge;
+    resizeState.localRef = localRef;
+    resizeState.lane = laneIdx;
+    resizeState.originalStart = localRef.start;
+    resizeState.originalEnd = localRef.end;
+    
+    document.body.style.cursor = 'ew-resize';
+    document.body.classList.add('resizing-active');
+    
+    const onMouseMove = (moveEvent) => {
+      if(!resizeState.active) return;
+      const targetSlot = moveEvent.target.closest('.slot');
+      if(!targetSlot) return;
+      const targetLane = parseInt(targetSlot.dataset.lane);
+      if(targetLane !== laneIdx) return;
+      const newSlotIdx = parseInt(targetSlot.dataset.si);
+      if(isNaN(newSlotIdx)) return;
+      const newTimeValue = slots[newSlotIdx].key;
+      
+      let currentStart = resizeState.originalStart;
+      let currentEnd = resizeState.originalEnd;
+      let startIdx = getSlotIndexByTime(currentStart);
+      let endIdx = getSlotIndexByTime(currentEnd);
+      if(startIdx === -1 || endIdx === -1) return;
+      
+      let newStart = currentStart, newEnd = currentEnd;
+      if(edge === 'left'){
+        if(newSlotIdx < endIdx){
+          newStart = newTimeValue;
+        } else return;
+      } else {
+        if(newSlotIdx > startIdx){
+          newEnd = newTimeValue;
+        } else return;
+      }
+      
+      if(newStart !== currentStart || newEnd !== currentEnd){
+        localRef.start = newStart;
+        localRef.end = newEnd;
+        renderAllSliders();
+      }
+    };
+    
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = '';
+      document.body.classList.remove('resizing-active');
+      resizeState.active = false;
+    };
+    
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   }
 
   function createBookingSlider(booking, start, end, laneIdx, isLocal, localRef = null){
@@ -564,6 +627,7 @@
     let timeDiv = document.createElement("div"); timeDiv.className="sl-time"; timeDiv.textContent=`${fmt(start)} – ${fmt(end)}`;
     div.append(nameDiv, timeDiv);
     div.addEventListener("click", (e)=>{
+      if(resizeState.active) return;
       e.stopPropagation();
       if(isLocal && localRef){
         if(confirm("Удалить этот интервал?")){
@@ -581,57 +645,8 @@
       let rightHandle = document.createElement("div"); rightHandle.className="resize-handle-right";
       div.appendChild(leftHandle); div.appendChild(rightHandle);
       
-      let resizeActive = false, resizeEdge = null;
-      const startResize = (edge, e) => {
-        e.stopPropagation();
-        resizeActive = true;
-        resizeEdge = edge;
-        document.body.style.cursor = 'ew-resize';
-        
-        const onMouseMove = (moveEvent) => {
-          if(!resizeActive) return;
-          const targetSlot = moveEvent.target.closest('.slot');
-          if(!targetSlot) return;
-          const targetLane = parseInt(targetSlot.dataset.lane);
-          if(targetLane !== laneIdx) return;
-          const newSlotIdx = parseInt(targetSlot.dataset.si);
-          if(isNaN(newSlotIdx)) return;
-          const newTimeValue = slots[newSlotIdx].key;
-          
-          let currentStart = localRef.start;
-          let currentEnd = localRef.end;
-          let startIdx = getSlotIndexByTime(currentStart);
-          let endIdx = getSlotIndexByTime(currentEnd);
-          if(startIdx === -1 || endIdx === -1) return;
-          
-          let newStart = currentStart, newEnd = currentEnd;
-          if(edge === 'left'){
-            if(newTimeValue < currentEnd && getSlotIndexByTime(newTimeValue) < endIdx){
-              newStart = newTimeValue;
-            } else return;
-          } else {
-            if(newTimeValue > currentStart && getSlotIndexByTime(newTimeValue) > startIdx){
-              newEnd = newTimeValue;
-            } else return;
-          }
-          if(newStart !== currentStart || newEnd !== currentEnd){
-            localRef.start = newStart;
-            localRef.end = newEnd;
-            renderAllSliders();
-          }
-        };
-        
-        const onMouseUp = () => {
-          document.removeEventListener('mousemove', onMouseMove);
-          document.removeEventListener('mouseup', onMouseUp);
-          document.body.style.cursor = '';
-          resizeActive = false;
-        };
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-      };
-      leftHandle.addEventListener('mousedown', (e) => startResize('left', e));
-      rightHandle.addEventListener('mousedown', (e) => startResize('right', e));
+      leftHandle.addEventListener('mousedown', (e) => startResize(localRef, laneIdx, 'left', e));
+      rightHandle.addEventListener('mousedown', (e) => startResize(localRef, laneIdx, 'right', e));
     }
     return div;
   }

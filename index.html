@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
-  <title>Бильярд · Брони | Ресайз ползунков (уменьшение/увеличение)</title>
+  <title>Бильярд · Брони | Интерактивные ползунки (ресайз и протяжка)</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png"/>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
@@ -405,7 +405,7 @@
   const GRP_CLASS = ['grp-navy','grp-sage','grp-rust'];
   const ROW_CLASS = ['row-navy','row-sage','row-rust'];
 
-  let localBookings = []; // { lane, start, end, tempId }
+  let localBookings = [];
   let savedBookings = [];
   let nextTempId = 1;
   let dragState = { active: false, lane: null, startIdx: null, currentIdx: null };
@@ -544,6 +544,11 @@
     updateCardsList();
   }
 
+  function getSlotIndexByTime(timeValue){
+    for(let i=0; i<slots.length; i++) if(slots[i].key === timeValue) return i;
+    return -1;
+  }
+
   function createBookingSlider(booking, start, end, laneIdx, isLocal, localRef = null){
     let div = document.createElement("div");
     let statusClass = "pending";
@@ -571,23 +576,12 @@
       }
     });
     
-    // Ручки для изменения размера (только для локальных броней)
     if(isLocal && localRef){
       let leftHandle = document.createElement("div"); leftHandle.className="resize-handle-left";
       let rightHandle = document.createElement("div"); rightHandle.className="resize-handle-right";
       div.appendChild(leftHandle); div.appendChild(rightHandle);
       
-      // Получаем актуальную карту индексов ячеек для данного стола
-      const getCurrentSlotIndex = (timeValue) => {
-        for(let idx = 0; idx < slots.length; idx++){
-          if(slots[idx].key === timeValue) return idx;
-        }
-        return -1;
-      };
-      
-      let resizeActive = false;
-      let resizeEdge = null;
-      
+      let resizeActive = false, resizeEdge = null;
       const startResize = (edge, e) => {
         e.stopPropagation();
         resizeActive = true;
@@ -606,36 +600,20 @@
           
           let currentStart = localRef.start;
           let currentEnd = localRef.end;
-          let startIdx = getCurrentSlotIndex(currentStart);
-          let endIdx = getCurrentSlotIndex(currentEnd);
-          
+          let startIdx = getSlotIndexByTime(currentStart);
+          let endIdx = getSlotIndexByTime(currentEnd);
           if(startIdx === -1 || endIdx === -1) return;
           
-          let newStart = currentStart;
-          let newEnd = currentEnd;
-          
+          let newStart = currentStart, newEnd = currentEnd;
           if(edge === 'left'){
-            // Изменяем левую границу: новый старт не может быть больше или равен текущему концу
-            if(newTimeValue < currentEnd){
+            if(newTimeValue < currentEnd && getSlotIndexByTime(newTimeValue) < endIdx){
               newStart = newTimeValue;
-              // Дополнительно проверяем, чтобы start не стал > end
-              let newStartIdx = getCurrentSlotIndex(newStart);
-              if(newStartIdx >= endIdx) return;
-            } else {
-              return;
-            }
-          } else if(edge === 'right'){
-            // Изменяем правую границу: новый конец не может быть меньше или равен текущему старту
-            if(newTimeValue > currentStart){
+            } else return;
+          } else {
+            if(newTimeValue > currentStart && getSlotIndexByTime(newTimeValue) > startIdx){
               newEnd = newTimeValue;
-              let newEndIdx = getCurrentSlotIndex(newEnd);
-              if(newEndIdx <= startIdx) return;
-            } else {
-              return;
-            }
+            } else return;
           }
-          
-          // Обновляем только если реально изменилось
           if(newStart !== currentStart || newEnd !== currentEnd){
             localRef.start = newStart;
             localRef.end = newEnd;
@@ -649,11 +627,9 @@
           document.body.style.cursor = '';
           resizeActive = false;
         };
-        
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
       };
-      
       leftHandle.addEventListener('mousedown', (e) => startResize('left', e));
       rightHandle.addEventListener('mousedown', (e) => startResize('right', e));
     }

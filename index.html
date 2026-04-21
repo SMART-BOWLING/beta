@@ -52,7 +52,7 @@
     .dot-red   { background: var(--red); }
     .grid-card { background: var(--surface); border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,.06); overflow: hidden; border: .5px solid var(--border); width: 100%; }
     .grid-scroll { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; position: relative; width: 100%; }
-    #tableDesktop { display: table; border-collapse: collapse; table-layout: fixed; width: 100%; min-width: 1100px; user-select: none; font-size: 14px; position: relative; }
+    #tableDesktop { display: table; border-collapse: collapse; table-layout: fixed; width: 100%; min-width: 1100px; user-select: none; font-size: 14px; }
     #tableDesktop thead th { height: var(--cell-h); font-size: 13px; font-weight: 600; color: var(--ink3); border-bottom: 1px solid var(--border2); border-right: .5px solid var(--border); text-align: center; background: var(--surface2); position: sticky; top: 0; z-index: 3; }
     #tableDesktop thead th.corner { width: var(--lane-w); min-width: var(--lane-w); background: var(--surface2); color: var(--ink2); border-right: 1px solid var(--border2); position: sticky; left: 0; z-index: 5; }
     #tableDesktop thead th.th-time { cursor: pointer; width: var(--cell-w); min-width: var(--cell-w); transition: .1s; }
@@ -61,13 +61,11 @@
     .lane-hdr.grp-navy { color: #1d4f9f; background: #eef3fc !important; }
     .lane-hdr.grp-sage { color: #1a6640; background: #edf7f0 !important; }
     .lane-hdr.grp-rust { color: #a83418; background: #fdf0ea !important; }
-    #tableDesktop tbody td.slot { cursor: pointer; border-bottom: .5px solid var(--border); border-right: .5px solid var(--border); vertical-align: middle; text-align: center; transition: background 0.05s; position: relative; }
-    #tableDesktop tbody td.slot.drag-highlight { background: #ffe8b6 !important; border-left: 2px solid var(--amber); border-right: 2px solid var(--amber); }
-    #tableDesktop tbody td.slot.drag-start { background: #ffdd99 !important; border-top-left-radius: 8px; border-bottom-left-radius: 8px; border-left: 2px solid var(--amber); }
-    #tableDesktop tbody td.slot.drag-end { background: #ffdd99 !important; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-right: 2px solid var(--amber); }
+    #tableDesktop tbody td.slot { cursor: pointer; border-bottom: .5px solid var(--border); border-right: .5px solid var(--border); vertical-align: middle; text-align: center; transition: background 0.05s; }
+    #tableDesktop tbody td.slot.range-selected { background: #ffe8b6 !important; }
+    #tableDesktop tbody td.slot.range-start { background: #ffdd99 !important; border-top-left-radius: 8px; border-bottom-left-radius: 8px; border-left: 2px solid var(--amber); }
+    #tableDesktop tbody td.slot.range-end { background: #ffdd99 !important; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-right: 2px solid var(--amber); }
     #tableDesktop tbody td.slot.selected { background: #fff3c4 !important; border-left: 2px solid var(--amber); border-right: 2px solid var(--amber); }
-    #tableDesktop tbody td.slot.sel-left { border-left: 2px solid var(--amber); border-radius: 6px 0 0 6px; }
-    #tableDesktop tbody td.slot.sel-right { border-right: 2px solid var(--amber); border-radius: 0 6px 6px 0; }
     #tableMobile { display: none; border-collapse: collapse; width: 100%; user-select: none; }
     @media (max-width: 800px) {
       #tableDesktop { display: none; }
@@ -81,16 +79,13 @@
     #tableMobile thead th.hdr-navy { background: #eef3fc; color: #1d4f9f; }
     #tableMobile thead th.hdr-sage { background: #edf7f0; color: #1a6640; }
     #tableMobile thead th.hdr-rust { background: #fdf0ea; color: #a83418; }
-    #tableMobile thead th.hl { background: #fff4e0 !important; color: var(--amber) !important; }
-    #tableMobile th.tcol { background: var(--surface2); color: var(--ink3); font-size: 11px; font-weight: 600; border-left: .5px solid var(--border2); cursor: pointer; position: sticky; top: 0; z-index: 3; }
-    #tableMobile td { height: 42px; border-bottom: .5px solid var(--border); border-right: .5px solid var(--border); text-align: center; font-size: 11px; cursor: pointer; }
-    #tableMobile td.slot.drag-highlight { background: #ffe8b6 !important; border-top: 2px solid var(--amber); border-bottom: 2px solid var(--amber); }
-    #tableMobile td.slot.drag-start { background: #ffdd99 !important; border-top-left-radius: 8px; border-top-right-radius: 8px; border-top: 2px solid var(--amber); }
-    #tableMobile td.slot.drag-end { background: #ffdd99 !important; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; border-bottom: 2px solid var(--amber); }
+    #tableMobile td.slot.range-selected { background: #ffe8b6 !important; }
+    #tableMobile td.slot.range-start { background: #ffdd99 !important; border-top-left-radius: 8px; border-top-right-radius: 8px; border-top: 2px solid var(--amber); }
+    #tableMobile td.slot.range-end { background: #ffdd99 !important; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; border-bottom: 2px solid var(--amber); }
     #tableMobile td.slot.selected { background: #fff3c4 !important; border-top: 2px solid var(--amber); border-bottom: 2px solid var(--amber); }
     #slidersLayer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
     .slider { position: absolute; border-radius: 12px; pointer-events: auto; cursor: pointer; padding: 6px 10px; display: flex; flex-direction: column; justify-content: center; gap: 2px; transition: 0.1s; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-    .slider:hover { opacity: 0.92; transform: scale(1.01); z-index: 20; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .slider:hover { opacity: 0.92; transform: scale(1.01); z-index: 20; }
     .slider.pending   { background: rgba(255,159,10,0.2); border: 1px solid rgba(255,159,10,0.7); }
     .slider.confirmed { background: rgba(52,199,89,0.2); border: 1px solid rgba(52,199,89,0.7); }
     .slider.rejected  { background: rgba(255,59,48,0.2); border: 1px solid rgba(255,59,48,0.7); }
@@ -134,10 +129,63 @@
     .loader-box { background: white; border-radius: 32px; padding: 28px 40px; text-align: center; }
     .spin { width: 38px; height: 38px; border: 3px solid #ddd; border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 14px; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    /* Preview bubble like DayPilot */
-    .drag-preview { position: fixed; background: rgba(0,0,0,0.85); color: white; padding: 8px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; pointer-events: none; z-index: 10000; font-family: var(--font); white-space: nowrap; backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-    .tooltip-bubble { position: fixed; background: rgba(0,0,0,0.85); color: white; padding: 8px 12px; border-radius: 12px; font-size: 12px; pointer-events: none; z-index: 10001; font-family: var(--font); backdrop-filter: blur(8px); max-width: 250px; white-space: normal; }
-    .tooltip-bubble strong { display: block; margin-bottom: 4px; }
+    
+    /* DayPilot-style dialog */
+    .booking-dialog-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+    .booking-dialog {
+      background: white;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      animation: slideUp 0.2s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .booking-dialog-header {
+      padding: 20px 20px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+    .booking-dialog-header h3 { margin: 0; font-size: 20px; }
+    .close-btn {
+      width: 32px; height: 32px; border-radius: 50%; border: none;
+      background: #f0f0f0; cursor: pointer; font-size: 20px;
+    }
+    .booking-dialog-body { padding: 20px; }
+    .info-range {
+      background: #f5f5f7; padding: 12px; border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    .range-details { margin-top: 8px; font-size: 14px; color: #666; }
+    .booking-dialog-body input,
+    .booking-dialog-body textarea {
+      width: 100%; padding: 12px; margin-bottom: 12px;
+      border: 1px solid #ddd; border-radius: 10px;
+      font-family: inherit; font-size: 14px; box-sizing: border-box;
+    }
+    .booking-dialog-footer {
+      padding: 0 20px 20px; display: flex; gap: 12px;
+    }
+    .booking-dialog-footer button {
+      flex: 1; padding: 12px; border: none; border-radius: 10px;
+      font-weight: 600; cursor: pointer;
+    }
+    .btn-cancel { background: #f0f0f0; color: #333; }
+    .btn-ok { background: #0071e3; color: white; }
   </style>
 </head>
 <body>
@@ -153,7 +201,7 @@
   <div class="page">
     <div class="ctrl">
       <div class="date-field"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><input type="date" id="dateInput"/></div>
-      <button class="btn-book" onclick="openBookModal()">➕ Новая бронь</button>
+      <button class="btn-book" onclick="openLegacyBookModal()">➕ Новая бронь</button>
     </div>
     <div class="pills"><div class="pill"><div class="dot dot-navy"></div>Столы 1–3</div><div class="pill"><div class="dot dot-sage"></div>Столы 4–6</div><div class="pill"><div class="dot dot-rust"></div>Столы 7–12</div><div class="pill"><div class="dot dot-amber"></div>Ожидает</div><div class="pill"><div class="dot dot-green"></div>Подтверждено</div><div class="pill"><div class="dot dot-red"></div>Отменено</div></div>
     <div class="grid-card"><div class="grid-scroll" id="gridScroll">
@@ -165,9 +213,10 @@
   </div>
 </div>
 <div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="sheet-title">Новая бронь</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div class="f-group"><label class="f-label">Имя клиента</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+380 99 123 45 67"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания..."></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitForm()">Подтвердить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
-<div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="sheet-title">Детали брони</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span class="info-lbl">Стол</span><span id="i-table"></span></div><div class="info-row"><span class="info-lbl">Время</span><span id="i-time"></span></div><div class="info-row"><span class="info-lbl">Имя</span><span id="i-name"></span></div><div class="info-row"><span class="info-lbl">Телефон</span><span id="i-phone"></span></div><div class="info-row"><span class="info-lbl">Комментарий</span><span id="i-comment"></span></div><div class="info-row"><span class="info-lbl">Статус</span><span id="i-status"></span></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Состоялось</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">🗑 Удалить бронь</button></div></div></div>
+<div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="sheet-title">Детали</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span class="info-lbl">Стол</span><span id="i-table"></span></div><div class="info-row"><span class="info-lbl">Время</span><span id="i-time"></span></div><div class="info-row"><span class="info-lbl">Имя</span><span id="i-name"></span></div><div class="info-row"><span class="info-lbl">Телефон</span><span id="i-phone"></span></div><div class="info-row"><span class="info-lbl">Комментарий</span><span id="i-comment"></span></div><div class="info-row"><span class="info-lbl">Статус</span><span id="i-status"></span></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Состоялось</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">🗑 Удалить бронь</button></div></div></div>
 <div id="imgPopup"><div class="img-wrap"><button class="img-x" onclick="closeImg()">×</button><img src="https://i.postimg.cc/52ZDKDDw/55.png" alt="Схема столов"/></div></div>
 <div id="loader"><div class="loader-box"><div class="spin"></div><div class="loader-txt">Загрузка...</div></div></div>
+
 <script>
   const GAS = "https://script.google.com/macros/s/AKfycbxfRLDGA29FrqKS61HmYN_FUnDwOydeCaEdeW4oc4wyroQzvb4h1OnwQ5HeotIHhcj9/exec";
   const ALLOWED = ["vadiksss900@gmail.com","sergey99belov@gmail.com","popadinecvasil3@gmail.com","veronicadiakova04@gmail.com","info.luckystrike.kh@gmail.com","sashavolobuev123890@gmail.com","egorgorbushko@gmail.com","shatrava.o@gmail.com","Craftmax30@gmail.com","bowlingblock.b@gmail.com","lana.arnaut@gmail.com","polosinnikita1224@gmail.com","sofialat1506@gmail.com","ll3991940@gmail.com","ken040888@gmail.com"];
@@ -178,63 +227,331 @@
   const ROW_CLASS = ['row-navy','row-sage','row-rust'];
   let ivs = {};
   let curId = null;
-  let dragState = { active: false, lane: null, startIdx: null, currentIdx: null, isDesktop: true };
-  let previewElement = null;
-  let tooltipElement = null;
   const $ = id => document.getElementById(id);
   const qs = (s, p=document) => p.querySelector(s);
   const qsa = (s, p=document) => Array.from(p.querySelectorAll(s));
 
-  function parseJwt(t){ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
-  function handleCredentialResponse(r){ let d=parseJwt(r.credential); if(ALLOWED.includes(d.email)){ localStorage.setItem("ue",d.email); location.reload(); } else alert("Доступ запрещён"); }
-  window.onload = ()=>{ if(localStorage.getItem("ue") && ALLOWED.includes(localStorage.getItem("ue"))){ $("login").style.display="none"; $("content").style.display="block"; init(); } };
-  function init(){
-    let today = new Date().toISOString().split('T')[0];
-    $("dateInput").min = today; $("dateInput").value = today;
-    buildDesktopTable(); buildMobileTable();
-    attachDragEvents();
-    $("dateInput").addEventListener("change", ()=>{ resetSel(); loadSliders(); });
-    renderCards(); loadSliders();
-    attachHoverTooltips(); // Like DayPilot bubble
+  // ========== DayPilot-style Selection Manager ==========
+  class SelectionManager {
+    constructor() {
+      this.isSelecting = false;
+      this.startCell = null;
+      this.currentCell = null;
+    }
+
+    startSelection(cell) {
+      this.isSelecting = true;
+      this.startCell = cell;
+      this.currentCell = cell;
+      this.clearSelection();
+      this.highlightCell(cell);
+    }
+
+    updateSelection(cell) {
+      if (!this.isSelecting) return;
+      this.currentCell = cell;
+      this.clearSelection();
+      this.highlightRange();
+    }
+
+    highlightCell(cell) {
+      if (!cell) return;
+      cell.classList.add('range-selected');
+      cell.classList.add('range-start');
+      cell.classList.add('range-end');
+    }
+
+    highlightRange() {
+      if (!this.startCell || !this.currentCell) return;
+      
+      const startIdx = parseInt(this.startCell.dataset.si);
+      const currentIdx = parseInt(this.currentCell.dataset.si);
+      const lane = parseInt(this.startCell.dataset.lane);
+      const isDesktop = window.innerWidth > 800;
+      
+      const minIdx = Math.min(startIdx, currentIdx);
+      const maxIdx = Math.max(startIdx, currentIdx);
+      
+      for (let i = minIdx; i <= maxIdx; i++) {
+        const selector = `td.slot[data-lane="${lane}"][data-si="${i}"]`;
+        const cells = qsa(selector, isDesktop ? $("tableDesktop") : $("tableMobile"));
+        cells.forEach(cell => {
+          cell.classList.add('range-selected');
+          if (i === minIdx) cell.classList.add('range-start');
+          if (i === maxIdx) cell.classList.add('range-end');
+        });
+      }
+    }
+
+    clearSelection() {
+      qsa('.range-selected, .range-start, .range-end').forEach(cell => {
+        cell.classList.remove('range-selected', 'range-start', 'range-end');
+      });
+    }
+
+    endSelection() {
+      if (!this.isSelecting || !this.startCell || !this.currentCell) {
+        this.reset();
+        return null;
+      }
+      
+      const startIdx = parseInt(this.startCell.dataset.si);
+      const currentIdx = parseInt(this.currentCell.dataset.si);
+      
+      if (startIdx === currentIdx) {
+        this.reset();
+        return null;
+      }
+      
+      const result = {
+        lane: parseInt(this.startCell.dataset.lane),
+        startIdx: Math.min(startIdx, currentIdx),
+        endIdx: Math.max(startIdx, currentIdx),
+        startTime: slots[Math.min(startIdx, currentIdx)].key,
+        endTime: slots[Math.max(startIdx, currentIdx)].key
+      };
+      
+      this.reset();
+      return result;
+    }
+
+    reset() {
+      this.isSelecting = false;
+      this.startCell = null;
+      this.currentCell = null;
+      this.clearSelection();
+    }
   }
-  
-  // Like DayPilot bubble on hover
-  function attachHoverTooltips(){
-    const slidersLayer = $("slidersLayer");
-    slidersLayer.addEventListener("mouseenter", (e) => {
-      let slider = e.target.closest('.slider');
-      if(slider && !tooltipElement){
-        let booking = slider.bookingData;
-        if(booking){
-          showTooltip(slider, booking);
+
+  // ========== DayPilot-style Booking Dialog ==========
+  class BookingDialog {
+    static async show(options = {}) {
+      return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'booking-dialog-overlay';
+        modal.innerHTML = `
+          <div class="booking-dialog">
+            <div class="booking-dialog-header">
+              <h3>${options.title || 'Новая бронь'}</h3>
+              <button class="close-btn">×</button>
+            </div>
+            <div class="booking-dialog-body">
+              <div class="info-range">
+                <strong>${options.message || 'Создать новую бронь?'}</strong>
+                <div class="range-details">
+                  Стол №${(options.lane || 0) + 1}<br>
+                  ${options.timeRange || ''}
+                </div>
+              </div>
+              <input type="text" id="bookingName" placeholder="Имя клиента" value="${options.defaultText || ''}">
+              <input type="tel" id="bookingPhone" placeholder="Телефон">
+              <textarea id="bookingComment" placeholder="Комментарий" rows="2"></textarea>
+            </div>
+            <div class="booking-dialog-footer">
+              <button class="btn-cancel">Отмена</button>
+              <button class="btn-ok">Создать</button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        const close = () => {
+          modal.remove();
+          resolve({ canceled: true });
+        };
+        
+        const submit = () => {
+          const name = modal.querySelector('#bookingName').value;
+          const phone = modal.querySelector('#bookingPhone').value;
+          const comment = modal.querySelector('#bookingComment').value;
+          
+          if (!name || !phone) {
+            alert('Пожалуйста, заполните имя и телефон');
+            return;
+          }
+          
+          modal.remove();
+          resolve({ 
+            canceled: false, 
+            result: { name, phone, comment }
+          });
+        };
+        
+        modal.querySelector('.close-btn').onclick = close;
+        modal.querySelector('.btn-cancel').onclick = close;
+        modal.querySelector('.btn-ok').onclick = submit;
+        
+        modal.querySelector('#bookingName').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') submit();
+        });
+      });
+    }
+  }
+
+  // ========== DayPilot-style Event Manager ==========
+  class EventManager {
+    constructor() {
+      this.events = [];
+      this.listeners = {};
+    }
+
+    on(event, callback) {
+      if (!this.listeners[event]) this.listeners[event] = [];
+      this.listeners[event].push(callback);
+    }
+
+    emit(event, data) {
+      if (this.listeners[event]) {
+        this.listeners[event].forEach(callback => callback(data));
+      }
+    }
+
+    addEvent(eventData) {
+      const newEvent = {
+        id: this.generateId(),
+        ...eventData,
+        createdAt: new Date().toISOString()
+      };
+      this.events.push(newEvent);
+      this.emit('eventAdded', newEvent);
+      return newEvent;
+    }
+
+    generateId() {
+      return 'evt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+  }
+
+  // Initialize managers
+  const selectionManager = new SelectionManager();
+  const eventManager = new EventManager();
+
+  function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
+
+  // Save booking to server
+  async function saveBookingToServer(event) {
+    const booking = {
+      date: $("dateInput").value,
+      tableNumber: event.lane + 1,
+      start: event.start,
+      end: event.end,
+      name: event.name,
+      phone: event.phone,
+      comment: event.comment || '',
+      status: 'pending'
+    };
+    
+    try {
+      await fetch(GAS, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify({ bookings: [booking] })
+      });
+      await loadSliders();
+    } catch(e) {
+      console.error("Error saving booking:", e);
+    }
+  }
+
+  // Event subscription
+  eventManager.on('eventAdded', async (event) => {
+    await saveBookingToServer(event);
+  });
+
+  // Initialize drag events (DayPilot-style)
+  function initDragEvents() {
+    const container = $("gridScroll");
+    
+    const getSlotFromTarget = (el) => {
+      while (el && !el.classList?.contains('slot')) el = el.parentElement;
+      return el;
+    };
+    
+    const handleStart = (e) => {
+      const slot = getSlotFromTarget(e.target);
+      if (slot && !slot.closest('.slider')) {
+        selectionManager.startSelection(slot);
+        e.preventDefault();
+      }
+    };
+    
+    const handleMove = (e) => {
+      if (selectionManager.isSelecting) {
+        let clientX, clientY;
+        if (e.touches) {
+          clientX = e.touches[0].clientX;
+          clientY = e.touches[0].clientY;
+        } else {
+          clientX = e.clientX;
+          clientY = e.clientY;
+        }
+        const slot = document.elementsFromPoint(clientX, clientY)
+          .find(el => el.classList?.contains('slot'));
+        if (slot) {
+          selectionManager.updateSelection(slot);
         }
       }
-    }, true);
-    slidersLayer.addEventListener("mouseleave", (e) => {
-      let slider = e.target.closest('.slider');
-      if(slider && tooltipElement){
-        hideTooltip();
+    };
+    
+    const handleEnd = async () => {
+      const selection = selectionManager.endSelection();
+      if (selection && selection.startIdx !== selection.endIdx) {
+        const timeRange = `${fmt(selection.startTime)} – ${fmt(selection.endTime)}`;
+        const result = await BookingDialog.show({
+          title: 'Новая бронь',
+          message: 'Создать новую бронь?',
+          lane: selection.lane,
+          timeRange: timeRange,
+          defaultText: `Бронь на стол ${selection.lane + 1}`
+        });
+        
+        if (!result.canceled) {
+          eventManager.addEvent({
+            lane: selection.lane,
+            start: selection.startTime,
+            end: selection.endTime,
+            name: result.result.name,
+            phone: result.result.phone,
+            comment: result.result.comment,
+            date: $("dateInput").value,
+            status: 'pending'
+          });
+        }
       }
-    }, true);
+      selectionManager.reset();
+      document.body.style.userSelect = '';
+    };
+    
+    container.addEventListener("mousedown", handleStart);
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleEnd);
+    container.addEventListener("touchstart", handleStart);
+    window.addEventListener("touchmove", handleMove);
+    window.addEventListener("touchend", handleEnd);
   }
+
+  function parseJwt(t){ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
+  function handleCredentialResponse(r){ let d=parseJwt(r.credential); if(ALLOWED.includes(d.email)){ localStorage.setItem("ue",d.email); location.reload(); } else alert("Доступ запрещён"); }
   
-  function showTooltip(target, booking){
-    if(tooltipElement) hideTooltip();
-    tooltipElement = document.createElement('div');
-    tooltipElement.className = 'tooltip-bubble';
-    let statusText = booking.confirmed === "Да" ? "✅ Подтверждено" : (booking.confirmed === "Нет" ? "❌ Отменено" : "⏳ Ожидает");
-    tooltipElement.innerHTML = `<strong>${booking.name || "Без имени"}</strong>📞 ${booking.phone || "—"}<br>📅 ${fmt(+booking.start)} – ${fmt(+booking.end)}<br>${statusText}`;
-    document.body.appendChild(tooltipElement);
-    let rect = target.getBoundingClientRect();
-    tooltipElement.style.left = rect.left + rect.width/2 - tooltipElement.offsetWidth/2 + 'px';
-    tooltipElement.style.top = rect.top - tooltipElement.offsetHeight - 8 + 'px';
-  }
-  
-  function hideTooltip(){
-    if(tooltipElement){
-      tooltipElement.remove();
-      tooltipElement = null;
+  window.onload = ()=>{
+    if(localStorage.getItem("ue") && ALLOWED.includes(localStorage.getItem("ue"))){ 
+      $("login").style.display="none"; 
+      $("content").style.display="block"; 
+      init(); 
     }
+  };
+  
+  function init(){
+    let today = new Date().toISOString().split('T')[0];
+    $("dateInput").min = today; 
+    $("dateInput").value = today;
+    buildDesktopTable(); 
+    buildMobileTable();
+    initDragEvents();
+    $("dateInput").addEventListener("change", ()=>{ resetSel(); loadSliders(); });
+    renderCards(); 
+    loadSliders();
   }
   
   function buildDesktopTable(){
@@ -248,6 +565,7 @@
       body.appendChild(tr);
     }
   }
+  
   function buildMobileTable(){
     let mtHead=$("mtHeadRow");
     for(let i=0;i<LANES;i++){ let th=document.createElement("th"); let grp=LANE_GROUPS[i]; th.className=grp===0?"hdr-navy":grp===1?"hdr-sage":"hdr-rust"; th.textContent=i+1; mtHead.appendChild(th); }
@@ -259,99 +577,6 @@
     });
   }
   
-  // Like DayPilot preview during drag
-  function showDragPreview(x, y, startTime, endTime, lane){
-    if(previewElement) previewElement.remove();
-    previewElement = document.createElement('div');
-    previewElement.className = 'drag-preview';
-    previewElement.innerHTML = `🎱 Стол ${lane+1} · ${fmt(startTime)} – ${fmt(endTime)}`;
-    document.body.appendChild(previewElement);
-    previewElement.style.left = (x + 15) + 'px';
-    previewElement.style.top = (y + 15) + 'px';
-  }
-  
-  function hideDragPreview(){
-    if(previewElement){
-      previewElement.remove();
-      previewElement = null;
-    }
-  }
-  
-  function attachDragEvents(){
-    const container = $("gridScroll");
-    const isDesktopMode = () => window.innerWidth > 800;
-    function getSlotFromTarget(el){ while(el && !el.classList?.contains('slot')) el=el.parentElement; return el; }
-    function startDrag(e){ 
-      let target = getSlotFromTarget(e.target); 
-      if(!target || target.closest('.slider')) return; // Don't drag on existing bookings
-      dragState.active=true; 
-      dragState.lane = parseInt(target.dataset.lane); 
-      dragState.startIdx = parseInt(target.dataset.si); 
-      dragState.currentIdx = dragState.startIdx; 
-      dragState.isDesktop = isDesktopMode(); 
-      document.body.style.userSelect='none'; 
-      clearDragHighlights(); 
-      highlightRange(); 
-      let startTime = slots[dragState.startIdx].key;
-      let clientX = e.clientX || (e.touches && e.touches[0].clientX);
-      let clientY = e.clientY || (e.touches && e.touches[0].clientY);
-      showDragPreview(clientX, clientY, startTime, startTime, dragState.lane);
-      e.preventDefault(); 
-    }
-    function onDragMove(e){ 
-      if(!dragState.active) return; 
-      let clientX, clientY; 
-      if(e.touches){ clientX=e.touches[0].clientX; clientY=e.touches[0].clientY; } 
-      else { clientX=e.clientX; clientY=e.clientY; } 
-      let elem = document.elementsFromPoint(clientX, clientY).find(el=>el.classList?.contains('slot') && parseInt(el.dataset.lane)===dragState.lane); 
-      if(elem){ 
-        let newIdx = parseInt(elem.dataset.si); 
-        if(newIdx!==dragState.currentIdx){ 
-          dragState.currentIdx = newIdx; 
-          clearDragHighlights(); 
-          highlightRange(); 
-          let startTime = Math.min(dragState.startIdx, dragState.currentIdx);
-          let endTime = Math.max(dragState.startIdx, dragState.currentIdx);
-          showDragPreview(clientX, clientY, slots[startTime].key, slots[endTime].key, dragState.lane);
-        } else {
-          if(previewElement){
-            previewElement.style.left = (clientX + 15) + 'px';
-            previewElement.style.top = (clientY + 15) + 'px';
-          }
-        }
-      } 
-    }
-    function endDrag(){ 
-      hideDragPreview();
-      if(!dragState.active) return; 
-      if(dragState.startIdx!==null && dragState.currentIdx!==null && dragState.startIdx!==dragState.currentIdx){ 
-        let start = Math.min(dragState.startIdx, dragState.currentIdx); 
-        let end = Math.max(dragState.startIdx, dragState.currentIdx); 
-        let startTime = slots[start].key; 
-        let endTime = slots[end].key; 
-        if(startTime !== endTime){ 
-          if(!ivs[dragState.lane]) ivs[dragState.lane]=[]; 
-          ivs[dragState.lane].push({start: startTime, end: endTime}); 
-          renderCards(); 
-        } 
-      } 
-      clearDragHighlights(); 
-      dragState.active=false; 
-      dragState.lane=null; 
-      dragState.startIdx=null; 
-      dragState.currentIdx=null; 
-      document.body.style.userSelect=''; 
-    }
-    function clearDragHighlights(){ qsa("#tableDesktop td.slot.drag-highlight, #tableDesktop td.slot.drag-start, #tableDesktop td.slot.drag-end").forEach(c=>c.classList.remove("drag-highlight","drag-start","drag-end")); qsa("#tableMobile td.slot.drag-highlight, #tableMobile td.slot.drag-start, #tableMobile td.slot.drag-end").forEach(c=>c.classList.remove("drag-highlight","drag-start","drag-end")); }
-    function highlightRange(){ if(dragState.startIdx===null || dragState.currentIdx===null) return; let s=Math.min(dragState.startIdx, dragState.currentIdx), e=Math.max(dragState.startIdx, dragState.currentIdx); let isDesk = dragState.isDesktop; for(let i=s; i<=e; i++){ let selector = `td.slot[data-lane="${dragState.lane}"][data-si="${i}"]`; let cells = qsa(selector, isDesk ? $("tableDesktop") : $("tableMobile")); cells.forEach(cell=>{ cell.classList.add("drag-highlight"); if(i===s) cell.classList.add("drag-start"); if(i===e) cell.classList.add("drag-end"); }); } }
-    container.addEventListener("mousedown", (e)=>{ let slot=getSlotFromTarget(e.target); if(slot && !slot.closest('.slider')){ startDrag(e); e.preventDefault(); } });
-    window.addEventListener("mousemove", onDragMove);
-    window.addEventListener("mouseup", endDrag);
-    container.addEventListener("touchstart", (e)=>{ let slot=getSlotFromTarget(e.target); if(slot && !slot.closest('.slider')){ startDrag(e); e.preventDefault(); } });
-    window.addEventListener("touchmove", onDragMove);
-    window.addEventListener("touchend", endDrag);
-  }
-  function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
   function renderCards(){
     qsa("#tableDesktop td.slot.selected, #tableDesktop td.slot.sel-left, #tableDesktop td.slot.sel-right").forEach(c=>c.classList.remove("selected","sel-left","sel-right"));
     qsa("#tableMobile td.slot.selected, #tableMobile td.slot.sel-top, #tableMobile td.slot.sel-bot").forEach(c=>c.classList.remove("selected","sel-top","sel-bot"));
@@ -364,26 +589,107 @@
     $("cardsContainer").innerHTML=""; let dd=$("dateInput").value.split("-").reverse().join(".");
     for(let k in ivs){(ivs[k]||[]).forEach((iv,idx)=>{ let s=Math.min(iv.start,iv.end), e=Math.max(iv.start,iv.end); let div=document.createElement("div"); div.className="bcard"; div.innerHTML=`<div><div class="bcard-title">Стол №${+k+1}</div><div class="bcard-sub">${dd} · ${fmt(s)} – ${fmt(e)}</div></div>`; let rm=document.createElement("button"); rm.className="bcard-rm"; rm.innerHTML="✕"; rm.onclick=ev=>{ ev.stopPropagation(); ivs[k].splice(idx,1); renderCards(); }; div.appendChild(rm); $("cardsContainer").appendChild(div); }); }
   }
+  
   function resetSel(){ Object.keys(ivs).forEach(k=>ivs[k]=[]); renderCards(); }
-  function openBookModal(){ if(!Object.values(ivs).some(a=>a.length)) return alert("📌 Выделите интервал перетаскиванием мыши по таблице"); $("bookModal").classList.add("open"); }
+  
+  function openLegacyBookModal(){ if(!Object.values(ivs).some(a=>a.length)) return alert("📌 Выделите интервал перетаскиванием мыши по таблице"); $("bookModal").classList.add("open"); }
   function closeBookModal(){ $("bookModal").classList.remove("open"); }
-  async function submitForm(){ let name=$("nameInput").value.trim(), phone=$("phoneInput").value.trim(), comment=$("commentInput").value.trim(), date=$("dateInput").value; if(!name||!phone) return alert("Введите имя и телефон"); let bookings=[]; for(let k in ivs) (ivs[k]||[]).forEach(iv=>bookings.push({date,tableNumber:+k+1,start:iv.start,end:iv.end,name,phone,comment})); if(!bookings.length) return; showLoad(); try{ await Promise.all(bookings.map(b=>fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({bookings:[b]})}))); closeBookModal(); $("nameInput").value=$("phoneInput").value=$("commentInput").value=""; resetSel(); await loadSliders(); } catch(e){ alert("Ошибка"); } finally{ hideLoad(); } }
-  function showInfoModal(b){ $("i-table").textContent="№ "+b.table; $("i-time").textContent=`${fmt(+b.start)} – ${fmt(+b.end)}`; $("i-name").textContent=b.name; $("i-phone").textContent=b.phone; $("i-comment").textContent=b.comment||"—"; let s=$("i-status"); if(b.confirmed==="Да") s.innerHTML='<span style="background:#e0f7e8; padding:4px 12px; border-radius:40px;">✓ Подтверждено</span>'; else if(b.confirmed==="Нет") s.innerHTML='<span style="background:#ffe5e2; padding:4px 12px; border-radius:40px;">✕ Не состоялось</span>'; else s.innerHTML='<span style="background:#fff1df; padding:4px 12px; border-radius:40px;">⏳ Ожидает</span>'; curId=b.id; $("infoModal").classList.add("open"); }
+  
+  async function submitForm(){ 
+    let name=$("nameInput").value.trim(), phone=$("phoneInput").value.trim(), comment=$("commentInput").value.trim(), date=$("dateInput").value; 
+    if(!name||!phone) return alert("Введите имя и телефон"); 
+    let bookings=[]; 
+    for(let k in ivs) (ivs[k]||[]).forEach(iv=>bookings.push({date,tableNumber:+k+1,start:iv.start,end:iv.end,name,phone,comment})); 
+    if(!bookings.length) return; 
+    showLoad(); 
+    try{ 
+      await Promise.all(bookings.map(b=>fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({bookings:[b]})}))); 
+      closeBookModal(); 
+      $("nameInput").value=$("phoneInput").value=$("commentInput").value=""; 
+      resetSel(); 
+      await loadSliders(); 
+    } catch(e){ alert("Ошибка"); } 
+    finally{ hideLoad(); } 
+  }
+  
+  function showInfoModal(b){ 
+    $("i-table").textContent="№ "+b.table; 
+    $("i-time").textContent=`${fmt(+b.start)} – ${fmt(+b.end)}`; 
+    $("i-name").textContent=b.name; 
+    $("i-phone").textContent=b.phone; 
+    $("i-comment").textContent=b.comment||"—"; 
+    let s=$("i-status"); 
+    if(b.confirmed==="Да") s.innerHTML='<span style="background:#e0f7e8; padding:4px 12px; border-radius:40px;">✓ Подтверждено</span>'; 
+    else if(b.confirmed==="Нет") s.innerHTML='<span style="background:#ffe5e2; padding:4px 12px; border-radius:40px;">✕ Не состоялось</span>'; 
+    else s.innerHTML='<span style="background:#fff1df; padding:4px 12px; border-radius:40px;">⏳ Ожидает</span>'; 
+    curId=b.id; 
+    $("infoModal").classList.add("open"); 
+  }
+  
   function closeInfoModal(){ $("infoModal").classList.remove("open"); curId=null; }
+  
   async function confirmBooking(yes){ if(!curId)return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:curId,confirmed:yes})}); closeInfoModal(); await loadSliders(); } catch(e){} finally{ hideLoad(); } }
+  
   async function deleteBooking(){ if(!curId||!confirm("Удалить бронь?"))return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:curId})}); closeInfoModal(); await loadSliders(); } catch(e){} finally{ hideLoad(); } }
+  
   function isDesktop(){ return window.innerWidth>800; }
+  
   async function loadSliders(){ showLoad(); $("slidersLayer").innerHTML=""; try{ let res=await fetch(GAS+"?action=get&date="+$("dateInput").value); let data=await res.json(); if(!data.bookings?.length) return; if(isDesktop()) renderSlidersDesktop(data.bookings); else renderSlidersMobile(data.bookings); } catch(e){} finally{ hideLoad(); } }
-  function renderSlidersDesktop(bookings){ let rows=Array.from($("dtBody").querySelectorAll("tr")); let colByKey={}; slots.forEach((sl,i)=>{ colByKey[sl.key]=i+1; }); bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return; let laneIdx=b.table-1, start=+b.start, end=+b.end, si=colByKey[start], ei=colByKey[end]; if(si==null||ei==null)return; let row=rows[laneIdx]; if(!row)return; let sc=row.cells[si], ec=row.cells[ei]; if(!sc||!ec)return; let left=sc.offsetLeft+1, top=row.offsetTop+1, width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2, height=row.offsetHeight-2; let slider=makeSlider(b,start,end); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; slider.bookingData = b; $("slidersLayer").appendChild(slider); }); }
-  function renderSlidersMobile(bookings){ let mtRows=Array.from($("mtBody").querySelectorAll("tr")); let rowByKey={}; slots.forEach((sl,i)=>{ rowByKey[sl.key]=mtRows[i]; }); bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return; let laneIdx=b.table-1, start=+b.start, end=+b.end, startRow=rowByKey[start], endRow=rowByKey[end]; if(!startRow||!endRow)return; let cell=startRow.cells[laneIdx]; if(!cell)return; let left=cell.offsetLeft+1, top=startRow.offsetTop+1, width=cell.offsetWidth-2, height=(endRow.offsetTop+endRow.offsetHeight)-startRow.offsetTop-2; let slider=makeSlider(b,start,end); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; slider.bookingData = b; $("slidersLayer").appendChild(slider); }); }
-  function makeSlider(b,start,end){ let el=document.createElement("div"); el.className="slider "+(b.confirmed==="Да"?"confirmed":b.confirmed==="Нет"?"rejected":"pending"); let nd=document.createElement("div"); nd.className="sl-name"; nd.textContent=b.name||"—"; let td=document.createElement("div"); td.className="sl-time"; td.textContent=`${fmt(start)} – ${fmt(end)}`; el.append(nd,td); el.addEventListener("click",e=>{ e.stopPropagation(); showInfoModal(b); }); // Right-click context menu like DayPilot
-    el.addEventListener("contextmenu", e=>{ e.preventDefault(); e.stopPropagation(); if(confirm(`Удалить бронь "${b.name}"?`)) deleteBookingById(b.id); }); return el; }
-  async function deleteBookingById(id){ showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:id})}); await loadSliders(); } catch(e){} finally{ hideLoad(); } }
-  function showLoad(){ $("loader").style.display="flex"; } function hideLoad(){ $("loader").style.display="none"; }
-  function openImg(){ $("imgPopup").classList.add("open"); } function closeImg(){ $("imgPopup").classList.remove("open"); }
+  
+  function renderSlidersDesktop(bookings){ 
+    let rows=Array.from($("dtBody").querySelectorAll("tr")); 
+    let colByKey={}; slots.forEach((sl,i)=>{ colByKey[sl.key]=i+1; }); 
+    bookings.forEach(b=>{ 
+      if(b.date!==$("dateInput").value)return; 
+      let laneIdx=b.table-1, start=+b.start, end=+b.end, si=colByKey[start], ei=colByKey[end]; 
+      if(si==null||ei==null)return; 
+      let row=rows[laneIdx]; 
+      if(!row)return; 
+      let sc=row.cells[si], ec=row.cells[ei]; 
+      if(!sc||!ec)return; 
+      let left=sc.offsetLeft+1, top=row.offsetTop+1, width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2, height=row.offsetHeight-2; 
+      let slider=makeSlider(b,start,end); 
+      slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; 
+      $("slidersLayer").appendChild(slider); 
+    }); 
+  }
+  
+  function renderSlidersMobile(bookings){ 
+    let mtRows=Array.from($("mtBody").querySelectorAll("tr")); 
+    let rowByKey={}; slots.forEach((sl,i)=>{ rowByKey[sl.key]=mtRows[i]; }); 
+    bookings.forEach(b=>{ 
+      if(b.date!==$("dateInput").value)return; 
+      let laneIdx=b.table-1, start=+b.start, end=+b.end, startRow=rowByKey[start], endRow=rowByKey[end]; 
+      if(!startRow||!endRow)return; 
+      let cell=startRow.cells[laneIdx]; 
+      if(!cell)return; 
+      let left=cell.offsetLeft+1, top=startRow.offsetTop+1, width=cell.offsetWidth-2, height=(endRow.offsetTop+endRow.offsetHeight)-startRow.offsetTop-2; 
+      let slider=makeSlider(b,start,end); 
+      slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; 
+      $("slidersLayer").appendChild(slider); 
+    }); 
+  }
+  
+  function makeSlider(b,start,end){ 
+    let el=document.createElement("div"); 
+    el.className="slider "+(b.confirmed==="Да"?"confirmed":b.confirmed==="Нет"?"rejected":"pending"); 
+    let nd=document.createElement("div"); nd.className="sl-name"; nd.textContent=b.name||"—"; 
+    let td=document.createElement("div"); td.className="sl-time"; td.textContent=`${fmt(start)} – ${fmt(end)}`; 
+    el.append(nd,td); 
+    el.addEventListener("click",e=>{ e.stopPropagation(); showInfoModal(b); }); 
+    return el; 
+  }
+  
+  function showLoad(){ $("loader").style.display="flex"; } 
+  function hideLoad(){ $("loader").style.display="none"; }
+  function openImg(){ $("imgPopup").classList.add("open"); } 
+  function closeImg(){ $("imgPopup").classList.remove("open"); }
+  
   ["bookModal","infoModal"].forEach(id=>{ $(id).addEventListener("click",e=>{ if(e.target===$(id)){ $(id).classList.remove("open"); if(id==="infoModal")curId=null; } }); });
   $("imgPopup").addEventListener("click",e=>{ if(e.target===$("imgPopup")) closeImg(); });
-  let lastDesktop=isDesktop(); window.addEventListener("resize",()=>{ if(isDesktop()!==lastDesktop){ lastDesktop=isDesktop(); loadSliders(); } });
+  
+  let lastDesktop=isDesktop(); 
+  window.addEventListener("resize",()=>{ if(isDesktop()!==lastDesktop){ lastDesktop=isDesktop(); loadSliders(); } });
 </script>
 </body>
 </html>

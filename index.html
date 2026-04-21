@@ -1,111 +1,357 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
-  <title>Бильярд · Брони | Drag & Drop + Ресайз</title>
-  <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Бильярд · Интерактивное бронирование с ползунками</title>
+  <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg: #f5f5f7; --surface: #ffffff; --surface2: #f5f5f7;
-      --border: rgba(0,0,0,.08); --border2: rgba(0,0,0,.14);
-      --ink: #1d1d1f; --ink2: #3d3d3f; --ink3: #6e6e73; --ink4: #aeaeb2;
-      --blue: #0071e3; --blue-h: #0077ed; --blue-dim: rgba(0,113,227,.08);
-      --green: #34c759; --red: #ff3b30; --amber: #ff9f0a;
-      --r: 12px; --r2: 18px;
-      --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
-      --cell-h: 58px; --cell-w: 68px; --lane-w: 100px;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none; /* предотвращает выделение при перетаскивании */
     }
-    body { font-family: var(--font); background: var(--bg); color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; }
-    #login { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; z-index: 9999; padding: 32px; }
+
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --surface2: #f5f5f7;
+      --border: rgba(0,0,0,.08);
+      --border2: rgba(0,0,0,.14);
+      --ink: #1d1d1f;
+      --ink2: #3d3d3f;
+      --ink3: #6e6e73;
+      --ink4: #aeaeb2;
+      --blue: #0071e3;
+      --blue-h: #0077ed;
+      --blue-dim: rgba(0,113,227,.08);
+      --green: #34c759;
+      --red: #ff3b30;
+      --amber: #ff9f0a;
+      --r: 12px;
+      --r2: 18px;
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+      --cell-h: 58px;
+      --cell-w: 68px;
+      --lane-w: 100px;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* LOGIN */
+    #login {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 20px; z-index: 9999; padding: 32px;
+    }
     .login-glyph { font-size: 58px; }
     .login-title { font-size: 32px; font-weight: 700; letter-spacing: -.5px; }
-    .login-sub { font-size: 16px; color: var(--ink3); margin-top: -8px; }
-    .login-sep { width: 1px; height: 28px; background: var(--border2); }
+    .login-sub   { font-size: 16px; color: var(--ink3); margin-top: -8px; }
+    .login-sep   { width: 1px; height: 28px; background: var(--border2); }
+
+    /* APP */
     #content { display: none; min-height: 100vh; }
-    .nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,.92); backdrop-filter: saturate(180%) blur(20px); border-bottom: .5px solid var(--border2); height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; }
+
+    /* NAVBAR */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: .5px solid var(--border2);
+      height: 60px; display: flex; align-items: center;
+      justify-content: space-between; padding: 0 28px;
+    }
     .nav-title { font-size: 20px; font-weight: 600; letter-spacing: -.3px; }
-    .nav-btn { display: flex; align-items: center; gap: 8px; background: var(--surface); border: .5px solid var(--border2); border-radius: 980px; padding: 8px 18px; font-family: var(--font); font-size: 14px; font-weight: 500; color: var(--blue); cursor: pointer; transition: background .15s; }
+    .nav-btn {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface); border: .5px solid var(--border2);
+      border-radius: 980px; padding: 8px 18px;
+      font-family: var(--font); font-size: 14px; font-weight: 500; color: var(--blue);
+      cursor: pointer; transition: background .15s;
+    }
     .nav-btn:hover { background: var(--blue-dim); }
-    .page { width: 100%; margin: 0; padding: 24px 28px 80px; display: flex; flex-direction: column; gap: 24px; }
-    .ctrl { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; background: var(--surface); border-radius: var(--r2); padding: 18px 24px; box-shadow: 0 2px 12px rgba(0,0,0,.04); }
-    .date-field { flex: 1; min-width: 220px; max-width: 280px; display: flex; align-items: center; gap: 12px; background: var(--surface2); border-radius: 14px; padding: 0 18px; height: 52px; border: .5px solid var(--border2); }
+
+    /* PAGE */
+    .page {
+      width: 100%;
+      margin: 0;
+      padding: 24px 28px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* CONTROLS */
+    .ctrl {
+      display: flex; gap: 18px; align-items: center; flex-wrap: wrap;
+      background: var(--surface); border-radius: var(--r2);
+      padding: 18px 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.04);
+    }
+    .date-field {
+      flex: 1; min-width: 220px; max-width: 280px;
+      display: flex; align-items: center; gap: 12px;
+      background: var(--surface2); border-radius: 14px;
+      padding: 0 18px; height: 52px; border: .5px solid var(--border2);
+    }
     .date-field svg { flex-shrink: 0; color: var(--ink3); width: 18px; height: 18px; }
-    #dateInput { flex: 1; border: none; background: transparent; font-family: var(--font); font-size: 17px; font-weight: 500; color: var(--ink); cursor: pointer; }
+    #dateInput {
+      flex: 1; border: none; background: transparent;
+      font-family: var(--font); font-size: 17px; font-weight: 500; color: var(--ink);
+      cursor: pointer;
+    }
     #dateInput:focus { outline: none; }
-    .btn-book { height: 52px; padding: 0 32px; background: var(--blue); color: white; border: none; border-radius: 980px; font-family: var(--font); font-size: 17px; font-weight: 600; cursor: pointer; transition: all .15s; box-shadow: 0 2px 6px rgba(0,113,227,.3); }
+    .btn-book {
+      height: 52px; padding: 0 32px;
+      background: var(--blue); color: white; border: none; border-radius: 980px;
+      font-family: var(--font); font-size: 17px; font-weight: 600;
+      cursor: pointer; transition: all .15s;
+      box-shadow: 0 2px 6px rgba(0,113,227,.3);
+    }
     .btn-book:hover { background: var(--blue-h); transform: scale(0.98); }
+
+    /* LEGEND */
     .pills { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
-    .pill { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--ink3); background: var(--surface); border: .5px solid var(--border2); border-radius: 980px; padding: 6px 16px; }
+    .pill {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 500; color: var(--ink3);
+      background: var(--surface); border: .5px solid var(--border2);
+      border-radius: 980px; padding: 6px 16px;
+    }
     .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot-navy { background: #3a7bd5; } .dot-sage { background: #30a862; } .dot-rust { background: #e05c2a; } .dot-amber { background: var(--amber); } .dot-green { background: var(--green); } .dot-red { background: var(--red); }
-    .grid-card { background: var(--surface); border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,.06); overflow: hidden; border: .5px solid var(--border); width: 100%; }
-    .grid-scroll { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; position: relative; width: 100%; }
-    #tableDesktop { display: table; border-collapse: collapse; table-layout: fixed; width: 100%; min-width: 1100px; user-select: none; font-size: 14px; }
-    #tableDesktop thead th { height: var(--cell-h); font-size: 13px; font-weight: 600; letter-spacing: .2px; color: var(--ink4); border-bottom: 1px solid var(--border2); border-right: .5px solid var(--border); text-align: center; vertical-align: middle; background: var(--surface2); position: sticky; top: 0; z-index: 3; }
+    .dot-navy  { background: #3a7bd5; }
+    .dot-sage  { background: #30a862; }
+    .dot-rust  { background: #e05c2a; }
+    .dot-amber { background: var(--amber); }
+    .dot-green { background: var(--green); }
+    .dot-red   { background: var(--red); }
+
+    /* GRID CARD */
+    .grid-card {
+      background: var(--surface); border-radius: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.06);
+      overflow: hidden;
+      border: .5px solid var(--border);
+      width: 100%;
+      position: relative;
+    }
+    .grid-scroll {
+      overflow-x: auto;
+      overflow-y: visible;
+      -webkit-overflow-scrolling: touch;
+      position: relative;
+      width: 100%;
+    }
+
+    /* DESKTOP TABLE */
+    #tableDesktop {
+      display: table;
+      border-collapse: collapse;
+      table-layout: fixed;
+      width: 100%;
+      min-width: 1100px;
+      font-size: 14px;
+    }
+    #tableDesktop thead th {
+      height: var(--cell-h);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .2px;
+      color: var(--ink4);
+      border-bottom: 1px solid var(--border2);
+      border-right: .5px solid var(--border);
+      text-align: center;
+      vertical-align: middle;
+      background: var(--surface2);
+      position: sticky;
+      top: 0;
+      z-index: 3;
+    }
     #tableDesktop thead th:last-child { border-right: none; }
-    #tableDesktop thead th.corner { width: var(--lane-w); min-width: var(--lane-w); background: var(--surface2); font-size: 13px; font-weight: 600; color: var(--ink2); border-right: 1px solid var(--border2); position: sticky; left: 0; z-index: 5; }
-    #tableDesktop thead th.th-time { cursor: pointer; width: var(--cell-w); min-width: var(--cell-w); transition: all .12s; }
+    #tableDesktop thead th.corner {
+      width: var(--lane-w);
+      min-width: var(--lane-w);
+      background: var(--surface2);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink2);
+      border-right: 1px solid var(--border2);
+      position: sticky;
+      left: 0;
+      z-index: 5;
+    }
+    #tableDesktop thead th.th-time {
+      cursor: pointer;
+      width: var(--cell-w);
+      min-width: var(--cell-w);
+      transition: all .12s;
+    }
+    #tableDesktop thead th.th-time:hover { background: #fff4e0; color: var(--amber); }
     #tableDesktop tbody tr { height: var(--cell-h); }
-    #tableDesktop tbody td.lane-hdr { width: var(--lane-w); min-width: var(--lane-w); font-size: 17px; font-weight: 700; border-bottom: .5px solid var(--border2); border-right: 1px solid var(--border2); text-align: center; vertical-align: middle; background: var(--surface2); position: sticky; left: 0; z-index: 2; }
+    #tableDesktop tbody td.lane-hdr {
+      width: var(--lane-w);
+      min-width: var(--lane-w);
+      font-size: 17px;
+      font-weight: 700;
+      border-bottom: .5px solid var(--border2);
+      border-right: 1px solid var(--border2);
+      text-align: center;
+      vertical-align: middle;
+      background: var(--surface2);
+      position: sticky;
+      left: 0;
+      z-index: 2;
+    }
     .lane-hdr.grp-navy { color: #1d4f9f; background: #eef3fc !important; }
     .lane-hdr.grp-sage { color: #1a6640; background: #edf7f0 !important; }
     .lane-hdr.grp-rust { color: #a83418; background: #fdf0ea !important; }
-    #tableDesktop tbody td.slot { cursor: pointer; border-bottom: .5px solid var(--border); border-right: .5px solid var(--border); vertical-align: middle; text-align: center; font-size: 12px; transition: background 0.05s; }
-    #tableDesktop tbody td.slot.shade { background: rgba(0,0,0,.02); }
+    #tableDesktop tbody td.slot {
+      cursor: pointer;
+      border-bottom: .5px solid var(--border);
+      border-right: .5px solid var(--border);
+      vertical-align: middle;
+      text-align: center;
+      font-size: 12px;
+      transition: background 0.08s;
+    }
     #tableDesktop tbody tr.row-navy td.slot { background: #f8fafd; }
     #tableDesktop tbody tr.row-sage td.slot { background: #f6fcf8; }
     #tableDesktop tbody tr.row-rust td.slot { background: #fef8f4; }
-    #tableDesktop tbody td.slot.selected { background: #fff3c4 !important; border-top: 2px solid var(--amber); border-bottom: 2px solid var(--amber); }
-    #tableDesktop tbody td.slot.sel-left { border-left: 2px solid var(--amber); border-radius: 6px 0 0 6px; }
+    #tableDesktop tbody td.slot:hover { background: #fff8ec !important; }
+    #tableDesktop tbody td.slot.selected {
+      background: #fff3c4 !important;
+      border-top: 2px solid var(--amber);
+      border-bottom: 2px solid var(--amber);
+    }
+    #tableDesktop tbody td.slot.sel-left  { border-left: 2px solid var(--amber); border-radius: 6px 0 0 6px; }
     #tableDesktop tbody td.slot.sel-right { border-right: 2px solid var(--amber) !important; border-radius: 0 6px 6px 0; }
     #tableDesktop tbody td.slot.anchored { background: #ffe7a3 !important; outline: 2px solid var(--amber); outline-offset: -2px; border-radius: 8px; }
-    #tableDesktop tbody td.slot.drag-hover { background: #fff1cf !important; }
-    #tableMobile { display: none; border-collapse: collapse; width: 100%; }
-    @media (max-width: 800px) { #tableDesktop { display: none; } #tableMobile { display: table; } :root { --cell-h: 48px; --cell-w: 52px; --lane-w: 80px; } .page { padding: 16px 12px 70px; gap: 16px; } .ctrl { flex-direction: column; align-items: stretch; } .btn-book { width: 100%; justify-content: center; } }
-    #tableMobile thead th { height: 44px; font-size: 13px; font-weight: 600; border-bottom: .5px solid var(--border2); border-right: .5px solid var(--border); text-align: center; }
+
+    /* MOBILE TABLE */
+    #tableMobile {
+      display: none;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    @media (max-width: 800px) {
+      #tableDesktop { display: none; }
+      #tableMobile { display: table; }
+      :root { --cell-h: 48px; --cell-w: 52px; --lane-w: 80px; }
+      .page { padding: 16px 12px 70px; gap: 16px; }
+      .ctrl { flex-direction: column; align-items: stretch; }
+      .btn-book { width: 100%; justify-content: center; }
+      .nav-title { font-size: 18px; }
+    }
+    #tableMobile thead th {
+      height: 44px; font-size: 13px; font-weight: 600;
+      border-bottom: .5px solid var(--border2);
+      border-right: .5px solid var(--border);
+      text-align: center;
+    }
     #tableMobile thead th.hdr-navy { background: #eef3fc; color: #1d4f9f; }
     #tableMobile thead th.hdr-sage { background: #edf7f0; color: #1a6640; }
     #tableMobile thead th.hdr-rust { background: #fdf0ea; color: #a83418; }
-    #tableMobile th.tcol { background: var(--surface2); color: var(--ink4); font-size: 11px; font-weight: 600; border-left: .5px solid var(--border2); cursor: pointer; position: sticky; top: 0; z-index: 3; }
-    #tableMobile td { height: 42px; border-bottom: .5px solid var(--border); border-right: .5px solid var(--border); text-align: center; font-size: 11px; cursor: pointer; }
+    #tableMobile th.tcol {
+      background: var(--surface2); color: var(--ink4); font-size: 11px; font-weight: 600;
+      border-left: .5px solid var(--border2); cursor: pointer;
+      position: sticky; top: 0; z-index: 3;
+    }
+    #tableMobile td {
+      height: 42px; border-bottom: .5px solid var(--border);
+      border-right: .5px solid var(--border); text-align: center;
+      font-size: 11px; cursor: pointer;
+    }
     #tableMobile td.slot.selected { background: #fff3c4 !important; border-left: 2px solid var(--amber); border-right: 2px solid var(--amber); }
     #tableMobile td.slot.sel-top { border-top: 2px solid var(--amber); border-radius: 6px 6px 0 0; }
     #tableMobile td.slot.sel-bot { border-bottom: 2px solid var(--amber) !important; border-radius: 0 0 6px 6px; }
-    #slidersLayer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
-    .slider { position: absolute; border-radius: 12px; pointer-events: auto; cursor: grab; padding: 6px 10px; overflow: hidden; display: flex; flex-direction: column; justify-content: center; gap: 2px; transition: all 0.1s; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    #tableMobile td.slot.anchored { background: #ffe7a3 !important; outline: 2px solid var(--amber); outline-offset: -2px; border-radius: 8px; }
+
+    /* SLIDERS LAYER */
+    #slidersLayer {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: auto;
+      z-index: 10;
+    }
+    .slider {
+      position: absolute; border-radius: 12px;
+      pointer-events: auto; cursor: grab;
+      padding: 6px 10px; overflow: hidden;
+      display: flex; flex-direction: column; justify-content: center;
+      gap: 2px; transition: all 0.1s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      backdrop-filter: blur(2px);
+      z-index: 15;
+    }
     .slider:active { cursor: grabbing; }
-    .slider:hover { opacity: 0.92; transform: scale(1.01); z-index: 20; }
-    .slider.pending { background: rgba(255,159,10,0.2); border: 1px solid rgba(255,159,10,0.7); }
-    .slider.confirmed { background: rgba(52,199,89,0.2); border: 1px solid rgba(52,199,89,0.7); }
-    .slider.rejected { background: rgba(255,59,48,0.2); border: 1px solid rgba(255,59,48,0.7); }
-    .sl-name { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sl-time { font-size: 9px; opacity: 0.8; white-space: nowrap; }
-    .resize-handle { position: absolute; top: 0; bottom: 0; width: 12px; background: transparent; z-index: 5; cursor: ew-resize; pointer-events: auto; }
-    .resize-handle.left { left: 0; border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
-    .resize-handle.right { right: 0; border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
-    .resize-handle:hover { background: rgba(0,0,0,0.1); }
+    .slider:hover { opacity: 0.95; transform: scale(1.01); z-index: 20; }
+    .slider.pending   { background: rgba(255,159,10,0.85); border-left: 6px solid #ff9f0a; }
+    .slider.confirmed { background: rgba(52,199,89,0.85); border-left: 6px solid #2b8c46; }
+    .slider.rejected  { background: rgba(255,59,48,0.85); border-left: 6px solid #cc3b2f; }
+    .sl-name { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: white; text-shadow: 0 0 2px rgba(0,0,0,0.3); }
+    .sl-time { font-size: 9px; opacity: 0.9; white-space: nowrap; color: white; }
+
+    /* RESIZE HANDLES */
+    .slider .resize-handle {
+      position: absolute;
+      width: 12px;
+      height: 100%;
+      top: 0;
+      background: rgba(255,255,255,0.4);
+      cursor: ew-resize;
+      z-index: 25;
+      border-radius: 6px;
+    }
+    .slider .resize-left { left: 0; }
+    .slider .resize-right { right: 0; }
+
+    /* CARDS */
     #cardsContainer { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
-    .bcard { display: flex; align-items: center; gap: 14px; background: var(--surface); border: .5px solid var(--border2); border-radius: 20px; padding: 12px 18px; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+    .bcard {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--surface); border: .5px solid var(--border2);
+      border-radius: 20px; padding: 12px 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    }
     .bcard-title { font-size: 15px; font-weight: 700; }
     .bcard-sub { font-size: 13px; color: var(--ink3); margin-top: 4px; }
-    .bcard-rm { width: 30px; height: 30px; border-radius: 30px; background: var(--surface2); border: .5px solid var(--border2); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); z-index: 2000; justify-content: center; align-items: flex-end; }
+    .bcard-rm {
+      width: 30px; height: 30px; border-radius: 30px;
+      background: var(--surface2); border: .5px solid var(--border2);
+      font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* MODALS */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4); backdrop-filter: blur(10px);
+      z-index: 2000; justify-content: center; align-items: flex-end;
+    }
     .overlay.open { display: flex; }
     @media(min-width: 560px) { .overlay { align-items: center; padding: 24px; } .sheet { border-radius: 32px !important; max-width: 480px; } }
-    .sheet { background: var(--surface); border-radius: 28px 28px 0 0; width: 100%; box-shadow: 0 -4px 30px rgba(0,0,0,.2); animation: sheetUp .28s ease; }
+    .sheet {
+      background: var(--surface); border-radius: 28px 28px 0 0;
+      width: 100%; box-shadow: 0 -4px 30px rgba(0,0,0,.2);
+      animation: sheetUp .28s ease;
+    }
     @keyframes sheetUp { from{transform:translateY(60px);opacity:0} to{transform:translateY(0);opacity:1} }
     .sheet-handle { width: 40px; height: 5px; background: var(--border2); border-radius: 4px; margin: 14px auto 0; }
     .sheet-head { padding: 20px 24px 8px; display: flex; justify-content: space-between; align-items: center; }
-    .sheet-title { font-size: 24px; font-weight: 700; }
+    .sheet-title { font-size: 24px; font-weight: 700; letter-spacing: -0.3px; }
     .sheet-x { width: 36px; height: 36px; border-radius: 50%; background: var(--surface2); border: .5px solid var(--border2); font-size: 20px; cursor: pointer; }
     .sheet-body { padding: 12px 24px 28px; }
     .f-group { margin-bottom: 20px; }
     .f-label { font-size: 13px; font-weight: 600; color: var(--ink3); margin-bottom: 6px; display: block; }
     .f-input { width: 100%; background: var(--surface2); border: .5px solid var(--border2); border-radius: 14px; font-size: 16px; padding: 14px 16px; }
-    .f-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,113,227,.1); background: white; }
     .f-actions { display: flex; gap: 12px; margin-top: 24px; }
     .f-btn-ok { flex:1; height: 52px; background: var(--blue); color: white; border: none; border-radius: 980px; font-weight: 600; font-size: 16px; cursor: pointer; }
     .f-btn-cancel { height: 52px; padding: 0 24px; background: var(--surface2); border: .5px solid var(--border2); border-radius: 980px; font-size: 16px; cursor: pointer; }
@@ -116,7 +362,7 @@
     .confirm-btns { display: flex; gap: 12px; margin: 12px 0 16px; }
     .cb-yes, .cb-no { flex:1; height: 48px; border-radius: 980px; font-weight: 600; border: none; cursor: pointer; }
     .cb-yes { background: rgba(52,199,89,.15); color: #1a6630; }
-    .cb-no { background: rgba(255,59,48,.1); color: #a81a10; }
+    .cb-no  { background: rgba(255,59,48,.1); color: #a81a10; }
     .del-btn { width:100%; height: 48px; background: transparent; border: .5px solid var(--border2); border-radius: 980px; margin-top: 12px; cursor: pointer; }
     #imgPopup { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(14px); z-index:3000; justify-content:center; align-items:center; }
     #imgPopup.open { display:flex; }
@@ -130,7 +376,16 @@
   </style>
 </head>
 <body>
-<div id="login"><div class="login-glyph">🎱</div><div class="login-title">Бильярд Клуб</div><div class="login-sub">Бронирование столов</div><div class="login-sep"></div><div id="g_id_onload" data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div><div class="g_id_signin" data-type="standard"></div></div>
+
+<div id="login">
+  <div class="login-glyph">🎱</div>
+  <div class="login-title">Бильярд Клуб</div>
+  <div class="login-sub">Бронирование столов</div>
+  <div class="login-sep"></div>
+  <div id="g_id_onload" data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
+  <div class="g_id_signin" data-type="standard"></div>
+</div>
+
 <div id="content">
   <nav class="nav"><span class="nav-title">🎱 LUCKY STRIKE · БРОНЬ</span><button class="nav-btn" onclick="openImg()">📐 Схема зала</button></nav>
   <div class="page">
@@ -140,10 +395,12 @@
     <div id="cardsContainer"></div>
   </div>
 </div>
+
 <div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="sheet-title">Новая бронь</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div class="f-group"><label class="f-label">Имя клиента</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+380 99 123 45 67"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания..."></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitForm()">Подтвердить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
 <div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="sheet-title">Детали</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span class="info-lbl">Стол</span><span id="i-table"></span></div><div class="info-row"><span class="info-lbl">Дата</span><span id="i-date"></span></div><div class="info-row"><span class="info-lbl">Время</span><span id="i-time"></span></div><div class="info-row"><span class="info-lbl">Имя</span><span id="i-name"></span></div><div class="info-row"><span class="info-lbl">Телефон</span><span id="i-phone"></span></div><div class="info-row"><span class="info-lbl">Комментарий</span><span id="i-comment"></span></div><div class="info-row"><span class="info-lbl">Статус</span><span id="i-status"></span></div></div><div class="confirm-lbl">Подтверждение визита</div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Состоялось</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">🗑 Удалить бронь</button></div></div></div></div>
 <div id="imgPopup"><div class="img-wrap"><button class="img-x" onclick="closeImg()">×</button><img src="https://i.postimg.cc/52ZDKDDw/55.png" alt="Схема столов"/></div></div>
 <div id="loader"><div class="loader-box"><div class="spin"></div><div class="loader-txt">Загрузка...</div></div></div>
+
 <script>
   const GAS = "https://script.google.com/macros/s/AKfycbxfRLDGA29FrqKS61HmYN_FUnDwOydeCaEdeW4oc4wyroQzvb4h1OnwQ5HeotIHhcj9/exec";
   const ALLOWED = ["vadiksss900@gmail.com","sergey99belov@gmail.com","popadinecvasil3@gmail.com","veronicadiakova04@gmail.com","info.luckystrike.kh@gmail.com","sashavolobuev123890@gmail.com","egorgorbushko@gmail.com","shatrava.o@gmail.com","Craftmax30@gmail.com","bowlingblock.b@gmail.com","lana.arnaut@gmail.com","polosinnikita1224@gmail.com","sofialat1506@gmail.com","ll3991940@gmail.com","ken040888@gmail.com"];
@@ -152,21 +409,26 @@
   const LANE_GROUPS = [0,0,0,1,1,1,2,2,2,2,2,2];
   const GRP_CLASS = ['grp-navy','grp-sage','grp-rust'];
   const ROW_CLASS = ['row-navy','row-sage','row-rust'];
-  let ivs = {}, dragTemp = { active: false, lane: null, startIdx: null, endIdx: null, startX: 0 };
-  let resizeBooking = null, resizeEdge = null;
+
+  let ivs = {}; // временные брони (для визуального выбора)
+  let selLane = null, selStart = null, curId = null;
+  let currentBookings = []; // загруженные из базы брони
   const $ = id => document.getElementById(id);
+
   function parseJwt(t){ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
   function handleCredentialResponse(r){ let d=parseJwt(r.credential); if(ALLOWED.includes(d.email)){ localStorage.setItem("ue",d.email); location.reload(); } else alert("Доступ запрещён"); }
   window.onload = ()=>{ if(localStorage.getItem("ue") && ALLOWED.includes(localStorage.getItem("ue"))){ $("login").style.display="none"; $("content").style.display="block"; init(); } };
+
   function init(){
     let today = new Date().toISOString().split('T')[0];
     $("dateInput").min = today; $("dateInput").value = today;
     buildDesktopTable(); buildMobileTable();
     $("dateInput").addEventListener("change", ()=>{ resetSel(); loadSliders(); });
-    enableDragSelection(); enableResizeOnSliders(); renderCards(); loadSliders();
+    renderCards(); loadSliders();
   }
+
   function buildDesktopTable(){
-    let headRow = qs("tr", $("dtHead"));
+    let headRow = document.querySelector("#dtHead tr");
     slots.forEach((sl,i)=>{ let th=document.createElement("th"); th.className="th-time"; th.dataset.si=i; th.dataset.key=sl.key; th.textContent=sl.label; headRow.appendChild(th); });
     let body=$("dtBody");
     for(let lane=0; lane<LANES; lane++){
@@ -176,7 +438,7 @@
       body.appendChild(tr);
     }
   }
-  function buildMobileTable(){ /* упрощённо, но drag на десктопе основной */ 
+  function buildMobileTable(){
     let mtHead=$("mtHeadRow");
     for(let i=0;i<LANES;i++){ let th=document.createElement("th"); let grp=LANE_GROUPS[i]; th.className=grp===0?"hdr-navy":grp===1?"hdr-sage":"hdr-rust"; th.textContent=i+1; mtHead.appendChild(th); }
     let thTime=document.createElement("th"); thTime.className="tcol no-click"; thTime.textContent="ВРЕМЯ"; mtHead.appendChild(thTime);
@@ -186,45 +448,177 @@
       let th=document.createElement("th"); th.className="tcol"; th.textContent=sl.label; tr.appendChild(th); mtBody.appendChild(tr);
     });
   }
-  function qs(s,p=document){ return p.querySelector(s); }
-  function qsa(s,p=document){ return Array.from(p.querySelectorAll(s)); }
   function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
-  function enableDragSelection(){
-    let table=$("tableDesktop");
-    let isDragging=false, startCell=null, startLane=null, startSlotIdx=null;
-    table.addEventListener("mousedown",(e)=>{ let td=e.target.closest(".slot"); if(!td||resizeBooking) return; e.preventDefault(); startCell=td; startLane=+td.dataset.lane; startSlotIdx=+td.dataset.si; isDragging=true; dragTemp.active=true; clearHighlights(); });
-    window.addEventListener("mousemove",(e)=>{ if(!isDragging||!startCell) return; let targetTd=document.elementFromPoint(e.clientX,e.clientY)?.closest(".slot"); if(targetTd&&targetTd.dataset.lane==startLane){ let curIdx=+targetTd.dataset.si; let s=Math.min(startSlotIdx,curIdx), eIdx=Math.max(startSlotIdx,curIdx); highlightRange(startLane,s,eIdx); dragTemp.lane=startLane; dragTemp.startIdx=s; dragTemp.endIdx=eIdx; } });
-    window.addEventListener("mouseup",()=>{ if(isDragging&&dragTemp.lane!==null&&dragTemp.startIdx!==null){ let startKey=slots[dragTemp.startIdx].key, endKey=slots[dragTemp.endIdx].key; if(startKey!==endKey){ if(!ivs[dragTemp.lane]) ivs[dragTemp.lane]=[]; ivs[dragTemp.lane].push({start:Math.min(startKey,endKey), end:Math.max(startKey,endKey)}); renderCards(); loadSliders(); } } isDragging=false; dragTemp.active=false; dragTemp.lane=null; clearHighlights(); });
-  }
-  function highlightRange(lane,siStart,siEnd){
-    qsa("#tableDesktop td.slot").forEach(td=>td.classList.remove("drag-hover","selected","sel-left","sel-right"));
-    let cells=qsa(`#tableDesktop td.slot[data-lane="${lane}"]`);
-    for(let i=Math.min(siStart,siEnd); i<=Math.max(siStart,siEnd); i++) cells[i]?.classList.add("drag-hover");
-  }
-  function clearHighlights(){ qsa("#tableDesktop td.slot").forEach(td=>td.classList.remove("drag-hover","selected","sel-left","sel-right","vline","anchored")); }
-  function resetSel(){ Object.keys(ivs).forEach(k=>ivs[k]=[]); clearHighlights(); renderCards(); loadSliders(); }
+  function resetSel(){ selLane=selStart=null; Object.keys(ivs).forEach(k=>ivs[k]=[]); renderCards(); }
   function renderCards(){
-    $("cardsContainer").innerHTML=""; let dd=$("dateInput").value.split("-").reverse().join(".");
-    for(let k in ivs){(ivs[k]||[]).forEach((iv,idx)=>{ let s=Math.min(iv.start,iv.end), e=Math.max(iv.start,iv.end); let div=document.createElement("div"); div.className="bcard"; div.innerHTML=`<div class="bcard-info"><div class="bcard-title">Стол №${+k+1}</div><div class="bcard-sub">${dd} · ${fmt(s)} – ${fmt(e)}</div></div>`; let rm=document.createElement("button"); rm.className="bcard-rm"; rm.innerHTML="✕"; rm.onclick=ev=>{ ev.stopPropagation(); ivs[k].splice(idx,1); renderCards(); }; div.appendChild(rm); $("cardsContainer").appendChild(div); }); }
+    // очистка выделений в таблицах
+    document.querySelectorAll("#tableDesktop td.slot.selected, #tableDesktop td.slot.sel-left, #tableDesktop td.slot.sel-right").forEach(c=>c.classList.remove("selected","sel-left","sel-right"));
+    document.querySelectorAll("#tableMobile td.slot.selected, #tableMobile td.slot.sel-top, #tableMobile td.slot.sel-bot").forEach(c=>c.classList.remove("selected","sel-top","sel-bot"));
+    for(let k in ivs){ let lane=+k; (ivs[lane]||[]).forEach(iv=>{ let s=Math.min(iv.start,iv.end), e=Math.max(iv.start,iv.end);
+      document.querySelectorAll(`#tableDesktop td.slot[data-lane="${lane}"]`).forEach(td=>{ let t=+td.dataset.time; if(t>=s && t<=e) td.classList.add("selected"); });
+      let lc=document.querySelector(`#tableDesktop td.slot[data-lane="${lane}"][data-time="${s}"]`), rc=document.querySelector(`#tableDesktop td.slot[data-lane="${lane}"][data-time="${e}"]`);
+      if(lc)lc.classList.add("sel-left"); if(rc)rc.classList.add("sel-right");
+      document.querySelectorAll(`#tableMobile td.slot[data-lane="${lane}"]`).forEach(td=>{ let t=parseFloat(td.dataset.time); if(t>=s && t<=e) td.classList.add("selected"); });
+      let topCell=document.querySelector(`#tableMobile td.slot[data-lane="${lane}"][data-time="${s}"]`); if(topCell)topCell.classList.add("sel-top");
+      if(s!==e){ let bot=document.querySelector(`#tableMobile td.slot[data-lane="${lane}"][data-time="${e}"]`); if(bot)bot.classList.add("sel-bot"); }
+    }); }
+    let dd=$("dateInput").value.split("-").reverse().join(".");
+    $("cardsContainer").innerHTML="";
+    for(let k in ivs){(ivs[k]||[]).forEach((iv,idx)=>{ let s=Math.min(iv.start,iv.end), e=Math.max(iv.start,iv.end); let div=document.createElement("div"); div.className="bcard"; div.innerHTML=`<div><div class="bcard-title">Стол №${+k+1}</div><div class="bcard-sub">${dd} · ${fmt(s)} – ${fmt(e)}</div></div>`; let rm=document.createElement("button"); rm.className="bcard-rm"; rm.innerHTML="✕"; rm.onclick=ev=>{ ev.stopPropagation(); ivs[k].splice(idx,1); renderCards(); }; div.appendChild(rm); $("cardsContainer").appendChild(div); }); }
   }
-  function openBookModal(){ if(!Object.values(ivs).some(a=>a.length)) return alert("Выберите интервалы на сетке (зажмите мышку и проведите по ячейкам)"); $("bookModal").classList.add("open"); }
+
+  // drag-to-select logic on desktop
+  function setupDragSelection(){
+    let slotsDesk = document.querySelectorAll("#tableDesktop td.slot");
+    let isDragging = false, dragLane = null, dragStartIdx = null;
+    slotsDesk.forEach(slot=>{
+      slot.addEventListener("mousedown",(e)=>{
+        e.preventDefault();
+        isDragging=true;
+        dragLane = +slot.dataset.lane;
+        dragStartIdx = +slot.dataset.si;
+        selLane = dragLane; selStart = slots[dragStartIdx].key;
+        clearDtHighlights();
+        document.querySelectorAll(`#tableDesktop td.slot[data-lane="${dragLane}"]`).forEach(c=>c.classList.add("vline"));
+        let anc = document.querySelector(`#tableDesktop td.slot[data-lane="${dragLane}"][data-time="${selStart}"]`);
+        if(anc) anc.classList.add("anchored");
+      });
+      slot.addEventListener("mouseenter",()=>{
+        if(isDragging && dragLane!==null && dragStartIdx!==null){
+          let curIdx = +slot.dataset.si;
+          if(curIdx !== dragStartIdx){
+            let endKey = slots[curIdx].key;
+            if(endKey > selStart){
+              if(!ivs[dragLane]) ivs[dragLane]=[];
+              ivs[dragLane] = ivs[dragLane].filter(iv=>!(iv.start===selStart && iv.end===endKey));
+              ivs[dragLane].push({start:selStart, end:endKey});
+              renderCards();
+            }
+          }
+        }
+      });
+    });
+    document.addEventListener("mouseup",()=>{ isDragging=false; selLane=selStart=null; clearDtHighlights(); });
+  }
+
+  function onDesktopClick(e){ let el=e.target; if(el.classList.contains("slot") && selStart===null){ selLane=+el.dataset.lane; clearDtHighlights(); let lhdr=$("dtBody").rows[selLane]?.cells[0]; if(lhdr)lhdr.classList.add("hl-row"); document.querySelectorAll(`#tableDesktop td.slot[data-lane="${selLane}"]`).forEach(c=>c.classList.add("vline")); return; }
+    if(el.classList.contains("th-time") && selLane!==null && selStart===null){ selStart=+el.dataset.key; clearDtHighlights(); let lhdr=$("dtBody").rows[selLane]?.cells[0]; if(lhdr)lhdr.classList.add("hl-row"); let anc=document.querySelector(`#tableDesktop td.slot[data-lane="${selLane}"][data-time="${selStart}"]`); if(anc)anc.classList.add("anchored"); return; }
+    if(el.classList.contains("th-time") && selLane!==null && selStart!==null){ let t=+el.dataset.key; if(t<=selStart){ alert("Конец должен быть позже начала"); return; } if(!ivs[selLane])ivs[selLane]=[]; ivs[selLane].push({start:selStart,end:t}); selLane=selStart=null; clearDtHighlights(); renderCards(); }
+  }
+  function onDesktopDbl(e){ let el=e.target; if(!el.classList.contains("slot"))return; let lane=+el.dataset.lane, time=+el.dataset.time; if(ivs[lane]){ let idx=ivs[lane].findIndex(iv=>time>=Math.min(iv.start,iv.end) && time<=Math.max(iv.start,iv.end)); if(idx!==-1){ ivs[lane].splice(idx,1); renderCards(); } } }
+  function clearDtHighlights(){ document.querySelectorAll("#tableDesktop td.slot.vline, #tableDesktop td.slot.anchored, #tableDesktop td.lane-hdr.hl-row, #tableDesktop thead th.th-time.hl").forEach(c=>c.classList.remove("vline","anchored","hl-row","hl")); }
+
+  // --- SLIDERS with RESIZE HANDLES (drag to change interval) ---
+  function attachResizeHandlers(sliderDiv, booking, laneIdx){
+    let leftHandle = sliderDiv.querySelector(".resize-left");
+    let rightHandle = sliderDiv.querySelector(".resize-right");
+    let startVal = booking.start, endVal = booking.end;
+    let onResize = (side, deltaTime) => {
+      let newStart = startVal, newEnd = endVal;
+      if(side === 'left') newStart = Math.min(startVal + deltaTime, endVal - 0.5);
+      else newStart = startVal;
+      if(side === 'right') newEnd = Math.max(endVal + deltaTime, startVal + 0.5);
+      else newEnd = endVal;
+      if(newStart >= SH && newEnd <= EH+0.5 && newStart < newEnd){
+        booking.start = newStart; booking.end = newEnd;
+        updateBookingOnServer(booking, laneIdx);
+      }
+    };
+    let startX = 0, activeSide = null;
+    const onMouseMove = (e) => {
+      if(!activeSide) return;
+      let dx = e.clientX - startX;
+      let deltaHours = dx / 80; // чувствительность
+      if(activeSide === 'left') onResize('left', deltaHours);
+      else onResize('right', deltaHours);
+      startX = e.clientX;
+    };
+    const onMouseUp = () => { document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); };
+    const startResize = (side, e) => { e.stopPropagation(); activeSide = side; startX = e.clientX; document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp); };
+    leftHandle.addEventListener('mousedown', (e)=>startResize('left', e));
+    rightHandle.addEventListener('mousedown', (e)=>startResize('right', e));
+  }
+
+  async function updateBookingOnServer(booking, laneIdx){
+    showLoad();
+    try{
+      await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"update", id:booking.id, start:booking.start, end:booking.end})});
+      await loadSliders();
+    } catch(e){ console.warn(e); } finally{ hideLoad(); }
+  }
+
+  async function loadSliders(){
+    showLoad();
+    $("slidersLayer").innerHTML="";
+    try{
+      let res=await fetch(GAS+"?action=get&date="+$("dateInput").value);
+      let data=await res.json();
+      currentBookings = data.bookings || [];
+      if(isDesktop()) renderSlidersDesktop(currentBookings);
+      else renderSlidersMobile(currentBookings);
+    } catch(e){} finally{ hideLoad(); }
+  }
+  function renderSlidersDesktop(bookings){
+    let rows=Array.from($("dtBody").querySelectorAll("tr"));
+    let colByKey={}; slots.forEach((sl,i)=>{ colByKey[sl.key]=i+1; });
+    bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return;
+      let laneIdx=b.table-1, start=+b.start, end=+b.end, si=colByKey[start], ei=colByKey[end];
+      if(si==null||ei==null)return; let row=rows[laneIdx]; if(!row)return;
+      let sc=row.cells[si], ec=row.cells[ei]; if(!sc||!ec)return;
+      let left=sc.offsetLeft+1, top=row.offsetTop+1, width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2, height=row.offsetHeight-2;
+      let slider=makeSlider(b,start,end);
+      slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;position:absolute;`;
+      $("slidersLayer").appendChild(slider);
+      attachResizeHandlers(slider, b, laneIdx);
+    });
+  }
+  function renderSlidersMobile(bookings){
+    let mtRows=Array.from($("mtBody").querySelectorAll("tr"));
+    let rowByKey={}; slots.forEach((sl,i)=>{ rowByKey[sl.key]=mtRows[i]; });
+    bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return;
+      let laneIdx=b.table-1, start=+b.start, end=+b.end, startRow=rowByKey[start], endRow=rowByKey[end];
+      if(!startRow||!endRow)return; let cell=startRow.cells[laneIdx]; if(!cell)return;
+      let left=cell.offsetLeft+1, top=startRow.offsetTop+1, width=cell.offsetWidth-2, height=(endRow.offsetTop+endRow.offsetHeight)-startRow.offsetTop-2;
+      let slider=makeSlider(b,start,end);
+      slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;position:absolute;`;
+      $("slidersLayer").appendChild(slider);
+      attachResizeHandlers(slider, b, laneIdx);
+    });
+  }
+  function makeSlider(b,start,end){
+    let el=document.createElement("div"); el.className="slider "+(b.confirmed==="Да"?"confirmed":b.confirmed==="Нет"?"rejected":"pending");
+    let nd=document.createElement("div"); nd.className="sl-name"; nd.textContent=b.name||"—";
+    let td=document.createElement("div"); td.className="sl-time"; td.textContent=`${fmt(start)} – ${fmt(end)}`;
+    let leftHandle=document.createElement("div"); leftHandle.className="resize-handle resize-left";
+    let rightHandle=document.createElement("div"); rightHandle.className="resize-handle resize-right";
+    el.append(leftHandle, rightHandle, nd, td);
+    el.addEventListener("click",e=>{ e.stopPropagation(); showInfoModal(b); });
+    return el;
+  }
+  function showInfoModal(b){ $("i-table").textContent="№ "+b.table; $("i-date").textContent=b.date.split("-").reverse().join("."); $("i-time").textContent=`${fmt(+b.start)} – ${fmt(+b.end)}`; $("i-name").textContent=b.name; $("i-phone").textContent=b.phone; $("i-comment").textContent=b.comment||"—"; let s=$("i-status"); if(b.confirmed==="Да") s.innerHTML='<span style="background:#e0f7e8; padding:4px 12px; border-radius:40px;">✓ Подтверждено</span>'; else if(b.confirmed==="Нет") s.innerHTML='<span style="background:#ffe5e2; padding:4px 12px; border-radius:40px;">✕ Не состоялось</span>'; else s.innerHTML='<span style="background:#fff1df; padding:4px 12px; border-radius:40px;">⏳ Ожидает</span>'; curId=b.id; $("infoModal").classList.add("open"); }
+  function closeInfoModal(){ $("infoModal").classList.remove("open"); curId=null; }
+  async function confirmBooking(yes){ if(!curId)return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:curId,confirmed:yes})}); closeInfoModal(); await loadSliders(); } catch(e){} finally{ hideLoad(); } }
+  async function deleteBooking(){ if(!curId||!confirm("Удалить бронь?"))return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:curId})}); closeInfoModal(); await loadSliders(); } catch(e){} finally{ hideLoad(); } }
+  function openBookModal(){ if(!Object.values(ivs).some(a=>a.length)) return alert("Выберите интервалы на сетке (зажмите и протяните мышь по слотам, либо кликните стол -> время начала -> время конца)"); $("bookModal").classList.add("open"); }
   function closeBookModal(){ $("bookModal").classList.remove("open"); }
   async function submitForm(){ let name=$("nameInput").value.trim(), phone=$("phoneInput").value.trim(), comment=$("commentInput").value.trim(), date=$("dateInput").value; if(!name||!phone) return alert("Введите имя и телефон"); let bookings=[]; for(let k in ivs) (ivs[k]||[]).forEach(iv=>bookings.push({date,tableNumber:+k+1,start:iv.start,end:iv.end,name,phone,comment})); if(!bookings.length) return; showLoad(); try{ await Promise.all(bookings.map(b=>fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({bookings:[b]})}))); closeBookModal(); $("nameInput").value=$("phoneInput").value=$("commentInput").value=""; resetSel(); await loadSliders(); } catch(e){ alert("Ошибка"); } finally{ hideLoad(); } }
-  async function loadSliders(){ showLoad(); $("slidersLayer").innerHTML=""; try{ let res=await fetch(GAS+"?action=get&date="+$("dateInput").value); let data=await res.json(); if(!data.bookings?.length) return; renderSlidersDesktop(data.bookings); } catch(e){} finally{ hideLoad(); } }
-  function renderSlidersDesktop(bookings){ let rows=Array.from($("dtBody").querySelectorAll("tr")); let colByKey={}; slots.forEach((sl,i)=>{ colByKey[sl.key]=i+1; }); bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return; let laneIdx=b.table-1, start=+b.start, end=+b.end, si=colByKey[start], ei=colByKey[end]; if(si==null||ei==null)return; let row=rows[laneIdx]; if(!row)return; let sc=row.cells[si], ec=row.cells[ei]; if(!sc||!ec)return; let left=sc.offsetLeft+1, top=row.offsetTop+1, width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2, height=row.offsetHeight-2; let slider=makeSlider(b,start,end, laneIdx); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; $("slidersLayer").appendChild(slider); }); enableResizeOnSliders(); }
-  function makeSlider(b,start,end, laneIdx){ let el=document.createElement("div"); el.className="slider "+(b.confirmed==="Да"?"confirmed":b.confirmed==="Нет"?"rejected":"pending"); el.setAttribute("data-id",b.id); el.setAttribute("data-lane",laneIdx); el.setAttribute("data-start",start); el.setAttribute("data-end",end); let nd=document.createElement("div"); nd.className="sl-name"; nd.textContent=b.name||"—"; let td=document.createElement("div"); td.className="sl-time"; td.textContent=`${fmt(start)} – ${fmt(end)}`; el.append(nd,td); let leftHandle=document.createElement("div"); leftHandle.className="resize-handle left"; let rightHandle=document.createElement("div"); rightHandle.className="resize-handle right"; el.appendChild(leftHandle); el.appendChild(rightHandle); el.addEventListener("click",e=>{ if(e.target===leftHandle||e.target===rightHandle)return; e.stopPropagation(); showInfoModal(b); }); return el; }
-  function enableResizeOnSliders(){ qsa(".resize-handle").forEach(handle=>{ handle.removeEventListener("mousedown",resizeStart); handle.addEventListener("mousedown",resizeStart); }); }
-  function resizeStart(e){ e.stopPropagation(); let slider=e.target.closest(".slider"); if(!slider)return; resizeBooking={ id:slider.dataset.id, lane:+slider.dataset.lane, start:parseFloat(slider.dataset.start), end:parseFloat(slider.dataset.end), edge:e.target.classList.contains("left")?"left":"right" }; e.preventDefault(); window.addEventListener("mousemove",resizeMove); window.addEventListener("mouseup",resizeEnd); }
-  function resizeMove(e){ if(!resizeBooking)return; let table=$("tableDesktop"); let cells=qsa("#tableDesktop td.slot"); let targetCell=document.elementFromPoint(e.clientX,e.clientY)?.closest(".slot"); if(!targetCell||+targetCell.dataset.lane!==resizeBooking.lane)return; let newSlotIdx=+targetCell.dataset.si; let newTime=slots[newSlotIdx].key; if(resizeBooking.edge==="left"){ if(newTime>=resizeBooking.end)return; resizeBooking.start=newTime; } else { if(newTime<=resizeBooking.start)return; resizeBooking.end=newTime; } let updSlider=qs(`.slider[data-id="${resizeBooking.id}"]`); if(updSlider){ updSlider.dataset.start=resizeBooking.start; updSlider.dataset.end=resizeBooking.end; let row=$("dtBody").rows[resizeBooking.lane]; let colByKey={}; slots.forEach((sl,i)=>{ colByKey[sl.key]=i+1; }); let si=colByKey[resizeBooking.start], ei=colByKey[resizeBooking.end]; if(si&&ei){ let sc=row.cells[si], ec=row.cells[ei]; if(sc&&ec){ let left=sc.offsetLeft+1, top=row.offsetTop+1, width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2; updSlider.style.left=`${left}px`; updSlider.style.width=`${width}px`; let nameDiv=updSlider.querySelector(".sl-name"), timeDiv=updSlider.querySelector(".sl-time"); if(timeDiv)timeDiv.textContent=`${fmt(resizeBooking.start)} – ${fmt(resizeBooking.end)}`; } } } }
-  async function resizeEnd(){ if(resizeBooking){ showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"updateTime",id:resizeBooking.id,start:resizeBooking.start,end:resizeBooking.end})}); await loadSliders(); } catch(e){} finally{ hideLoad(); } resizeBooking=null; } window.removeEventListener("mousemove",resizeMove); window.removeEventListener("mouseup",resizeEnd); }
-  function showInfoModal(b){ $("i-table").textContent="№ "+b.table; $("i-date").textContent=b.date.split("-").reverse().join("."); $("i-time").textContent=`${fmt(+b.start)} – ${fmt(+b.end)}`; $("i-name").textContent=b.name; $("i-phone").textContent=b.phone; $("i-comment").textContent=b.comment||"—"; let s=$("i-status"); if(b.confirmed==="Да") s.innerHTML='<span style="background:#e0f7e8; padding:4px 12px; border-radius:40px;">✓ Подтверждено</span>'; else if(b.confirmed==="Нет") s.innerHTML='<span style="background:#ffe5e2; padding:4px 12px; border-radius:40px;">✕ Не состоялось</span>'; else s.innerHTML='<span style="background:#fff1df; padding:4px 12px; border-radius:40px;">⏳ Ожидает</span>'; window.curBooking=b; $("infoModal").classList.add("open"); }
-  function closeInfoModal(){ $("infoModal").classList.remove("open"); window.curBooking=null; }
-  async function confirmBooking(yes){ if(!window.curBooking)return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:window.curBooking.id,confirmed:yes})}); closeInfoModal(); await loadSliders(); } catch(e){} finally{ hideLoad(); } }
-  async function deleteBooking(){ if(!window.curBooking||!confirm("Удалить бронь?"))return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:window.curBooking.id})}); closeInfoModal(); await loadSliders(); } catch(e){} finally{ hideLoad(); } }
   function showLoad(){ $("loader").style.display="flex"; } function hideLoad(){ $("loader").style.display="none"; }
   function openImg(){ $("imgPopup").classList.add("open"); } function closeImg(){ $("imgPopup").classList.remove("open"); }
-  ["bookModal","infoModal"].forEach(id=>{ $(id).addEventListener("click",e=>{ if(e.target===$(id)){ $(id).classList.remove("open"); if(id==="infoModal")window.curBooking=null; } }); });
+  function isDesktop(){ return window.innerWidth>800; }
+  ["bookModal","infoModal"].forEach(id=>{ $(id).addEventListener("click",e=>{ if(e.target===$(id)){ $(id).classList.remove("open"); if(id==="infoModal")curId=null; } }); });
   $("imgPopup").addEventListener("click",e=>{ if(e.target===$("imgPopup")) closeImg(); });
+  let lastDesktop=isDesktop(); window.addEventListener("resize",()=>{ if(isDesktop()!==lastDesktop){ lastDesktop=isDesktop(); loadSliders(); } });
+  // Инициализируем drag-to-select после отрисовки таблиц
+  setTimeout(()=>{ setupDragSelection(); }, 200);
+  // также обрабатываем клики/двойные для совместимости со старым методом
+  $("tableDesktop").addEventListener("click", onDesktopClick);
+  $("tableDesktop").addEventListener("dblclick", onDesktopDbl);
+  $("tableMobile").addEventListener("click", onMobileClick);
+  $("tableMobile").addEventListener("dblclick", onMobileDbl);
+  function onMobileClick(e){ let el=e.target; if(el.classList.contains("slot") && selStart===null){ selLane=+el.dataset.lane; document.querySelectorAll("#tableMobile td.slot.vline, #tableMobile thead th.hl").forEach(c=>c.classList.remove("vline","hl")); $("mtHeadRow")?.cells[selLane]?.classList.add("hl"); document.querySelectorAll(`#tableMobile td.slot[data-lane="${selLane}"]`).forEach(c=>c.classList.add("vline")); return; }
+    if(el.classList.contains("tcol") && selLane!==null && selStart===null){ let txt=el.textContent; selStart=parseFloat(txt.includes(":30")?txt.replace(":30",".5"):txt.replace(":00",".0")); document.querySelectorAll("#tableMobile td.slot.anchored").forEach(c=>c.classList.remove("anchored")); let anc=document.querySelector(`#tableMobile td.slot[data-lane="${selLane}"][data-time="${selStart}"]`); if(anc)anc.classList.add("anchored"); return; }
+    if(el.classList.contains("tcol") && selLane!==null && selStart!==null){ let txt=el.textContent; let t=parseFloat(txt.includes(":30")?txt.replace(":30",".5"):txt.replace(":00",".0")); if(t<=selStart){ alert("Конец позже"); return; } if(!ivs[selLane])ivs[selLane]=[]; ivs[selLane].push({start:selStart,end:t}); selLane=selStart=null; document.querySelectorAll("#tableMobile td.slot.vline, #tableMobile thead th.hl").forEach(c=>c.classList.remove("vline","hl")); renderCards(); } }
+  function onMobileDbl(e){ if(!e.target.classList.contains("slot"))return; let lane=+e.target.dataset.lane, time=parseFloat(e.target.dataset.time); if(ivs[lane]){ let idx=ivs[lane].findIndex(iv=>time>=Math.min(iv.start,iv.end) && time<=Math.max(iv.start,iv.end)); if(idx!==-1){ ivs[lane].splice(idx,1); renderCards(); } } }
 </script>
 </body>
 </html>

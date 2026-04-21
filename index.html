@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
-  <title>Бильярд · Брони | Drag-to-book</title>
+  <title>Бильярд · Брони | Перетаскивание броней</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png"/>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
     :root {
       --bg: #f5f5f7;
       --surface: #ffffff;
@@ -21,13 +21,12 @@
       --green: #34c759;
       --red: #ff3b30;
       --amber: #ff9f0a;
-      --r: 12px;
       --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
       --cell-h: 58px;
       --cell-w: 68px;
       --lane-w: 100px;
     }
-    body { font-family: var(--font); background: var(--bg); color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    body { font-family: var(--font); background: var(--bg); color: var(--ink); min-height: 100vh; }
     #login { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; z-index: 9999; padding: 32px; }
     .login-glyph { font-size: 58px; }
     .login-title { font-size: 32px; font-weight: 700; }
@@ -38,7 +37,7 @@
     .page { width: 100%; margin: 0; padding: 24px 28px 80px; display: flex; flex-direction: column; gap: 24px; }
     .ctrl { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; background: var(--surface); border-radius: 18px; padding: 18px 24px; box-shadow: 0 2px 12px rgba(0,0,0,.04); }
     .date-field { flex: 1; min-width: 220px; max-width: 280px; display: flex; align-items: center; gap: 12px; background: var(--surface2); border-radius: 14px; padding: 0 18px; height: 52px; border: .5px solid var(--border2); }
-    #dateInput { flex: 1; border: none; background: transparent; font-family: var(--font); font-size: 17px; font-weight: 500; cursor: pointer; }
+    #dateInput { flex: 1; border: none; background: transparent; font-family: var(--font); font-size: 17px; font-weight: 500; cursor: pointer; user-select: auto; }
     .btn-book { height: 52px; padding: 0 32px; background: var(--blue); color: white; border: none; border-radius: 980px; font-family: var(--font); font-size: 17px; font-weight: 600; cursor: pointer; transition: all .15s; box-shadow: 0 2px 6px rgba(0,113,227,.3); }
     .btn-book:hover { background: #0077ed; transform: scale(0.98); }
     .pills { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -50,25 +49,20 @@
     .dot-amber { background: var(--amber); }
     .dot-green { background: var(--green); }
     .dot-red   { background: var(--red); }
-    .grid-card { background: var(--surface); border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,.06); overflow: hidden; border: .5px solid var(--border); width: 100%; }
-    .grid-scroll { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; position: relative; width: 100%; }
-    #tableDesktop { display: table; border-collapse: collapse; table-layout: fixed; width: 100%; min-width: 1100px; user-select: none; font-size: 14px; }
+    .grid-card { background: var(--surface); border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,.06); overflow: hidden; border: .5px solid var(--border); width: 100%; position: relative; }
+    .grid-scroll { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; position: relative; width: 100%; min-height: 400px; }
+    #tableDesktop { display: table; border-collapse: collapse; table-layout: fixed; width: 100%; min-width: 1100px; font-size: 14px; }
     #tableDesktop thead th { height: var(--cell-h); font-size: 13px; font-weight: 600; color: var(--ink3); border-bottom: 1px solid var(--border2); border-right: .5px solid var(--border); text-align: center; background: var(--surface2); position: sticky; top: 0; z-index: 3; }
     #tableDesktop thead th.corner { width: var(--lane-w); min-width: var(--lane-w); background: var(--surface2); color: var(--ink2); border-right: 1px solid var(--border2); position: sticky; left: 0; z-index: 5; }
-    #tableDesktop thead th.th-time { cursor: pointer; width: var(--cell-w); min-width: var(--cell-w); transition: .1s; }
+    #tableDesktop thead th.th-time { width: var(--cell-w); min-width: var(--cell-w); }
     #tableDesktop tbody tr { height: var(--cell-h); }
     #tableDesktop tbody td.lane-hdr { width: var(--lane-w); min-width: var(--lane-w); font-size: 17px; font-weight: 700; border-bottom: .5px solid var(--border2); border-right: 1px solid var(--border2); text-align: center; background: var(--surface2); position: sticky; left: 0; z-index: 2; }
     .lane-hdr.grp-navy { color: #1d4f9f; background: #eef3fc !important; }
     .lane-hdr.grp-sage { color: #1a6640; background: #edf7f0 !important; }
     .lane-hdr.grp-rust { color: #a83418; background: #fdf0ea !important; }
-    #tableDesktop tbody td.slot { cursor: pointer; border-bottom: .5px solid var(--border); border-right: .5px solid var(--border); vertical-align: middle; text-align: center; transition: background 0.05s; }
-    #tableDesktop tbody td.slot.drag-highlight { background: #ffe8b6 !important; border-left: 2px solid var(--amber); border-right: 2px solid var(--amber); }
-    #tableDesktop tbody td.slot.drag-start { background: #ffdd99 !important; border-top-left-radius: 8px; border-bottom-left-radius: 8px; border-left: 2px solid var(--amber); }
-    #tableDesktop tbody td.slot.drag-end { background: #ffdd99 !important; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-right: 2px solid var(--amber); }
-    #tableDesktop tbody td.slot.selected { background: #fff3c4 !important; border-left: 2px solid var(--amber); border-right: 2px solid var(--amber); }
-    #tableDesktop tbody td.slot.sel-left { border-left: 2px solid var(--amber); border-radius: 6px 0 0 6px; }
-    #tableDesktop tbody td.slot.sel-right { border-right: 2px solid var(--amber); border-radius: 0 6px 6px 0; }
-    #tableMobile { display: none; border-collapse: collapse; width: 100%; user-select: none; }
+    #tableDesktop tbody td.slot { border-bottom: .5px solid var(--border); border-right: .5px solid var(--border); vertical-align: middle; text-align: center; transition: background 0.05s; }
+    #tableDesktop tbody td.slot.drag-over { background: #fff0c0 !important; box-shadow: inset 0 0 0 2px var(--amber); }
+    #tableMobile { display: none; border-collapse: collapse; width: 100%; }
     @media (max-width: 800px) {
       #tableDesktop { display: none; }
       #tableMobile { display: table; }
@@ -81,24 +75,24 @@
     #tableMobile thead th.hdr-navy { background: #eef3fc; color: #1d4f9f; }
     #tableMobile thead th.hdr-sage { background: #edf7f0; color: #1a6640; }
     #tableMobile thead th.hdr-rust { background: #fdf0ea; color: #a83418; }
-    #tableMobile thead th.hl { background: #fff4e0 !important; color: var(--amber) !important; }
-    #tableMobile th.tcol { background: var(--surface2); color: var(--ink3); font-size: 11px; font-weight: 600; border-left: .5px solid var(--border2); cursor: pointer; position: sticky; top: 0; z-index: 3; }
-    #tableMobile td { height: 42px; border-bottom: .5px solid var(--border); border-right: .5px solid var(--border); text-align: center; font-size: 11px; cursor: pointer; }
-    #tableMobile td.slot.drag-highlight { background: #ffe8b6 !important; border-top: 2px solid var(--amber); border-bottom: 2px solid var(--amber); }
-    #tableMobile td.slot.drag-start { background: #ffdd99 !important; border-top-left-radius: 8px; border-top-right-radius: 8px; border-top: 2px solid var(--amber); }
-    #tableMobile td.slot.drag-end { background: #ffdd99 !important; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; border-bottom: 2px solid var(--amber); }
-    #tableMobile td.slot.selected { background: #fff3c4 !important; border-top: 2px solid var(--amber); border-bottom: 2px solid var(--amber); }
+    #tableMobile th.tcol { background: var(--surface2); color: var(--ink3); font-size: 11px; font-weight: 600; border-left: .5px solid var(--border2); position: sticky; top: 0; z-index: 3; }
+    #tableMobile td { height: 42px; border-bottom: .5px solid var(--border); border-right: .5px solid var(--border); text-align: center; font-size: 11px; }
+    #tableMobile td.slot.drag-over { background: #fff0c0 !important; box-shadow: inset 0 0 0 2px var(--amber); }
     #slidersLayer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
-    .slider { position: absolute; border-radius: 12px; pointer-events: auto; cursor: pointer; padding: 6px 10px; display: flex; flex-direction: column; justify-content: center; gap: 2px; transition: 0.1s; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-    .slider:hover { opacity: 0.92; transform: scale(1.01); z-index: 20; }
-    .slider.pending   { background: rgba(255,159,10,0.2); border: 1px solid rgba(255,159,10,0.7); }
-    .slider.confirmed { background: rgba(52,199,89,0.2); border: 1px solid rgba(52,199,89,0.7); }
-    .slider.rejected  { background: rgba(255,59,48,0.2); border: 1px solid rgba(255,59,48,0.7); }
-    .sl-name { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sl-time { font-size: 9px; opacity: 0.8; }
-    .pending .sl-name, .pending .sl-time { color: #7d4a00; }
-    .confirmed .sl-name, .confirmed .sl-time { color: #1a5e2a; }
-    .rejected .sl-name, .rejected .sl-time { color: #8c1a14; }
+    .slider {
+      position: absolute; border-radius: 12px; pointer-events: auto; cursor: grab;
+      padding: 6px 10px; display: flex; flex-direction: column; justify-content: center;
+      gap: 2px; transition: 0.1s; box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      backdrop-filter: blur(2px);
+    }
+    .slider:active { cursor: grabbing; opacity: 0.85; }
+    .slider.dragging { opacity: 0.5; cursor: grabbing; z-index: 100; }
+    .slider.pending   { background: rgba(255,159,10,0.85); border: 1px solid rgba(255,159,10,1); }
+    .slider.confirmed { background: rgba(52,199,89,0.85); border: 1px solid rgba(52,199,89,1); }
+    .slider.rejected  { background: rgba(255,59,48,0.85); border: 1px solid rgba(255,59,48,1); }
+    .sl-name { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellips; color: white; text-shadow: 0 0 2px rgba(0,0,0,0.3); }
+    .sl-time { font-size: 9px; opacity: 0.9; white-space: nowrap; color: white; text-shadow: 0 0 1px rgba(0,0,0,0.3); }
+    .slider-placeholder { position: absolute; background: rgba(255,159,10,0.3); border: 2px dashed var(--amber); border-radius: 12px; pointer-events: none; z-index: 15; }
     #cardsContainer { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
     .bcard { display: flex; align-items: center; gap: 14px; background: var(--surface); border: .5px solid var(--border2); border-radius: 20px; padding: 12px 18px; }
     .bcard-title { font-size: 15px; font-weight: 700; }
@@ -115,7 +109,7 @@
     .sheet-body { padding: 12px 24px 28px; }
     .f-group { margin-bottom: 20px; }
     .f-label { font-size: 13px; font-weight: 600; color: var(--ink3); margin-bottom: 6px; display: block; }
-    .f-input { width: 100%; background: var(--surface2); border: .5px solid var(--border2); border-radius: 14px; font-size: 16px; padding: 14px 16px; }
+    .f-input { width: 100%; background: var(--surface2); border: .5px solid var(--border2); border-radius: 14px; font-size: 16px; padding: 14px 16px; user-select: auto; }
     .f-actions { display: flex; gap: 12px; margin-top: 24px; }
     .f-btn-ok { flex:1; height: 52px; background: var(--blue); color: white; border: none; border-radius: 980px; font-weight: 600; cursor: pointer; }
     .f-btn-cancel { height: 52px; padding: 0 24px; background: var(--surface2); border: .5px solid var(--border2); border-radius: 980px; cursor: pointer; }
@@ -140,12 +134,12 @@
 <div id="login">
   <div class="login-glyph">🎱</div>
   <div class="login-title">Бильярд Клуб</div>
-  <div class="login-sub">Бронирование столов · перетаскивайте мышкой</div>
+  <div class="login-sub">Бронирование столов · Перетаскивайте брони мышкой</div>
   <div id="g_id_onload" data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
   <div class="g_id_signin" data-type="standard"></div>
 </div>
 <div id="content">
-  <nav class="nav"><span class="nav-title">🎱 LUCKY STRIKE · DRAG TO BOOK</span><button class="nav-btn" onclick="openImg()">📐 Схема зала</button></nav>
+  <nav class="nav"><span class="nav-title">🎱 LUCKY STRIKE · ПЕРЕТАСКИВАЙ БРОНИ</span><button class="nav-btn" onclick="openImg()">📐 Схема зала</button></nav>
   <div class="page">
     <div class="ctrl">
       <div class="date-field"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><input type="date" id="dateInput"/></div>
@@ -172,13 +166,14 @@
   const LANE_GROUPS = [0,0,0,1,1,1,2,2,2,2,2,2];
   const GRP_CLASS = ['grp-navy','grp-sage','grp-rust'];
   const ROW_CLASS = ['row-navy','row-sage','row-rust'];
-  let ivs = {};
+  let allBookings = [];
   let curId = null;
-  let dragState = { active: false, lane: null, startIdx: null, currentIdx: null, isDesktop: true };
+  let dragBooking = null;
+  let dragStartX = 0, dragStartY = 0;
+  let placeholderDiv = null;
   const $ = id => document.getElementById(id);
   const qs = (s, p=document) => p.querySelector(s);
   const qsa = (s, p=document) => Array.from(p.querySelectorAll(s));
-
   function parseJwt(t){ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
   function handleCredentialResponse(r){ let d=parseJwt(r.credential); if(ALLOWED.includes(d.email)){ localStorage.setItem("ue",d.email); location.reload(); } else alert("Доступ запрещён"); }
   window.onload = ()=>{ if(localStorage.getItem("ue") && ALLOWED.includes(localStorage.getItem("ue"))){ $("login").style.display="none"; $("content").style.display="block"; init(); } };
@@ -186,9 +181,9 @@
     let today = new Date().toISOString().split('T')[0];
     $("dateInput").min = today; $("dateInput").value = today;
     buildDesktopTable(); buildMobileTable();
-    attachDragEvents();
-    $("dateInput").addEventListener("change", ()=>{ resetSel(); loadSliders(); });
-    renderCards(); loadSliders();
+    attachDragDropForBookings();
+    $("dateInput").addEventListener("change", ()=>{ loadSliders(); });
+    loadSliders();
   }
   function buildDesktopTable(){
     let headRow = qs("tr", $("dtHead"));
@@ -204,60 +199,106 @@
   function buildMobileTable(){
     let mtHead=$("mtHeadRow");
     for(let i=0;i<LANES;i++){ let th=document.createElement("th"); let grp=LANE_GROUPS[i]; th.className=grp===0?"hdr-navy":grp===1?"hdr-sage":"hdr-rust"; th.textContent=i+1; mtHead.appendChild(th); }
-    let thTime=document.createElement("th"); thTime.className="tcol no-click"; thTime.textContent="ВРЕМЯ"; mtHead.appendChild(thTime);
+    let thTime=document.createElement("th"); thTime.className="tcol"; thTime.textContent="ВРЕМЯ"; mtHead.appendChild(thTime);
     let mtBody=$("mtBody");
     slots.forEach(sl=>{ let tr=document.createElement("tr");
       for(let lane=0; lane<LANES; lane++){ let td=document.createElement("td"); td.className="slot"; td.dataset.lane=lane; td.dataset.time=sl.key; td.dataset.si=slots.indexOf(sl); tr.appendChild(td); }
       let th=document.createElement("th"); th.className="tcol"; th.textContent=sl.label; tr.appendChild(th); mtBody.appendChild(tr);
     });
   }
-  function attachDragEvents(){
-    const container = $("gridScroll");
-    const isDesktopMode = () => window.innerWidth > 800;
-    function getSlotFromTarget(el){ while(el && !el.classList?.contains('slot')) el=el.parentElement; return el; }
-    function startDrag(e){ let target = getSlotFromTarget(e.target); if(!target) return; dragState.active=true; dragState.lane = parseInt(target.dataset.lane); dragState.startIdx = parseInt(target.dataset.si); dragState.currentIdx = dragState.startIdx; dragState.isDesktop = isDesktopMode(); document.body.style.userSelect='none'; clearDragHighlights(); highlightRange(); e.preventDefault(); }
-    function onDragMove(e){ if(!dragState.active) return; let clientX, clientY; if(e.touches){ clientX=e.touches[0].clientX; clientY=e.touches[0].clientY; } else { clientX=e.clientX; clientY=e.clientY; } let elem = document.elementsFromPoint(clientX, clientY).find(el=>el.classList?.contains('slot') && parseInt(el.dataset.lane)===dragState.lane); if(elem){ let newIdx = parseInt(elem.dataset.si); if(newIdx!==dragState.currentIdx){ dragState.currentIdx = newIdx; clearDragHighlights(); highlightRange(); } } }
-    function endDrag(){ if(!dragState.active) return; if(dragState.startIdx!==null && dragState.currentIdx!==null && dragState.startIdx!==dragState.currentIdx){ let start = Math.min(dragState.startIdx, dragState.currentIdx); let end = Math.max(dragState.startIdx, dragState.currentIdx); let startTime = slots[start].key; let endTime = slots[end].key; if(startTime !== endTime){ if(!ivs[dragState.lane]) ivs[dragState.lane]=[]; ivs[dragState.lane].push({start: startTime, end: endTime}); renderCards(); } } clearDragHighlights(); dragState.active=false; dragState.lane=null; dragState.startIdx=null; dragState.currentIdx=null; document.body.style.userSelect=''; }
-    function clearDragHighlights(){ qsa("#tableDesktop td.slot.drag-highlight, #tableDesktop td.slot.drag-start, #tableDesktop td.slot.drag-end").forEach(c=>c.classList.remove("drag-highlight","drag-start","drag-end")); qsa("#tableMobile td.slot.drag-highlight, #tableMobile td.slot.drag-start, #tableMobile td.slot.drag-end").forEach(c=>c.classList.remove("drag-highlight","drag-start","drag-end")); }
-    function highlightRange(){ if(dragState.startIdx===null || dragState.currentIdx===null) return; let s=Math.min(dragState.startIdx, dragState.currentIdx), e=Math.max(dragState.startIdx, dragState.currentIdx); let isDesk = dragState.isDesktop; for(let i=s; i<=e; i++){ let selector = `td.slot[data-lane="${dragState.lane}"][data-si="${i}"]`; let cells = qsa(selector, isDesk ? $("tableDesktop") : $("tableMobile")); cells.forEach(cell=>{ cell.classList.add("drag-highlight"); if(i===s) cell.classList.add("drag-start"); if(i===e) cell.classList.add("drag-end"); }); } }
-    container.addEventListener("mousedown", (e)=>{ let slot=getSlotFromTarget(e.target); if(slot && !slot.closest('.slider')){ startDrag(e); e.preventDefault(); } });
-    window.addEventListener("mousemove", onDragMove);
-    window.addEventListener("mouseup", endDrag);
-    container.addEventListener("touchstart", (e)=>{ let slot=getSlotFromTarget(e.target); if(slot && !slot.closest('.slider')){ startDrag(e); e.preventDefault(); } });
-    window.addEventListener("touchmove", onDragMove);
-    window.addEventListener("touchend", endDrag);
-  }
   function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
-  function renderCards(){
-    qsa("#tableDesktop td.slot.selected, #tableDesktop td.slot.sel-left, #tableDesktop td.slot.sel-right").forEach(c=>c.classList.remove("selected","sel-left","sel-right"));
-    qsa("#tableMobile td.slot.selected, #tableMobile td.slot.sel-top, #tableMobile td.slot.sel-bot").forEach(c=>c.classList.remove("selected","sel-top","sel-bot"));
-    for(let k in ivs){ let lane=+k; (ivs[lane]||[]).forEach(iv=>{ let s=Math.min(iv.start,iv.end), e=Math.max(iv.start,iv.end);
-      qsa(`#tableDesktop td.slot[data-lane="${lane}"]`).forEach(td=>{ let t=+td.dataset.time; if(t>=s && t<=e) td.classList.add("selected"); });
-      let lc=qs(`#tableDesktop td.slot[data-lane="${lane}"][data-time="${s}"]`), rc=qs(`#tableDesktop td.slot[data-lane="${lane}"][data-time="${e}"]`); if(lc)lc.classList.add("sel-left"); if(rc)rc.classList.add("sel-right");
-      qsa(`#tableMobile td.slot[data-lane="${lane}"]`).forEach(td=>{ let t=parseFloat(td.dataset.time); if(t>=s && t<=e) td.classList.add("selected"); });
-      let topCell=qs(`#tableMobile td.slot[data-lane="${lane}"][data-time="${s}"]`); if(topCell)topCell.classList.add("sel-top"); if(s!==e){ let bot=qs(`#tableMobile td.slot[data-lane="${lane}"][data-time="${e}"]`); if(bot)bot.classList.add("sel-bot"); }
-    }); }
-    $("cardsContainer").innerHTML=""; let dd=$("dateInput").value.split("-").reverse().join(".");
-    for(let k in ivs){(ivs[k]||[]).forEach((iv,idx)=>{ let s=Math.min(iv.start,iv.end), e=Math.max(iv.start,iv.end); let div=document.createElement("div"); div.className="bcard"; div.innerHTML=`<div><div class="bcard-title">Стол №${+k+1}</div><div class="bcard-sub">${dd} · ${fmt(s)} – ${fmt(e)}</div></div>`; let rm=document.createElement("button"); rm.className="bcard-rm"; rm.innerHTML="✕"; rm.onclick=ev=>{ ev.stopPropagation(); ivs[k].splice(idx,1); renderCards(); }; div.appendChild(rm); $("cardsContainer").appendChild(div); }); }
+  function isDesktop(){ return window.innerWidth>800; }
+  function attachDragDropForBookings(){
+    const slidersLayer = $("slidersLayer");
+    let currentTargetSlot = null;
+    slidersLayer.addEventListener("mousedown", (e) => {
+      let slider = e.target.closest('.slider');
+      if(!slider) return;
+      e.preventDefault();
+      dragBooking = { id: slider.dataset.id, table: parseInt(slider.dataset.table), start: parseFloat(slider.dataset.start), end: parseFloat(slider.dataset.end), name: slider.dataset.name, phone: slider.dataset.phone, comment: slider.dataset.comment, confirmed: slider.dataset.confirmed };
+      dragStartX = e.clientX; dragStartY = e.clientY;
+      slider.classList.add("dragging");
+      placeholderDiv = document.createElement('div'); placeholderDiv.className = 'slider-placeholder';
+      let rect = slider.getBoundingClientRect(); let parentRect = slidersLayer.getBoundingClientRect();
+      placeholderDiv.style.left = (rect.left - parentRect.left) + 'px'; placeholderDiv.style.top = (rect.top - parentRect.top) + 'px';
+      placeholderDiv.style.width = rect.width + 'px'; placeholderDiv.style.height = rect.height + 'px';
+      slidersLayer.appendChild(placeholderDiv);
+      document.body.style.cursor = 'grabbing';
+      const onMouseMove = (moveEvent) => {
+        if(!dragBooking) return;
+        let elem = document.elementsFromPoint(moveEvent.clientX, moveEvent.clientY).find(el => el.classList?.contains('slot'));
+        if(currentTargetSlot) currentTargetSlot.classList.remove('drag-over');
+        if(elem && !elem.closest('.slider')){ currentTargetSlot = elem; currentTargetSlot.classList.add('drag-over'); }
+        else { if(currentTargetSlot) currentTargetSlot.classList.remove('drag-over'); currentTargetSlot = null; }
+      };
+      const onMouseUp = async (upEvent) => {
+        if(currentTargetSlot) currentTargetSlot.classList.remove('drag-over');
+        if(placeholderDiv) placeholderDiv.remove();
+        if(dragBooking && currentTargetSlot){
+          let newLane = parseInt(currentTargetSlot.dataset.lane);
+          let newTimeSlotIdx = parseInt(currentTargetSlot.dataset.si);
+          let newStartTime = slots[newTimeSlotIdx].key;
+          let duration = dragBooking.end - dragBooking.start;
+          let newEndTime = newStartTime + duration;
+          if(newEndTime <= slots[slots.length-1].key && newEndTime >= SH && newStartTime >= SH){
+            if(confirm(`Переместить бронь на стол ${newLane+1} c ${fmt(newStartTime)} до ${fmt(newEndTime)}?`)){
+              showLoad();
+              try{
+                await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"move",id:dragBooking.id,newTable:newLane+1,newStart:newStartTime,newEnd:newEndTime})});
+                await loadSliders();
+              } catch(e){ alert("Ошибка перемещения"); } finally{ hideLoad(); }
+            }
+          } else { alert("Новый интервал выходит за пределы рабочего дня (11:00-22:30)"); }
+        }
+        if(dragBooking){ let oldSlider = qs(`.slider[data-id="${dragBooking.id}"]`); if(oldSlider) oldSlider.classList.remove('dragging'); }
+        dragBooking = null; currentTargetSlot = null; document.body.style.cursor = '';
+        window.removeEventListener('mousemove', onMouseMove); window.removeEventListener('mouseup', onMouseUp);
+      };
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    });
   }
-  function resetSel(){ Object.keys(ivs).forEach(k=>ivs[k]=[]); renderCards(); }
-  function openBookModal(){ if(!Object.values(ivs).some(a=>a.length)) return alert("📌 Выделите интервал перетаскиванием мыши по таблице"); $("bookModal").classList.add("open"); }
-  function closeBookModal(){ $("bookModal").classList.remove("open"); }
-  async function submitForm(){ let name=$("nameInput").value.trim(), phone=$("phoneInput").value.trim(), comment=$("commentInput").value.trim(), date=$("dateInput").value; if(!name||!phone) return alert("Введите имя и телефон"); let bookings=[]; for(let k in ivs) (ivs[k]||[]).forEach(iv=>bookings.push({date,tableNumber:+k+1,start:iv.start,end:iv.end,name,phone,comment})); if(!bookings.length) return; showLoad(); try{ await Promise.all(bookings.map(b=>fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({bookings:[b]})}))); closeBookModal(); $("nameInput").value=$("phoneInput").value=$("commentInput").value=""; resetSel(); await loadSliders(); } catch(e){ alert("Ошибка"); } finally{ hideLoad(); } }
+  async function loadSliders(){ showLoad(); $("slidersLayer").innerHTML=""; try{ let res=await fetch(GAS+"?action=get&date="+$("dateInput").value); let data=await res.json(); allBookings = data.bookings || []; if(!allBookings.length) return; if(isDesktop()) renderSlidersDesktop(allBookings); else renderSlidersMobile(allBookings); } catch(e){ console.error(e); } finally{ hideLoad(); } }
+  function renderSlidersDesktop(bookings){
+    let rows=Array.from($("dtBody").querySelectorAll("tr")); let colByKey={}; slots.forEach((sl,i)=>{ colByKey[sl.key]=i+1; });
+    bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return; let laneIdx=b.table-1, start=+b.start, end=+b.end, si=colByKey[start], ei=colByKey[end]; if(si==null||ei==null)return; let row=rows[laneIdx]; if(!row)return; let sc=row.cells[si], ec=row.cells[ei]; if(!sc||!ec)return; let left=sc.offsetLeft+1, top=row.offsetTop+1, width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2, height=row.offsetHeight-2; let slider=makeSlider(b,start,end); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; $("slidersLayer").appendChild(slider); });
+  }
+  function renderSlidersMobile(bookings){
+    let mtRows=Array.from($("mtBody").querySelectorAll("tr")); let rowByKey={}; slots.forEach((sl,i)=>{ rowByKey[sl.key]=mtRows[i]; });
+    bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return; let laneIdx=b.table-1, start=+b.start, end=+b.end, startRow=rowByKey[start], endRow=rowByKey[end]; if(!startRow||!endRow)return; let cell=startRow.cells[laneIdx]; if(!cell)return; let left=cell.offsetLeft+1, top=startRow.offsetTop+1, width=cell.offsetWidth-2, height=(endRow.offsetTop+endRow.offsetHeight)-startRow.offsetTop-2; let slider=makeSlider(b,start,end); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; $("slidersLayer").appendChild(slider); });
+  }
+  function makeSlider(b,start,end){
+    let el=document.createElement("div"); el.className="slider "+(b.confirmed==="Да"?"confirmed":b.confirmed==="Нет"?"rejected":"pending");
+    el.dataset.id=b.id; el.dataset.table=b.table; el.dataset.start=start; el.dataset.end=end; el.dataset.name=b.name; el.dataset.phone=b.phone; el.dataset.comment=b.comment||""; el.dataset.confirmed=b.confirmed;
+    let nd=document.createElement("div"); nd.className="sl-name"; nd.textContent=b.name||"—";
+    let td=document.createElement("div"); td.className="sl-time"; td.textContent=`${fmt(start)} – ${fmt(end)}`;
+    el.append(nd,td);
+    el.addEventListener("click",(e)=>{ e.stopPropagation(); showInfoModal(b); });
+    return el;
+  }
   function showInfoModal(b){ $("i-table").textContent="№ "+b.table; $("i-time").textContent=`${fmt(+b.start)} – ${fmt(+b.end)}`; $("i-name").textContent=b.name; $("i-phone").textContent=b.phone; $("i-comment").textContent=b.comment||"—"; let s=$("i-status"); if(b.confirmed==="Да") s.innerHTML='<span style="background:#e0f7e8; padding:4px 12px; border-radius:40px;">✓ Подтверждено</span>'; else if(b.confirmed==="Нет") s.innerHTML='<span style="background:#ffe5e2; padding:4px 12px; border-radius:40px;">✕ Не состоялось</span>'; else s.innerHTML='<span style="background:#fff1df; padding:4px 12px; border-radius:40px;">⏳ Ожидает</span>'; curId=b.id; $("infoModal").classList.add("open"); }
   function closeInfoModal(){ $("infoModal").classList.remove("open"); curId=null; }
   async function confirmBooking(yes){ if(!curId)return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:curId,confirmed:yes})}); closeInfoModal(); await loadSliders(); } catch(e){} finally{ hideLoad(); } }
   async function deleteBooking(){ if(!curId||!confirm("Удалить бронь?"))return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:curId})}); closeInfoModal(); await loadSliders(); } catch(e){} finally{ hideLoad(); } }
-  function isDesktop(){ return window.innerWidth>800; }
-  async function loadSliders(){ showLoad(); $("slidersLayer").innerHTML=""; try{ let res=await fetch(GAS+"?action=get&date="+$("dateInput").value); let data=await res.json(); if(!data.bookings?.length) return; if(isDesktop()) renderSlidersDesktop(data.bookings); else renderSlidersMobile(data.bookings); } catch(e){} finally{ hideLoad(); } }
-  function renderSlidersDesktop(bookings){ let rows=Array.from($("dtBody").querySelectorAll("tr")); let colByKey={}; slots.forEach((sl,i)=>{ colByKey[sl.key]=i+1; }); bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return; let laneIdx=b.table-1, start=+b.start, end=+b.end, si=colByKey[start], ei=colByKey[end]; if(si==null||ei==null)return; let row=rows[laneIdx]; if(!row)return; let sc=row.cells[si], ec=row.cells[ei]; if(!sc||!ec)return; let left=sc.offsetLeft+1, top=row.offsetTop+1, width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2, height=row.offsetHeight-2; let slider=makeSlider(b,start,end); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; $("slidersLayer").appendChild(slider); }); }
-  function renderSlidersMobile(bookings){ let mtRows=Array.from($("mtBody").querySelectorAll("tr")); let rowByKey={}; slots.forEach((sl,i)=>{ rowByKey[sl.key]=mtRows[i]; }); bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return; let laneIdx=b.table-1, start=+b.start, end=+b.end, startRow=rowByKey[start], endRow=rowByKey[end]; if(!startRow||!endRow)return; let cell=startRow.cells[laneIdx]; if(!cell)return; let left=cell.offsetLeft+1, top=startRow.offsetTop+1, width=cell.offsetWidth-2, height=(endRow.offsetTop+endRow.offsetHeight)-startRow.offsetTop-2; let slider=makeSlider(b,start,end); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; $("slidersLayer").appendChild(slider); }); }
-  function makeSlider(b,start,end){ let el=document.createElement("div"); el.className="slider "+(b.confirmed==="Да"?"confirmed":b.confirmed==="Нет"?"rejected":"pending"); let nd=document.createElement("div"); nd.className="sl-name"; nd.textContent=b.name||"—"; let td=document.createElement("div"); td.className="sl-time"; td.textContent=`${fmt(start)} – ${fmt(end)}`; el.append(nd,td); el.addEventListener("click",e=>{ e.stopPropagation(); showInfoModal(b); }); return el; }
+  async function submitForm(){ let name=$("nameInput").value.trim(), phone=$("phoneInput").value.trim(), comment=$("commentInput").value.trim(), date=$("dateInput").value; if(!name||!phone) return alert("Введите имя и телефон"); let bookings=[]; for(let k in ivs) (ivs[k]||[]).forEach(iv=>bookings.push({date,tableNumber:+k+1,start:iv.start,end:iv.end,name,phone,comment})); if(!bookings.length) return; showLoad(); try{ await Promise.all(bookings.map(b=>fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({bookings:[b]})}))); closeBookModal(); $("nameInput").value=$("phoneInput").value=$("commentInput").value=""; resetSel(); await loadSliders(); } catch(e){ alert("Ошибка"); } finally{ hideLoad(); } }
+  let ivs = {}; function resetSel(){ Object.keys(ivs).forEach(k=>ivs[k]=[]); renderCards(); } function renderCards(){ qsa("#tableDesktop td.slot.selected, #tableDesktop td.slot.sel-left, #tableDesktop td.slot.sel-right").forEach(c=>c.classList.remove("selected","sel-left","sel-right")); qsa("#tableMobile td.slot.selected, #tableMobile td.slot.sel-top, #tableMobile td.slot.sel-bot").forEach(c=>c.classList.remove("selected","sel-top","sel-bot")); for(let k in ivs){ let lane=+k; (ivs[lane]||[]).forEach(iv=>{ let s=Math.min(iv.start,iv.end), e=Math.max(iv.start,iv.end); qsa(`#tableDesktop td.slot[data-lane="${lane}"]`).forEach(td=>{ let t=+td.dataset.time; if(t>=s && t<=e) td.classList.add("selected"); }); let lc=qs(`#tableDesktop td.slot[data-lane="${lane}"][data-time="${s}"]`), rc=qs(`#tableDesktop td.slot[data-lane="${lane}"][data-time="${e}"]`); if(lc)lc.classList.add("sel-left"); if(rc)rc.classList.add("sel-right"); qsa(`#tableMobile td.slot[data-lane="${lane}"]`).forEach(td=>{ let t=parseFloat(td.dataset.time); if(t>=s && t<=e) td.classList.add("selected"); }); let topCell=qs(`#tableMobile td.slot[data-lane="${lane}"][data-time="${s}"]`); if(topCell)topCell.classList.add("sel-top"); if(s!==e){ let bot=qs(`#tableMobile td.slot[data-lane="${lane}"][data-time="${e}"]`); if(bot)bot.classList.add("sel-bot"); } }); } $("cardsContainer").innerHTML=""; let dd=$("dateInput").value.split("-").reverse().join("."); for(let k in ivs){(ivs[k]||[]).forEach((iv,idx)=>{ let s=Math.min(iv.start,iv.end), e=Math.max(iv.start,iv.end); let div=document.createElement("div"); div.className="bcard"; div.innerHTML=`<div><div class="bcard-title">Стол №${+k+1}</div><div class="bcard-sub">${dd} · ${fmt(s)} – ${fmt(e)}</div></div>`; let rm=document.createElement("button"); rm.className="bcard-rm"; rm.innerHTML="✕"; rm.onclick=ev=>{ ev.stopPropagation(); ivs[k].splice(idx,1); renderCards(); }; div.appendChild(rm); $("cardsContainer").appendChild(div); }); } }
+  function openBookModal(){ if(!Object.values(ivs).some(a=>a.length)) return alert("📌 Сначала выделите интервал времени (зажмите мышку и протяните по ячейкам)"); $("bookModal").classList.add("open"); }
+  function closeBookModal(){ $("bookModal").classList.remove("open"); }
   function showLoad(){ $("loader").style.display="flex"; } function hideLoad(){ $("loader").style.display="none"; }
   function openImg(){ $("imgPopup").classList.add("open"); } function closeImg(){ $("imgPopup").classList.remove("open"); }
   ["bookModal","infoModal"].forEach(id=>{ $(id).addEventListener("click",e=>{ if(e.target===$(id)){ $(id).classList.remove("open"); if(id==="infoModal")curId=null; } }); });
   $("imgPopup").addEventListener("click",e=>{ if(e.target===$("imgPopup")) closeImg(); });
   let lastDesktop=isDesktop(); window.addEventListener("resize",()=>{ if(isDesktop()!==lastDesktop){ lastDesktop=isDesktop(); loadSliders(); } });
+  (function initDragSelection(){
+    const container = $("gridScroll");
+    let selectionActive = false, startLane=null, startIdx=null, currentIdx=null;
+    function getSlotTarget(e){ let el=e.target.closest?.('.slot'); return el; }
+    function clearHighlights(){ qsa("#tableDesktop td.slot.drag-highlight, #tableDesktop td.slot.drag-start, #tableDesktop td.slot.drag-end").forEach(c=>c.classList.remove("drag-highlight","drag-start","drag-end")); qsa("#tableMobile td.slot.drag-highlight, #tableMobile td.slot.drag-start, #tableMobile td.slot.drag-end").forEach(c=>c.classList.remove("drag-highlight","drag-start","drag-end")); }
+    function highlightRange(lane, sIdx, eIdx, isDesk){ for(let i=Math.min(sIdx,eIdx); i<=Math.max(sIdx,eIdx); i++){ let selector = `td.slot[data-lane="${lane}"][data-si="${i}"]`; let cells = qsa(selector, isDesk ? $("tableDesktop") : $("tableMobile")); cells.forEach(cell=>{ cell.classList.add("drag-highlight"); if(i===sIdx) cell.classList.add("drag-start"); if(i===eIdx) cell.classList.add("drag-end"); }); } }
+    container.addEventListener("mousedown", (e)=>{ let slot=getSlotTarget(e); if(slot && !slot.closest('.slider') && !dragBooking){ selectionActive=true; startLane=parseInt(slot.dataset.lane); startIdx=parseInt(slot.dataset.si); currentIdx=startIdx; clearHighlights(); highlightRange(startLane, startIdx, currentIdx, isDesktop()); e.preventDefault(); } });
+    window.addEventListener("mousemove", (e)=>{ if(selectionActive && startLane!==null){ let elem = document.elementsFromPoint(e.clientX, e.clientY).find(el=>el.classList?.contains('slot') && parseInt(el.dataset.lane)===startLane); if(elem){ let newIdx=parseInt(elem.dataset.si); if(newIdx!==currentIdx){ currentIdx=newIdx; clearHighlights(); highlightRange(startLane, startIdx, currentIdx, isDesktop()); } } } });
+    window.addEventListener("mouseup", ()=>{ if(selectionActive && startLane!==null && startIdx!==null && currentIdx!==null && startIdx!==currentIdx){ let s=Math.min(startIdx,currentIdx), e=Math.max(startIdx,currentIdx); let startTime=slots[s].key, endTime=slots[e].key; if(!ivs[startLane]) ivs[startLane]=[]; ivs[startLane].push({start:startTime, end:endTime}); renderCards(); } clearHighlights(); selectionActive=false; startLane=null; startIdx=null; currentIdx=null; });
+  })();
 </script>
 </body>
 </html>

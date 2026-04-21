@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
-  <title>Бильярд · Брони | Интерактивная таблица</title>
+  <title>Бильярд · Брони | Ползунки после выделения</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png"/>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
@@ -11,7 +11,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      user-select: none; /* предотвращает выделение текста при драге */
+      user-select: none;
     }
 
     :root {
@@ -47,7 +47,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* LOGIN */
     #login {
       position: fixed; inset: 0; background: var(--bg);
       display: flex; flex-direction: column; align-items: center;
@@ -58,7 +57,6 @@
     .login-sub   { font-size: 16px; color: var(--ink3); margin-top: -8px; }
     .login-sep   { width: 1px; height: 28px; background: var(--border2); }
 
-    /* APP */
     #content { display: none; min-height: 100vh; }
 
     .nav {
@@ -222,7 +220,7 @@
     #tableDesktop tbody td.slot.sel-left  { border-left: 2px solid var(--amber); border-radius: 6px 0 0 6px; }
     #tableDesktop tbody td.slot.sel-right { border-right: 2px solid var(--amber) !important; border-radius: 0 6px 6px 0; }
 
-    /* мобильная таблица (базовая) */
+    /* мобильная заглушка */
     #tableMobile {
       display: none;
       border-collapse: collapse;
@@ -237,46 +235,65 @@
       .btn-book { width: 100%; justify-content: center; }
     }
     #tableMobile thead th, #tableMobile td { border: .5px solid var(--border2); text-align: center; }
-    #tableMobile td.slot.selected { background: #fff3c4 !important; }
+
+    /* Слой для ползунков (визуальные блоки, остаются после выделения) */
     #slidersLayer {
-      position: absolute; top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none; z-index: 10;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
     }
     .slider {
-      position: absolute; border-radius: 12px;
-      pointer-events: auto; cursor: pointer;
-      padding: 6px 10px; overflow: hidden;
-      display: flex; flex-direction: column; justify-content: center;
-      gap: 2px; transition: all 0.1s;
+      position: absolute;
+      border-radius: 12px;
+      pointer-events: auto;
+      cursor: pointer;
+      padding: 6px 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+      transition: all 0.1s;
       box-shadow: 0 2px 6px rgba(0,0,0,0.08);
       background-clip: padding-box;
     }
     .slider:hover { opacity: 0.92; transform: scale(1.01); z-index: 20; }
-    .slider.pending   { background: rgba(255,159,10,0.2); border: 1px solid rgba(255,159,10,0.7); }
-    .slider.confirmed { background: rgba(52,199,89,0.2); border: 1px solid rgba(52,199,89,0.7); }
-    .slider.rejected  { background: rgba(255,59,48,0.2); border: 1px solid rgba(255,59,48,0.7); }
+    .slider.pending   { background: rgba(255,159,10,0.25); border: 1px solid rgba(255,159,10,0.8); }
+    .slider.confirmed { background: rgba(52,199,89,0.25); border: 1px solid rgba(52,199,89,0.8); }
+    .slider.rejected  { background: rgba(255,59,48,0.25); border: 1px solid rgba(255,59,48,0.8); }
+    /* стиль для локальных ползунков (ещё не сохранённые брони) */
+    .slider.local {
+      background: rgba(255,159,10,0.4);
+      border: 1.5px solid var(--amber);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.6);
+    }
     .sl-name { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sl-time { font-size: 9px; opacity: 0.8; white-space: nowrap; }
     .pending  .sl-name, .pending  .sl-time { color: #7d4a00; }
     .confirmed .sl-name, .confirmed .sl-time { color: #1a5e2a; }
     .rejected  .sl-name, .rejected  .sl-time { color: #8c1a14; }
+    .local .sl-name, .local .sl-time { color: #b45f06; font-weight: 600; }
 
-    /* резиновые ручки для изменения интервала */
+    /* ручки для изменения размера */
     .resize-handle-left, .resize-handle-right {
       position: absolute;
       top: 0;
-      width: 12px;
+      width: 14px;
       height: 100%;
       cursor: ew-resize;
-      background: rgba(0,0,0,0.05);
+      background: rgba(0,0,0,0.08);
       z-index: 5;
       pointer-events: auto;
       border-radius: 12px;
+      transition: background 0.1s;
     }
-    .resize-handle-left { left: 0; }
-    .resize-handle-right { right: 0; }
-    .resize-handle-left:hover, .resize-handle-right:hover { background: rgba(0,0,0,0.15); }
+    .resize-handle-left:hover, .resize-handle-right:hover { background: rgba(0,0,0,0.2); }
+    .resize-handle-left { left: 0; border-radius: 12px 0 0 12px; }
+    .resize-handle-right { right: 0; border-radius: 0 12px 12px 0; }
 
     .bcard {
       display: flex; align-items: center; gap: 14px;
@@ -393,10 +410,11 @@
   const GRP_CLASS = ['grp-navy','grp-sage','grp-rust'];
   const ROW_CLASS = ['row-navy','row-sage','row-rust'];
 
-  let ivs = {};  // { lane: [{start, end}] } локальные несохранённые интервалы для брони
-  let curId = null;
-  let dragState = { active: false, lane: null, startIdx: null, currentIdx: null, isResizing: false, resizeEdge: null, resizeBooking: null };
-  let allBookings = []; // загруженные из google таблиц
+  let localBookings = []; // { lane, start, end, tempId }
+  let savedBookings = []; // из базы
+  let nextTempId = 1;
+  let dragState = { active: false, lane: null, startIdx: null, currentIdx: null };
+  let curInfoBooking = null;
 
   const $ = id => document.getElementById(id);
   const qs = (s, p=document) => p.querySelector(s);
@@ -409,13 +427,11 @@
     let today = new Date().toISOString().split('T')[0];
     $("dateInput").min = today; $("dateInput").value = today;
     buildDesktopTable(); buildMobileTable();
-    $("dateInput").addEventListener("change", ()=>{ resetLocalIntervals(); loadSlidersAndBookings(); });
+    $("dateInput").addEventListener("change", ()=>{ localBookings = []; loadSavedBookings(); renderAllSliders(); });
     $("tableDesktop").addEventListener("mousedown", onDragStart);
     document.body.addEventListener("mousemove", onDragMove);
     document.body.addEventListener("mouseup", onDragEnd);
-    // Для мобильного (упрощённо) оставим клики как альтернативу
-    $("tableMobile").addEventListener("click", onMobileFallback);
-    loadSlidersAndBookings();
+    loadSavedBookings();
   }
 
   function buildDesktopTable(){
@@ -429,60 +445,46 @@
       body.appendChild(tr);
     }
   }
-  function buildMobileTable(){
-    let mtHead=$("mtHeadRow");
-    for(let i=0;i<LANES;i++){ let th=document.createElement("th"); th.textContent=i+1; mtHead.appendChild(th); }
-    let thTime=document.createElement("th"); thTime.textContent="ВРЕМЯ"; mtHead.appendChild(thTime);
-    let mtBody=$("mtBody");
-    slots.forEach(sl=>{ let tr=document.createElement("tr");
-      for(let lane=0; lane<LANES; lane++){ let td=document.createElement("td"); td.className="slot"; td.dataset.lane=lane; td.dataset.time=sl.key; tr.appendChild(td); }
-      let th=document.createElement("th"); th.textContent=sl.label; tr.appendChild(th); mtBody.appendChild(tr);
-    });
-  }
+  function buildMobileTable(){ /* минимально для совместимости */ let mtHead=$("mtHeadRow"); for(let i=0;i<LANES;i++){ let th=document.createElement("th"); th.textContent=i+1; mtHead.appendChild(th); } }
 
-  // Драг для выделения интервалов
   function onDragStart(e){
     let td = e.target.closest('.slot');
     if(!td) return;
-    if(dragState.isResizing) return;
     let lane = parseInt(td.dataset.lane);
     let si = parseInt(td.dataset.si);
     dragState.active = true;
     dragState.lane = lane;
     dragState.startIdx = si;
     dragState.currentIdx = si;
-    clearHighlights();
-    updateSelectionHighlight(lane, dragState.startIdx, dragState.currentIdx);
+    clearHighlightSelection();
+    updateDragHighlight(lane, dragState.startIdx, dragState.currentIdx);
   }
   function onDragMove(e){
-    if(!dragState.active || dragState.isResizing) return;
+    if(!dragState.active) return;
     let target = e.target.closest('.slot');
     if(!target || parseInt(target.dataset.lane) !== dragState.lane) return;
     let newIdx = parseInt(target.dataset.si);
     if(newIdx !== dragState.currentIdx){
       dragState.currentIdx = newIdx;
-      updateSelectionHighlight(dragState.lane, dragState.startIdx, dragState.currentIdx);
+      updateDragHighlight(dragState.lane, dragState.startIdx, dragState.currentIdx);
     }
   }
   function onDragEnd(e){
-    if(!dragState.active || dragState.isResizing) { dragState.active=false; return; }
-    if(dragState.startIdx !== null && dragState.currentIdx !== null && dragState.lane !== null){
+    if(!dragState.active) { dragState.active=false; return; }
+    if(dragState.startIdx !== null && dragState.currentIdx !== null && dragState.startIdx !== dragState.currentIdx){
       let s = Math.min(dragState.startIdx, dragState.currentIdx);
       let eIdx = Math.max(dragState.startIdx, dragState.currentIdx);
       let startTime = slots[s].key;
       let endTime = slots[eIdx].key;
-      if(startTime !== endTime){
-        if(!ivs[dragState.lane]) ivs[dragState.lane] = [];
-        ivs[dragState.lane].push({ start: startTime, end: endTime });
-        renderLocalIntervals();
-      }
+      // добавляем локальную бронь
+      localBookings.push({ lane: dragState.lane, start: startTime, end: endTime, tempId: nextTempId++, isLocal: true });
+      renderAllSliders();
     }
     dragState.active = false; dragState.lane = null; dragState.startIdx = null; dragState.currentIdx = null;
-    clearHighlights();
+    clearHighlightSelection();
   }
-
-  function updateSelectionHighlight(lane, si1, si2){
-    clearHighlights();
+  function updateDragHighlight(lane, si1, si2){
+    clearHighlightSelection();
     let min = Math.min(si1, si2), max = Math.max(si1, si2);
     let cells = qsa(`#tableDesktop td.slot[data-lane="${lane}"]`);
     cells.forEach((cell, idx)=>{
@@ -491,48 +493,28 @@
       if(idx === max) cell.classList.add("sel-right");
     });
   }
-  function clearHighlights(){
+  function clearHighlightSelection(){
     qsa("#tableDesktop td.slot.selected, #tableDesktop td.slot.sel-left, #tableDesktop td.slot.sel-right").forEach(c=>c.classList.remove("selected","sel-left","sel-right"));
   }
-  function renderLocalIntervals(){
-    qsa("#tableDesktop td.slot.selected, #tableDesktop td.slot.sel-left, #tableDesktop td.slot.sel-right").forEach(c=>c.classList.remove("selected","sel-left","sel-right"));
-    for(let lane in ivs){
-      (ivs[lane]||[]).forEach(iv=>{
-        let siStart = slots.findIndex(s=>s.key===iv.start);
-        let siEnd = slots.findIndex(s=>s.key===iv.end);
-        if(siStart!==-1 && siEnd!==-1){
-          for(let i=siStart; i<=siEnd; i++){
-            let cell = qs(`#tableDesktop td.slot[data-lane="${lane}"][data-si="${i}"]`);
-            if(cell) cell.classList.add("selected");
-          }
-          let leftCell = qs(`#tableDesktop td.slot[data-lane="${lane}"][data-si="${siStart}"]`);
-          let rightCell = qs(`#tableDesktop td.slot[data-lane="${lane}"][data-si="${siEnd}"]`);
-          if(leftCell) leftCell.classList.add("sel-left");
-          if(rightCell) rightCell.classList.add("sel-right");
-        }
-      });
-    }
-    renderCards();
-  }
 
-  function resetLocalIntervals(){ ivs = {}; renderLocalIntervals(); }
-
-  async function loadSlidersAndBookings(){
+  async function loadSavedBookings(){
     showLoad();
     try{
       let res = await fetch(GAS+"?action=get&date="+$("dateInput").value);
       let data = await res.json();
-      allBookings = data.bookings || [];
-      renderSliders();
+      savedBookings = data.bookings || [];
+      renderAllSliders();
     }catch(e){ console.warn(e); } finally{ hideLoad(); }
   }
-  function renderSliders(){
+
+  function renderAllSliders(){
     $("slidersLayer").innerHTML = "";
-    if(!isDesktop()) return; // для простоты только десктоп слайдеры с резиновыми краями
+    if(!isDesktop()) return;
     let rows = Array.from($("dtBody").querySelectorAll("tr"));
     let colByKey = {};
     slots.forEach((sl,i)=>{ colByKey[sl.key]=i+1; });
-    allBookings.forEach(b=>{
+    // отрисовать сохранённые брони
+    savedBookings.forEach(b=>{
       if(b.date !== $("dateInput").value) return;
       let laneIdx = b.table-1;
       let start = +b.start, end = +b.end;
@@ -544,109 +526,135 @@
       if(!sc||!ec) return;
       let left = sc.offsetLeft+1, top = row.offsetTop+1;
       let width = (ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2, height = row.offsetHeight-2;
-      let slider = createResizableSlider(b, start, end, laneIdx);
+      let slider = createBookingSlider(b, start, end, laneIdx, false);
       slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;position:absolute;`;
       $("slidersLayer").appendChild(slider);
     });
+    // отрисовать локальные (несохранённые) ползунки
+    localBookings.forEach(lb=>{
+      let laneIdx = lb.lane;
+      let start = lb.start, end = lb.end;
+      let si = colByKey[start], ei = colByKey[end];
+      if(si==null || ei==null) return;
+      let row = rows[laneIdx];
+      if(!row) return;
+      let sc = row.cells[si], ec = row.cells[ei];
+      if(!sc||!ec) return;
+      let left = sc.offsetLeft+1, top = row.offsetTop+1;
+      let width = (ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2, height = row.offsetHeight-2;
+      let fakeBooking = { id: `local_${lb.tempId}`, name: "Новая бронь", phone: "", comment: "", confirmed: null, start, end, table: laneIdx+1 };
+      let slider = createBookingSlider(fakeBooking, start, end, laneIdx, true);
+      slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;position:absolute;`;
+      $("slidersLayer").appendChild(slider);
+    });
+    updateCardsList();
   }
-  function createResizableSlider(b, start, end, laneIdx){
+
+  function createBookingSlider(booking, start, end, laneIdx, isLocal){
     let div = document.createElement("div");
-    div.className = "slider " + (b.confirmed==="Да"?"confirmed":b.confirmed==="Нет"?"rejected":"pending");
-    let nameDiv = document.createElement("div"); nameDiv.className="sl-name"; nameDiv.textContent=b.name||"—";
+    let statusClass = "pending";
+    if(!isLocal){
+      if(booking.confirmed==="Да") statusClass = "confirmed";
+      else if(booking.confirmed==="Нет") statusClass = "rejected";
+      else statusClass = "pending";
+    } else {
+      statusClass = "local";
+    }
+    div.className = `slider ${statusClass}`;
+    let nameDiv = document.createElement("div"); nameDiv.className="sl-name"; nameDiv.textContent = isLocal ? "✏️ Новая" : (booking.name||"—");
     let timeDiv = document.createElement("div"); timeDiv.className="sl-time"; timeDiv.textContent=`${fmt(start)} – ${fmt(end)}`;
     div.append(nameDiv, timeDiv);
-    div.addEventListener("click", (e)=>{ e.stopPropagation(); showInfoModal(b); });
-    // левая ручка
-    let leftHandle = document.createElement("div"); leftHandle.className="resize-handle-left";
-    let rightHandle = document.createElement("div"); rightHandle.className="resize-handle-right";
-    div.appendChild(leftHandle); div.appendChild(rightHandle);
-    
-    let resizeData = { booking: b, lane: laneIdx, edge: null, startTime: start, endTime: end };
-    const startResize = (edge, e) => {
+    div.addEventListener("click", (e)=>{
       e.stopPropagation();
-      dragState.isResizing = true;
-      resizeData.edge = edge;
-      document.body.style.cursor = 'ew-resize';
-      const onMouseMove = (moveEvent) => {
-        if(!dragState.isResizing) return;
-        let targetSlot = moveEvent.target.closest('.slot');
-        if(!targetSlot || parseInt(targetSlot.dataset.lane) !== laneIdx) return;
-        let newSlotIdx = parseInt(targetSlot.dataset.si);
-        let newTime = slots[newSlotIdx].key;
-        let updated = false;
-        if(edge === 'left' && newTime < resizeData.endTime){
-          resizeData.startTime = newTime;
-          updated = true;
-        } else if(edge === 'right' && newTime > resizeData.startTime){
-          resizeData.endTime = newTime;
-          updated = true;
+      if(isLocal){
+        // для локальной брони можно удалить
+        if(confirm("Удалить этот интервал?")){
+          localBookings = localBookings.filter(l=> !(l.lane===laneIdx && l.start===start && l.end===end));
+          renderAllSliders();
         }
-        if(updated){
-          // обновляем визуально локальный интервал в ivs и потом сохраним
-          if(!ivs[resizeData.lane]) ivs[resizeData.lane]=[];
-          let idx = ivs[resizeData.lane].findIndex(iv=>iv.start===resizeData.startTimeOld && iv.end===resizeData.endTimeOld);
-          if(idx!==-1) ivs[resizeData.lane].splice(idx,1);
-          ivs[resizeData.lane].push({ start: resizeData.startTime, end: resizeData.endTime });
-          renderLocalIntervals();
-          resizeData.startTimeOld = resizeData.startTime;
-          resizeData.endTimeOld = resizeData.endTime;
-        }
+      } else {
+        curInfoBooking = booking;
+        showInfoModal(booking);
+      }
+    });
+    // ручки изменения размера ТОЛЬКО для локальных броней (чтобы можно было менять до сохранения)
+    if(isLocal){
+      let leftHandle = document.createElement("div"); leftHandle.className="resize-handle-left";
+      let rightHandle = document.createElement("div"); rightHandle.className="resize-handle-right";
+      div.appendChild(leftHandle); div.appendChild(rightHandle);
+      let resizeState = { active: false, edge: null, originalStart: start, originalEnd: end, lane: laneIdx };
+      const startResize = (edge, e) => {
+        e.stopPropagation();
+        resizeState.active = true;
+        resizeState.edge = edge;
+        document.body.style.cursor = 'ew-resize';
+        const onMouseMove = (moveEvent) => {
+          if(!resizeState.active) return;
+          let targetSlot = moveEvent.target.closest('.slot');
+          if(!targetSlot || parseInt(targetSlot.dataset.lane) !== laneIdx) return;
+          let newSlotIdx = parseInt(targetSlot.dataset.si);
+          let newTime = slots[newSlotIdx].key;
+          let updated = false;
+          if(edge === 'left' && newTime < resizeState.originalEnd){
+            resizeState.originalStart = newTime;
+            updated = true;
+          } else if(edge === 'right' && newTime > resizeState.originalStart){
+            resizeState.originalEnd = newTime;
+            updated = true;
+          }
+          if(updated){
+            // обновляем локальную бронь
+            let idx = localBookings.findIndex(l=> l.lane===laneIdx && l.start===start && l.end===end);
+            if(idx!==-1){
+              localBookings[idx].start = resizeState.originalStart;
+              localBookings[idx].end = resizeState.originalEnd;
+              renderAllSliders();
+            }
+          }
+        };
+        const onMouseUp = () => {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+          document.body.style.cursor = '';
+          resizeState.active = false;
+        };
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
       };
-      const onMouseUp = async () => {
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-        document.body.style.cursor = '';
-        if(resizeData.startTime !== start || resizeData.endTime !== end){
-          // обновляем бронь в Google Sheets
-          showLoad();
-          try{
-            await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"updateTime", id:b.id, newStart:resizeData.startTime, newEnd:resizeData.endTime})});
-            await loadSlidersAndBookings();
-            resetLocalIntervals();
-          }catch(e){}
-          finally{ hideLoad(); }
-        }
-        dragState.isResizing = false;
-      };
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-    };
-    resizeData.startTimeOld = start; resizeData.endTimeOld = end;
-    leftHandle.addEventListener('mousedown', (e)=>startResize('left', e));
-    rightHandle.addEventListener('mousedown', (e)=>startResize('right', e));
+      leftHandle.addEventListener('mousedown', (e)=>startResize('left', e));
+      rightHandle.addEventListener('mousedown', (e)=>startResize('right', e));
+    }
     return div;
   }
+
+  function updateCardsList(){
+    $("cardsContainer").innerHTML = "";
+    let dd = $("dateInput").value.split("-").reverse().join(".");
+    localBookings.forEach((lb, idx)=>{
+      let div = document.createElement("div"); div.className="bcard";
+      div.innerHTML = `<div><div class="bcard-title">Стол №${lb.lane+1}</div><div class="bcard-sub">${dd} · ${fmt(lb.start)} – ${fmt(lb.end)}</div></div>`;
+      let rm = document.createElement("button"); rm.className="bcard-rm"; rm.innerHTML="✕";
+      rm.onclick = ()=>{ localBookings.splice(idx,1); renderAllSliders(); };
+      div.appendChild(rm); $("cardsContainer").appendChild(div);
+    });
+  }
+
   function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
   function isDesktop(){ return window.innerWidth > 800; }
-  function onMobileFallback(e){ /* минимальная поддержка */ }
-  
-  function renderCards(){
-    $("cardsContainer").innerHTML="";
-    let dd=$("dateInput").value.split("-").reverse().join(".");
-    for(let k in ivs){
-      (ivs[k]||[]).forEach((iv,idx)=>{
-        let s=Math.min(iv.start,iv.end), e=Math.max(iv.start,iv.end);
-        let div=document.createElement("div"); div.className="bcard";
-        div.innerHTML=`<div><div class="bcard-title">Стол №${+k+1}</div><div class="bcard-sub">${dd} · ${fmt(s)} – ${fmt(e)}</div></div>`;
-        let rm=document.createElement("button"); rm.className="bcard-rm"; rm.innerHTML="✕";
-        rm.onclick=()=>{ ivs[k].splice(idx,1); renderLocalIntervals(); };
-        div.appendChild(rm); $("cardsContainer").appendChild(div);
-      });
-    }
-  }
-  function openBookModal(){ if(!Object.values(ivs).some(a=>a.length)) return alert("Выделите интервалы на сетке"); $("bookModal").classList.add("open"); }
+
+  function openBookModal(){ if(localBookings.length===0) return alert("Выделите интервалы на сетке (протяните мышкой)"); $("bookModal").classList.add("open"); }
   function closeBookModal(){ $("bookModal").classList.remove("open"); }
   async function submitForm(){
     let name=$("nameInput").value.trim(), phone=$("phoneInput").value.trim(), comment=$("commentInput").value.trim(), date=$("dateInput").value;
     if(!name||!phone) return alert("Введите имя и телефон");
-    let bookings=[];
-    for(let k in ivs) (ivs[k]||[]).forEach(iv=>bookings.push({date,tableNumber:+k+1,start:iv.start,end:iv.end,name,phone,comment}));
-    if(!bookings.length) return;
+    let bookingsToSend = localBookings.map(lb=>({ date, tableNumber: lb.lane+1, start: lb.start, end: lb.end, name, phone, comment }));
+    if(bookingsToSend.length===0) return;
     showLoad();
     try{
-      await Promise.all(bookings.map(b=>fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({bookings:[b]})})));
+      await Promise.all(bookingsToSend.map(b=>fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({bookings:[b]})})));
       closeBookModal(); $("nameInput").value=$("phoneInput").value=$("commentInput").value="";
-      resetLocalIntervals(); await loadSlidersAndBookings();
+      localBookings = [];
+      await loadSavedBookings();
     } catch(e){ alert("Ошибка"); } finally{ hideLoad(); }
   }
   function showInfoModal(b){
@@ -658,16 +666,16 @@
     if(b.confirmed==="Да") s.innerHTML='<span style="background:#e0f7e8; padding:4px 12px; border-radius:40px;">✓ Подтверждено</span>';
     else if(b.confirmed==="Нет") s.innerHTML='<span style="background:#ffe5e2; padding:4px 12px; border-radius:40px;">✕ Не состоялось</span>';
     else s.innerHTML='<span style="background:#fff1df; padding:4px 12px; border-radius:40px;">⏳ Ожидает</span>';
-    curId=b.id; $("infoModal").classList.add("open");
+    $("infoModal").classList.add("open");
   }
-  function closeInfoModal(){ $("infoModal").classList.remove("open"); curId=null; }
-  async function confirmBooking(yes){ if(!curId)return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:curId,confirmed:yes})}); closeInfoModal(); await loadSlidersAndBookings(); } catch(e){} finally{ hideLoad(); } }
-  async function deleteBooking(){ if(!curId||!confirm("Удалить бронь?"))return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:curId})}); closeInfoModal(); await loadSlidersAndBookings(); } catch(e){} finally{ hideLoad(); } }
+  function closeInfoModal(){ $("infoModal").classList.remove("open"); curInfoBooking=null; }
+  async function confirmBooking(yes){ if(!curInfoBooking) return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:curInfoBooking.id,confirmed:yes})}); closeInfoModal(); await loadSavedBookings(); } catch(e){} finally{ hideLoad(); } }
+  async function deleteBooking(){ if(!curInfoBooking||!confirm("Удалить бронь?"))return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:curInfoBooking.id})}); closeInfoModal(); await loadSavedBookings(); } catch(e){} finally{ hideLoad(); } }
   function showLoad(){ $("loader").style.display="flex"; } function hideLoad(){ $("loader").style.display="none"; }
   function openImg(){ $("imgPopup").classList.add("open"); } function closeImg(){ $("imgPopup").classList.remove("open"); }
   ["bookModal","infoModal"].forEach(id=>{ $(id).addEventListener("click",e=>{ if(e.target===$(id)) $(id).classList.remove("open"); }); });
   $("imgPopup").addEventListener("click",e=>{ if(e.target===$("imgPopup")) closeImg(); });
-  let lastDesktop=true; window.addEventListener("resize",()=>{ if(isDesktop()!==lastDesktop){ lastDesktop=isDesktop(); loadSlidersAndBookings(); } });
+  let lastDesktop=true; window.addEventListener("resize",()=>{ if(isDesktop()!==lastDesktop){ lastDesktop=isDesktop(); renderAllSliders(); } });
 </script>
 </body>
 </html>

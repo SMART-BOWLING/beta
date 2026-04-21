@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
-  <title>Бильярд · Брони | Улучшенный ресайз ползунков</title>
+  <title>Бильярд · Брони | Ресайз в обе стороны</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png"/>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
@@ -258,10 +258,6 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.08);
       background-clip: padding-box;
     }
-    .slider.resizing {
-      opacity: 0.9;
-      transition: none;
-    }
     .slider:hover { opacity: 0.92; transform: scale(1.01); z-index: 20; }
     .slider.pending   { background: rgba(255,159,10,0.25); border: 1px solid rgba(255,159,10,0.8); }
     .slider.confirmed { background: rgba(52,199,89,0.25); border: 1px solid rgba(52,199,89,0.8); }
@@ -414,7 +410,6 @@
   let nextTempId = 1;
   let dragState = { active: false, lane: null, startIdx: null, currentIdx: null };
   let curInfoBooking = null;
-  let resizeState = { active: false, edge: null, localRef: null, lane: null, startX: 0, originalStart: null, originalEnd: null };
 
   const $ = id => document.getElementById(id);
   const qs = (s, p=document) => p.querySelector(s);
@@ -554,64 +549,6 @@
     updateCardsList();
   }
 
-  function startResize(localRef, laneIdx, edge, e){
-    e.stopPropagation();
-    resizeState.active = true;
-    resizeState.edge = edge;
-    resizeState.localRef = localRef;
-    resizeState.lane = laneIdx;
-    resizeState.originalStart = localRef.start;
-    resizeState.originalEnd = localRef.end;
-    
-    document.body.style.cursor = 'ew-resize';
-    document.body.classList.add('resizing-active');
-    
-    const onMouseMove = (moveEvent) => {
-      if(!resizeState.active) return;
-      const targetSlot = moveEvent.target.closest('.slot');
-      if(!targetSlot) return;
-      const targetLane = parseInt(targetSlot.dataset.lane);
-      if(targetLane !== laneIdx) return;
-      const newSlotIdx = parseInt(targetSlot.dataset.si);
-      if(isNaN(newSlotIdx)) return;
-      const newTimeValue = slots[newSlotIdx].key;
-      
-      let currentStart = resizeState.originalStart;
-      let currentEnd = resizeState.originalEnd;
-      let startIdx = getSlotIndexByTime(currentStart);
-      let endIdx = getSlotIndexByTime(currentEnd);
-      if(startIdx === -1 || endIdx === -1) return;
-      
-      let newStart = currentStart, newEnd = currentEnd;
-      if(edge === 'left'){
-        if(newSlotIdx < endIdx){
-          newStart = newTimeValue;
-        } else return;
-      } else {
-        if(newSlotIdx > startIdx){
-          newEnd = newTimeValue;
-        } else return;
-      }
-      
-      if(newStart !== currentStart || newEnd !== currentEnd){
-        localRef.start = newStart;
-        localRef.end = newEnd;
-        renderAllSliders();
-      }
-    };
-    
-    const onMouseUp = () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-      document.body.style.cursor = '';
-      document.body.classList.remove('resizing-active');
-      resizeState.active = false;
-    };
-    
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-  }
-
   function createBookingSlider(booking, start, end, laneIdx, isLocal, localRef = null){
     let div = document.createElement("div");
     let statusClass = "pending";
@@ -627,7 +564,6 @@
     let timeDiv = document.createElement("div"); timeDiv.className="sl-time"; timeDiv.textContent=`${fmt(start)} – ${fmt(end)}`;
     div.append(nameDiv, timeDiv);
     div.addEventListener("click", (e)=>{
-      if(resizeState.active) return;
       e.stopPropagation();
       if(isLocal && localRef){
         if(confirm("Удалить этот интервал?")){
@@ -645,8 +581,81 @@
       let rightHandle = document.createElement("div"); rightHandle.className="resize-handle-right";
       div.appendChild(leftHandle); div.appendChild(rightHandle);
       
-      leftHandle.addEventListener('mousedown', (e) => startResize(localRef, laneIdx, 'left', e));
-      rightHandle.addEventListener('mousedown', (e) => startResize(localRef, laneIdx, 'right', e));
+      // Функция ресайза с поддержкой увеличения И уменьшения
+      const startResize = (edge, e) => {
+        e.stopPropagation();
+        let isResizing = true;
+        document.body.style.cursor = 'ew-resize';
+        
+        const onMouseMove = (moveEvent) => {
+          if(!isResizing) return;
+          const targetSlot = moveEvent.target.closest('.slot');
+          if(!targetSlot) return;
+          const targetLane = parseInt(targetSlot.dataset.lane);
+          if(targetLane !== laneIdx) return;
+          const newSlotIdx = parseInt(targetSlot.dataset.si);
+          if(isNaN(newSlotIdx)) return;
+          
+          // Получаем текущие границы напрямую из localRef
+          let currentStart = localRef.start;
+          let currentEnd = localRef.end;
+          let currentStartIdx = getSlotIndexByTime(currentStart);
+          let currentEndIdx = getSlotIndexByTime(currentEnd);
+          
+          if(currentStartIdx === -1 || currentEndIdx === -1) return;
+          
+          let newStart = currentStart;
+          let newEnd = currentEnd;
+          
+          if(edge === 'left'){
+            // Изменяем левый край: можно как увеличить, так и уменьшить
+            if(newSlotIdx < currentEndIdx){
+              newStart = slots[newSlotIdx].key;
+            } else if(newSlotIdx > currentEndIdx){
+              // Если перетянули за правый край - меняем местами (меняем правый край)
+              newStart = currentEnd;
+              newEnd = slots[newSlotIdx].key;
+            } else {
+              return;
+            }
+          } else {
+            // Изменяем правый край
+            if(newSlotIdx > currentStartIdx){
+              newEnd = slots[newSlotIdx].key;
+            } else if(newSlotIdx < currentStartIdx){
+              // Если перетянули за левый край - меняем местами
+              newEnd = currentStart;
+              newStart = slots[newSlotIdx].key;
+            } else {
+              return;
+            }
+          }
+          
+          // Убеждаемся, что start < end
+          let newStartIdx = getSlotIndexByTime(newStart);
+          let newEndIdx = getSlotIndexByTime(newEnd);
+          if(newStartIdx < newEndIdx){
+            if(newStart !== currentStart || newEnd !== currentEnd){
+              localRef.start = newStart;
+              localRef.end = newEnd;
+              renderAllSliders();
+            }
+          }
+        };
+        
+        const onMouseUp = () => {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+          document.body.style.cursor = '';
+          isResizing = false;
+        };
+        
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      };
+      
+      leftHandle.addEventListener('mousedown', (e) => startResize('left', e));
+      rightHandle.addEventListener('mousedown', (e) => startResize('right', e));
     }
     return div;
   }

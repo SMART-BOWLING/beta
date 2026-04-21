@@ -80,11 +80,11 @@
     }
     .nav-btn:hover { background: var(--blue-dim); }
 
-    /* PAGE */
+    /* PAGE — теперь занимает 100% ширины (раньше был max-width) */
     .page {
-      max-width: 1600px;      /* шире, чтобы таблица дышала */
-      margin: 0 auto;
-      padding: 24px 24px 80px;
+      width: 100%;
+      margin: 0;
+      padding: 24px 28px 80px;
       display: flex;
       flex-direction: column;
       gap: 24px;
@@ -135,12 +135,13 @@
     .dot-green { background: var(--green); }
     .dot-red   { background: var(--red); }
 
-    /* GRID CARD */
+    /* GRID CARD — теперь без ограничений по ширине */
     .grid-card {
       background: var(--surface); border-radius: 24px;
       box-shadow: 0 4px 20px rgba(0,0,0,.06);
       overflow: hidden;
       border: .5px solid var(--border);
+      width: 100%;
     }
     .grid-scroll {
       overflow-x: auto;
@@ -150,7 +151,7 @@
       width: 100%;
     }
 
-    /* ========== ДЕСКТОПНАЯ ТАБЛИЦА (строки = столы) ========== */
+    /* ========== ДЕСКТОПНАЯ ТАБЛИЦА (строки = столы, полная ширина) ========== */
     #tableDesktop {
       display: table;
       border-collapse: collapse;

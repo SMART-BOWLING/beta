@@ -282,7 +282,7 @@
       height: 100%;
       cursor: ew-resize;
       background: rgba(0,0,0,0.08);
-      z-index: 5;
+      z-index: 15;
       pointer-events: auto;
       border-radius: 12px;
       transition: background 0.1s;
@@ -571,50 +571,75 @@
       }
     });
     
-    // Ручки для изменения размера (только для локальных)
+    // Ручки для изменения размера (только для локальных броней)
     if(isLocal && localRef){
       let leftHandle = document.createElement("div"); leftHandle.className="resize-handle-left";
       let rightHandle = document.createElement("div"); rightHandle.className="resize-handle-right";
       div.appendChild(leftHandle); div.appendChild(rightHandle);
       
-      let resizeState = { active: false, edge: null, originalStart: start, originalEnd: end, lane: laneIdx };
+      // Получаем актуальную карту индексов ячеек для данного стола
+      const getCurrentSlotIndex = (timeValue) => {
+        for(let idx = 0; idx < slots.length; idx++){
+          if(slots[idx].key === timeValue) return idx;
+        }
+        return -1;
+      };
+      
+      let resizeActive = false;
+      let resizeEdge = null;
       
       const startResize = (edge, e) => {
         e.stopPropagation();
-        resizeState.active = true;
-        resizeState.edge = edge;
+        resizeActive = true;
+        resizeEdge = edge;
         document.body.style.cursor = 'ew-resize';
         
         const onMouseMove = (moveEvent) => {
-          if(!resizeState.active) return;
-          let targetSlot = moveEvent.target.closest('.slot');
-          if(!targetSlot || parseInt(targetSlot.dataset.lane) !== laneIdx) return;
-          let newSlotIdx = parseInt(targetSlot.dataset.si);
-          let newTime = slots[newSlotIdx].key;
+          if(!resizeActive) return;
+          const targetSlot = moveEvent.target.closest('.slot');
+          if(!targetSlot) return;
+          const targetLane = parseInt(targetSlot.dataset.lane);
+          if(targetLane !== laneIdx) return;
+          const newSlotIdx = parseInt(targetSlot.dataset.si);
+          if(isNaN(newSlotIdx)) return;
+          const newTimeValue = slots[newSlotIdx].key;
           
-          // Получаем текущие границы брони
           let currentStart = localRef.start;
           let currentEnd = localRef.end;
+          let startIdx = getCurrentSlotIndex(currentStart);
+          let endIdx = getCurrentSlotIndex(currentEnd);
+          
+          if(startIdx === -1 || endIdx === -1) return;
+          
           let newStart = currentStart;
           let newEnd = currentEnd;
           
           if(edge === 'left'){
-            // Изменяем левую границу: новый start не должен быть >= end
-            if(newTime < currentEnd){
-              newStart = newTime;
+            // Изменяем левую границу: новый старт не может быть больше или равен текущему концу
+            if(newTimeValue < currentEnd){
+              newStart = newTimeValue;
+              // Дополнительно проверяем, чтобы start не стал > end
+              let newStartIdx = getCurrentSlotIndex(newStart);
+              if(newStartIdx >= endIdx) return;
+            } else {
+              return;
             }
           } else if(edge === 'right'){
-            // Изменяем правую границу: новый end не должен быть <= start
-            if(newTime > currentStart){
-              newEnd = newTime;
+            // Изменяем правую границу: новый конец не может быть меньше или равен текущему старту
+            if(newTimeValue > currentStart){
+              newEnd = newTimeValue;
+              let newEndIdx = getCurrentSlotIndex(newEnd);
+              if(newEndIdx <= startIdx) return;
+            } else {
+              return;
             }
           }
           
-          // Обновляем, только если границы изменились
+          // Обновляем только если реально изменилось
           if(newStart !== currentStart || newEnd !== currentEnd){
             localRef.start = newStart;
             localRef.end = newEnd;
-            renderAllSliders(); // перерисовываем все слайдеры с новыми размерами
+            renderAllSliders();
           }
         };
         
@@ -622,15 +647,15 @@
           document.removeEventListener('mousemove', onMouseMove);
           document.removeEventListener('mouseup', onMouseUp);
           document.body.style.cursor = '';
-          resizeState.active = false;
+          resizeActive = false;
         };
         
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
       };
       
-      leftHandle.addEventListener('mousedown', (e)=>startResize('left', e));
-      rightHandle.addEventListener('mousedown', (e)=>startResize('right', e));
+      leftHandle.addEventListener('mousedown', (e) => startResize('left', e));
+      rightHandle.addEventListener('mousedown', (e) => startResize('right', e));
     }
     return div;
   }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
-  <title>Бильярд · Брони | DayPilot‑like drag & resize</title>
+  <title>Бильярд · Брони | Плавный resize</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png"/>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
@@ -262,8 +262,8 @@
     .drag-handle {
       position: absolute;
       top: 0;
-      left: 12px;
-      right: 12px;
+      left: 14px;
+      right: 14px;
       height: 100%;
       cursor: grab;
       background: transparent;
@@ -301,6 +301,16 @@
     .loader-box { background: white; border-radius: 32px; padding: 28px 40px; }
     .spin { width: 38px; height: 38px; border: 3px solid #ddd; border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 14px; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .resize-preview {
+      position: absolute;
+      background: rgba(255, 159, 10, 0.3);
+      border: 2px dashed #ff9f0a;
+      border-radius: 12px;
+      pointer-events: none;
+      z-index: 25;
+      transition: all 0.05s linear;
+    }
   </style>
 </head>
 <body>
@@ -319,7 +329,7 @@
 
 <div id="content">
   <nav class="nav">
-    <span class="nav-title">🎱 LUCKY STRIKE · DayPilot‑like брони</span>
+    <span class="nav-title">🎱 LUCKY STRIKE · Плавный resize</span>
     <button class="nav-btn" onclick="openImg()">📐 Схема зала</button>
   </nav>
   <div class="page">
@@ -366,15 +376,15 @@
   const GRP_CLASS = ['grp-navy','grp-sage','grp-rust'];
   const ROW_CLASS = ['row-navy','row-sage','row-rust'];
   
-  let bookings = []; // { id, lane, start, end, name, phone, comment, confirmed }
+  let bookings = [];
   let nextId = 1;
   let dragInterval = null;
   let isDragging = false;
   let dragStartCell = null;
-  let dragMoveTarget = null;
   
-  let moveDragCtx = null;   // для перемещения всего слайдера
-  let resizeCtx = null;     // для изменения границ
+  let moveDragCtx = null;
+  let resizeCtx = null;
+  let resizePreview = null;
   
   const $ = id => document.getElementById(id);
   
@@ -394,7 +404,7 @@
     $("dateInput").min = today;
     $("dateInput").value = today;
     buildDesktopTable();
-    $("dateInput").addEventListener("change", ()=>{ loadFromServer(); renderAll(); });
+    $("dateInput").addEventListener("change", ()=>{ loadFromServer(); });
     $("tableDesktop").addEventListener("mousedown", onMouseDown);
     document.body.addEventListener("mousemove", onMouseMove);
     document.body.addEventListener("mouseup", onMouseUp);
@@ -476,24 +486,23 @@
   }
   
   function onMouseUp(){
-    if(isDragging && dragInterval){
+    if(isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){
       let { lane, startIdx, endIdx } = dragInterval;
-      if(startIdx !== endIdx){
-        let start = slots[startIdx].key;
-        let end = slots[endIdx].key;
-        let newBooking = {
-          id: nextId++,
-          lane: lane,
-          start: Math.min(start, end),
-          end: Math.max(start, end),
-          name: "Новая бронь",
-          phone: "",
-          comment: "",
-          confirmed: null
-        };
-        bookings.push(newBooking);
-        renderAll();
-      }
+      let start = slots[startIdx].key;
+      let end = slots[endIdx].key;
+      let newBooking = {
+        id: nextId++,
+        lane: lane,
+        start: Math.min(start, end),
+        end: Math.max(start, end),
+        name: "Новая бронь",
+        phone: "",
+        comment: "",
+        confirmed: null
+      };
+      bookings.push(newBooking);
+      renderAll();
+      saveToServer();
     }
     isDragging = false;
     dragInterval = null;
@@ -503,40 +512,105 @@
   
   function startResize(booking, side, e){
     e.stopPropagation();
-    resizeCtx = { booking, side, startX: e.clientX, origStart: booking.start, origEnd: booking.end };
+    e.preventDefault();
+    
+    // Создаём элемент предпросмотра
+    resizePreview = document.createElement("div");
+    resizePreview.className = "resize-preview";
+    document.getElementById("gridScroll").style.position = "relative";
+    document.getElementById("gridScroll").appendChild(resizePreview);
+    
+    resizeCtx = { 
+      booking, side, 
+      startX: e.clientX, 
+      origStart: booking.start, 
+      origEnd: booking.end,
+      origStartIdx: slots.findIndex(s => s.key === booking.start),
+      origEndIdx: slots.findIndex(s => s.key === booking.end),
+      currentStartIdx: slots.findIndex(s => s.key === booking.start),
+      currentEndIdx: slots.findIndex(s => s.key === booking.end)
+    };
+    
+    document.body.style.cursor = "ew-resize";
     document.addEventListener("mousemove", onResizeMove);
     document.addEventListener("mouseup", onResizeEnd);
   }
   
+  function updateResizePreview(booking){
+    if(!resizePreview) return;
+    let startIdx = slots.findIndex(s => s.key === booking.start);
+    let endIdx = slots.findIndex(s => s.key === booking.end);
+    let row = $("dtBody").rows[booking.lane];
+    if(!row) return;
+    let sc = row.cells[startIdx+1];
+    let ec = row.cells[endIdx+1];
+    if(!sc || !ec) return;
+    
+    let left = sc.offsetLeft + 1;
+    let top = row.offsetTop + 1;
+    let width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2;
+    let height = row.offsetHeight - 2;
+    
+    resizePreview.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+  }
+  
   function onResizeMove(e){
     if(!resizeCtx) return;
-    let delta = e.clientX - resizeCtx.startX;
-    let cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
-    let step = Math.round(delta / cellWidth);
-    if(step === 0) return;
     
-    let startIdx = slots.findIndex(s => s.key === resizeCtx.booking.start);
-    let endIdx = slots.findIndex(s => s.key === resizeCtx.booking.end);
+    let deltaX = e.clientX - resizeCtx.startX;
+    let cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
+    
+    // Порог в 15% от ширины ячейки для изменения (нужно оттянуть на 10-15px)
+    let threshold = cellWidth * 0.15;
+    let step = 0;
+    
+    if(Math.abs(deltaX) > threshold){
+      step = Math.floor(deltaX / cellWidth);
+      // Ограничиваем шаг, чтобы не перескакивать через несколько ячеек
+      step = Math.max(-1, Math.min(1, step));
+    }
+    
+    if(step === 0) {
+      updateResizePreview(resizeCtx.booking);
+      return;
+    }
+    
+    let newStartIdx = resizeCtx.origStartIdx;
+    let newEndIdx = resizeCtx.origEndIdx;
     
     if(resizeCtx.side === 'left'){
-      let newIdx = Math.max(0, Math.min(endIdx-1, startIdx + step));
-      if(newIdx !== startIdx){
-        resizeCtx.booking.start = slots[newIdx].key;
+      newStartIdx = Math.max(0, Math.min(resizeCtx.origEndIdx - 1, resizeCtx.origStartIdx + step));
+      if(newStartIdx !== resizeCtx.origStartIdx){
+        resizeCtx.booking.start = slots[newStartIdx].key;
+        resizeCtx.origStartIdx = newStartIdx;
+        resizeCtx.startX = e.clientX;
       }
     } else {
-      let newIdx = Math.min(slots.length-1, Math.max(startIdx+1, endIdx + step));
-      if(newIdx !== endIdx){
-        resizeCtx.booking.end = slots[newIdx].key;
+      newEndIdx = Math.min(slots.length - 1, Math.max(resizeCtx.origStartIdx + 1, resizeCtx.origEndIdx + step));
+      if(newEndIdx !== resizeCtx.origEndIdx){
+        resizeCtx.booking.end = slots[newEndIdx].key;
+        resizeCtx.origEndIdx = newEndIdx;
+        resizeCtx.startX = e.clientX;
       }
     }
-    renderAll();
+    
+    updateResizePreview(resizeCtx.booking);
+    renderSliders();
   }
   
   function onResizeEnd(){
+    if(resizePreview){
+      resizePreview.remove();
+      resizePreview = null;
+    }
+    document.body.style.cursor = "";
     document.removeEventListener("mousemove", onResizeMove);
     document.removeEventListener("mouseup", onResizeEnd);
+    if(resizeCtx){
+      renderAll();
+      saveToServer();
+    }
     resizeCtx = null;
-    saveToServer();
   }
   
   function startMove(booking, e){
@@ -553,6 +627,7 @@
       endIdx: slots.findIndex(s => s.key === booking.end),
       duration: slots.findIndex(s => s.key === booking.end) - slots.findIndex(s => s.key === booking.start)
     };
+    document.body.style.cursor = "grabbing";
     document.addEventListener("mousemove", onMoveMove);
     document.addEventListener("mouseup", onMoveEnd);
   }
@@ -564,8 +639,9 @@
     let cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
     let rowHeight = $("dtBody").rows[0]?.offsetHeight || 58;
     
-    let stepX = Math.round(deltaX / cellWidth);
-    let stepY = Math.round(deltaY / rowHeight);
+    let threshold = cellWidth * 0.2;
+    let stepX = Math.abs(deltaX) > threshold ? Math.round(deltaX / cellWidth) : 0;
+    let stepY = Math.abs(deltaY) > rowHeight * 0.2 ? Math.round(deltaY / rowHeight) : 0;
     
     let newLane = Math.max(0, Math.min(LANES-1, moveDragCtx.origLane + stepY));
     let newStartIdx = Math.max(0, Math.min(slots.length - moveDragCtx.duration - 1, moveDragCtx.startIdx + stepX));
@@ -575,15 +651,19 @@
       moveDragCtx.booking.lane = newLane;
       moveDragCtx.booking.start = slots[newStartIdx].key;
       moveDragCtx.booking.end = slots[newEndIdx].key;
-      renderAll();
+      renderSliders();
     }
   }
   
   function onMoveEnd(){
+    document.body.style.cursor = "";
     document.removeEventListener("mousemove", onMoveMove);
     document.removeEventListener("mouseup", onMoveEnd);
+    if(moveDragCtx){
+      renderAll();
+      saveToServer();
+    }
     moveDragCtx = null;
-    saveToServer();
   }
   
   function renderAll(){
@@ -697,10 +777,12 @@
   }
   
   async function saveToServer(){
-    // только локально, для сохранения на сервер используем submitForm
+    // Сохраняем локальные изменения (для демо)
+    console.log("Saved locally", bookings);
   }
   
   function openBookModal(){
+    if(bookings.length === 0) return alert("Сначала создайте бронь, выделив интервал на таблице");
     $("bookModal").classList.add("open");
   }
   function closeBookModal(){ $("bookModal").classList.remove("open"); }

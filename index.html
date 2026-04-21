@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
-  <title>Бильярд · Брони | Ресайз в обе стороны</title>
+  <title>Бильярд · Брони | Ресайз как в DayPilot</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png"/>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
@@ -254,7 +254,7 @@
       flex-direction: column;
       justify-content: center;
       gap: 2px;
-      transition: box-shadow 0.1s, opacity 0.1s;
+      transition: box-shadow 0.1s;
       box-shadow: 0 2px 6px rgba(0,0,0,0.08);
       background-clip: padding-box;
     }
@@ -287,7 +287,7 @@
       transition: background 0.15s;
     }
     .resize-handle-left:hover, .resize-handle-right:hover { background: rgba(0,0,0,0.3); }
-    .resize-handle-left:active, .resize-handle-right:active { background: rgba(0,0,0,0.4); }
+    .resize-handle-left:active, .resize-handle-right:active { background: rgba(0,0,0,0.5); }
     .resize-handle-left { left: 0; border-radius: 12px 0 0 12px; }
     .resize-handle-right { right: 0; border-radius: 0 12px 12px 0; }
 
@@ -581,11 +581,17 @@
       let rightHandle = document.createElement("div"); rightHandle.className="resize-handle-right";
       div.appendChild(leftHandle); div.appendChild(rightHandle);
       
-      // Функция ресайза с поддержкой увеличения И уменьшения
+      // Ресайз как в DayPilot - плавный и в обе стороны
       const startResize = (edge, e) => {
         e.stopPropagation();
         let isResizing = true;
         document.body.style.cursor = 'ew-resize';
+        
+        // Сохраняем начальные значения
+        let originalStart = localRef.start;
+        let originalEnd = localRef.end;
+        let originalStartIdx = getSlotIndexByTime(originalStart);
+        let originalEndIdx = getSlotIndexByTime(originalEnd);
         
         const onMouseMove = (moveEvent) => {
           if(!isResizing) return;
@@ -596,46 +602,38 @@
           const newSlotIdx = parseInt(targetSlot.dataset.si);
           if(isNaN(newSlotIdx)) return;
           
-          // Получаем текущие границы напрямую из localRef
-          let currentStart = localRef.start;
-          let currentEnd = localRef.end;
-          let currentStartIdx = getSlotIndexByTime(currentStart);
-          let currentEndIdx = getSlotIndexByTime(currentEnd);
-          
-          if(currentStartIdx === -1 || currentEndIdx === -1) return;
-          
-          let newStart = currentStart;
-          let newEnd = currentEnd;
+          let newStart = originalStart;
+          let newEnd = originalEnd;
           
           if(edge === 'left'){
-            // Изменяем левый край: можно как увеличить, так и уменьшить
-            if(newSlotIdx < currentEndIdx){
+            // Изменяем левый край - можно и увеличивать и уменьшать
+            if(newSlotIdx < originalEndIdx){
               newStart = slots[newSlotIdx].key;
-            } else if(newSlotIdx > currentEndIdx){
-              // Если перетянули за правый край - меняем местами (меняем правый край)
-              newStart = currentEnd;
+            } else if(newSlotIdx > originalEndIdx){
+              // Если перетянули за правый край - меняем логику (изменяем правый край)
+              newStart = originalEnd;
               newEnd = slots[newSlotIdx].key;
             } else {
               return;
             }
           } else {
             // Изменяем правый край
-            if(newSlotIdx > currentStartIdx){
+            if(newSlotIdx > originalStartIdx){
               newEnd = slots[newSlotIdx].key;
-            } else if(newSlotIdx < currentStartIdx){
-              // Если перетянули за левый край - меняем местами
-              newEnd = currentStart;
+            } else if(newSlotIdx < originalStartIdx){
+              // Если перетянули за левый край - меняем логику
+              newEnd = originalStart;
               newStart = slots[newSlotIdx].key;
             } else {
               return;
             }
           }
           
-          // Убеждаемся, что start < end
+          // Проверяем что start < end
           let newStartIdx = getSlotIndexByTime(newStart);
           let newEndIdx = getSlotIndexByTime(newEnd);
           if(newStartIdx < newEndIdx){
-            if(newStart !== currentStart || newEnd !== currentEnd){
+            if(newStart !== localRef.start || newEnd !== localRef.end){
               localRef.start = newStart;
               localRef.end = newEnd;
               renderAllSliders();

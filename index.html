@@ -176,7 +176,7 @@
   const GRP_CLASS = ['grp-navy','grp-sage','grp-rust'];
   const ROW_CLASS = ['row-navy','row-sage','row-rust'];
   let ivs = {}, currentBookings = []; let curId = null;
-  let dragBooking = null; // активное перетаскивание брони
+  let dragBooking = null;
   let $ = id => document.getElementById(id);
   function parseJwt(t){ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
   function handleCredentialResponse(r){ let d=parseJwt(r.credential); if(ALLOWED.includes(d.email)){ localStorage.setItem("ue",d.email); location.reload(); } else alert("Доступ запрещён"); }
@@ -186,8 +186,8 @@
     $("dateInput").min = today; $("dateInput").value = today;
     buildDesktopTable(); buildMobileTable();
     $("dateInput").addEventListener("change", ()=>{ loadSliders(); });
-    renderCards(); loadSliders();
-    attachDragMoveEvents();
+    loadSliders();
+    attachGlobalDragEvents();
   }
   function buildDesktopTable(){
     let headRow = document.querySelector("tr", $("dtHead"));
@@ -211,40 +211,118 @@
     });
   }
   function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
-  function renderCards(){ /* just for legacy, not used for drag */ }
   function openBookModal(){ $("bookModal").classList.add("open"); }
   function closeBookModal(){ $("bookModal").classList.remove("open"); }
-  async function submitForm(){ let name=$("nameInput").value.trim(), phone=$("phoneInput").value.trim(), comment=$("commentInput").value.trim(), date=$("dateInput").value; if(!name||!phone) return alert("Введите имя и телефон"); let bookings=[]; for(let k in ivs) (ivs[k]||[]).forEach(iv=>bookings.push({date,tableNumber:+k+1,start:iv.start,end:iv.end,name,phone,comment})); if(!bookings.length) return alert("Сначала выделите интервал в сетке"); showLoad(); try{ await Promise.all(bookings.map(b=>fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({bookings:[b]})}))); closeBookModal(); $("nameInput").value=$("phoneInput").value=$("commentInput").value=""; Object.keys(ivs).forEach(k=>ivs[k]=[]); await loadSliders(); } catch(e){ alert("Ошибка"); } finally{ hideLoad(); } }
-  function showInfoModal(b){ $("i-table").textContent="№ "+b.table; $("i-time").textContent=`${fmt(+b.start)} – ${fmt(+b.end)}`; $("i-name").textContent=b.name; $("i-phone").textContent=b.phone; $("i-comment").textContent=b.comment||"—"; let s=$("i-status"); if(b.confirmed==="Да") s.innerHTML='<span style="background:#e0f7e8; padding:4px 12px; border-radius:40px;">✓ Подтверждено</span>'; else if(b.confirmed==="Нет") s.innerHTML='<span style="background:#ffe5e2; padding:4px 12px; border-radius:40px;">✕ Не состоялось</span>'; else s.innerHTML='<span style="background:#fff1df; padding:4px 12px; border-radius:40px;">⏳ Ожидает</span>'; curId=b.id; $("infoModal").classList.add("open"); }
+  async function submitForm(){ 
+    let name=$("nameInput").value.trim(), phone=$("phoneInput").value.trim(), comment=$("commentInput").value.trim(), date=$("dateInput").value; 
+    if(!name||!phone) return alert("Введите имя и телефон"); 
+    let bookings=[]; 
+    for(let k in ivs) (ivs[k]||[]).forEach(iv=>bookings.push({date,tableNumber:+k+1,start:iv.start,end:iv.end,name,phone,comment})); 
+    if(!bookings.length) return alert("Сначала выделите интервал в сетке"); 
+    showLoad(); 
+    try{ 
+      await Promise.all(bookings.map(b=>fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({bookings:[b]})}))); 
+      closeBookModal(); 
+      $("nameInput").value=$("phoneInput").value=$("commentInput").value=""; 
+      Object.keys(ivs).forEach(k=>ivs[k]=[]); 
+      await loadSliders(); 
+    } catch(e){ alert("Ошибка"); } 
+    finally{ hideLoad(); } 
+  }
+  function showInfoModal(b){ 
+    $("i-table").textContent="№ "+b.table; 
+    $("i-time").textContent=`${fmt(+b.start)} – ${fmt(+b.end)}`; 
+    $("i-name").textContent=b.name; 
+    $("i-phone").textContent=b.phone; 
+    $("i-comment").textContent=b.comment||"—"; 
+    let s=$("i-status"); 
+    if(b.confirmed==="Да") s.innerHTML='<span style="background:#e0f7e8; padding:4px 12px; border-radius:40px;">✓ Подтверждено</span>'; 
+    else if(b.confirmed==="Нет") s.innerHTML='<span style="background:#ffe5e2; padding:4px 12px; border-radius:40px;">✕ Не состоялось</span>'; 
+    else s.innerHTML='<span style="background:#fff1df; padding:4px 12px; border-radius:40px;">⏳ Ожидает</span>'; 
+    curId=b.id; 
+    $("infoModal").classList.add("open"); 
+  }
   function closeInfoModal(){ $("infoModal").classList.remove("open"); curId=null; }
   async function confirmBooking(yes){ if(!curId)return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:curId,confirmed:yes})}); closeInfoModal(); await loadSliders(); } catch(e){} finally{ hideLoad(); } }
   async function deleteBooking(){ if(!curId||!confirm("Удалить бронь?"))return; showLoad(); try{ await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:curId})}); closeInfoModal(); await loadSliders(); } catch(e){} finally{ hideLoad(); } }
   function isDesktop(){ return window.innerWidth>800; }
-  async function loadSliders(){ showLoad(); $("slidersLayer").innerHTML=""; try{ let res=await fetch(GAS+"?action=get&date="+$("dateInput").value); let data=await res.json(); currentBookings = data.bookings || []; if(isDesktop()) renderSlidersDesktop(currentBookings); else renderSlidersMobile(currentBookings); } catch(e){} finally{ hideLoad(); } }
-  function renderSlidersDesktop(bookings){ let rows=Array.from($("dtBody").querySelectorAll("tr")); let colByKey={}; slots.forEach((sl,i)=>{ colByKey[sl.key]=i+1; }); bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return; let laneIdx=b.table-1, start=+b.start, end=+b.end, si=colByKey[start], ei=colByKey[end]; if(si==null||ei==null)return; let row=rows[laneIdx]; if(!row)return; let sc=row.cells[si], ec=row.cells[ei]; if(!sc||!ec)return; let left=sc.offsetLeft+1, top=row.offsetTop+1, width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2, height=row.offsetHeight-2; let slider=makeSlider(b,start,end); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; slider.dataset.bookingId=b.id; $("slidersLayer").appendChild(slider); }); attachDragMoveToSliders(); }
-  function renderSlidersMobile(bookings){ let mtRows=Array.from($("mtBody").querySelectorAll("tr")); let rowByKey={}; slots.forEach((sl,i)=>{ rowByKey[sl.key]=mtRows[i]; }); bookings.forEach(b=>{ if(b.date!==$("dateInput").value)return; let laneIdx=b.table-1, start=+b.start, end=+b.end, startRow=rowByKey[start], endRow=rowByKey[end]; if(!startRow||!endRow)return; let cell=startRow.cells[laneIdx]; if(!cell)return; let left=cell.offsetLeft+1, top=startRow.offsetTop+1, width=cell.offsetWidth-2, height=(endRow.offsetTop+endRow.offsetHeight)-startRow.offsetTop-2; let slider=makeSlider(b,start,end); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; slider.dataset.bookingId=b.id; $("slidersLayer").appendChild(slider); }); attachDragMoveToSliders(); }
-  function makeSlider(b,start,end){ let el=document.createElement("div"); el.className="slider "+(b.confirmed==="Да"?"confirmed":b.confirmed==="Нет"?"rejected":"pending"); let nd=document.createElement("div"); nd.className="sl-name"; nd.textContent=b.name||"—"; let td=document.createElement("div"); td.className="sl-time"; td.textContent=`${fmt(start)} – ${fmt(end)}`; el.append(nd,td); el.addEventListener("click",e=>{ e.stopPropagation(); showInfoModal(b); }); return el; }
-  function attachDragMoveToSliders(){
+  async function loadSliders(){ 
+    showLoad(); 
+    $("slidersLayer").innerHTML=""; 
+    try{ 
+      let res=await fetch(GAS+"?action=get&date="+$("dateInput").value); 
+      let data=await res.json(); 
+      currentBookings = data.bookings || []; 
+      if(isDesktop()) renderSlidersDesktop(currentBookings); 
+      else renderSlidersMobile(currentBookings); 
+    } catch(e){} 
+    finally{ hideLoad(); } 
+  }
+  function renderSlidersDesktop(bookings){ 
+    let rows=Array.from($("dtBody").querySelectorAll("tr")); 
+    let colByKey={}; 
+    slots.forEach((sl,i)=>{ colByKey[sl.key]=i+1; }); 
+    bookings.forEach(b=>{ 
+      if(b.date!==$("dateInput").value)return; 
+      let laneIdx=b.table-1, start=+b.start, end=+b.end, si=colByKey[start], ei=colByKey[end]; 
+      if(si==null||ei==null)return; 
+      let row=rows[laneIdx]; 
+      if(!row)return; 
+      let sc=row.cells[si], ec=row.cells[ei]; 
+      if(!sc||!ec)return; 
+      let left=sc.offsetLeft+1, top=row.offsetTop+1, width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2, height=row.offsetHeight-2; 
+      let slider=makeSlider(b,start,end); 
+      slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; 
+      slider.dataset.bookingId=b.id; 
+      $("slidersLayer").appendChild(slider); 
+    }); 
+    attachDragToSliders(); 
+  }
+  function renderSlidersMobile(bookings){ 
+    let mtRows=Array.from($("mtBody").querySelectorAll("tr")); 
+    let rowByKey={}; 
+    slots.forEach((sl,i)=>{ rowByKey[sl.key]=mtRows[i]; }); 
+    bookings.forEach(b=>{ 
+      if(b.date!==$("dateInput").value)return; 
+      let laneIdx=b.table-1, start=+b.start, end=+b.end, startRow=rowByKey[start], endRow=rowByKey[end]; 
+      if(!startRow||!endRow)return; 
+      let cell=startRow.cells[laneIdx]; 
+      if(!cell)return; 
+      let left=cell.offsetLeft+1, top=startRow.offsetTop+1, width=cell.offsetWidth-2, height=(endRow.offsetTop+endRow.offsetHeight)-startRow.offsetTop-2; 
+      let slider=makeSlider(b,start,end); 
+      slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; 
+      slider.dataset.bookingId=b.id; 
+      $("slidersLayer").appendChild(slider); 
+    }); 
+    attachDragToSliders(); 
+  }
+  function makeSlider(b,start,end){ 
+    let el=document.createElement("div"); 
+    el.className="slider "+(b.confirmed==="Да"?"confirmed":b.confirmed==="Нет"?"rejected":"pending"); 
+    let nd=document.createElement("div"); 
+    nd.className="sl-name"; 
+    nd.textContent=b.name||"—"; 
+    let td=document.createElement("div"); 
+    td.className="sl-time"; 
+    td.textContent=`${fmt(start)} – ${fmt(end)}`; 
+    el.append(nd,td); 
+    el.addEventListener("click",e=>{ e.stopPropagation(); showInfoModal(b); }); 
+    return el; 
+  }
+  function attachDragToSliders(){
     const sliders = document.querySelectorAll("#slidersLayer .slider");
     sliders.forEach(slider => {
       slider.setAttribute("draggable", "true");
-      slider.addEventListener("dragstart", handleDragStart);
-      slider.addEventListener("dragend", handleDragEnd);
-      slider.addEventListener("drag", (e) => { e.preventDefault(); });
-    });
-    const slotsDesk = document.querySelectorAll("#tableDesktop td.slot");
-    const slotsMob = document.querySelectorAll("#tableMobile td.slot");
-    [...slotsDesk, ...slotsMob].forEach(slot => {
-      slot.addEventListener("dragover", (e) => { e.preventDefault(); slot.classList.add("drop-zone-hint"); });
-      slot.addEventListener("dragleave", () => { slot.classList.remove("drop-zone-hint"); });
-      slot.addEventListener("drop", handleDropOnSlot);
+      slider.removeEventListener("dragstart", dragStartHandler);
+      slider.removeEventListener("dragend", dragEndHandler);
+      slider.addEventListener("dragstart", dragStartHandler);
+      slider.addEventListener("dragend", dragEndHandler);
     });
   }
-  function handleDragStart(e){
+  function dragStartHandler(e){
     let slider = e.target.closest(".slider");
     if(!slider) return;
     let bookingId = slider.dataset.bookingId;
-    if(!bookingId) return;
     let booking = currentBookings.find(b => b.id == bookingId);
     if(!booking) return;
     dragBooking = booking;
@@ -252,46 +330,54 @@
     e.dataTransfer.effectAllowed = "move";
     slider.classList.add("dragging");
   }
-  function handleDragEnd(e){
+  function dragEndHandler(e){
     let slider = e.target.closest(".slider");
     if(slider) slider.classList.remove("dragging");
     document.querySelectorAll(".drop-zone-hint").forEach(el => el.classList.remove("drop-zone-hint"));
     dragBooking = null;
   }
-  async function handleDropOnSlot(e){
-    e.preventDefault();
-    let targetSlot = e.target.closest(".slot");
-    if(!targetSlot) return;
-    if(!dragBooking) return;
-    let newLane = parseInt(targetSlot.dataset.lane);
-    let newTimeKey = parseFloat(targetSlot.dataset.time);
-    if(isNaN(newLane) || isNaN(newTimeKey)) return;
-    let oldStart = parseFloat(dragBooking.start);
-    let oldEnd = parseFloat(dragBooking.end);
-    let duration = oldEnd - oldStart;
-    let newStart = newTimeKey;
-    let newEnd = newStart + duration;
-    if(newEnd > EH) { alert("Нельзя выйти за пределы 22:00"); return; }
-    if(newStart < SH) { alert("Нельзя раньше 11:00"); return; }
-    if(newLane+1 !== dragBooking.table) {
-      let conflict = currentBookings.some(b => b.id != dragBooking.id && b.table === newLane+1 && b.date === $("dateInput").value && 
-        ((newStart >= parseFloat(b.start) && newStart < parseFloat(b.end)) || (newEnd > parseFloat(b.start) && newEnd <= parseFloat(b.end)) ||
-        (newStart <= parseFloat(b.start) && newEnd >= parseFloat(b.end))));
-      if(conflict) { alert("На этом столе в выбранное время уже есть бронь"); return; }
-    }
-    showLoad();
-    try {
-      await fetch(GAS, { method:"POST", mode:"no-cors", body: JSON.stringify({ action:"move", id: dragBooking.id, newTable: newLane+1, newStart, newEnd }) });
-      await loadSliders();
-    } catch(err){ alert("Ошибка перемещения"); }
-    finally{ hideLoad(); dragBooking = null; document.querySelectorAll(".drop-zone-hint").forEach(el => el.classList.remove("drop-zone-hint")); }
+  function attachGlobalDragEvents(){
+    const slotsDesk = document.querySelectorAll("#tableDesktop td.slot");
+    const slotsMob = document.querySelectorAll("#tableMobile td.slot");
+    [...slotsDesk, ...slotsMob].forEach(slot => {
+      slot.addEventListener("dragover", (e) => { e.preventDefault(); slot.classList.add("drop-zone-hint"); });
+      slot.addEventListener("dragleave", () => { slot.classList.remove("drop-zone-hint"); });
+      slot.addEventListener("drop", async (e) => {
+        e.preventDefault();
+        let targetSlot = e.target.closest(".slot");
+        if(!targetSlot) return;
+        if(!dragBooking) return;
+        let newLane = parseInt(targetSlot.dataset.lane);
+        let newTimeKey = parseFloat(targetSlot.dataset.time);
+        if(isNaN(newLane) || isNaN(newTimeKey)) return;
+        let oldStart = parseFloat(dragBooking.start);
+        let oldEnd = parseFloat(dragBooking.end);
+        let duration = oldEnd - oldStart;
+        let newStart = newTimeKey;
+        let newEnd = newStart + duration;
+        if(newEnd > EH) { alert("Нельзя выйти за пределы 22:00"); return; }
+        if(newStart < SH) { alert("Нельзя раньше 11:00"); return; }
+        let conflict = currentBookings.some(b => b.id != dragBooking.id && b.table === newLane+1 && b.date === $("dateInput").value && 
+          ((newStart >= parseFloat(b.start) && newStart < parseFloat(b.end)) || (newEnd > parseFloat(b.start) && newEnd <= parseFloat(b.end)) ||
+          (newStart <= parseFloat(b.start) && newEnd >= parseFloat(b.end))));
+        if(conflict) { alert("На этом столе в выбранное время уже есть бронь"); return; }
+        showLoad();
+        try {
+          await fetch(GAS, { method:"POST", mode:"no-cors", body: JSON.stringify({ action:"move", id: dragBooking.id, newTable: newLane+1, newStart, newEnd }) });
+          await loadSliders();
+        } catch(err){ alert("Ошибка перемещения"); }
+        finally{ hideLoad(); dragBooking = null; document.querySelectorAll(".drop-zone-hint").forEach(el => el.classList.remove("drop-zone-hint")); }
+      });
+    });
   }
-  function attachDragMoveEvents(){ /* nothing extra */ }
-  function showLoad(){ $("loader").style.display="flex"; } function hideLoad(){ $("loader").style.display="none"; }
-  function openImg(){ $("imgPopup").classList.add("open"); } function closeImg(){ $("imgPopup").classList.remove("open"); }
+  function showLoad(){ $("loader").style.display="flex"; } 
+  function hideLoad(){ $("loader").style.display="none"; }
+  function openImg(){ $("imgPopup").classList.add("open"); } 
+  function closeImg(){ $("imgPopup").classList.remove("open"); }
   ["bookModal","infoModal"].forEach(id=>{ $(id).addEventListener("click",e=>{ if(e.target===$(id)){ $(id).classList.remove("open"); if(id==="infoModal")curId=null; } }); });
   $("imgPopup").addEventListener("click",e=>{ if(e.target===$("imgPopup")) closeImg(); });
-  let lastDesktop=isDesktop(); window.addEventListener("resize",()=>{ if(isDesktop()!==lastDesktop){ lastDesktop=isDesktop(); loadSliders(); } });
+  let lastDesktop=isDesktop(); 
+  window.addEventListener("resize",()=>{ if(isDesktop()!==lastDesktop){ lastDesktop=isDesktop(); loadSliders(); } });
 </script>
 </body>
 </html>

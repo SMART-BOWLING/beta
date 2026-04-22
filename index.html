@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
-  <title>Бильярд · Брони | Плавный resize</title>
+  <title>Бильярд · Брони | Плавное управление</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png"/>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
@@ -174,12 +174,9 @@
       z-index: 5;
     }
     #tableDesktop thead th.th-time {
-      cursor: pointer;
       width: var(--cell-w);
       min-width: var(--cell-w);
-      transition: all .12s;
     }
-    #tableDesktop thead th.th-time:hover { background: #fff4e0; color: var(--amber); }
 
     #tableDesktop tbody tr { height: var(--cell-h); }
     #tableDesktop tbody td.lane-hdr {
@@ -294,6 +291,7 @@
     .f-input { width: 100%; background: var(--surface2); border: .5px solid var(--border2); border-radius: 14px; font-size: 16px; padding: 12px 14px; user-select: text; }
     .f-actions { display: flex; gap: 12px; margin-top: 24px; }
     .f-btn-ok { flex:1; height: 52px; background: var(--blue); color: white; border: none; border-radius: 980px; font-weight: 600; cursor: pointer; }
+    .f-btn-cancel { flex:1; height: 52px; background: var(--surface2); border: .5px solid var(--border2); border-radius: 980px; font-weight: 600; cursor: pointer; }
     .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: .5px solid var(--border); }
     .del-btn { width:100%; height: 48px; background: #ffe5e2; border: none; border-radius: 980px; margin-top: 20px; cursor: pointer; font-weight: 600; }
     .confirm-btns { display: flex; gap: 12px; margin: 12px 0; }
@@ -312,8 +310,6 @@
       border-radius: 14px;
       pointer-events: none;
       z-index: 25;
-      transition: all 0.02s linear;
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
     }
   </style>
 </head>
@@ -333,7 +329,7 @@
 
 <div id="content">
   <nav class="nav">
-    <span class="nav-title">🎱 LUCKY STRIKE · Плавный resize</span>
+    <span class="nav-title">🎱 LUCKY STRIKE · Плавное управление</span>
     <button class="nav-btn" onclick="openImg()">📐 Схема зала</button>
   </nav>
   <div class="page">
@@ -366,8 +362,12 @@
   </div>
 </div>
 
-<div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Новая бронь</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div class="f-group"><label class="f-label">Имя</label><input class="f-input" id="nameInput"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitForm()">Подтвердить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
-<div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><span id="i-table"></span></div><div class="info-row"><span>Время</span><span id="i-time"></span></div><div class="info-row"><span>Имя</span><span id="i-name"></span></div><div class="info-row"><span>Телефон</span><span id="i-phone"></span></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Состоялось</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">🗑 Удалить бронь</button></div></div></div>
+<!-- Модалка для ввода имени/телефона (только для новых черновиков) -->
+<div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Заполните данные</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div class="f-group"><label class="f-label">Имя *</label><input class="f-input" id="nameInput"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitDraftBooking()">Сохранить бронь</button><button class="f-btn-cancel" onclick="closeBookModalAndDiscard()">Отмена</button></div></div></div></div>
+
+<!-- Модалка детальной информации о брони -->
+<div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали брони</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><span id="i-table"></span></div><div class="info-row"><span>Время</span><span id="i-time"></span></div><div class="info-row"><span>Имя</span><span id="i-name"></span></div><div class="info-row"><span>Телефон</span><span id="i-phone"></span></div><div class="info-row"><span>Комментарий</span><span id="i-comment"></span></div></div><div class="confirm-btns"><button class="cb-yes" onclick="markAttendance(true)">✅ Пришли</button><button class="cb-no" onclick="markAttendance(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBookingFromModal()">🗑 Удалить бронь</button></div></div></div>
+
 <div id="imgPopup" class="overlay"><div class="sheet" style="max-width:90vw; background:transparent; box-shadow:none;"><img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width:100%; border-radius:28px;" onclick="closeImg()"/></div></div>
 <div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
 
@@ -380,14 +380,12 @@
   const GRP_CLASS = ['grp-navy','grp-sage','grp-rust'];
   const ROW_CLASS = ['row-navy','row-sage','row-rust'];
   
-  let bookings = [];
-  let nextId = 1;
-  let dragInterval = null;
-  let isDragging = false;
-  let dragStartCell = null;
+  let bookings = [];           // все брони (с id или без, но после сохранения id !== null)
+  let draftBooking = null;     // черновик, созданный протягиванием, ещё без имени/телефона
+  let currentBooking = null;
   
-  let moveDragCtx = null;
   let resizeCtx = null;
+  let moveDragCtx = null;
   let resizePreview = null;
   let updateTimeout = null;
   
@@ -419,7 +417,6 @@
       let th=document.createElement("th"); 
       th.className="th-time"; 
       th.dataset.si=i; 
-      th.dataset.key=sl.key; 
       th.textContent=sl.label; 
       headRow.appendChild(th);
     });
@@ -444,42 +441,39 @@
     }
   }
   
-  function getSlotCell(lane, slotIdx){
-    return $("dtBody")?.rows[lane]?.cells[slotIdx+1];
-  }
+  function getSlotCell(lane, slotIdx){ return $("dtBody")?.rows[lane]?.cells[slotIdx+1]; }
   
-  // Drag to create new booking
+  // DRAG для создания черновика
+  let dragActive = false, dragStart = null, dragRange = null;
   function onMouseDown(e){
     let target = e.target;
     if(target.classList && target.classList.contains("slot")){
       e.preventDefault();
       let lane = parseInt(target.dataset.lane);
       let startIdx = parseInt(target.dataset.si);
-      isDragging = true;
-      dragStartCell = { lane, startIdx };
-      dragInterval = { lane, startIdx, endIdx: startIdx };
+      dragActive = true;
+      dragStart = { lane, startIdx };
+      dragRange = { lane, startIdx, endIdx: startIdx };
       highlightDragInterval(lane, startIdx, startIdx);
     }
   }
-  
   function onMouseMove(e){
-    if(isDragging && dragStartCell){
+    if(dragActive && dragStart){
       let hoverEl = document.elementsFromPoint(e.clientX, e.clientY).find(el => el.classList && el.classList.contains("slot"));
       if(hoverEl){
         let lane = parseInt(hoverEl.dataset.lane);
         let idx = parseInt(hoverEl.dataset.si);
-        if(lane === dragStartCell.lane){
-          let newStart = Math.min(dragStartCell.startIdx, idx);
-          let newEnd = Math.max(dragStartCell.startIdx, idx);
-          if(dragInterval.startIdx !== newStart || dragInterval.endIdx !== newEnd){
-            dragInterval = { lane, startIdx: newStart, endIdx: newEnd };
+        if(lane === dragStart.lane){
+          let newStart = Math.min(dragStart.startIdx, idx);
+          let newEnd = Math.max(dragStart.startIdx, idx);
+          if(dragRange.startIdx !== newStart || dragRange.endIdx !== newEnd){
+            dragRange = { lane, startIdx: newStart, endIdx: newEnd };
             highlightDragInterval(lane, newStart, newEnd);
           }
         }
       }
     }
   }
-  
   function highlightDragInterval(lane, startIdx, endIdx){
     document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td => td.classList.remove("drag-over"));
     for(let i=startIdx; i<=endIdx; i++){
@@ -487,71 +481,116 @@
       if(cell) cell.classList.add("drag-over");
     }
   }
-  
   function onMouseUp(){
-    if(isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){
-      let { lane, startIdx, endIdx } = dragInterval;
+    if(dragActive && dragRange && dragRange.startIdx !== dragRange.endIdx){
+      let { lane, startIdx, endIdx } = dragRange;
       let start = slots[startIdx].key;
       let end = slots[endIdx].key;
-      let newBooking = {
+      // Создаём черновик (без id, без имени) – НЕ ОТПРАВЛЯЕМ В ТАБЛИЦУ
+      draftBooking = {
         id: null,
         lane: lane,
         start: Math.min(start, end),
         end: Math.max(start, end),
-        name: "Новая бронь",
+        name: "",
         phone: "",
         comment: "",
         confirmed: null
       };
-      bookings.push(newBooking);
+      // Визуально добавляем его в массив временно для отображения, но с пометкой draft
+      bookings.push(draftBooking);
       renderAll();
-      saveToServer(newBooking);
+      // Открываем модалку для ввода имени/телефона
+      openBookModal();
     }
-    isDragging = false;
-    dragInterval = null;
-    dragStartCell = null;
+    dragActive = false;
+    dragRange = null;
+    dragStart = null;
     document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td => td.classList.remove("drag-over"));
   }
   
-  // Плавный resize без дискретных скачков
-  function startResize(booking, side, e){
-    e.stopPropagation();
-    e.preventDefault();
-    
+  function openBookModal(){
+    $("bookModal").classList.add("open");
+  }
+  function closeBookModal(){
+    $("bookModal").classList.remove("open");
+    $("nameInput").value = "";
+    $("phoneInput").value = "";
+    $("commentInput").value = "";
+  }
+  function closeBookModalAndDiscard(){
+    // Отмена: удаляем черновик из списка
+    if(draftBooking){
+      let idx = bookings.findIndex(b => b === draftBooking);
+      if(idx !== -1) bookings.splice(idx,1);
+      draftBooking = null;
+      renderAll();
+    }
+    closeBookModal();
+  }
+  async function submitDraftBooking(){
+    let name = $("nameInput").value.trim();
+    if(!name){ alert("Введите имя"); return; }
+    let phone = $("phoneInput").value.trim();
+    let comment = $("commentInput").value.trim();
+    if(draftBooking){
+      draftBooking.name = name;
+      draftBooking.phone = phone;
+      draftBooking.comment = comment;
+      // Сохраняем на сервер
+      await saveNewBookingToServer(draftBooking);
+      draftBooking = null;
+      closeBookModal();
+      await loadFromServer(); // перезагрузим чтобы получить id
+    } else {
+      closeBookModal();
+    }
+  }
+  
+  async function saveNewBookingToServer(booking){
+    let date = $("dateInput").value;
+    try {
+      await fetch(GAS_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify({
+          bookings: [{
+            date: date,
+            tableNumber: booking.lane+1,
+            start: booking.start,
+            end: booking.end,
+            name: booking.name,
+            phone: booking.phone,
+            comment: booking.comment
+          }]
+        })
+      });
+    } catch(e){ console.error(e); }
+  }
+  
+  // Плавный resize и перемещение
+  function startResize(booking, side, e){ /* полная логика из исходника, адаптирована */
+    e.stopPropagation(); e.preventDefault();
     resizePreview = document.createElement("div");
     resizePreview.className = "resize-preview";
     const scrollDiv = document.getElementById("gridScroll");
     scrollDiv.style.position = "relative";
     scrollDiv.appendChild(resizePreview);
-    
-    const getCellWidth = () => $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
+    let getCellWidth = () => $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
     let cellWidth = getCellWidth();
-    
     let startIdx = slots.findIndex(s => s.key === booking.start);
     let endIdx = slots.findIndex(s => s.key === booking.end);
-    
-    resizeCtx = { 
-      booking, side,
-      startX: e.clientX,
-      startIdx: startIdx,
-      endIdx: endIdx,
-      initialStartIdx: startIdx,
-      initialEndIdx: endIdx,
-      initialStartVal: booking.start,
-      initialEndVal: booking.end,
-      cellWidth: cellWidth
-    };
-    
+    resizeCtx = { booking, side, startX: e.clientX, startIdx, endIdx, initialStartIdx: startIdx, initialEndIdx: endIdx, initialStartVal: booking.start, initialEndVal: booking.end, cellWidth };
     function updatePreviewAndModel(clientX){
       if(!resizeCtx) return;
       let deltaX = clientX - resizeCtx.startX;
       let idxDelta = deltaX / resizeCtx.cellWidth;
-      let newIdx, newKey;
+      let newIdx;
       if(resizeCtx.side === 'left'){
         let rawIdx = resizeCtx.initialStartIdx + idxDelta;
         newIdx = Math.max(0, Math.min(resizeCtx.initialEndIdx - 0.01, rawIdx));
         newIdx = Math.round(newIdx);
-        newKey = slots[newIdx]?.key;
+        let newKey = slots[newIdx]?.key;
         if(newKey !== undefined && newKey !== resizeCtx.booking.start){
           resizeCtx.booking.start = newKey;
           resizeCtx.startIdx = newIdx;
@@ -560,7 +599,7 @@
         let rawIdx = resizeCtx.initialEndIdx + idxDelta;
         newIdx = Math.max(resizeCtx.initialStartIdx + 0.01, Math.min(slots.length - 1, rawIdx));
         newIdx = Math.round(newIdx);
-        newKey = slots[newIdx]?.key;
+        let newKey = slots[newIdx]?.key;
         if(newKey !== undefined && newKey !== resizeCtx.booking.end){
           resizeCtx.booking.end = newKey;
           resizeCtx.endIdx = newIdx;
@@ -579,27 +618,15 @@
       renderSliders();
       scheduleUpdate(booking);
     }
-    
-    function onResizeMove(e){
-      if(!resizeCtx) return;
-      updatePreviewAndModel(e.clientX);
-    }
-    
-    function onResizeEnd(e){
-      if(resizePreview){
-        resizePreview.remove();
-        resizePreview = null;
-      }
+    function onResizeMove(e){ if(resizeCtx) updatePreviewAndModel(e.clientX); }
+    function onResizeEnd(){
+      if(resizePreview) resizePreview.remove();
       document.body.style.cursor = "";
       document.removeEventListener("mousemove", onResizeMove);
       document.removeEventListener("mouseup", onResizeEnd);
-      if(resizeCtx){
-        renderAll();
-        saveToServer(booking);
-      }
+      if(resizeCtx){ renderAll(); if(resizeCtx.booking.id) saveToServer(resizeCtx.booking); }
       resizeCtx = null;
     }
-    
     document.body.style.cursor = "ew-resize";
     document.addEventListener("mousemove", onResizeMove);
     document.addEventListener("mouseup", onResizeEnd);
@@ -608,155 +635,45 @@
   
   function startMove(booking, e){
     e.stopPropagation();
-    moveDragCtx = { 
-      booking, 
-      startX: e.clientX, 
-      startY: e.clientY,
-      origLane: booking.lane,
-      origStartIdx: slots.findIndex(s => s.key === booking.start),
-      origEndIdx: slots.findIndex(s => s.key === booking.end),
-      duration: slots.findIndex(s => s.key === booking.end) - slots.findIndex(s => s.key === booking.start)
-    };
+    moveDragCtx = { booking, startX: e.clientX, startY: e.clientY, origLane: booking.lane, origStartIdx: slots.findIndex(s => s.key === booking.start), duration: slots.findIndex(s => s.key === booking.end) - slots.findIndex(s => s.key === booking.start) };
     document.body.style.cursor = "grabbing";
     document.addEventListener("mousemove", onMoveMove);
     document.addEventListener("mouseup", onMoveEnd);
   }
-  
   function onMoveMove(e){
     if(!moveDragCtx) return;
-    let deltaX = e.clientX - moveDragCtx.startX;
-    let deltaY = e.clientY - moveDragCtx.startY;
-    let cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
-    let rowHeight = $("dtBody").rows[0]?.offsetHeight || 58;
+    let deltaX = e.clientX - moveDragCtx.startX, deltaY = e.clientY - moveDragCtx.startY;
+    let cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70, rowHeight = $("dtBody").rows[0]?.offsetHeight || 58;
     let stepX = Math.abs(deltaX) > cellWidth * 0.3 ? Math.round(deltaX / cellWidth) : 0;
     let stepY = Math.abs(deltaY) > rowHeight * 0.4 ? Math.round(deltaY / rowHeight) : 0;
     if(stepX === 0 && stepY === 0) return;
-    
     let newLane = Math.max(0, Math.min(LANES-1, moveDragCtx.origLane + stepY));
     let newStartIdx = Math.max(0, Math.min(slots.length - moveDragCtx.duration - 1, moveDragCtx.origStartIdx + stepX));
     let newEndIdx = newStartIdx + moveDragCtx.duration;
-    
     if(newLane !== moveDragCtx.booking.lane || slots[newStartIdx].key !== moveDragCtx.booking.start){
       moveDragCtx.booking.lane = newLane;
       moveDragCtx.booking.start = slots[newStartIdx].key;
       moveDragCtx.booking.end = slots[newEndIdx].key;
-      moveDragCtx.origStartIdx = newStartIdx;
-      moveDragCtx.origEndIdx = newEndIdx;
-      moveDragCtx.origLane = newLane;
-      moveDragCtx.startX = e.clientX;
-      moveDragCtx.startY = e.clientY;
+      moveDragCtx.origStartIdx = newStartIdx; moveDragCtx.origLane = newLane;
+      moveDragCtx.startX = e.clientX; moveDragCtx.startY = e.clientY;
       renderSliders();
       scheduleUpdate(moveDragCtx.booking);
     }
   }
-  
   function onMoveEnd(){
     document.body.style.cursor = "";
     document.removeEventListener("mousemove", onMoveMove);
     document.removeEventListener("mouseup", onMoveEnd);
-    if(moveDragCtx){
-      renderAll();
-      saveToServer(moveDragCtx.booking);
-    }
+    if(moveDragCtx && moveDragCtx.booking.id) saveToServer(moveDragCtx.booking);
     moveDragCtx = null;
   }
+  function scheduleUpdate(booking){ if(updateTimeout) clearTimeout(updateTimeout); updateTimeout = setTimeout(() => { if(booking.id) saveToServer(booking); updateTimeout = null; }, 300); }
   
-  function scheduleUpdate(booking){
-    if(updateTimeout) clearTimeout(updateTimeout);
-    updateTimeout = setTimeout(() => {
-      if(booking.id) saveToServer(booking);
-      updateTimeout = null;
-    }, 300);
+  async function saveToServer(booking){ /* обновление */
+    try{
+      await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id:booking.id, tableNumber:booking.lane+1, start:booking.start, end:booking.end, name:booking.name, phone:booking.phone, comment:booking.comment }) });
+    } catch(e){ console.error(e); }
   }
-  
-  function renderAll(){
-    renderSliders();
-    renderCards();
-  }
-  
-  function renderSliders(){
-    let container = $("slidersLayer");
-    if(!container) return;
-    container.innerHTML = "";
-    if(!$("tableDesktop") || !$("dtBody")) return;
-    let rows = Array.from($("dtBody").querySelectorAll("tr"));
-    if(rows.length === 0) return;
-    
-    bookings.forEach(booking => {
-      let startIdx = slots.findIndex(s => s.key === booking.start);
-      let endIdx = slots.findIndex(s => s.key === booking.end);
-      if(startIdx === -1 || endIdx === -1) return;
-      
-      let row = rows[booking.lane];
-      if(!row) return;
-      let sc = row.cells[startIdx+1];
-      let ec = row.cells[endIdx+1];
-      if(!sc || !ec) return;
-      
-      let left = sc.offsetLeft + 1;
-      let top = row.offsetTop + 1;
-      let width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2;
-      let height = row.offsetHeight - 2;
-      
-      let slider = document.createElement("div");
-      let status = booking.confirmed === true ? "confirmed" : (booking.confirmed === false ? "rejected" : "pending");
-      slider.className = `slider ${status}`;
-      slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
-      
-      let nameSpan = document.createElement("div");
-      nameSpan.className = "sl-name";
-      nameSpan.textContent = booking.name || "Бронь";
-      let timeSpan = document.createElement("div");
-      timeSpan.className = "sl-time";
-      timeSpan.textContent = `${fmt(booking.start)} – ${fmt(booking.end)}`;
-      slider.appendChild(nameSpan);
-      slider.appendChild(timeSpan);
-      
-      let dragHandle = document.createElement("div");
-      dragHandle.className = "drag-handle";
-      dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
-      slider.appendChild(dragHandle);
-      
-      let leftHandle = document.createElement("div");
-      leftHandle.className = "resize-handle handle-left";
-      leftHandle.addEventListener("mousedown", (e) => startResize(booking, 'left', e));
-      let rightHandle = document.createElement("div");
-      rightHandle.className = "resize-handle handle-right";
-      rightHandle.addEventListener("mousedown", (e) => startResize(booking, 'right', e));
-      slider.appendChild(leftHandle);
-      slider.appendChild(rightHandle);
-      
-      slider.addEventListener("click", (e) => {
-        if(e.target === leftHandle || e.target === rightHandle || e.target === dragHandle) return;
-        showInfoModal(booking);
-      });
-      
-      container.appendChild(slider);
-    });
-  }
-  
-  function renderCards(){
-    $("cardsContainer").innerHTML = "";
-    let dd = $("dateInput").value.split("-").reverse().join(".");
-    bookings.forEach((b, idx) => {
-      let div = document.createElement("div");
-      div.className = "bcard";
-      div.innerHTML = `<div><strong>Стол ${b.lane+1}</strong><br>${dd} · ${fmt(b.start)}–${fmt(b.end)}<br><small>${b.name}</small></div>`;
-      let rm = document.createElement("button");
-      rm.className = "bcard-rm";
-      rm.textContent = "✕";
-      rm.onclick = (e) => {
-        e.stopPropagation();
-        if(b.id) deleteBookingById(b.id);
-        bookings.splice(idx, 1);
-        renderAll();
-      };
-      div.appendChild(rm);
-      $("cardsContainer").appendChild(div);
-    });
-  }
-  
-  function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
   
   async function loadFromServer(){
     showLoad();
@@ -774,166 +691,96 @@
           comment: b.comment,
           confirmed: b.confirmed === "Да" ? true : (b.confirmed === "Нет" ? false : null)
         }));
-      }
+      } else bookings = [];
       renderAll();
     } catch(e){ console.error(e); }
     hideLoad();
   }
   
-  async function saveToServer(booking){
-    if(!booking.id){
-      // Новая бронь - отправляем как массив
-      let date = $("dateInput").value;
-      try{
-        await fetch(GAS_URL, {
-          method: "POST",
-          mode: "no-cors",
-          body: JSON.stringify({
-            bookings: [{
-              date: date,
-              tableNumber: booking.lane+1,
-              start: booking.start,
-              end: booking.end,
-              name: booking.name,
-              phone: booking.phone,
-              comment: booking.comment
-            }]
-          })
-        });
-        await loadFromServer();
-      } catch(e){ console.error(e); }
-    } else {
-      // Обновление существующей брони
-      try{
-        await fetch(GAS_URL, {
-          method: "POST",
-          mode: "no-cors",
-          body: JSON.stringify({
-            action: "update",
-            id: booking.id,
-            tableNumber: booking.lane+1,
-            start: booking.start,
-            end: booking.end,
-            name: booking.name,
-            phone: booking.phone,
-            comment: booking.comment
-          })
-        });
-      } catch(e){ console.error(e); }
-    }
+  function renderAll(){
+    renderSliders();
+    renderCards();
   }
+  function renderSliders(){
+    let container = $("slidersLayer"); if(!container) return;
+    container.innerHTML = "";
+    if(!$("tableDesktop") || !$("dtBody")) return;
+    let rows = Array.from($("dtBody").querySelectorAll("tr"));
+    bookings.forEach(booking => {
+      let startIdx = slots.findIndex(s => s.key === booking.start);
+      let endIdx = slots.findIndex(s => s.key === booking.end);
+      if(startIdx === -1 || endIdx === -1) return;
+      let row = rows[booking.lane];
+      if(!row) return;
+      let sc = row.cells[startIdx+1], ec = row.cells[endIdx+1];
+      if(!sc || !ec) return;
+      let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2;
+      let slider = document.createElement("div");
+      let status = booking.confirmed === true ? "confirmed" : (booking.confirmed === false ? "rejected" : "pending");
+      slider.className = `slider ${status}`;
+      slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+      slider.innerHTML = `<div class="sl-name">${booking.name || "Бронь"}</div><div class="sl-time">${fmt(booking.start)} – ${fmt(booking.end)}</div>`;
+      let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle"; dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
+      let leftHandle = document.createElement("div"); leftHandle.className = "resize-handle handle-left"; leftHandle.addEventListener("mousedown", (e) => startResize(booking, 'left', e));
+      let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right"; rightHandle.addEventListener("mousedown", (e) => startResize(booking, 'right', e));
+      slider.appendChild(dragHandle); slider.appendChild(leftHandle); slider.appendChild(rightHandle);
+      slider.addEventListener("click", (e) => { if(e.target === leftHandle || e.target === rightHandle || e.target === dragHandle) return; showInfoModal(booking); });
+      container.appendChild(slider);
+    });
+  }
+  function renderCards(){
+    $("cardsContainer").innerHTML = "";
+    let dd = $("dateInput").value.split("-").reverse().join(".");
+    // Показываем только брони, у которых есть id (сохранённые)
+    let savedBookings = bookings.filter(b => b.id != null);
+    savedBookings.forEach(b => {
+      let div = document.createElement("div");
+      div.className = "bcard";
+      div.innerHTML = `<div><strong>Стол ${b.lane+1}</strong><br>${dd} · ${fmt(b.start)}–${fmt(b.end)}<br><small>${b.name}</small></div>`;
+      let rm = document.createElement("button");
+      rm.className = "bcard-rm";
+      rm.textContent = "✕";
+      rm.onclick = (e) => { e.stopPropagation(); if(confirm("Удалить бронь?")) deleteBookingById(b.id); };
+      div.appendChild(rm);
+      $("cardsContainer").appendChild(div);
+    });
+  }
+  function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
   
   async function deleteBookingById(id){
     showLoad();
     try{
-      await fetch(GAS_URL, {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify({
-          action: "delete",
-          id: id
-        })
-      });
+      await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"delete", id:id }) });
       await loadFromServer();
     } catch(e){ console.error(e); }
     hideLoad();
   }
   
-  function openBookModal(){
-    $("bookModal").classList.add("open");
-  }
-  function closeBookModal(){ $("bookModal").classList.remove("open"); }
-  
-  async function submitForm(){
-    let name = $("nameInput").value.trim();
-    let phone = $("phoneInput").value.trim();
-    let comment = $("commentInput").value.trim();
-    if(!name) return alert("Введите имя");
-    
-    showLoad();
-    try{
-      for(let b of bookings){
-        if(!b.id){
-          let date = $("dateInput").value;
-          await fetch(GAS_URL, {
-            method: "POST",
-            mode: "no-cors",
-            body: JSON.stringify({
-              bookings: [{
-                date: date,
-                tableNumber: b.lane+1,
-                start: b.start,
-                end: b.end,
-                name: name,
-                phone: phone,
-                comment: comment
-              }]
-            })
-          });
-          b.name = name;
-          b.phone = phone;
-          b.comment = comment;
-        } else {
-          await fetch(GAS_URL, {
-            method: "POST",
-            mode: "no-cors",
-            body: JSON.stringify({
-              action: "update",
-              id: b.id,
-              name: name,
-              phone: phone,
-              comment: comment
-            })
-          });
-          b.name = name;
-          b.phone = phone;
-          b.comment = comment;
-        }
-      }
-      closeBookModal();
-      $("nameInput").value = "";
-      $("phoneInput").value = "";
-      $("commentInput").value = "";
-      await loadFromServer();
-    } catch(e){ alert("Ошибка отправки"); }
-    hideLoad();
-  }
-  
-  let currentBooking = null;
   function showInfoModal(b){
     currentBooking = b;
     $("i-table").textContent = "№ "+(b.lane+1);
     $("i-time").textContent = `${fmt(b.start)} – ${fmt(b.end)}`;
     $("i-name").textContent = b.name;
     $("i-phone").textContent = b.phone || "—";
+    $("i-comment").textContent = b.comment || "—";
     $("infoModal").classList.add("open");
   }
   function closeInfoModal(){ $("infoModal").classList.remove("open"); currentBooking=null; }
-  
-  async function confirmBooking(yes){
+  async function markAttendance(yes){
     if(!currentBooking) return;
     showLoad();
     try{
-      await fetch(GAS_URL,{
-        method:"POST",
-        mode:"no-cors",
-        body:JSON.stringify({action:"confirm",id:currentBooking.id,confirmed:yes})
-      });
+      await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"confirm", id:currentBooking.id, confirmed:yes }) });
       closeInfoModal();
       await loadFromServer();
     } catch(e){ console.error(e); }
     hideLoad();
   }
-  
-  async function deleteBooking(){
+  async function deleteBookingFromModal(){
     if(!currentBooking || !confirm("Удалить бронь?")) return;
     showLoad();
     try{
-      await fetch(GAS_URL,{
-        method:"POST",
-        mode:"no-cors",
-        body:JSON.stringify({action:"delete",id:currentBooking.id})
-      });
+      await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"delete", id:currentBooking.id }) });
       closeInfoModal();
       await loadFromServer();
     } catch(e){ console.error(e); }
@@ -948,10 +795,7 @@
   $("tableDesktop").addEventListener("mousedown", onMouseDown);
   document.body.addEventListener("mousemove", onMouseMove);
   document.body.addEventListener("mouseup", onMouseUp);
-  
-  ["bookModal","infoModal","imgPopup"].forEach(id=>{
-    $(id)?.addEventListener("click",e=>{ if(e.target=== $(id)) $(id).classList.remove("open"); });
-  });
+  ["infoModal","imgPopup"].forEach(id=>{ $(id)?.addEventListener("click",e=>{ if(e.target=== $(id)) $(id).classList.remove("open"); }); });
 </script>
 </body>
 </html>

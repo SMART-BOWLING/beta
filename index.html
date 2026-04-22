@@ -3,17 +3,11 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
-  <title>Бильярд · Брони | Плавный resize</title>
+  <title>Бильярд · Брони | Плавное управление бронями</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png"/>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      user-select: none;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
       --bg: #f5f5f7;
       --surface: #ffffff;
@@ -21,356 +15,129 @@
       --border: rgba(0,0,0,.08);
       --border2: rgba(0,0,0,.14);
       --ink: #1d1d1f;
-      --ink2: #3d3d3f;
       --ink3: #6e6e73;
-      --ink4: #aeaeb2;
       --blue: #0071e3;
-      --blue-h: #0077ed;
-      --blue-dim: rgba(0,113,227,.08);
       --green: #34c759;
       --red: #ff3b30;
       --amber: #ff9f0a;
-      --r: 12px;
-      --r2: 18px;
       --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
       --cell-h: 58px;
       --cell-w: 68px;
       --lane-w: 100px;
     }
-
-    body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--ink);
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    #login {
-      position: fixed; inset: 0; background: var(--bg);
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; gap: 20px; z-index: 9999; padding: 32px;
-    }
+    body { font-family: var(--font); background: var(--bg); color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    #login { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; z-index: 9999; padding: 32px; }
     .login-glyph { font-size: 58px; }
-    .login-title { font-size: 32px; font-weight: 700; letter-spacing: -.5px; }
-    .login-sub { font-size: 16px; color: var(--ink3); margin-top: -8px; }
-    .login-sep { width: 1px; height: 28px; background: var(--border2); }
-
+    .login-title { font-size: 32px; font-weight: 700; }
     #content { display: none; min-height: 100vh; }
-
-    .nav {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(255,255,255,.92);
-      backdrop-filter: saturate(180%) blur(20px);
-      border-bottom: .5px solid var(--border2);
-      height: 60px; display: flex; align-items: center;
-      justify-content: space-between; padding: 0 28px;
-    }
-    .nav-title { font-size: 20px; font-weight: 600; letter-spacing: -.3px; }
-    .nav-btn {
-      display: flex; align-items: center; gap: 8px;
-      background: var(--surface); border: .5px solid var(--border2);
-      border-radius: 980px; padding: 8px 18px;
-      font-family: var(--font); font-size: 14px; font-weight: 500; color: var(--blue);
-      cursor: pointer; transition: background .15s;
-    }
-    .nav-btn:hover { background: var(--blue-dim); }
-
-    .page {
-      width: 100%;
-      margin: 0;
-      padding: 24px 28px 80px;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    .ctrl {
-      display: flex; gap: 18px; align-items: center; flex-wrap: wrap;
-      background: var(--surface); border-radius: var(--r2);
-      padding: 18px 24px;
-      box-shadow: 0 2px 12px rgba(0,0,0,.04);
-    }
-    .date-field {
-      flex: 1; min-width: 220px; max-width: 280px;
-      display: flex; align-items: center; gap: 12px;
-      background: var(--surface2); border-radius: 14px;
-      padding: 0 18px; height: 52px; border: .5px solid var(--border2);
-    }
-    #dateInput {
-      flex: 1; border: none; background: transparent;
-      font-family: var(--font); font-size: 17px; font-weight: 500; color: var(--ink);
-      cursor: pointer;
-      user-select: text;
-    }
-    .btn-book {
-      height: 52px; padding: 0 32px;
-      background: var(--blue); color: white; border: none; border-radius: 980px;
-      font-family: var(--font); font-size: 17px; font-weight: 600;
-      cursor: pointer; transition: all .15s;
-      box-shadow: 0 2px 6px rgba(0,113,227,.3);
-    }
-    .btn-book:hover { background: var(--blue-h); transform: scale(0.98); }
-
-    .pills { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
-    .pill {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 13px; font-weight: 500; color: var(--ink3);
-      background: var(--surface); border: .5px solid var(--border2);
-      border-radius: 980px; padding: 6px 16px;
-    }
+    .nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,.92); backdrop-filter: saturate(180%) blur(20px); border-bottom: .5px solid var(--border2); height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; }
+    .nav-title { font-size: 20px; font-weight: 600; }
+    .nav-btn { display: flex; align-items: center; gap: 8px; background: var(--surface); border: .5px solid var(--border2); border-radius: 980px; padding: 8px 18px; font-family: var(--font); font-size: 14px; font-weight: 500; color: var(--blue); cursor: pointer; }
+    .page { width: 100%; margin: 0; padding: 24px 28px 80px; display: flex; flex-direction: column; gap: 24px; }
+    .ctrl { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; background: var(--surface); border-radius: 18px; padding: 18px 24px; box-shadow: 0 2px 12px rgba(0,0,0,.04); }
+    .date-field { flex: 1; min-width: 220px; max-width: 280px; display: flex; align-items: center; gap: 12px; background: var(--surface2); border-radius: 14px; padding: 0 18px; height: 52px; border: .5px solid var(--border2); }
+    #dateInput { flex: 1; border: none; background: transparent; font-family: var(--font); font-size: 17px; font-weight: 500; cursor: pointer; }
+    .btn-book { height: 52px; padding: 0 32px; background: var(--blue); color: white; border: none; border-radius: 980px; font-family: var(--font); font-size: 17px; font-weight: 600; cursor: pointer; transition: all .15s; box-shadow: 0 2px 6px rgba(0,113,227,.3); }
+    .btn-book:hover { background: #0077ed; transform: scale(0.98); }
+    .pills { display: flex; gap: 12px; flex-wrap: wrap; }
+    .pill { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--ink3); background: var(--surface); border: .5px solid var(--border2); border-radius: 980px; padding: 6px 16px; }
     .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot-navy { background: #3a7bd5; }
-    .dot-sage { background: #30a862; }
-    .dot-rust { background: #e05c2a; }
+    .dot-navy  { background: #3a7bd5; }
+    .dot-sage  { background: #30a862; }
+    .dot-rust  { background: #e05c2a; }
     .dot-amber { background: var(--amber); }
     .dot-green { background: var(--green); }
-    .dot-red { background: var(--red); }
-
-    .grid-card {
-      background: var(--surface); border-radius: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,.06);
-      overflow: hidden;
-      border: .5px solid var(--border);
-      position: relative;
-    }
-    .grid-scroll {
-      overflow-x: auto;
-      overflow-y: visible;
-      -webkit-overflow-scrolling: touch;
-      position: relative;
-      width: 100%;
-    }
-
-    #tableDesktop {
-      display: table;
-      border-collapse: collapse;
-      table-layout: fixed;
-      width: 100%;
-      min-width: 1100px;
-      font-size: 14px;
-    }
-    #tableDesktop thead th {
-      height: var(--cell-h);
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: .2px;
-      color: var(--ink4);
-      border-bottom: 1px solid var(--border2);
-      border-right: .5px solid var(--border);
-      text-align: center;
-      vertical-align: middle;
-      background: var(--surface2);
-      position: sticky;
-      top: 0;
-      z-index: 3;
-    }
-    #tableDesktop thead th.corner {
-      width: var(--lane-w);
-      min-width: var(--lane-w);
-      background: var(--surface2);
-      position: sticky;
-      left: 0;
-      z-index: 5;
-    }
-    #tableDesktop thead th.th-time {
-      cursor: pointer;
-      width: var(--cell-w);
-      min-width: var(--cell-w);
-      transition: all .12s;
-    }
-    #tableDesktop thead th.th-time:hover { background: #fff4e0; color: var(--amber); }
-
+    .dot-red   { background: var(--red); }
+    .grid-card { background: var(--surface); border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,.06); overflow: hidden; border: .5px solid var(--border); width: 100%; }
+    .grid-scroll { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; position: relative; width: 100%; }
+    #tableDesktop { display: table; border-collapse: collapse; table-layout: fixed; width: 100%; min-width: 1100px; user-select: none; font-size: 14px; }
+    #tableDesktop thead th { height: var(--cell-h); font-size: 13px; font-weight: 600; color: var(--ink3); border-bottom: 1px solid var(--border2); border-right: .5px solid var(--border); text-align: center; background: var(--surface2); position: sticky; top: 0; z-index: 3; }
+    #tableDesktop thead th.corner { width: var(--lane-w); min-width: var(--lane-w); background: var(--surface2); color: var(--ink2); border-right: 1px solid var(--border2); position: sticky; left: 0; z-index: 5; }
+    #tableDesktop thead th.th-time { width: var(--cell-w); min-width: var(--cell-w); transition: .1s; }
     #tableDesktop tbody tr { height: var(--cell-h); }
-    #tableDesktop tbody td.lane-hdr {
-      width: var(--lane-w);
-      min-width: var(--lane-w);
-      font-size: 17px;
-      font-weight: 700;
-      border-bottom: .5px solid var(--border2);
-      border-right: 1px solid var(--border2);
-      text-align: center;
-      background: var(--surface2);
-      position: sticky;
-      left: 0;
-      z-index: 2;
-    }
+    #tableDesktop tbody td.lane-hdr { width: var(--lane-w); min-width: var(--lane-w); font-size: 17px; font-weight: 700; border-bottom: .5px solid var(--border2); border-right: 1px solid var(--border2); text-align: center; background: var(--surface2); position: sticky; left: 0; z-index: 2; }
     .lane-hdr.grp-navy { color: #1d4f9f; background: #eef3fc !important; }
     .lane-hdr.grp-sage { color: #1a6640; background: #edf7f0 !important; }
     .lane-hdr.grp-rust { color: #a83418; background: #fdf0ea !important; }
-
-    #tableDesktop tbody td.slot {
-      cursor: crosshair;
-      border-bottom: .5px solid var(--border);
-      border-right: .5px solid var(--border);
-      transition: background 0.06s;
-    }
-    #tableDesktop tbody td.slot.drag-over { background: #ffe6a3 !important; }
-    #tableDesktop tbody tr.row-navy td.slot { background: #f8fafd; }
-    #tableDesktop tbody tr.row-sage td.slot { background: #f6fcf8; }
-    #tableDesktop tbody tr.row-rust td.slot { background: #fef8f4; }
-
+    #tableDesktop tbody td.slot { cursor: crosshair; border-bottom: .5px solid var(--border); border-right: .5px solid var(--border); transition: background 0.05s; }
+    #tableDesktop tbody td.slot.drag-highlight { background: #ffe8b6 !important; border-left: 2px solid var(--amber); border-right: 2px solid var(--amber); }
+    #tableDesktop tbody td.slot.drag-start { background: #ffdd99 !important; border-top-left-radius: 8px; border-bottom-left-radius: 8px; border-left: 2px solid var(--amber); }
+    #tableDesktop tbody td.slot.drag-end { background: #ffdd99 !important; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-right: 2px solid var(--amber); }
+    #tableDesktop tbody td.slot.selected { background: #fff3c4 !important; border-left: 2px solid var(--amber); border-right: 2px solid var(--amber); }
     @media (max-width: 800px) {
-      .page { padding: 16px 12px 70px; gap: 16px; }
+      .page { padding: 16px 12px 70px; }
       .ctrl { flex-direction: column; align-items: stretch; }
       .btn-book { width: 100%; }
     }
-
-    #slidersLayer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 20;
-    }
+    #slidersLayer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
     .slider {
-      position: absolute;
-      border-radius: 12px;
-      pointer-events: auto;
-      cursor: grab;
-      padding: 6px 10px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 2px;
-      transition: box-shadow 0.1s, opacity 0.1s;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
-      backdrop-filter: blur(4px);
-      border: 1px solid rgba(255,255,255,0.5);
+      position: absolute; border-radius: 12px; pointer-events: auto; cursor: pointer; padding: 6px 10px;
+      display: flex; flex-direction: column; justify-content: center; gap: 2px; transition: 0.1s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); backdrop-filter: blur(2px);
     }
-    .slider:active { cursor: grabbing; }
-    .slider:hover { opacity: 0.98; transform: scale(1.01); z-index: 30; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
-    .slider.pending { background: rgba(255,159,10,0.3); border-left: 4px solid #ff9f0a; }
-    .slider.confirmed { background: rgba(52,199,89,0.3); border-left: 4px solid #34c759; }
-    .slider.rejected { background: rgba(255,59,48,0.25); border-left: 4px solid #ff3b30; opacity: 0.85; }
+    .slider:hover { opacity: 0.96; transform: scale(1.01); z-index: 25; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .slider.pending   { background: rgba(255,159,10,0.25); border-left: 4px solid #ff9f0a; }
+    .slider.confirmed { background: rgba(52,199,89,0.25); border-left: 4px solid #34c759; }
+    .slider.rejected  { background: rgba(255,59,48,0.2); border-left: 4px solid #ff3b30; opacity: 0.85; }
     .sl-name { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sl-time { font-size: 9px; opacity: 0.85; white-space: nowrap; }
-    .resize-handle {
-      position: absolute;
-      width: 14px;
-      height: 70%;
-      top: 15%;
-      background: rgba(0,0,0,0.25);
-      border-radius: 20px;
-      cursor: ew-resize;
-      transition: all 0.1s;
-      z-index: 5;
-    }
-    .resize-handle:hover { background: rgba(0,0,0,0.65); width: 16px; }
-    .handle-left { left: 3px; }
-    .handle-right { right: 3px; }
-    .drag-handle {
-      position: absolute;
-      top: 0;
-      left: 20px;
-      right: 20px;
-      height: 100%;
-      cursor: grab;
-      background: transparent;
-      z-index: 2;
-    }
-    .drag-handle:active { cursor: grabbing; }
-
-    .cards-container { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
-    .bcard {
-      display: flex; align-items: center; gap: 14px;
-      background: var(--surface); border: .5px solid var(--border2);
-      border-radius: 20px; padding: 12px 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.05);
-    }
-    .bcard-rm { width: 30px; height: 30px; border-radius: 30px; background: var(--surface2); border: .5px solid var(--border2); cursor: pointer; font-size: 16px; }
-
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); z-index: 2000; justify-content: center; align-items: center; }
     .overlay.open { display: flex; }
-    .sheet { background: var(--surface); border-radius: 32px; width: 100%; max-width: 480px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+    .sheet { background: var(--surface); border-radius: 32px; width: 100%; max-width: 480px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); animation: sheetUp .25s ease; }
+    @keyframes sheetUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
     .sheet-head { padding: 20px 24px 8px; display: flex; justify-content: space-between; align-items: center; }
     .sheet-title { font-size: 24px; font-weight: 700; }
-    .sheet-x { width: 36px; height: 36px; border-radius: 50%; background: var(--surface2); border: none; font-size: 20px; cursor: pointer; }
+    .sheet-x { width: 36px; height: 36px; border-radius: 50%; background: var(--surface2); border: .5px solid var(--border2); font-size: 20px; cursor: pointer; }
     .sheet-body { padding: 12px 24px 28px; }
     .f-group { margin-bottom: 20px; }
     .f-label { font-size: 13px; font-weight: 600; color: var(--ink3); margin-bottom: 6px; display: block; }
     .f-input { width: 100%; background: var(--surface2); border: .5px solid var(--border2); border-radius: 14px; font-size: 16px; padding: 12px 14px; user-select: text; }
     .f-actions { display: flex; gap: 12px; margin-top: 24px; }
     .f-btn-ok { flex:1; height: 52px; background: var(--blue); color: white; border: none; border-radius: 980px; font-weight: 600; cursor: pointer; }
-    .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: .5px solid var(--border); }
-    .del-btn { width:100%; height: 48px; background: #ffe5e2; border: none; border-radius: 980px; margin-top: 20px; cursor: pointer; font-weight: 600; }
-    .confirm-btns { display: flex; gap: 12px; margin: 12px 0; }
+    .f-btn-cancel { height: 52px; padding: 0 24px; background: var(--surface2); border: .5px solid var(--border2); border-radius: 980px; cursor: pointer; }
+    .info-list { border-radius: 18px; border: .5px solid var(--border2); margin-bottom: 24px; overflow: hidden; }
+    .info-row { display: flex; justify-content: space-between; padding: 14px 18px; border-bottom: .5px solid var(--border); background: var(--surface2); }
+    .confirm-btns { display: flex; gap: 12px; margin: 12px 0 16px; }
     .cb-yes, .cb-no { flex:1; height: 48px; border-radius: 980px; font-weight: 600; border: none; cursor: pointer; }
     .cb-yes { background: rgba(52,199,89,.15); color: #1a6630; }
     .cb-no { background: rgba(255,59,48,.1); color: #a81a10; }
+    .del-btn { width:100%; height: 48px; background: transparent; border: .5px solid var(--border2); border-radius: 980px; margin-top: 12px; cursor: pointer; }
+    #imgPopup { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(14px); z-index:3000; justify-content:center; align-items:center; }
+    #imgPopup.open { display:flex; }
+    .img-wrap { background:white; border-radius: 32px; padding: 8px; max-width: 92vw; max-height: 88vh; position: relative; }
+    .img-wrap img { max-width: 100%; max-height: 84vh; border-radius: 24px; }
     #loader { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.3); backdrop-filter: blur(4px); z-index:5000; align-items:center; justify-content:center; }
-    .loader-box { background: white; border-radius: 32px; padding: 28px 40px; }
+    .loader-box { background: white; border-radius: 32px; padding: 28px 40px; text-align: center; }
     .spin { width: 38px; height: 38px; border: 3px solid #ddd; border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 14px; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    
-    .resize-preview {
-      position: absolute;
-      background: rgba(255, 159, 10, 0.4);
-      border: 2px dashed #ff9f0a;
-      border-radius: 14px;
-      pointer-events: none;
-      z-index: 25;
-      transition: all 0.02s linear;
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
-    }
   </style>
 </head>
 <body>
-
 <div id="login">
   <div class="login-glyph">🎱</div>
   <div class="login-title">Бильярд Клуб</div>
   <div class="login-sub">Бронирование столов</div>
-  <div class="login-sep"></div>
-  <div id="g_id_onload"
-    data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com"
-    data-callback="handleCredentialResponse"
-    data-auto_prompt="false"></div>
+  <div id="g_id_onload" data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
   <div class="g_id_signin" data-type="standard"></div>
 </div>
-
 <div id="content">
-  <nav class="nav">
-    <span class="nav-title">🎱 LUCKY STRIKE · Плавный resize</span>
-    <button class="nav-btn" onclick="openImg()">📐 Схема зала</button>
-  </nav>
+  <nav class="nav"><span class="nav-title">🎱 LUCKY STRIKE · Плавные брони</span><button class="nav-btn" onclick="openImg()">📐 Схема зала</button></nav>
   <div class="page">
     <div class="ctrl">
-      <div class="date-field">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-        <input type="date" id="dateInput"/>
-      </div>
-      <button class="btn-book" onclick="openBookModal()">➕ Новая бронь</button>
+      <div class="date-field"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><input type="date" id="dateInput"/></div>
+      <button class="btn-book" onclick="openNewBookingFromSelection()">➕ Новая бронь</button>
     </div>
-    <div class="pills">
-      <div class="pill"><div class="dot dot-navy"></div>Столы 1–3</div>
-      <div class="pill"><div class="dot dot-sage"></div>Столы 4–6</div>
-      <div class="pill"><div class="dot dot-rust"></div>Столы 7–12</div>
-      <div class="pill"><div class="dot dot-amber"></div>Ожидает</div>
-      <div class="pill"><div class="dot dot-green"></div>Подтверждено</div>
-      <div class="pill"><div class="dot dot-red"></div>Отменено</div>
-    </div>
-
-    <div class="grid-card">
-      <div class="grid-scroll" id="gridScroll">
-        <table id="tableDesktop">
-          <thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead>
-          <tbody id="dtBody"></tbody>
-        </table>
-        <div id="slidersLayer"></div>
-      </div>
-    </div>
-    <div id="cardsContainer" class="cards-container"></div>
+    <div class="pills"><div class="pill"><div class="dot dot-navy"></div>Столы 1–3</div><div class="pill"><div class="dot dot-sage"></div>Столы 4–6</div><div class="pill"><div class="dot dot-rust"></div>Столы 7–12</div><div class="pill"><div class="dot dot-amber"></div>Ожидает</div><div class="pill"><div class="dot dot-green"></div>Подтверждено</div><div class="pill"><div class="dot dot-red"></div>Отменено</div></div>
+    <div class="grid-card"><div class="grid-scroll" id="gridScroll">
+      <table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table>
+      <div id="slidersLayer"></div>
+    </div></div>
   </div>
 </div>
-
-<div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Новая бронь</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div class="f-group"><label class="f-label">Имя</label><input class="f-input" id="nameInput"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitForm()">Подтвердить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
-<div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><span id="i-table"></span></div><div class="info-row"><span>Время</span><span id="i-time"></span></div><div class="info-row"><span>Имя</span><span id="i-name"></span></div><div class="info-row"><span>Телефон</span><span id="i-phone"></span></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Состоялось</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">🗑 Удалить бронь</button></div></div></div>
-<div id="imgPopup" class="overlay"><div class="sheet" style="max-width:90vw; background:transparent; box-shadow:none;"><img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width:100%; border-radius:28px;" onclick="closeImg()"/></div></div>
+<div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Новая бронь</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div class="f-group"><label class="f-label">Имя клиента</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+380 99 123 45 67"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания..."></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitNewBooking()">Подтвердить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
+<div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали брони</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><span id="i-table"></span></div><div class="info-row"><span>Время</span><span id="i-time"></span></div><div class="info-row"><span>Имя</span><span id="i-name"></span></div><div class="info-row"><span>Телефон</span><span id="i-phone"></span></div><div class="info-row"><span>Комментарий</span><span id="i-comment"></span></div><div class="info-row"><span>Статус</span><span id="i-status"></span></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Состоялось</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">🗑 Удалить бронь</button></div></div></div>
+<div id="imgPopup"><div class="img-wrap"><img src="https://i.postimg.cc/52ZDKDDw/55.png" alt="Схема столов"/></div></div>
 <div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
-
 <script>
   const GAS = "https://script.google.com/macros/s/AKfycbw0A0E0MGk-RrNbAHktsTjXEa02i7skrHEKOxSnDhy65bGg0-fbM_Jj4tRzhADHY-kB/exec";
   const ALLOWED = ["vadiksss900@gmail.com","sergey99belov@gmail.com","popadinecvasil3@gmail.com","veronicadiakova04@gmail.com","info.luckystrike.kh@gmail.com","sashavolobuev123890@gmail.com","egorgorbushko@gmail.com","shatrava.o@gmail.com","Craftmax30@gmail.com","bowlingblock.b@gmail.com","lana.arnaut@gmail.com","polosinnikita1224@gmail.com","sofialat1506@gmail.com","ll3991940@gmail.com","ken040888@gmail.com"];
@@ -380,18 +147,13 @@
   const GRP_CLASS = ['grp-navy','grp-sage','grp-rust'];
   const ROW_CLASS = ['row-navy','row-sage','row-rust'];
   
-  let bookings = [];
-  let nextId = 1;
-  let dragInterval = null;
-  let isDragging = false;
-  let dragStartCell = null;
-  
-  let moveDragCtx = null;
-  let resizeCtx = null;
-  let resizePreview = null;
+  // Данные
+  let serverBookings = [];     // брони с сервера (уже сохраненные)
+  let selectedRanges = [];     // временные выделения для новой брони {lane, start, end}
+  let currentBookingDetail = null;
+  let nextTempId = 1;
   
   const $ = id => document.getElementById(id);
-  
   function parseJwt(t){ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
   function handleCredentialResponse(r){ let d=parseJwt(r.credential); if(ALLOWED.includes(d.email)){ localStorage.setItem("ue",d.email); location.reload(); } else alert("Доступ запрещён"); }
   
@@ -405,297 +167,184 @@
   
   function init(){
     let today = new Date().toISOString().split('T')[0];
-    $("dateInput").min = today;
-    $("dateInput").value = today;
+    $("dateInput").min = today; $("dateInput").value = today;
     buildDesktopTable();
-    $("dateInput").addEventListener("change", ()=>{ loadFromServer(); });
-    $("tableDesktop").addEventListener("mousedown", onMouseDown);
-    document.body.addEventListener("mousemove", onMouseMove);
-    document.body.addEventListener("mouseup", onMouseUp);
-    loadFromServer();
+    attachDragEvents();
+    $("dateInput").addEventListener("change", ()=>{ clearTempSelections(); loadBookings(); });
+    loadBookings();
   }
   
   function buildDesktopTable(){
     let headRow = document.querySelector("#dtHead tr");
-    slots.forEach((sl,i)=>{ 
-      let th=document.createElement("th"); 
-      th.className="th-time"; 
-      th.dataset.si=i; 
-      th.dataset.key=sl.key; 
-      th.textContent=sl.label; 
-      headRow.appendChild(th);
-    });
+    slots.forEach((sl,i)=>{ let th=document.createElement("th"); th.className="th-time"; th.dataset.si=i; th.dataset.key=sl.key; th.textContent=sl.label; headRow.appendChild(th); });
     let body=$("dtBody");
     for(let lane=0; lane<LANES; lane++){
-      let tr=document.createElement("tr"); 
-      tr.className=ROW_CLASS[LANE_GROUPS[lane]]; 
-      tr.dataset.lane=lane;
-      let lhdr=document.createElement("td"); 
-      lhdr.className=`lane-hdr ${GRP_CLASS[LANE_GROUPS[lane]]}`; 
-      lhdr.textContent=`№ ${lane+1}`; 
-      tr.appendChild(lhdr);
-      slots.forEach((sl,si)=>{ 
-        let td=document.createElement("td"); 
-        td.className="slot"; 
-        td.dataset.lane=lane; 
-        td.dataset.time=sl.key; 
-        td.dataset.si=si; 
-        tr.appendChild(td);
-      });
+      let tr=document.createElement("tr"); tr.className=ROW_CLASS[LANE_GROUPS[lane]]; tr.dataset.lane=lane;
+      let lhdr=document.createElement("td"); lhdr.className=`lane-hdr ${GRP_CLASS[LANE_GROUPS[lane]]}`; lhdr.textContent=`№ ${lane+1}`; tr.appendChild(lhdr);
+      slots.forEach((sl,si)=>{ let td=document.createElement("td"); td.className="slot"; td.dataset.lane=lane; td.dataset.time=sl.key; td.dataset.si=si; tr.appendChild(td); });
       body.appendChild(tr);
     }
   }
   
-  function getSlotCell(lane, slotIdx){
-    return $("dtBody")?.rows[lane]?.cells[slotIdx+1];
-  }
-  
-  function onMouseDown(e){
-    let target = e.target;
-    if(target.classList && target.classList.contains("slot")){
-      e.preventDefault();
-      let lane = parseInt(target.dataset.lane);
-      let startIdx = parseInt(target.dataset.si);
-      isDragging = true;
-      dragStartCell = { lane, startIdx };
-      dragInterval = { lane, startIdx, endIdx: startIdx };
-      highlightDragInterval(lane, startIdx, startIdx);
+  // Drag-to-select для временного выделения (новая бронь)
+  let dragActive = false, dragLane = null, dragStartIdx = null, dragCurrIdx = null;
+  function attachDragEvents(){
+    const container = $("gridScroll");
+    function getSlot(elem){ while(elem && !elem.classList?.contains('slot')) elem=elem.parentElement; return elem; }
+    function clearTempHighlights(){
+      document.querySelectorAll("#tableDesktop td.slot.drag-highlight, #tableDesktop td.slot.drag-start, #tableDesktop td.slot.drag-end").forEach(c=>c.classList.remove("drag-highlight","drag-start","drag-end"));
     }
-  }
-  
-  function onMouseMove(e){
-    if(isDragging && dragStartCell){
-      let hoverEl = document.elementsFromPoint(e.clientX, e.clientY).find(el => el.classList && el.classList.contains("slot"));
-      if(hoverEl){
-        let lane = parseInt(hoverEl.dataset.lane);
-        let idx = parseInt(hoverEl.dataset.si);
-        if(lane === dragStartCell.lane){
-          let newStart = Math.min(dragStartCell.startIdx, idx);
-          let newEnd = Math.max(dragStartCell.startIdx, idx);
-          if(dragInterval.startIdx !== newStart || dragInterval.endIdx !== newEnd){
-            dragInterval = { lane, startIdx: newStart, endIdx: newEnd };
-            highlightDragInterval(lane, newStart, newEnd);
-          }
+    function highlightTempRange(lane, sIdx, eIdx){
+      clearTempHighlights();
+      for(let i=sIdx; i<=eIdx; i++){
+        let cell = document.querySelector(`#tableDesktop td.slot[data-lane="${lane}"][data-si="${i}"]`);
+        if(cell){
+          cell.classList.add("drag-highlight");
+          if(i===sIdx) cell.classList.add("drag-start");
+          if(i===eIdx) cell.classList.add("drag-end");
         }
       }
     }
+    function startDrag(e){
+      let target = getSlot(e.target);
+      if(!target) return;
+      dragActive=true; dragLane=parseInt(target.dataset.lane); dragStartIdx=parseInt(target.dataset.si); dragCurrIdx=dragStartIdx;
+      document.body.style.userSelect='none';
+      highlightTempRange(dragLane, dragStartIdx, dragCurrIdx);
+      e.preventDefault();
+    }
+    function onMove(e){
+      if(!dragActive) return;
+      let x=e.clientX, y=e.clientY;
+      if(e.touches){ x=e.touches[0].clientX; y=e.touches[0].clientY; }
+      let elem = document.elementsFromPoint(x,y).find(el=>el.classList?.contains('slot') && parseInt(el.dataset.lane)===dragLane);
+      if(elem){
+        let newIdx = parseInt(elem.dataset.si);
+        if(newIdx!==dragCurrIdx){
+          dragCurrIdx=newIdx;
+          let s=Math.min(dragStartIdx, dragCurrIdx), e=Math.max(dragStartIdx, dragCurrIdx);
+          highlightTempRange(dragLane, s, e);
+        }
+      }
+    }
+    function endDrag(){
+      if(!dragActive) return;
+      if(dragStartIdx!==null && dragCurrIdx!==null && dragStartIdx!==dragCurrIdx){
+        let startIdx=Math.min(dragStartIdx, dragCurrIdx), endIdx=Math.max(dragStartIdx, dragCurrIdx);
+        let startTime=slots[startIdx].key, endTime=slots[endIdx].key;
+        // удаляем старые выделения для этого стола, заменяем новым
+        selectedRanges = selectedRanges.filter(r => r.lane !== dragLane);
+        selectedRanges.push({ lane: dragLane, start: startTime, end: endTime });
+        renderTempSelections();
+      }
+      clearTempHighlights();
+      dragActive=false; dragLane=null; dragStartIdx=null; dragCurrIdx=null;
+      document.body.style.userSelect='';
+    }
+    container.addEventListener("mousedown", startDrag);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", endDrag);
+    container.addEventListener("touchstart", (e)=>{ let slot=getSlot(e.target); if(slot){ startDrag(e); e.preventDefault(); } });
+    window.addEventListener("touchmove", onMove);
+    window.addEventListener("touchend", endDrag);
   }
   
-  function highlightDragInterval(lane, startIdx, endIdx){
-    document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td => td.classList.remove("drag-over"));
-    for(let i=startIdx; i<=endIdx; i++){
-      let cell = getSlotCell(lane, i);
-      if(cell) cell.classList.add("drag-over");
+  function renderTempSelections(){
+    // очистить предыдущие классы selected
+    document.querySelectorAll("#tableDesktop td.slot.selected, #tableDesktop td.slot.sel-left, #tableDesktop td.slot.sel-right").forEach(c=>c.classList.remove("selected","sel-left","sel-right"));
+    for(let r of selectedRanges){
+      let sIdx = slots.findIndex(s=>s.key===r.start);
+      let eIdx = slots.findIndex(s=>s.key===r.end);
+      if(sIdx===-1 || eIdx===-1) continue;
+      for(let i=sIdx; i<=eIdx; i++){
+        let cell = document.querySelector(`#tableDesktop td.slot[data-lane="${r.lane}"][data-si="${i}"]`);
+        if(cell) cell.classList.add("selected");
+      }
+      let leftCell = document.querySelector(`#tableDesktop td.slot[data-lane="${r.lane}"][data-si="${sIdx}"]`);
+      let rightCell = document.querySelector(`#tableDesktop td.slot[data-lane="${r.lane}"][data-si="${eIdx}"]`);
+      if(leftCell) leftCell.classList.add("sel-left");
+      if(rightCell) rightCell.classList.add("sel-right");
     }
   }
   
-  function onMouseUp(){
-    if(isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){
-      let { lane, startIdx, endIdx } = dragInterval;
-      let start = slots[startIdx].key;
-      let end = slots[endIdx].key;
-      let newBooking = {
-        id: nextId++,
-        lane: lane,
-        start: Math.min(start, end),
-        end: Math.max(start, end),
-        name: "Новая бронь",
-        phone: "",
-        comment: "",
-        confirmed: null
-      };
-      bookings.push(newBooking);
-      renderAll();
-      saveToServer();
-    }
-    isDragging = false;
-    dragInterval = null;
-    dragStartCell = null;
-    document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td => td.classList.remove("drag-over"));
+  function clearTempSelections(){
+    selectedRanges = [];
+    renderTempSelections();
   }
   
-  // Плавный резист с чувствительным порогом (без рывков)
-  function startResize(booking, side, e){
-    e.stopPropagation();
-    e.preventDefault();
-    
-    resizePreview = document.createElement("div");
-    resizePreview.className = "resize-preview";
-    const scrollDiv = document.getElementById("gridScroll");
-    scrollDiv.style.position = "relative";
-    scrollDiv.appendChild(resizePreview);
-    
-    let startIdx = slots.findIndex(s => s.key === booking.start);
-    let endIdx = slots.findIndex(s => s.key === booking.end);
-    resizeCtx = { 
-      booking, side, 
-      startX: e.clientX,
-      origStartIdx: startIdx,
-      origEndIdx: endIdx,
-      currentStartIdx: startIdx,
-      currentEndIdx: endIdx,
-      thresholdAcc: 0
-    };
-    
-    updateResizePreview(booking);
-    document.body.style.cursor = "ew-resize";
-    document.addEventListener("mousemove", onResizeMove);
-    document.addEventListener("mouseup", onResizeEnd);
-  }
-  
-  function updateResizePreview(booking){
-    if(!resizePreview) return;
-    let startIdx = slots.findIndex(s => s.key === booking.start);
-    let endIdx = slots.findIndex(s => s.key === booking.end);
-    let row = $("dtBody").rows[booking.lane];
-    if(!row) return;
-    let sc = row.cells[startIdx+1];
-    let ec = row.cells[endIdx+1];
-    if(!sc || !ec) return;
-    let left = sc.offsetLeft + 1;
-    let top = row.offsetTop + 1;
-    let width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2;
-    let height = row.offsetHeight - 2;
-    resizePreview.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
-  }
-  
-  function onResizeMove(e){
-    if(!resizeCtx) return;
-    let deltaX = e.clientX - resizeCtx.startX;
-    let cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
-    // плавный порог: изменение каждые 12 пикселей, но без дерганий
-    let step = 0;
-    if(Math.abs(deltaX) > 12) {
-      step = deltaX > 0 ? 1 : -1;
-    }
-    if(step === 0) {
-      updateResizePreview(resizeCtx.booking);
+  function openNewBookingFromSelection(){
+    if(selectedRanges.length === 0){
+      alert("📌 Выделите интервал на таблице: зажмите левую кнопку мыши и протяните по ячейкам нужного стола");
       return;
     }
-    
-    let newStartIdx = resizeCtx.origStartIdx;
-    let newEndIdx = resizeCtx.origEndIdx;
-    
-    if(resizeCtx.side === 'left'){
-      newStartIdx = Math.max(0, Math.min(resizeCtx.origEndIdx - 1, resizeCtx.origStartIdx + step));
-      if(newStartIdx !== resizeCtx.origStartIdx){
-        resizeCtx.booking.start = slots[newStartIdx].key;
-        resizeCtx.origStartIdx = newStartIdx;
-        resizeCtx.startX = e.clientX;
-      }
-    } else {
-      newEndIdx = Math.min(slots.length - 1, Math.max(resizeCtx.origStartIdx + 1, resizeCtx.origEndIdx + step));
-      if(newEndIdx !== resizeCtx.origEndIdx){
-        resizeCtx.booking.end = slots[newEndIdx].key;
-        resizeCtx.origEndIdx = newEndIdx;
-        resizeCtx.startX = e.clientX;
-      }
-    }
-    updateResizePreview(resizeCtx.booking);
-    renderSliders(); // динамический рендер слайдеров при ресайзе
+    $("bookModal").classList.add("open");
+  }
+  function closeBookModal(){ $("bookModal").classList.remove("open"); }
+  
+  async function submitNewBooking(){
+    let name = $("nameInput").value.trim();
+    let phone = $("phoneInput").value.trim();
+    let comment = $("commentInput").value.trim();
+    let date = $("dateInput").value;
+    if(!name || !phone) { alert("Введите имя и телефон"); return; }
+    if(selectedRanges.length === 0) { alert("Нет выделенных интервалов"); return; }
+    showLoad();
+    try{
+      let bookingsToSend = selectedRanges.map(r => ({
+        date, tableNumber: r.lane+1, start: r.start, end: r.end,
+        name, phone, comment
+      }));
+      await fetch(GAS, { method: "POST", mode: "no-cors", body: JSON.stringify({ bookings: bookingsToSend }) });
+      closeBookModal();
+      $("nameInput").value = $("phoneInput").value = $("commentInput").value = "";
+      clearTempSelections();
+      await loadBookings();
+    } catch(e){ alert("Ошибка сохранения"); } finally { hideLoad(); }
   }
   
-  function onResizeEnd(){
-    if(resizePreview){
-      resizePreview.remove();
-      resizePreview = null;
-    }
-    document.body.style.cursor = "";
-    document.removeEventListener("mousemove", onResizeMove);
-    document.removeEventListener("mouseup", onResizeEnd);
-    if(resizeCtx){
-      renderAll();
-      saveToServer();
-    }
-    resizeCtx = null;
-  }
-  
-  function startMove(booking, e){
-    e.stopPropagation();
-    moveDragCtx = { 
-      booking, 
-      startX: e.clientX, 
-      startY: e.clientY,
-      origLane: booking.lane,
-      origStartIdx: slots.findIndex(s => s.key === booking.start),
-      origEndIdx: slots.findIndex(s => s.key === booking.end),
-      duration: slots.findIndex(s => s.key === booking.end) - slots.findIndex(s => s.key === booking.start)
-    };
-    document.body.style.cursor = "grabbing";
-    document.addEventListener("mousemove", onMoveMove);
-    document.addEventListener("mouseup", onMoveEnd);
-  }
-  
-  function onMoveMove(e){
-    if(!moveDragCtx) return;
-    let deltaX = e.clientX - moveDragCtx.startX;
-    let deltaY = e.clientY - moveDragCtx.startY;
-    let cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
-    let rowHeight = $("dtBody").rows[0]?.offsetHeight || 58;
-    let stepX = Math.abs(deltaX) > cellWidth * 0.2 ? Math.round(deltaX / cellWidth) : 0;
-    let stepY = Math.abs(deltaY) > rowHeight * 0.3 ? Math.round(deltaY / rowHeight) : 0;
-    if(stepX === 0 && stepY === 0) return;
-    
-    let newLane = Math.max(0, Math.min(LANES-1, moveDragCtx.origLane + stepY));
-    let newStartIdx = Math.max(0, Math.min(slots.length - moveDragCtx.duration - 1, moveDragCtx.origStartIdx + stepX));
-    let newEndIdx = newStartIdx + moveDragCtx.duration;
-    
-    if(newLane !== moveDragCtx.booking.lane || slots[newStartIdx].key !== moveDragCtx.booking.start){
-      moveDragCtx.booking.lane = newLane;
-      moveDragCtx.booking.start = slots[newStartIdx].key;
-      moveDragCtx.booking.end = slots[newEndIdx].key;
-      moveDragCtx.origStartIdx = newStartIdx;
-      moveDragCtx.origEndIdx = newEndIdx;
-      moveDragCtx.origLane = newLane;
-      moveDragCtx.startX = e.clientX;
-      moveDragCtx.startY = e.clientY;
+  async function loadBookings(){
+    showLoad();
+    try{
+      let res = await fetch(GAS+"?action=get&date="+$("dateInput").value);
+      let data = await res.json();
+      serverBookings = (data.bookings || []).map(b => ({
+        id: b.id,
+        table: b.table,
+        start: parseFloat(b.start),
+        end: parseFloat(b.end),
+        name: b.name,
+        phone: b.phone,
+        comment: b.comment,
+        confirmed: b.confirmed === "Да" ? true : (b.confirmed === "Нет" ? false : null)
+      }));
       renderSliders();
-    }
-  }
-  
-  function onMoveEnd(){
-    document.body.style.cursor = "";
-    document.removeEventListener("mousemove", onMoveMove);
-    document.removeEventListener("mouseup", onMoveEnd);
-    if(moveDragCtx){
-      renderAll();
-      saveToServer();
-    }
-    moveDragCtx = null;
-  }
-  
-  function renderAll(){
-    renderSliders();
-    renderCards();
+    } catch(e){ console.error(e); }
+    hideLoad();
   }
   
   function renderSliders(){
     let container = $("slidersLayer");
     container.innerHTML = "";
-    if(!$("tableDesktop") || !$("dtBody")) return;
     let rows = Array.from($("dtBody").querySelectorAll("tr"));
-    
-    bookings.forEach(booking => {
+    if(rows.length === 0) return;
+    serverBookings.forEach(booking => {
+      let laneIdx = booking.table - 1;
       let startIdx = slots.findIndex(s => s.key === booking.start);
       let endIdx = slots.findIndex(s => s.key === booking.end);
       if(startIdx === -1 || endIdx === -1) return;
-      
-      let row = rows[booking.lane];
+      let row = rows[laneIdx];
       if(!row) return;
       let sc = row.cells[startIdx+1];
       let ec = row.cells[endIdx+1];
       if(!sc || !ec) return;
-      
       let left = sc.offsetLeft + 1;
       let top = row.offsetTop + 1;
       let width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2;
       let height = row.offsetHeight - 2;
-      
       let slider = document.createElement("div");
-      let status = booking.confirmed === true ? "confirmed" : (booking.confirmed === false ? "rejected" : "pending");
-      slider.className = `slider ${status}`;
+      let statusClass = booking.confirmed === true ? "confirmed" : (booking.confirmed === false ? "rejected" : "pending");
+      slider.className = `slider ${statusClass}`;
       slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
-      
       let nameSpan = document.createElement("div");
       nameSpan.className = "sl-name";
       nameSpan.textContent = booking.name || "Бронь";
@@ -704,145 +353,48 @@
       timeSpan.textContent = `${fmt(booking.start)} – ${fmt(booking.end)}`;
       slider.appendChild(nameSpan);
       slider.appendChild(timeSpan);
-      
-      let dragHandle = document.createElement("div");
-      dragHandle.className = "drag-handle";
-      dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
-      slider.appendChild(dragHandle);
-      
-      let leftHandle = document.createElement("div");
-      leftHandle.className = "resize-handle handle-left";
-      leftHandle.addEventListener("mousedown", (e) => startResize(booking, 'left', e));
-      let rightHandle = document.createElement("div");
-      rightHandle.className = "resize-handle handle-right";
-      rightHandle.addEventListener("mousedown", (e) => startResize(booking, 'right', e));
-      slider.appendChild(leftHandle);
-      slider.appendChild(rightHandle);
-      
       slider.addEventListener("click", (e) => {
-        if(e.target === leftHandle || e.target === rightHandle || e.target === dragHandle) return;
-        showInfoModal(booking);
-      });
-      
-      container.appendChild(slider);
-    });
-  }
-  
-  function renderCards(){
-    $("cardsContainer").innerHTML = "";
-    let dd = $("dateInput").value.split("-").reverse().join(".");
-    bookings.forEach((b, idx) => {
-      let div = document.createElement("div");
-      div.className = "bcard";
-      div.innerHTML = `<div><strong>Стол ${b.lane+1}</strong><br>${dd} · ${fmt(b.start)}–${fmt(b.end)}<br><small>${b.name}</small></div>`;
-      let rm = document.createElement("button");
-      rm.className = "bcard-rm";
-      rm.textContent = "✕";
-      rm.onclick = (e) => {
         e.stopPropagation();
-        bookings.splice(idx, 1);
-        renderAll();
-        saveToServer();
-      };
-      div.appendChild(rm);
-      $("cardsContainer").appendChild(div);
+        showBookingDetails(booking);
+      });
+      container.appendChild(slider);
     });
   }
   
   function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
   
-  async function loadFromServer(){
-    showLoad();
-    try{
-      let res = await fetch(GAS+"?action=get&date="+$("dateInput").value);
-      let data = await res.json();
-      if(data.bookings){
-        bookings = data.bookings.map(b => ({
-          id: b.id,
-          lane: b.table-1,
-          start: parseFloat(b.start),
-          end: parseFloat(b.end),
-          name: b.name,
-          phone: b.phone,
-          comment: b.comment,
-          confirmed: b.confirmed === "Да" ? true : (b.confirmed === "Нет" ? false : null)
-        }));
-        nextId = Math.max(nextId, ...bookings.map(b=>b.id), 0) + 1;
-      }
-      renderAll();
-    } catch(e){ console.error(e); }
-    hideLoad();
-  }
-  
-  async function saveToServer(){
-    console.log("Сохраняем изменения локально (имитация сервера)", bookings);
-    // для демо — просто заглушка, синхронизация с Google Sheets опциональна
-  }
-  
-  function openBookModal(){
-    if(bookings.length === 0) return alert("Сначала создайте бронь, выделив интервал на таблице");
-    $("bookModal").classList.add("open");
-  }
-  function closeBookModal(){ $("bookModal").classList.remove("open"); }
-  
-  async function submitForm(){
-    let name = $("nameInput").value.trim();
-    let phone = $("phoneInput").value.trim();
-    let comment = $("commentInput").value.trim();
-    if(!name) return alert("Введите имя");
-    let date = $("dateInput").value;
-    
-    showLoad();
-    try{
-      for(let b of bookings){
-        await fetch(GAS, {
-          method: "POST",
-          mode: "no-cors",
-          body: JSON.stringify({
-            bookings: [{
-              date, tableNumber: b.lane+1, start: b.start, end: b.end,
-              name, phone, comment
-            }]
-          })
-        });
-      }
-      closeBookModal();
-      $("nameInput").value = "";
-      $("phoneInput").value = "";
-      $("commentInput").value = "";
-      bookings = [];
-      await loadFromServer();
-    } catch(e){ alert("Ошибка отправки"); }
-    hideLoad();
-  }
-  
-  let currentBooking = null;
-  function showInfoModal(b){
-    currentBooking = b;
-    $("i-table").textContent = "№ "+(b.lane+1);
+  function showBookingDetails(b){
+    currentBookingDetail = b;
+    $("i-table").textContent = "№ "+b.table;
     $("i-time").textContent = `${fmt(b.start)} – ${fmt(b.end)}`;
-    $("i-name").textContent = b.name;
+    $("i-name").textContent = b.name || "—";
     $("i-phone").textContent = b.phone || "—";
+    $("i-comment").textContent = b.comment || "—";
+    let statusSpan = $("i-status");
+    if(b.confirmed === true) statusSpan.innerHTML = '<span style="background:#e0f7e8; padding:4px 12px; border-radius:40px;">✓ Подтверждено</span>';
+    else if(b.confirmed === false) statusSpan.innerHTML = '<span style="background:#ffe5e2; padding:4px 12px; border-radius:40px;">✕ Не состоялось</span>';
+    else statusSpan.innerHTML = '<span style="background:#fff1df; padding:4px 12px; border-radius:40px;">⏳ Ожидает</span>';
     $("infoModal").classList.add("open");
   }
-  function closeInfoModal(){ $("infoModal").classList.remove("open"); currentBooking=null; }
+  function closeInfoModal(){ $("infoModal").classList.remove("open"); currentBookingDetail=null; }
   
   async function confirmBooking(yes){
-    if(!currentBooking) return;
+    if(!currentBookingDetail) return;
     showLoad();
-    await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:currentBooking.id,confirmed:yes})});
-    closeInfoModal();
-    await loadFromServer();
-    hideLoad();
+    try{
+      await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:currentBookingDetail.id,confirmed:yes})});
+      closeInfoModal();
+      await loadBookings();
+    } catch(e){} finally { hideLoad(); }
   }
-  
   async function deleteBooking(){
-    if(!currentBooking || !confirm("Удалить бронь?")) return;
+    if(!currentBookingDetail || !confirm("Удалить бронь?")) return;
     showLoad();
-    await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:currentBooking.id})});
-    closeInfoModal();
-    await loadFromServer();
-    hideLoad();
+    try{
+      await fetch(GAS,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:currentBookingDetail.id})});
+      closeInfoModal();
+      await loadBookings();
+    } catch(e){} finally { hideLoad(); }
   }
   
   function showLoad(){ $("loader").style.display="flex"; }
@@ -850,9 +402,10 @@
   function openImg(){ $("imgPopup").classList.add("open"); }
   function closeImg(){ $("imgPopup").classList.remove("open"); }
   
-  ["bookModal","infoModal","imgPopup"].forEach(id=>{
-    $(id)?.addEventListener("click",e=>{ if(e.target=== $(id)) $(id).classList.remove("open"); });
+  ["bookModal","infoModal"].forEach(id=>{
+    $(id)?.addEventListener("click",e=>{ if(e.target=== $(id)){ $(id).classList.remove("open"); if(id==="infoModal") currentBookingDetail=null; } });
   });
+  $("imgPopup").addEventListener("click",e=>{ if(e.target===$("imgPopup")) closeImg(); });
 </script>
 </body>
 </html>

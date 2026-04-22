@@ -834,35 +834,27 @@
     update(e.clientX);
   }
   
-  // ИСПРАВЛЕННАЯ ФУНКЦИЯ ПЕРЕТАСКИВАНИЯ
+  // ИСПРАВЛЕННАЯ ФУНКЦИЯ ПЕРЕТАСКИВАНИЯ (без смещения вправо при вертикальном движении)
   function startMoveBase(booking, e, isTemp) {
     e.stopPropagation();
     
     const slider = e.currentTarget.closest('.slider');
     if (!slider) return;
     
-    // Получаем размеры
-    const cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
-    const rowHeight = $("dtBody").rows[0]?.offsetHeight || 58;
     const rows = $("dtBody").rows;
-    
-    // Начальные данные
     const startLane = booking.lane;
     const startIdx = slots.findIndex(s => s.key === booking.start);
     const duration = slots.findIndex(s => s.key === booking.end) - startIdx;
     
-    // Позиция мыши относительно слайдера
     const sliderRect = slider.getBoundingClientRect();
     const offsetX = e.clientX - sliderRect.left;
     const offsetY = e.clientY - sliderRect.top;
     
-    // Начальная позиция слайдера
     const startLeft = parseFloat(slider.style.left);
     const startTop = parseFloat(slider.style.top);
     
     slider.classList.add('dragging');
     
-    // Создаем призрачный слайдер
     const ghost = document.createElement('div');
     ghost.className = 'ghost-slider';
     ghost.style.left = startLeft + 'px';
@@ -871,38 +863,52 @@
     ghost.style.height = slider.offsetHeight + 'px';
     $('slidersLayer').appendChild(ghost);
     
-    // Текущая позиция в индексах
     let currentLane = startLane;
     let currentStartIdx = startIdx;
     
-    function findNearestCell(clientX, clientY) {
-      // Ищем ячейку под мышью
+    // Карта ячеек для быстрого поиска
+    const cellsMap = [];
+    for (let lane = 0; lane < rows.length; lane++) {
+      cellsMap[lane] = [];
+      const row = rows[lane];
+      for (let idx = 1; idx < row.cells.length; idx++) {
+        cellsMap[lane][idx - 1] = row.cells[idx];
+      }
+    }
+    
+    function findCellByPosition(clientX, clientY) {
       const elements = document.elementsFromPoint(clientX, clientY);
       const slot = elements.find(el => el.classList && el.classList.contains('slot'));
       
       if (slot) {
-        return {
-          lane: parseInt(slot.dataset.lane),
-          idx: parseInt(slot.dataset.si)
-        };
+        const lane = parseInt(slot.dataset.lane);
+        const idx = parseInt(slot.dataset.si);
+        return { lane, idx };
       }
       
-      // Если не нашли - ищем ближайшую по координатам
       let minDist = Infinity;
       let nearest = { lane: currentLane, idx: currentStartIdx };
       
-      for (let lane = 0; lane < rows.length; lane++) {
-        const row = rows[lane];
-        for (let idx = 1; idx < row.cells.length; idx++) {
-          const cell = row.cells[idx];
+      for (let lane = 0; lane < cellsMap.length; lane++) {
+        for (let idx = 0; idx < cellsMap[lane].length; idx++) {
+          const cell = cellsMap[lane][idx];
           const rect = cell.getBoundingClientRect();
+          
+          // Приоритет текущему временному столбцу
+          const isSameTimeColumn = (idx >= currentStartIdx && idx <= currentStartIdx + duration);
+          
           const centerX = rect.left + rect.width / 2;
           const centerY = rect.top + rect.height / 2;
-          const dist = Math.sqrt(Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2));
+          let dist = Math.sqrt(Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2));
+          
+          // Сильный приоритет ячейкам того же временного диапазона
+          if (isSameTimeColumn) {
+            dist *= 0.2;
+          }
           
           if (dist < minDist) {
             minDist = dist;
-            nearest = { lane, idx: idx - 1 };
+            nearest = { lane, idx };
           }
         }
       }
@@ -911,22 +917,24 @@
     }
     
     function onMove(e) {
-      // Двигаем слайдер за мышью
-      const newLeft = e.clientX - offsetX - $('gridScroll').getBoundingClientRect().left + $('gridScroll').scrollLeft;
-      const newTop = e.clientY - offsetY - $('gridScroll').getBoundingClientRect().top + $('gridScroll').scrollTop;
+      const gridScroll = $('gridScroll');
+      const scrollRect = gridScroll.getBoundingClientRect();
+      const newLeft = e.clientX - offsetX - scrollRect.left + gridScroll.scrollLeft;
+      const newTop = e.clientY - offsetY - scrollRect.top + gridScroll.scrollTop;
       
       slider.style.left = newLeft + 'px';
       slider.style.top = newTop + 'px';
       
-      // Находим ближайшую ячейку для призрака
-      const nearest = findNearestCell(e.clientX, e.clientY);
+      const nearest = findCellByPosition(e.clientX, e.clientY);
+      let newLane = nearest.lane;
+      let newStartIdx = nearest.idx;
       
-      // Проверяем, изменилась ли позиция
-      if (nearest.lane !== currentLane || nearest.idx !== currentStartIdx) {
-        currentLane = nearest.lane;
-        currentStartIdx = Math.max(0, Math.min(slots.length - duration - 1, nearest.idx));
+      newStartIdx = Math.max(0, Math.min(slots.length - duration - 1, newStartIdx));
+      
+      if (newLane !== currentLane || newStartIdx !== currentStartIdx) {
+        currentLane = newLane;
+        currentStartIdx = newStartIdx;
         
-        // Обновляем призрак
         const targetRow = rows[currentLane];
         if (targetRow) {
           const startCell = targetRow.cells[currentStartIdx + 1];
@@ -943,15 +951,13 @@
     }
     
     function onEnd(e) {
-      // Финальная позиция
-      const nearest = findNearestCell(e.clientX, e.clientY);
+      const nearest = findCellByPosition(e.clientX, e.clientY);
       const finalLane = nearest.lane;
       const finalIdx = Math.max(0, Math.min(slots.length - duration - 1, nearest.idx));
       
       const newStart = slots[finalIdx].key;
       const newEnd = slots[finalIdx + duration].key;
       
-      // Проверяем конфликты
       let hasConflict = false;
       if (!isTemp) {
         hasConflict = bookings.some(b => 
@@ -974,14 +980,12 @@
         }
       }
       
-      // Убираем призрак и классы
       ghost.remove();
       slider.classList.remove('dragging');
       document.body.style.cursor = "";
       document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseup", onEnd);
       
-      // Перерисовываем
       renderAllSliders();
     }
     
@@ -1081,4 +1085,4 @@
   ["bookModal","infoModal","imgPopup"].forEach(id=>{ $(id)?.addEventListener("click",e=>{ if(e.target=== $(id)) $(id).classList.remove("open"); }); });
 </script>
 </body>
-</html>html>
+</html>

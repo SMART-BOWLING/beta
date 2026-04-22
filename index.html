@@ -87,9 +87,14 @@
       gap: 24px;
     }
 
+    /* Управляющая панель: дата + кнопка + контейнер с карточками черновиков */
     .ctrl {
-      display: flex; gap: 18px; align-items: center; flex-wrap: wrap;
-      background: var(--surface); border-radius: var(--r2);
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      flex-wrap: wrap;
+      background: var(--surface);
+      border-radius: var(--r2);
       padding: 18px 24px;
       box-shadow: 0 2px 12px rgba(0,0,0,.04);
     }
@@ -111,8 +116,77 @@
       font-family: var(--font); font-size: 17px; font-weight: 600;
       cursor: pointer; transition: all .15s;
       box-shadow: 0 2px 6px rgba(0,113,227,.3);
+      white-space: nowrap;
     }
     .btn-book:hover { background: var(--blue-h); transform: scale(0.98); }
+
+    /* НОВЫЙ КОНТЕЙНЕР ДЛЯ КАРТОЧЕК — справа от кнопки "Новая бронь" */
+    .inline-temp-cards {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-left: auto;   /* прижимаем к правому краю, но если места мало — перенос */
+    }
+    .temp-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(0,113,227,0.08);
+      border-radius: 40px;
+      padding: 4px 8px 4px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--blue);
+      border: 0.5px solid rgba(0,113,227,0.3);
+      white-space: nowrap;
+    }
+    .temp-badge span {
+      font-weight: 600;
+      background: white;
+      border-radius: 30px;
+      padding: 4px 12px;
+      color: #0071e3;
+    }
+    .temp-card-inline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--blue);
+      border-radius: 32px;
+      padding: 6px 14px 6px 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.05);
+      transition: all 0.1s;
+      font-size: 13px;
+    }
+    .temp-card-inline strong {
+      font-size: 14px;
+      margin-right: 2px;
+    }
+    .temp-card-inline .temp-time {
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: 500;
+      background: #f0f0f2;
+      padding: 4px 8px;
+      border-radius: 20px;
+    }
+    .temp-card-inline .temp-rm {
+      width: 26px;
+      height: 26px;
+      border-radius: 30px;
+      background: #ffe5e2;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      color: #b81c00;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .temp-card-inline .temp-rm:hover { background: #ffccbb; }
 
     .pills {
       display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px;
@@ -222,6 +296,7 @@
     @media (max-width: 800px) {
       .page { padding: 16px 12px 70px; gap: 16px; }
       .ctrl { flex-direction: column; align-items: stretch; }
+      .inline-temp-cards { margin-left: 0; justify-content: flex-start; }
       .btn-book { width: 100%; }
     }
 
@@ -295,52 +370,8 @@
     }
     .drag-handle:active { cursor: grabbing; }
 
-    /* Карточки черновиков — под кнопкой "Новая бронь" */
-    .temp-cards-area {
-      background: var(--surface);
-      border-radius: 20px;
-      padding: 0px 12px 12px 12px;
-      margin-top: -8px;
-      transition: all 0.2s;
-    }
-    .temp-cards-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--blue);
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding-left: 6px;
-    }
-    .temp-cards-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .temp-bcard {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      background: var(--surface2);
-      border: 1px solid var(--blue);
-      border-radius: 20px;
-      padding: 10px 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.05);
-      transition: 0.1s;
-    }
-    .temp-bcard-rm {
-      width: 28px;
-      height: 28px;
-      border-radius: 30px;
-      background: #ffe5e2;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
-      color: #b81c00;
-    }
-    .temp-bcard-rm:hover { background: #ffccbb; }
+    /* старый контейнер больше не нужен, но оставим скрытым */
+    #tempContainer { display: none; }
 
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); z-index: 2000; justify-content: center; align-items: center; }
     .overlay.open { display: flex; }
@@ -408,20 +439,18 @@
     <button class="nav-btn" onclick="openImg()">📐 Схема зала</button>
   </nav>
   <div class="page">
+    <!-- Панель: дата + кнопка + карточки черновиков (inline) -->
     <div class="ctrl">
       <div class="date-field">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         <input type="date" id="dateInput"/>
       </div>
       <button class="btn-book" onclick="openBookModal()">➕ Новая бронь</button>
+      
+      <!-- КОНТЕЙНЕР ДЛЯ КАРТОЧЕК ЧЕРНОВИКОВ - поялятся справа от кнопки -->
+      <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
-    
-    <!-- Контейнер для карточек черновиков (расположен сразу под кнопкой/панелью управления) -->
-    <div id="tempCardsSection" class="temp-cards-area" style="display: none;">
-      <div class="temp-cards-title">⏳ Черновики (ожидают подтверждения):</div>
-      <div id="tempCardsContainer" class="temp-cards-container"></div>
-    </div>
-    
+
     <div class="pills">
       <div class="pill"><div class="dot dot-navy"></div>Столы 1–3</div>
       <div class="pill"><div class="dot dot-sage"></div>Столы 4–6</div>
@@ -465,7 +494,6 @@
   let isDragging = false;
   let dragStartCell = null;
   let dragInterval = null;
-  
   let resizePreview = null;
   let updateTimeout = null;
   
@@ -530,7 +558,7 @@
   
   function clearTempSelections(){
     tempBookings = [];
-    renderTempCards();     // обновим отображение карточек
+    renderInlineTempCards();
     document.querySelectorAll("#tableDesktop td.slot.selected-temp").forEach(td => td.classList.remove("selected-temp"));
     renderAllSliders();
   }
@@ -549,37 +577,36 @@
     }
   }
   
-  // Отрисовка карточек черновиков ПОД кнопкой
-  function renderTempCards(){
-    const section = $("tempCardsSection");
-    const container = $("tempCardsContainer");
+  // Новая функция рендера карточек прямо в панели, справа от кнопки
+  function renderInlineTempCards(){
+    const container = $("inlineTempContainer");
     if(!container) return;
     if(tempBookings.length === 0){
-      section.style.display = "none";
+      container.innerHTML = "";
       return;
     }
-    section.style.display = "block";
-    container.innerHTML = "";
+    container.innerHTML = `<div class="temp-badge">✏️ Черновики <span>${tempBookings.length}</span></div>`;
     tempBookings.forEach((tb, idx) => {
-      let div = document.createElement("div");
-      div.className = "temp-bcard";
-      div.innerHTML = `<div><strong>Стол ${tb.lane+1}</strong><br>${fmt(tb.start)}–${fmt(tb.end)}<br><small style="color:#0071e3;">✏️ черновик</small></div>`;
-      let rm = document.createElement("button");
-      rm.className = "temp-bcard-rm";
-      rm.textContent = "✕";
-      rm.onclick = (e) => {
+      let card = document.createElement("div");
+      card.className = "temp-card-inline";
+      card.innerHTML = `
+        <strong>Стол ${tb.lane+1}</strong>
+        <span class="temp-time">${fmt(tb.start)}–${fmt(tb.end)}</span>
+        <button class="temp-rm" data-idx="${idx}">✕</button>
+      `;
+      const rmBtn = card.querySelector(".temp-rm");
+      rmBtn.onclick = (e) => {
         e.stopPropagation();
         tempBookings.splice(idx, 1);
-        renderTempCards();
+        renderInlineTempCards();
         highlightAllTempBookings();
         renderAllSliders();
       };
-      div.appendChild(rm);
-      container.appendChild(div);
+      container.appendChild(card);
     });
   }
   
-  // === DRAG to create temp ===
+  // DRAG to create temp
   function onMouseDown(e){
     let target = e.target;
     if(target.classList && target.classList.contains("slot")){
@@ -630,7 +657,7 @@
       } else {
         let newTemp = { id: nextTempId++, lane, start: Math.min(start, end), end: Math.max(start, end) };
         tempBookings.push(newTemp);
-        renderTempCards();          // обновляем карточки под кнопкой
+        renderInlineTempCards();
         highlightAllTempBookings();
         renderAllSliders();
       }
@@ -690,10 +717,7 @@
   
   function scheduleUpdate(booking){
     if(updateTimeout) clearTimeout(updateTimeout);
-    updateTimeout = setTimeout(() => {
-      renderAllSliders();
-      updateTimeout = null;
-    }, 50);
+    updateTimeout = setTimeout(() => { renderAllSliders(); updateTimeout = null; }, 50);
   }
   
   async function confirmBooking(yes){
@@ -714,10 +738,10 @@
     hideLoad();
   }
   
-  function scheduleUpdateForTemp(tempBooking){
+  function scheduleUpdateForTemp(){
     if(updateTimeout) clearTimeout(updateTimeout);
     updateTimeout = setTimeout(() => {
-      renderTempCards();
+      renderInlineTempCards();
       highlightAllTempBookings();
       renderAllSliders();
       updateTimeout = null;
@@ -734,6 +758,8 @@
     const startIdxOrig = slots.findIndex(s => s.key === entity.start);
     const ghost = document.createElement('div');
     ghost.className = 'ghost-slider';
+    ghost.style.cssText = slider.style.cssText;
+    ghost.style.opacity = '0.6';
     $('slidersLayer').appendChild(ghost);
     slider.classList.add('dragging');
     
@@ -791,13 +817,11 @@
           entity.end = newEnd;
           if (isTemp) {
             highlightAllTempBookings();
-            renderTempCards();
+            renderInlineTempCards();
           } else {
             saveToServer(entity);
           }
-        } else if (!isTemp) {
-          alert("Невозможно переместить: конфликт с другой бронью");
-        }
+        } else if (!isTemp) alert("Невозможно переместить: конфликт с другой бронью");
       }
       ghost.remove();
       slider.classList.remove('dragging');
@@ -806,7 +830,6 @@
       document.removeEventListener('mouseup', onDragEnd);
       renderAllSliders();
     }
-    
     document.body.style.cursor = 'grabbing';
     document.addEventListener('mousemove', onDragMove);
     document.addEventListener('mouseup', onDragEnd);
@@ -909,7 +932,7 @@
         resizePreview.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
       }
       renderAllSliders();
-      scheduleUpdateForTemp(ctx.temp);
+      scheduleUpdateForTemp();
     }
     function onMove(e){ if(ctx) update(e.clientX); }
     function onEnd(){
@@ -917,7 +940,7 @@
       document.body.style.cursor = "";
       document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseup", onEnd);
-      renderAllSliders(); highlightAllTempBookings(); renderTempCards();
+      renderAllSliders(); highlightAllTempBookings(); renderInlineTempCards();
     }
     document.body.style.cursor = "ew-resize";
     document.addEventListener("mousemove", onMove);
@@ -991,7 +1014,6 @@
   function renderAll(){
     renderAllSliders();
     highlightAllTempBookings();
-    renderTempCards();   // обновляем карточки, если есть
   }
   
   let currentBooking = null;

@@ -279,14 +279,75 @@
     }
     .drag-handle:active { cursor: grabbing; }
 
-    .cards-container { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
-    .bcard {
-      display: flex; align-items: center; gap: 14px;
-      background: var(--surface); border: .5px solid var(--border2);
-      border-radius: 20px; padding: 12px 18px;
+    /* Контейнер для временных карточек (создаваемые брони) */
+    .temp-cards-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+      padding: 12px;
+      background: var(--surface2);
+      border-radius: 20px;
+      border: 1px dashed var(--border2);
+    }
+    .temp-cards-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink3);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .temp-bcard {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--blue);
+      border-radius: 20px;
+      padding: 10px 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,.05);
     }
-    .bcard-rm { width: 30px; height: 30px; border-radius: 30px; background: var(--surface2); border: .5px solid var(--border2); cursor: pointer; font-size: 16px; }
+    .temp-bcard-rm {
+      width: 28px;
+      height: 28px;
+      border-radius: 30px;
+      background: #ffe5e2;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      color: #b81c00;
+    }
+    .temp-bcard-rm:hover { background: #ffccbb; }
+
+    /* Контейнер для сохранённых броней */
+    .cards-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .bcard {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      border: .5px solid var(--border2);
+      border-radius: 20px;
+      padding: 12px 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    }
+    .bcard-rm {
+      width: 30px;
+      height: 30px;
+      border-radius: 30px;
+      background: var(--surface2);
+      border: .5px solid var(--border2);
+      cursor: pointer;
+      font-size: 16px;
+    }
 
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); z-index: 2000; justify-content: center; align-items: center; }
     .overlay.open { display: flex; }
@@ -340,7 +401,7 @@
 
 <div id="content">
   <nav class="nav">
-    <span class="nav-title">🎱 LUCKY STRIKE · Бронирование в два этапа</span>
+    <span class="nav-title">🎱 LUCKY STRIKE · Бронирование</span>
     <button class="nav-btn" onclick="openImg()">📐 Схема зала</button>
   </nav>
   <div class="page">
@@ -369,6 +430,14 @@
         <div id="slidersLayer"></div>
       </div>
     </div>
+    
+    <!-- Временные брони (создаются протяжкой, ещё не отправлены) -->
+    <div id="tempContainer" style="display: none;">
+      <div class="temp-cards-title">⏳ Ожидают подтверждения:</div>
+      <div id="tempCardsContainer" class="temp-cards-container"></div>
+    </div>
+    
+    <!-- Сохранённые брони -->
     <div id="cardsContainer" class="cards-container"></div>
   </div>
 </div>
@@ -389,6 +458,7 @@
   
   let bookings = [];        // загруженные из таблицы (уже сохранённые)
   let tempBookings = [];    // временные брони, созданные протяжкой, ещё не сохранены
+  let nextTempId = 1;
   
   let dragInterval = null;
   let isDragging = false;
@@ -456,23 +526,62 @@
     return $("dtBody")?.rows[lane]?.cells[slotIdx+1];
   }
   
-  // Очистка временных выделений
+  function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
+  
+  // Очистка временных выделений и карточек
   function clearTempSelections(){
     tempBookings = [];
+    renderTempCards();
+    // убираем подсветку ячеек
     document.querySelectorAll("#tableDesktop td.slot.selected-temp").forEach(td => td.classList.remove("selected-temp"));
+    $("tempContainer").style.display = "none";
   }
   
-  // Подсветка временной брони
-  function highlightTempBooking(lane, startIdx, endIdx){
-    // сначала снимаем все выделения этого стола? но проще перерисовать все темповые
+  // Подсветка всех временных броней на сетке
+  function highlightAllTempBookings(){
     document.querySelectorAll("#tableDesktop td.slot.selected-temp").forEach(td => td.classList.remove("selected-temp"));
-    for(let i=startIdx; i<=endIdx; i++){
-      let cell = getSlotCell(lane, i);
-      if(cell) cell.classList.add("selected-temp");
+    for(let tb of tempBookings){
+      let startIdx = slots.findIndex(s => s.key === tb.start);
+      let endIdx = slots.findIndex(s => s.key === tb.end);
+      if(startIdx !== -1 && endIdx !== -1){
+        for(let i=startIdx; i<=endIdx; i++){
+          let cell = getSlotCell(tb.lane, i);
+          if(cell) cell.classList.add("selected-temp");
+        }
+      }
     }
   }
   
-  // DRAG TO CREATE TEMP BOOKING (протяжка создаёт временную бронь)
+  // Отрисовка карточек временных броней
+  function renderTempCards(){
+    const container = $("tempCardsContainer");
+    if(!container) return;
+    if(tempBookings.length === 0){
+      $("tempContainer").style.display = "none";
+      return;
+    }
+    $("tempContainer").style.display = "block";
+    container.innerHTML = "";
+    tempBookings.forEach((tb, idx) => {
+      let div = document.createElement("div");
+      div.className = "temp-bcard";
+      div.innerHTML = `<div><strong>Стол ${tb.lane+1}</strong><br>${fmt(tb.start)}–${fmt(tb.end)}<br><small style="color:#0071e3;">⏳ ожидает</small></div>`;
+      let rm = document.createElement("button");
+      rm.className = "temp-bcard-rm";
+      rm.textContent = "✕";
+      rm.onclick = (e) => {
+        e.stopPropagation();
+        // удаляем временную бронь
+        tempBookings.splice(idx, 1);
+        renderTempCards();
+        highlightAllTempBookings();
+      };
+      div.appendChild(rm);
+      container.appendChild(div);
+    });
+  }
+  
+  // DRAG TO CREATE TEMP BOOKING
   function onMouseDown(e){
     let target = e.target;
     if(target.classList && target.classList.contains("slot")){
@@ -524,12 +633,14 @@
       } else {
         // добавляем временную бронь
         let newTemp = {
+          id: nextTempId++,
           lane: lane,
           start: Math.min(start, end),
           end: Math.max(start, end)
         };
         tempBookings.push(newTemp);
-        highlightTempBooking(lane, Math.min(startIdx,endIdx), Math.max(startIdx,endIdx));
+        renderTempCards();
+        highlightAllTempBookings();
       }
     }
     isDragging = false;
@@ -538,7 +649,6 @@
     document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td => td.classList.remove("drag-over"));
   }
   
-  // Открыть модалку для ввода данных и сохранения ВСЕХ временных броней
   function openBookModal(){
     if(tempBookings.length === 0){
       alert("Сначала выделите одну или несколько броней: зажмите левую кнопку мыши и протяните по ячейкам стола.");
@@ -567,7 +677,6 @@
     showLoad();
     const date = $("dateInput").value;
     try{
-      // Формируем массив броней для отправки (каждая временная бронь становится отдельной строкой)
       const payload = {
         bookings: tempBookings.map(tb => ({
           date: date,
@@ -595,7 +704,6 @@
     hideLoad();
   }
   
-  // Загрузка с сервера и отрисовка
   async function loadFromServer(){
     showLoad();
     try{
@@ -615,7 +723,6 @@
     hideLoad();
   }
   
-  // Сохранение изменений (перемещение/изменение размера/статус) - только для уже существующих броней
   async function saveToServer(booking){
     if(!booking.id) return;
     let date = $("dateInput").value;
@@ -659,12 +766,12 @@
     hideLoad();
   }
   
-  // Перемещение и ресайз (только для существующих)
   function scheduleUpdate(booking){
     if(updateTimeout) clearTimeout(updateTimeout);
     updateTimeout = setTimeout(() => { if(booking.id) saveToServer(booking); updateTimeout = null; }, 300);
   }
   
+  // Ресайз и перемещение (только для существующих броней)
   function startResize(booking, side, e){
     if(!booking.id) return;
     e.stopPropagation(); e.preventDefault();
@@ -775,18 +882,8 @@
   
   function renderAll(){
     renderSliders();
-    renderCards();
-    // дополнительно подсветить временные брони
-    for(let tb of tempBookings){
-      let startIdx = slots.findIndex(s => s.key === tb.start);
-      let endIdx = slots.findIndex(s => s.key === tb.end);
-      if(startIdx !== -1 && endIdx !== -1){
-        for(let i=startIdx; i<=endIdx; i++){
-          let cell = getSlotCell(tb.lane, i);
-          if(cell) cell.classList.add("selected-temp");
-        }
-      }
-    }
+    renderSavedCards();
+    highlightAllTempBookings();
   }
   
   function renderSliders(){
@@ -838,10 +935,10 @@
     });
   }
   
-  function renderCards(){
+  function renderSavedCards(){
     $("cardsContainer").innerHTML = "";
     let dd = $("dateInput").value.split("-").reverse().join(".");
-    bookings.forEach((b, idx) => {
+    bookings.forEach((b) => {
       let div = document.createElement("div");
       div.className = "bcard";
       div.innerHTML = `<div><strong>Стол ${b.lane+1}</strong><br>${dd} · ${fmt(b.start)}–${fmt(b.end)}<br><small>${b.name}</small></div>`;
@@ -853,8 +950,6 @@
       $("cardsContainer").appendChild(div);
     });
   }
-  
-  function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
   
   let currentBooking = null;
   function showInfoModal(b){

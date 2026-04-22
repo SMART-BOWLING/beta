@@ -313,7 +313,7 @@
       position: absolute;
       border-radius: 12px;
       pointer-events: auto;
-      cursor: grab;
+      cursor: default; /* Изменено с grab на default, так как grab только на drag-handle */
       padding: 6px 10px;
       display: flex;
       flex-direction: column;
@@ -324,8 +324,8 @@
       border: 1px solid rgba(255,255,255,0.5);
       will-change: left, top;
       transition: none;
+      overflow: hidden;
     }
-    .slider:active { cursor: grabbing; }
     .slider:hover { opacity: 0.98; transform: scale(1.01); z-index: 30; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
     .slider.dragging {
       opacity: 0.7 !important;
@@ -342,8 +342,61 @@
       border-left: 4px solid #0071e3;
       backdrop-filter: blur(4px);
     }
-    .sl-name { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sl-time { font-size: 9px; opacity: 0.85; white-space: nowrap; }
+    
+    /* Верхняя строка с именем и кнопками */
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+    .sl-name { 
+      font-size: 12px; 
+      font-weight: 700; 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+      flex: 1;
+      pointer-events: none; /* Чтобы не мешать кнопкам */
+    }
+    .slider-actions {
+      display: flex;
+      gap: 4px;
+      margin-left: 4px;
+    }
+    .slider-btn {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.8);
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #333;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      transition: all 0.1s;
+      pointer-events: auto;
+      z-index: 10;
+    }
+    .slider-btn:hover {
+      background: white;
+      transform: scale(1.1);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .slider-btn.info-btn { color: #0071e3; }
+    .slider-btn.delete-btn { color: #ff3b30; }
+
+    .sl-time { 
+      font-size: 9px; 
+      opacity: 0.85; 
+      white-space: nowrap; 
+      pointer-events: none;
+    }
+    
     .resize-handle {
       position: absolute;
       width: 14px;
@@ -358,11 +411,12 @@
     .resize-handle:hover { background: rgba(0,0,0,0.65); width: 16px; }
     .handle-left { left: 3px; }
     .handle-right { right: 3px; }
+    
     .drag-handle {
       position: absolute;
       top: 0;
-      left: 20px;
-      right: 20px;
+      left: 20px;   /* Уменьшено, чтобы не перекрывать кнопки */
+      right: 60px;  /* Освобождаем место для кнопок справа */
       height: 100%;
       cursor: grab;
       background: transparent;
@@ -948,6 +1002,14 @@
     update(e.clientX);
   }
   
+  // Функция для удаления черновика прямо с ползунка
+  function deleteTempFromSlider(tempId) {
+    tempBookings = tempBookings.filter(t => t.id !== tempId);
+    renderInlineTempCards();
+    highlightAllTempBookings();
+    renderAllSliders();
+  }
+
   function renderAllSliders(){
     let container = $("slidersLayer");
     if(!container) return;
@@ -956,6 +1018,7 @@
     let rows = Array.from($("dtBody").querySelectorAll("tr"));
     if(rows.length === 0) return;
     
+    // Рендер подтвержденных/ожидающих броней
     bookings.forEach(booking => {
       let startIdx = slots.findIndex(s => s.key === booking.start);
       let endIdx = slots.findIndex(s => s.key === booking.end);
@@ -965,25 +1028,60 @@
       let sc = row.cells[startIdx+1], ec = row.cells[endIdx+1];
       if(!sc || !ec) return;
       let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2;
+      
       let slider = document.createElement("div");
       let status = booking.confirmed === true ? "confirmed" : (booking.confirmed === false ? "rejected" : "pending");
       slider.className = `slider ${status}`;
       slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
-      let nameSpan = document.createElement("div"); nameSpan.className = "sl-name"; nameSpan.textContent = booking.name || "Бронь";
-      let timeSpan = document.createElement("div"); timeSpan.className = "sl-time"; timeSpan.textContent = `${fmt(booking.start)} – ${fmt(booking.end)}`;
-      slider.appendChild(nameSpan); slider.appendChild(timeSpan);
-      let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
+      
+      // Header с именем и кнопками
+      let header = document.createElement("div");
+      header.className = "slider-header";
+      
+      let nameSpan = document.createElement("div"); 
+      nameSpan.className = "sl-name"; 
+      nameSpan.textContent = booking.name || "Бронь";
+      
+      let actionsDiv = document.createElement("div");
+      actionsDiv.className = "slider-actions";
+      
+      let infoBtn = document.createElement("button");
+      infoBtn.className = "slider-btn info-btn";
+      infoBtn.innerHTML = "🛈";
+      infoBtn.title = "Информация о брони";
+      infoBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        showInfoModal(booking);
+      });
+      
+      actionsDiv.appendChild(infoBtn);
+      header.appendChild(nameSpan);
+      header.appendChild(actionsDiv);
+      
+      let timeSpan = document.createElement("div"); 
+      timeSpan.className = "sl-time"; 
+      timeSpan.textContent = `${fmt(booking.start)} – ${fmt(booking.end)}`;
+      
+      slider.appendChild(header);
+      slider.appendChild(timeSpan);
+      
+      // Drag handle (зона для перетаскивания)
+      let dragHandle = document.createElement("div"); 
+      dragHandle.className = "drag-handle";
       dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
       slider.appendChild(dragHandle);
+      
+      // Resize handles
       let leftHandle = document.createElement("div"); leftHandle.className = "resize-handle handle-left";
       leftHandle.addEventListener("mousedown", (e) => startResize(booking, 'left', e));
       let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right";
       rightHandle.addEventListener("mousedown", (e) => startResize(booking, 'right', e));
       slider.appendChild(leftHandle); slider.appendChild(rightHandle);
-      slider.addEventListener("click", (e) => { if(e.target === leftHandle || e.target === rightHandle || e.target === dragHandle) return; showInfoModal(booking); });
+      
       container.appendChild(slider);
     });
     
+    // Рендер черновиков (временных броней)
     tempBookings.forEach(temp => {
       let startIdx = slots.findIndex(s => s.key === temp.start);
       let endIdx = slots.findIndex(s => s.key === temp.end);
@@ -993,20 +1091,52 @@
       let sc = row.cells[startIdx+1], ec = row.cells[endIdx+1];
       if(!sc || !ec) return;
       let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2;
+      
       let slider = document.createElement("div");
       slider.className = "slider temp";
       slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
-      let nameSpan = document.createElement("div"); nameSpan.className = "sl-name"; nameSpan.textContent = "Черновик";
-      let timeSpan = document.createElement("div"); timeSpan.className = "sl-time"; timeSpan.textContent = `${fmt(temp.start)} – ${fmt(temp.end)}`;
-      slider.appendChild(nameSpan); slider.appendChild(timeSpan);
-      let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
+      
+      let header = document.createElement("div");
+      header.className = "slider-header";
+      
+      let nameSpan = document.createElement("div"); 
+      nameSpan.className = "sl-name"; 
+      nameSpan.textContent = "Черновик";
+      
+      let actionsDiv = document.createElement("div");
+      actionsDiv.className = "slider-actions";
+      
+      let deleteBtn = document.createElement("button");
+      deleteBtn.className = "slider-btn delete-btn";
+      deleteBtn.innerHTML = "🗑️";
+      deleteBtn.title = "Удалить черновик";
+      deleteBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        deleteTempFromSlider(temp.id);
+      });
+      
+      actionsDiv.appendChild(deleteBtn);
+      header.appendChild(nameSpan);
+      header.appendChild(actionsDiv);
+      
+      let timeSpan = document.createElement("div"); 
+      timeSpan.className = "sl-time"; 
+      timeSpan.textContent = `${fmt(temp.start)} – ${fmt(temp.end)}`;
+      
+      slider.appendChild(header);
+      slider.appendChild(timeSpan);
+      
+      let dragHandle = document.createElement("div"); 
+      dragHandle.className = "drag-handle";
       dragHandle.addEventListener("mousedown", (e) => startMoveForTemp(temp, e));
       slider.appendChild(dragHandle);
+      
       let leftHandle = document.createElement("div"); leftHandle.className = "resize-handle handle-left";
       leftHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'left', e));
       let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right";
       rightHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'right', e));
       slider.appendChild(leftHandle); slider.appendChild(rightHandle);
+      
       container.appendChild(slider);
     });
   }

@@ -329,30 +329,9 @@
     }
     .temp-bcard-rm:hover { background: #ffccbb; }
 
+    /* Блок карточек для СОЗДАННЫХ броней — теперь скрыт всегда */
     .cards-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 8px;
-    }
-    .bcard {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      background: var(--surface);
-      border: .5px solid var(--border2);
-      border-radius: 20px;
-      padding: 12px 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.05);
-    }
-    .bcard-rm {
-      width: 30px;
-      height: 30px;
-      border-radius: 30px;
-      background: var(--surface2);
-      border: .5px solid var(--border2);
-      cursor: pointer;
-      font-size: 16px;
+      display: none;
     }
 
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); z-index: 2000; justify-content: center; align-items: center; }
@@ -438,11 +417,13 @@
       </div>
     </div>
     
+    <!-- Блок черновиков (показывается только при создании брони) -->
     <div id="tempContainer" style="display: none;">
       <div class="temp-cards-title">⏳ Черновики (ожидают подтверждения):</div>
       <div id="tempCardsContainer" class="temp-cards-container"></div>
     </div>
     
+    <!-- Блок карточек постоянных броней скрыт навсегда согласно условию -->
     <div id="cardsContainer" class="cards-container"></div>
   </div>
 </div>
@@ -891,25 +872,15 @@
     });
   }
   
+  // Функция renderSavedCards более не нужна, так как карточки скрыты.
+  // Оставлена пустой, чтобы избежать ошибок.
   function renderSavedCards(){
-    $("cardsContainer").innerHTML = "";
-    let dd = $("dateInput").value.split("-").reverse().join(".");
-    bookings.forEach(b => {
-      let div = document.createElement("div");
-      div.className = "bcard";
-      div.innerHTML = `<div><strong>Стол ${b.lane+1}</strong><br>${dd} · ${fmt(b.start)}–${fmt(b.end)}<br><small>${b.name}</small></div>`;
-      let rm = document.createElement("button");
-      rm.className = "bcard-rm";
-      rm.textContent = "✕";
-      rm.onclick = () => { if(b.id) deleteBookingById(b.id); };
-      div.appendChild(rm);
-      $("cardsContainer").appendChild(div);
-    });
+    // Карточки для созданных броней не отображаются согласно условию
   }
   
   function renderAll(){
     renderAllSliders();
-    renderSavedCards();
+    renderSavedCards(); // теперь ничего не делает
     highlightAllTempBookings();
   }
   

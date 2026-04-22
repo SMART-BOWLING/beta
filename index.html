@@ -244,19 +244,18 @@
       flex-direction: column;
       justify-content: center;
       gap: 2px;
-      transition: box-shadow 0.1s, opacity 0.1s;
       box-shadow: 0 2px 10px rgba(0,0,0,0.12);
       backdrop-filter: blur(4px);
       border: 1px solid rgba(255,255,255,0.5);
+      will-change: left, top;
     }
     .slider:active { cursor: grabbing; }
     .slider:hover { opacity: 0.98; transform: scale(1.01); z-index: 30; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
     .slider.dragging {
-      transition: none !important;
-      opacity: 1 !important;
-      transform: none !important;
+      opacity: 0.95 !important;
       z-index: 100 !important;
       box-shadow: 0 8px 25px rgba(0,0,0,0.25) !important;
+      pointer-events: none !important;
     }
     .slider.pending { background: rgba(255,159,10,0.3); border-left: 4px solid #ff9f0a; }
     .slider.confirmed { background: rgba(52,199,89,0.3); border-left: 4px solid #34c759; }
@@ -373,6 +372,16 @@
       z-index: 25;
       transition: all 0.02s linear;
       box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
+    }
+    
+    .ghost-slider {
+      position: absolute;
+      background: rgba(0, 113, 227, 0.2);
+      border: 2px dashed #0071e3;
+      border-radius: 12px;
+      pointer-events: none;
+      z-index: 90;
+      opacity: 0.7;
     }
   </style>
 </head>
@@ -823,126 +832,173 @@
     update(e.clientX);
   }
   
-  // НОВАЯ ФУНКЦИЯ ТОЧНОГО ПЕРЕМЕЩЕНИЯ
-  function initAccurateDrag(ctx, isTemp) {
-      const cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
-      const rowHeight = $("dtBody").rows[0]?.offsetHeight || 58;
+  // НОВАЯ ЛОГИКА: ПЛАВНОЕ ПЕРЕТАСКИВАНИЕ БЕЗ ПРИВЯЗКИ К СЕТКЕ
+  function startMoveBase(booking, e, isTemp) {
+    e.stopPropagation();
+    
+    const slider = e.currentTarget.closest('.slider');
+    if (!slider) return;
+    
+    // Получаем начальные координаты
+    const startX = e.clientX;
+    const startY = e.clientY;
+    
+    // Сохраняем начальную позицию слайдера
+    const startLeft = parseFloat(slider.style.left);
+    const startTop = parseFloat(slider.style.top);
+    const sliderWidth = parseFloat(slider.style.width);
+    const sliderHeight = parseFloat(slider.style.height);
+    
+    // Находим начальную ячейку (для определения смещения)
+    const rows = $("dtBody").rows;
+    const startLane = booking.lane;
+    const startIdx = slots.findIndex(s => s.key === booking.start);
+    const duration = slots.findIndex(s => s.key === booking.end) - startIdx;
+    
+    // Добавляем класс dragging
+    slider.classList.add('dragging');
+    
+    // Создаем призрачный слайдер для визуализации целевой позиции
+    const ghost = document.createElement('div');
+    ghost.className = 'ghost-slider';
+    ghost.style.left = startLeft + 'px';
+    ghost.style.top = startTop + 'px';
+    ghost.style.width = sliderWidth + 'px';
+    ghost.style.height = sliderHeight + 'px';
+    $('slidersLayer').appendChild(ghost);
+    
+    // Функция для поиска ближайшей ячейки по координатам
+    function findNearestCell(clientX, clientY) {
+      // Получаем элемент под мышью
+      const elements = document.elementsFromPoint(clientX, clientY);
+      const slot = elements.find(el => el.classList && el.classList.contains('slot'));
       
-      let lastX = ctx.startX;
-      let lastY = ctx.startY;
+      if (slot) {
+        const lane = parseInt(slot.dataset.lane);
+        const idx = parseInt(slot.dataset.si);
+        return { lane, idx };
+      }
       
-      let currentLane = ctx.booking.lane;
-      let currentStartIdx = slots.findIndex(s => s.key === ctx.booking.start);
-      let currentEndIdx = slots.findIndex(s => s.key === ctx.booking.end);
-      const duration = currentEndIdx - currentStartIdx;
+      // Если не нашли ячейку, ищем ближайшую по координатам
+      let minDistance = Infinity;
+      let nearest = { lane: startLane, idx: startIdx };
       
-      // Находим слайдер
-      let slider = null;
-      if (isTemp) {
-        slider = Array.from(document.querySelectorAll('.slider.temp')).find(s => {
-          const timeSpan = s.querySelector('.sl-time');
-          if (!timeSpan) return false;
-          return timeSpan.textContent === `${fmt(ctx.booking.start)} – ${fmt(ctx.booking.end)}`;
-        });
+      for (let lane = 0; lane < rows.length; lane++) {
+        const row = rows[lane];
+        for (let idx = 1; idx < row.cells.length; idx++) {
+          const cell = row.cells[idx];
+          const rect = cell.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          const distance = Math.sqrt(Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2));
+          
+          if (distance < minDistance) {
+            minDistance = distance;
+            nearest = { lane, idx: idx - 1 };
+          }
+        }
+      }
+      
+      return nearest;
+    }
+    
+    function onMove(e) {
+      // Вычисляем смещение мыши
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
+      
+      // Плавно двигаем слайдер за мышью
+      slider.style.left = (startLeft + deltaX) + 'px';
+      slider.style.top = (startTop + deltaY) + 'px';
+      
+      // Находим ближайшую ячейку для призрака
+      const nearest = findNearestCell(e.clientX, e.clientY);
+      
+      // Проверяем, не выходит ли за границы по времени
+      let targetIdx = nearest.idx;
+      targetIdx = Math.max(0, Math.min(slots.length - duration - 1, targetIdx));
+      
+      // Обновляем позицию призрака
+      const targetRow = rows[nearest.lane];
+      if (targetRow) {
+        const startCell = targetRow.cells[targetIdx + 1];
+        const endCell = targetRow.cells[targetIdx + duration + 1];
+        
+        if (startCell && endCell) {
+          const left = startCell.offsetLeft + 1;
+          const top = targetRow.offsetTop + 1;
+          const width = (endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft - 2;
+          
+          ghost.style.left = left + 'px';
+          ghost.style.top = top + 'px';
+          ghost.style.width = width + 'px';
+          ghost.style.display = 'block';
+        }
+      }
+    }
+    
+    function onEnd(e) {
+      // Находим финальную позицию
+      const nearest = findNearestCell(e.clientX, e.clientY);
+      let targetLane = nearest.lane;
+      let targetIdx = nearest.idx;
+      
+      // Ограничиваем по времени
+      targetIdx = Math.max(0, Math.min(slots.length - duration - 1, targetIdx));
+      
+      // Проверяем конфликты
+      const newStart = slots[targetIdx].key;
+      const newEnd = slots[targetIdx + duration].key;
+      
+      let hasConflict = false;
+      if (!isTemp) {
+        hasConflict = bookings.some(b => 
+          b.id !== booking.id && 
+          b.lane === targetLane && 
+          !(b.end <= newStart || b.start >= newEnd)
+        );
+      }
+      
+      if (!hasConflict) {
+        // Обновляем данные брони
+        booking.lane = targetLane;
+        booking.start = newStart;
+        booking.end = newEnd;
+        
+        // Перерисовываем всё
+        renderAllSliders();
+        
+        if (isTemp) {
+          highlightAllTempBookings();
+          renderTempCards();
+        } else {
+          saveToServer(booking);
+        }
       } else {
-        slider = Array.from(document.querySelectorAll('.slider')).find(s => {
-          return !s.classList.contains('temp') && s.querySelector('.sl-time')?.textContent === `${fmt(ctx.booking.start)} – ${fmt(ctx.booking.end)}`;
-        });
+        // Если конфликт - возвращаем на место
+        renderAllSliders();
       }
       
-      if(slider) slider.classList.add('dragging');
-
-      function onMove(e) {
-          const deltaX = e.clientX - lastX;
-          const deltaY = e.clientY - lastY;
-          
-          let needsUpdate = false;
-          let newLane = currentLane;
-          let newStartIdx = currentStartIdx;
-          
-          // Проверяем, перешли ли мы границу ячейки по X (порог 60% для лучшей отзывчивости)
-          if (Math.abs(deltaX) >= cellWidth * 0.6) {
-              const step = deltaX > 0 ? 1 : -1;
-              newStartIdx = Math.max(0, Math.min(slots.length - duration - 1, currentStartIdx + step));
-              if (newStartIdx !== currentStartIdx) {
-                  lastX = e.clientX;
-                  needsUpdate = true;
-              }
-          }
-          
-          // Проверяем, перешли ли мы границу ячейки по Y
-          if (Math.abs(deltaY) >= rowHeight * 0.6) {
-              const step = deltaY > 0 ? 1 : -1;
-              newLane = Math.max(0, Math.min(LANES - 1, currentLane + step));
-              if (newLane !== currentLane) {
-                  lastY = e.clientY;
-                  needsUpdate = true;
-              }
-          }
-          
-          if (needsUpdate) {
-              ctx.booking.lane = newLane;
-              ctx.booking.start = slots[newStartIdx].key;
-              ctx.booking.end = slots[newStartIdx + duration].key;
-              
-              currentLane = newLane;
-              currentStartIdx = newStartIdx;
-              currentEndIdx = newStartIdx + duration;
-              
-              // Мгновенное обновление позиции слайдера
-              if (slider) {
-                  const row = $("dtBody").rows[newLane];
-                  if (row) {
-                      const sc = row.cells[newStartIdx + 1];
-                      const ec = row.cells[newStartIdx + duration + 1];
-                      if (sc && ec) {
-                          slider.style.left = (sc.offsetLeft + 1) + 'px';
-                          slider.style.top = (row.offsetTop + 1) + 'px';
-                          slider.style.width = (ec.offsetLeft + ec.offsetWidth - sc.offsetLeft - 2) + 'px';
-                      }
-                  }
-              }
-              
-              renderAllSliders();
-              if (isTemp) {
-                  scheduleUpdateForTemp(ctx.booking);
-              } else {
-                  scheduleUpdate(ctx.booking);
-              }
-          }
-      }
-      
-      function onEnd() {
-          if (slider) slider.classList.remove('dragging');
-          document.body.style.cursor = "";
-          document.removeEventListener("mousemove", onMove);
-          document.removeEventListener("mouseup", onEnd);
-          
-          renderAllSliders();
-          if (isTemp) {
-              highlightAllTempBookings();
-              renderTempCards();
-          } else {
-              saveToServer(ctx.booking);
-          }
-      }
-      
-      document.body.style.cursor = "grabbing";
-      document.addEventListener("mousemove", onMove);
-      document.addEventListener("mouseup", onEnd);
+      // Убираем призрак и классы
+      ghost.remove();
+      slider.classList.remove('dragging');
+      document.body.style.cursor = "";
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onEnd);
+    }
+    
+    document.body.style.cursor = "grabbing";
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onEnd);
   }
-
+  
   function startMoveForTemp(tempBooking, e) {
-      e.stopPropagation();
-      const ctx = { booking: tempBooking, startX: e.clientX, startY: e.clientY };
-      initAccurateDrag(ctx, true);
+    startMoveBase(tempBooking, e, true);
   }
-
+  
   function startMove(booking, e) {
-      if (!booking.id) return;
-      e.stopPropagation();
-      const ctx = { booking, startX: e.clientX, startY: e.clientY };
-      initAccurateDrag(ctx, false);
+    if (!booking.id) return;
+    startMoveBase(booking, e, false);
   }
   
   function renderAllSliders(){

@@ -834,7 +834,7 @@
     update(e.clientX);
   }
   
-  // ИСПРАВЛЕННАЯ ФУНКЦИЯ ПЕРЕТАСКИВАНИЯ (без смещения вправо при вертикальном движении)
+  // ФУНКЦИЯ ПЕРЕТАСКИВАНИЯ С СИММЕТРИЧНОЙ ЧУВСТВИТЕЛЬНОСТЬЮ
   function startMoveBase(booking, e, isTemp) {
     e.stopPropagation();
     
@@ -845,6 +845,10 @@
     const startLane = booking.lane;
     const startIdx = slots.findIndex(s => s.key === booking.start);
     const duration = slots.findIndex(s => s.key === booking.end) - startIdx;
+    
+    // ФИКСИРУЕМ исходный временной диапазон
+    const originalStartIdx = startIdx;
+    const originalEndIdx = startIdx + duration;
     
     const sliderRect = slider.getBoundingClientRect();
     const offsetX = e.clientX - sliderRect.left;
@@ -876,35 +880,58 @@
       }
     }
     
+    // Находим центр исходного слайдера для определения "домашней" зоны
+    const homeCells = [];
+    for (let lane = 0; lane < rows.length; lane++) {
+      for (let idx = originalStartIdx; idx <= originalEndIdx; idx++) {
+        if (cellsMap[lane] && cellsMap[lane][idx]) {
+          homeCells.push({ lane, idx });
+        }
+      }
+    }
+    
     function findCellByPosition(clientX, clientY) {
       const elements = document.elementsFromPoint(clientX, clientY);
       const slot = elements.find(el => el.classList && el.classList.contains('slot'));
       
       if (slot) {
-        const lane = parseInt(slot.dataset.lane);
-        const idx = parseInt(slot.dataset.si);
-        return { lane, idx };
+        return {
+          lane: parseInt(slot.dataset.lane),
+          idx: parseInt(slot.dataset.si)
+        };
       }
       
       let minDist = Infinity;
       let nearest = { lane: currentLane, idx: currentStartIdx };
       
+      // Сначала проверяем "домашние" ячейки (исходный временной диапазон)
+      for (let cell of homeCells) {
+        const domCell = cellsMap[cell.lane][cell.idx];
+        if (!domCell) continue;
+        
+        const rect = domCell.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const dist = Math.sqrt(Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2));
+        
+        // Сильный приоритет домашним ячейкам
+        if (dist * 0.3 < minDist) {
+          minDist = dist * 0.3;
+          nearest = { lane: cell.lane, idx: cell.idx };
+        }
+      }
+      
+      // Затем проверяем все остальные ячейки
       for (let lane = 0; lane < cellsMap.length; lane++) {
         for (let idx = 0; idx < cellsMap[lane].length; idx++) {
+          // Пропускаем уже проверенные домашние ячейки
+          if (idx >= originalStartIdx && idx <= originalEndIdx) continue;
+          
           const cell = cellsMap[lane][idx];
           const rect = cell.getBoundingClientRect();
-          
-          // Приоритет текущему временному столбцу
-          const isSameTimeColumn = (idx >= currentStartIdx && idx <= currentStartIdx + duration);
-          
           const centerX = rect.left + rect.width / 2;
           const centerY = rect.top + rect.height / 2;
-          let dist = Math.sqrt(Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2));
-          
-          // Сильный приоритет ячейкам того же временного диапазона
-          if (isSameTimeColumn) {
-            dist *= 0.2;
-          }
+          const dist = Math.sqrt(Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2));
           
           if (dist < minDist) {
             minDist = dist;
@@ -928,6 +955,13 @@
       const nearest = findCellByPosition(e.clientX, e.clientY);
       let newLane = nearest.lane;
       let newStartIdx = nearest.idx;
+      
+      // Если мышь в зоне исходного времени, приоритетно оставляем исходный idx
+      const isInHomeZone = (newStartIdx >= originalStartIdx && newStartIdx <= originalEndIdx);
+      if (isInHomeZone) {
+        // Оставляем тот же столбец, что и был
+        newStartIdx = currentStartIdx;
+      }
       
       newStartIdx = Math.max(0, Math.min(slots.length - duration - 1, newStartIdx));
       
@@ -953,7 +987,15 @@
     function onEnd(e) {
       const nearest = findCellByPosition(e.clientX, e.clientY);
       const finalLane = nearest.lane;
-      const finalIdx = Math.max(0, Math.min(slots.length - duration - 1, nearest.idx));
+      let finalIdx = nearest.idx;
+      
+      // Проверяем, не в домашней ли зоне
+      const isInHomeZone = (finalIdx >= originalStartIdx && finalIdx <= originalEndIdx);
+      if (isInHomeZone) {
+        finalIdx = startIdx; // Возвращаем на исходную позицию по времени
+      }
+      
+      finalIdx = Math.max(0, Math.min(slots.length - duration - 1, finalIdx));
       
       const newStart = slots[finalIdx].key;
       const newEnd = slots[finalIdx + duration].key;

@@ -235,38 +235,41 @@
       flex-direction: column;
       justify-content: center;
       gap: 2px;
-      transition: box-shadow 0.1s;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      backdrop-filter: blur(2px);
+      transition: box-shadow 0.1s, opacity 0.1s;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.5);
     }
     .slider:active { cursor: grabbing; }
-    .slider:hover { opacity: 0.96; transform: scale(1.01); z-index: 30; box-shadow: 0 4px 14px rgba(0,0,0,0.2); }
-    .slider.pending { background: rgba(255,159,10,0.25); border-left: 4px solid #ff9f0a; }
-    .slider.confirmed { background: rgba(52,199,89,0.25); border-left: 4px solid #34c759; }
-    .slider.rejected { background: rgba(255,59,48,0.2); border-left: 4px solid #ff3b30; opacity: 0.8; }
+    .slider:hover { opacity: 0.98; transform: scale(1.01); z-index: 30; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
+    .slider.pending { background: rgba(255,159,10,0.3); border-left: 4px solid #ff9f0a; }
+    .slider.confirmed { background: rgba(52,199,89,0.3); border-left: 4px solid #34c759; }
+    .slider.rejected { background: rgba(255,59,48,0.25); border-left: 4px solid #ff3b30; opacity: 0.85; }
     .sl-name { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sl-time { font-size: 9px; opacity: 0.85; white-space: nowrap; }
     .resize-handle {
       position: absolute;
-      width: 12px;
-      height: 80%;
-      top: 10%;
-      background: rgba(0,0,0,0.2);
+      width: 14px;
+      height: 70%;
+      top: 15%;
+      background: rgba(0,0,0,0.25);
       border-radius: 20px;
       cursor: ew-resize;
-      transition: background 0.1s;
+      transition: all 0.1s;
+      z-index: 5;
     }
-    .resize-handle:hover { background: rgba(0,0,0,0.6); width: 14px; }
-    .handle-left { left: 2px; }
-    .handle-right { right: 2px; }
+    .resize-handle:hover { background: rgba(0,0,0,0.65); width: 16px; }
+    .handle-left { left: 3px; }
+    .handle-right { right: 3px; }
     .drag-handle {
       position: absolute;
       top: 0;
-      left: 14px;
-      right: 14px;
+      left: 20px;
+      right: 20px;
       height: 100%;
       cursor: grab;
       background: transparent;
+      z-index: 2;
     }
     .drag-handle:active { cursor: grabbing; }
 
@@ -304,12 +307,13 @@
     
     .resize-preview {
       position: absolute;
-      background: rgba(255, 159, 10, 0.3);
+      background: rgba(255, 159, 10, 0.4);
       border: 2px dashed #ff9f0a;
-      border-radius: 12px;
+      border-radius: 14px;
       pointer-events: none;
       z-index: 25;
-      transition: all 0.05s linear;
+      transition: all 0.02s linear;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
     }
   </style>
 </head>
@@ -368,7 +372,7 @@
 <div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
 
 <script>
-  const GAS = "https://script.google.com/macros/s/AKfycbxfRLDGA29FrqKS61HmYN_FUnDwOydeCaEdeW4oc4wyroQzvb4h1OnwQ5HeotIHhcj9/exec";
+  const GAS = "https://script.google.com/macros/s/AKfycbw0A0E0MGk-RrNbAHktsTjXEa02i7skrHEKOxSnDhy65bGg0-fbM_Jj4tRzhADHY-kB/exec";
   const ALLOWED = ["vadiksss900@gmail.com","sergey99belov@gmail.com","popadinecvasil3@gmail.com","veronicadiakova04@gmail.com","info.luckystrike.kh@gmail.com","sashavolobuev123890@gmail.com","egorgorbushko@gmail.com","shatrava.o@gmail.com","Craftmax30@gmail.com","bowlingblock.b@gmail.com","lana.arnaut@gmail.com","polosinnikita1224@gmail.com","sofialat1506@gmail.com","ll3991940@gmail.com","ken040888@gmail.com"];
   const LANES = 12, SH = 11, EH = 22;
   const slots = []; for(let h=SH; h<=EH; h++) { slots.push({ label: `${h}:00`, key: h }); if(h<EH) slots.push({ label: `${h}:30`, key: h+0.5 }); }
@@ -510,27 +514,30 @@
     document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td => td.classList.remove("drag-over"));
   }
   
+  // Плавный резист с чувствительным порогом (без рывков)
   function startResize(booking, side, e){
     e.stopPropagation();
     e.preventDefault();
     
-    // Создаём элемент предпросмотра
     resizePreview = document.createElement("div");
     resizePreview.className = "resize-preview";
-    document.getElementById("gridScroll").style.position = "relative";
-    document.getElementById("gridScroll").appendChild(resizePreview);
+    const scrollDiv = document.getElementById("gridScroll");
+    scrollDiv.style.position = "relative";
+    scrollDiv.appendChild(resizePreview);
     
+    let startIdx = slots.findIndex(s => s.key === booking.start);
+    let endIdx = slots.findIndex(s => s.key === booking.end);
     resizeCtx = { 
       booking, side, 
-      startX: e.clientX, 
-      origStart: booking.start, 
-      origEnd: booking.end,
-      origStartIdx: slots.findIndex(s => s.key === booking.start),
-      origEndIdx: slots.findIndex(s => s.key === booking.end),
-      currentStartIdx: slots.findIndex(s => s.key === booking.start),
-      currentEndIdx: slots.findIndex(s => s.key === booking.end)
+      startX: e.clientX,
+      origStartIdx: startIdx,
+      origEndIdx: endIdx,
+      currentStartIdx: startIdx,
+      currentEndIdx: endIdx,
+      thresholdAcc: 0
     };
     
+    updateResizePreview(booking);
     document.body.style.cursor = "ew-resize";
     document.addEventListener("mousemove", onResizeMove);
     document.addEventListener("mouseup", onResizeEnd);
@@ -545,31 +552,22 @@
     let sc = row.cells[startIdx+1];
     let ec = row.cells[endIdx+1];
     if(!sc || !ec) return;
-    
     let left = sc.offsetLeft + 1;
     let top = row.offsetTop + 1;
     let width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2;
     let height = row.offsetHeight - 2;
-    
     resizePreview.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
   }
   
   function onResizeMove(e){
     if(!resizeCtx) return;
-    
     let deltaX = e.clientX - resizeCtx.startX;
     let cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
-    
-    // Порог в 15% от ширины ячейки для изменения (нужно оттянуть на 10-15px)
-    let threshold = cellWidth * 0.15;
+    // плавный порог: изменение каждые 12 пикселей, но без дерганий
     let step = 0;
-    
-    if(Math.abs(deltaX) > threshold){
-      step = Math.floor(deltaX / cellWidth);
-      // Ограничиваем шаг, чтобы не перескакивать через несколько ячеек
-      step = Math.max(-1, Math.min(1, step));
+    if(Math.abs(deltaX) > 12) {
+      step = deltaX > 0 ? 1 : -1;
     }
-    
     if(step === 0) {
       updateResizePreview(resizeCtx.booking);
       return;
@@ -593,9 +591,8 @@
         resizeCtx.startX = e.clientX;
       }
     }
-    
     updateResizePreview(resizeCtx.booking);
-    renderSliders();
+    renderSliders(); // динамический рендер слайдеров при ресайзе
   }
   
   function onResizeEnd(){
@@ -615,16 +612,13 @@
   
   function startMove(booking, e){
     e.stopPropagation();
-    let rect = e.target.getBoundingClientRect();
     moveDragCtx = { 
       booking, 
       startX: e.clientX, 
       startY: e.clientY,
       origLane: booking.lane,
-      origStart: booking.start,
-      origEnd: booking.end,
-      startIdx: slots.findIndex(s => s.key === booking.start),
-      endIdx: slots.findIndex(s => s.key === booking.end),
+      origStartIdx: slots.findIndex(s => s.key === booking.start),
+      origEndIdx: slots.findIndex(s => s.key === booking.end),
       duration: slots.findIndex(s => s.key === booking.end) - slots.findIndex(s => s.key === booking.start)
     };
     document.body.style.cursor = "grabbing";
@@ -638,19 +632,23 @@
     let deltaY = e.clientY - moveDragCtx.startY;
     let cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
     let rowHeight = $("dtBody").rows[0]?.offsetHeight || 58;
-    
-    let threshold = cellWidth * 0.2;
-    let stepX = Math.abs(deltaX) > threshold ? Math.round(deltaX / cellWidth) : 0;
-    let stepY = Math.abs(deltaY) > rowHeight * 0.2 ? Math.round(deltaY / rowHeight) : 0;
+    let stepX = Math.abs(deltaX) > cellWidth * 0.2 ? Math.round(deltaX / cellWidth) : 0;
+    let stepY = Math.abs(deltaY) > rowHeight * 0.3 ? Math.round(deltaY / rowHeight) : 0;
+    if(stepX === 0 && stepY === 0) return;
     
     let newLane = Math.max(0, Math.min(LANES-1, moveDragCtx.origLane + stepY));
-    let newStartIdx = Math.max(0, Math.min(slots.length - moveDragCtx.duration - 1, moveDragCtx.startIdx + stepX));
+    let newStartIdx = Math.max(0, Math.min(slots.length - moveDragCtx.duration - 1, moveDragCtx.origStartIdx + stepX));
     let newEndIdx = newStartIdx + moveDragCtx.duration;
     
     if(newLane !== moveDragCtx.booking.lane || slots[newStartIdx].key !== moveDragCtx.booking.start){
       moveDragCtx.booking.lane = newLane;
       moveDragCtx.booking.start = slots[newStartIdx].key;
       moveDragCtx.booking.end = slots[newEndIdx].key;
+      moveDragCtx.origStartIdx = newStartIdx;
+      moveDragCtx.origEndIdx = newEndIdx;
+      moveDragCtx.origLane = newLane;
+      moveDragCtx.startX = e.clientX;
+      moveDragCtx.startY = e.clientY;
       renderSliders();
     }
   }
@@ -777,8 +775,8 @@
   }
   
   async function saveToServer(){
-    // Сохраняем локальные изменения (для демо)
-    console.log("Saved locally", bookings);
+    console.log("Сохраняем изменения локально (имитация сервера)", bookings);
+    // для демо — просто заглушка, синхронизация с Google Sheets опциональна
   }
   
   function openBookModal(){
@@ -814,7 +812,7 @@
       $("commentInput").value = "";
       bookings = [];
       await loadFromServer();
-    } catch(e){ alert("Ошибка"); }
+    } catch(e){ alert("Ошибка отправки"); }
     hideLoad();
   }
   

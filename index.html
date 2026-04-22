@@ -505,6 +505,7 @@
   let tempBookings = [];
   let nextTempId = 1;
   
+  // Для click-to-select
   let selectionState = {
     active: false,
     lane: null,
@@ -582,14 +583,16 @@
     selectionState = { active: false, lane: null, startIdx: null, endIdx: null };
   }
   
+  // НОВЫЙ МЕТОД: обработка клика для выбора интервала
   function onSlotClick(e){
     let td = e.target.closest('.slot');
     if(!td) return;
-    if(isDragging) return;
+    if(isDragging) return; // не мешаем drag
     
     let lane = parseInt(td.dataset.lane);
     let idx = parseInt(td.dataset.si);
     
+    // Если нет активного выделения — начинаем новое
     if(!selectionState.active || selectionState.lane !== lane){
       clearSelection();
       selectionState.active = true;
@@ -600,9 +603,11 @@
       return;
     }
     
+    // Уже есть активное выделение на этом столе — завершаем интервал
     let start = Math.min(selectionState.startIdx, idx);
     let end = Math.max(selectionState.startIdx, idx);
     
+    // Проверяем конфликт с существующими бронями
     let startKey = slots[start].key;
     let endKey = slots[end].key;
     let hasConflict = bookings.some(b => b.lane === lane && !(b.end <= startKey || b.start >= endKey));
@@ -613,6 +618,7 @@
       return;
     }
     
+    // Создаём черновик
     let newTemp = { 
       id: nextTempId++, 
       lane: lane, 
@@ -676,6 +682,7 @@
     });
   }
   
+  // DRAG to create temp (оставлен как альтернатива)
   function onMouseDown(e){
     let target = e.target;
     if(target.classList && target.classList.contains("slot")){
@@ -818,6 +825,7 @@
     }, 50);
   }
   
+  // --- перемещение ---
   function startMoveEntity(entity, e, isTemp) {
     e.stopPropagation();
     const slider = e.currentTarget.closest('.slider');
@@ -1093,9 +1101,12 @@
   function openImg(){ $("imgPopup").classList.add("open"); }
   function closeImg(){ $("imgPopup").classList.remove("open"); }
   
+  // Вешаем обработчики
   $("tableDesktop").addEventListener("mousedown", onMouseDown);
   document.body.addEventListener("mousemove", onMouseMove);
   document.body.addEventListener("mouseup", onMouseUp);
+  
+  // НОВЫЙ обработчик кликов
   $("tableDesktop").addEventListener("click", onSlotClick);
   
   ["bookModal","infoModal","imgPopup"].forEach(id=>{ $(id)?.addEventListener("click",e=>{ if(e.target=== $(id)) $(id).classList.remove("open"); }); });

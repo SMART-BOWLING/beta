@@ -40,7 +40,7 @@
       user-select: none;
     }
 
-    /* АВТОРИЗАЦИЯ */
+    /* ЭКРАН АВТОРИЗАЦИИ */
     .auth-screen {
       position: fixed;
       inset: 0;
@@ -55,8 +55,9 @@
     .auth-icon { font-size: 64px; }
     .auth-title { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
     .auth-subtitle { color: var(--text-secondary); font-size: 15px; margin-top: -12px; }
+    .auth-divider { width: 40px; height: 2px; background: var(--border); border-radius: 1px; }
 
-    /* ОСНОВНОЙ КОНТЕЙНЕР */
+    /* ОСНОВНОЕ ПРИЛОЖЕНИЕ */
     .app { display: none; flex-direction: column; min-height: 100vh; }
 
     /* НАВИГАЦИЯ */
@@ -64,7 +65,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.85);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
       padding: 0 24px;
@@ -74,7 +75,8 @@
       justify-content: space-between;
     }
     .navbar-brand { font-weight: 700; font-size: 20px; letter-spacing: -0.3px; }
-    .navbar-action {
+    .navbar-actions { display: flex; gap: 10px; align-items: center; }
+    .btn-nav {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 100px;
@@ -87,11 +89,21 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      font-family: var(--font);
     }
-    .navbar-action:hover {
+    .btn-nav:hover {
       background: var(--accent-light);
       border-color: var(--accent);
       color: var(--accent);
+    }
+    .btn-logout {
+      background: #fff5f5;
+      border-color: #ffc9c9;
+      color: #c92a2a;
+    }
+    .btn-logout:hover {
+      background: #ffe3e3;
+      border-color: #c92a2a;
     }
 
     /* ОСНОВНОЙ КОНТЕНТ */
@@ -128,6 +140,7 @@
       min-width: 200px;
       max-width: 280px;
     }
+    .date-picker-wrapper svg { flex-shrink: 0; }
     .date-picker-wrapper input[type="date"] {
       border: none;
       background: transparent;
@@ -137,6 +150,7 @@
       width: 100%;
       color: var(--text);
       font-family: var(--font);
+      cursor: pointer;
     }
     .btn-primary {
       background: var(--accent);
@@ -153,8 +167,10 @@
       align-items: center;
       gap: 6px;
       box-shadow: 0 2px 8px rgba(66, 99, 235, 0.25);
+      font-family: var(--font);
     }
     .btn-primary:hover { background: #3b5bdb; transform: scale(0.98); }
+    .btn-primary:active { transform: scale(0.96); }
 
     /* ЧЕРНОВИКИ В СТРОКЕ */
     .draft-inline {
@@ -186,19 +202,22 @@
       align-items: center;
       gap: 8px;
       background: white;
-      border: 1px solid var(--accent);
+      border: 1.5px solid var(--accent);
       border-radius: 100px;
       padding: 4px 10px 4px 16px;
       font-size: 13px;
       box-shadow: var(--shadow-sm);
+      transition: transform 0.1s;
     }
+    .draft-card:hover { transform: scale(1.02); }
     .draft-card strong { font-size: 14px; }
     .draft-card-time {
       background: #f1f3f5;
       padding: 4px 10px;
       border-radius: 100px;
-      font-family: monospace;
+      font-family: 'SF Mono', 'Courier New', monospace;
       font-size: 12px;
+      font-weight: 500;
     }
     .draft-card-remove {
       width: 24px;
@@ -220,7 +239,7 @@
     .legend {
       display: flex;
       flex-wrap: wrap;
-      gap: 16px;
+      gap: 12px;
     }
     .legend-item {
       display: flex;
@@ -258,13 +277,14 @@
     .grid-scroll {
       overflow-x: auto;
       overflow-y: auto;
-      max-height: 70vh;
+      max-height: 65vh;
       -webkit-overflow-scrolling: touch;
+      position: relative;
     }
     table {
       border-collapse: collapse;
       width: 100%;
-      min-width: 900px;
+      min-width: 950px;
       table-layout: fixed;
     }
     thead th {
@@ -272,26 +292,28 @@
       font-weight: 600;
       font-size: 12px;
       color: var(--text-secondary);
-      padding: 10px 4px;
+      padding: 10px 2px;
       text-align: center;
       border-bottom: 2px solid var(--border);
       position: sticky;
       top: 0;
-      z-index: 3;
+      z-index: 5;
       cursor: pointer;
       transition: background 0.1s;
+      user-select: none;
     }
     thead th:hover { background: #e9ecef; }
     thead th:first-child {
       width: 90px;
-      z-index: 4;
+      z-index: 6;
+      background: #f8f9fa;
     }
     tbody td {
-      height: 52px;
+      height: 50px;
       border-bottom: 1px solid #f1f3f5;
       border-right: 1px solid #f1f3f5;
       text-align: center;
-      cursor: pointer;
+      cursor: crosshair;
       transition: background 0.1s;
       position: relative;
     }
@@ -302,7 +324,8 @@
       border-right: 2px solid var(--border);
       position: sticky;
       left: 0;
-      z-index: 2;
+      z-index: 4;
+      cursor: default;
     }
     tbody td.drag-hover { background: #fff3bf !important; }
     tbody td.draft-selected {
@@ -314,7 +337,7 @@
     .slider-layer {
       position: absolute;
       top: 0;
-      left: 90px; /* ширина первого столбца */
+      left: 90px;
       right: 0;
       bottom: 0;
       pointer-events: none;
@@ -322,8 +345,8 @@
     }
     .booking-card {
       position: absolute;
-      border-radius: 6px;
-      padding: 8px 12px;
+      border-radius: 8px;
+      padding: 6px 10px;
       background: rgba(255,255,255,0.95);
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       backdrop-filter: blur(4px);
@@ -333,22 +356,36 @@
       pointer-events: auto;
       cursor: grab;
       transition: box-shadow 0.15s;
-      border-left: 4px solid #adb5bd;
       overflow: hidden;
       font-size: 13px;
       z-index: 15;
+      border: 1px solid rgba(0,0,0,0.05);
     }
-    .booking-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 20; }
-    .booking-card.dragging { opacity: 0.7; cursor: grabbing; z-index: 50; }
-    .booking-card--pending { border-left-color: #fcc419; background: #fff9db; }
-    .booking-card--confirmed { border-left-color: #40c057; background: #ebfbee; }
-    .booking-card--cancelled { border-left-color: #fa5252; background: #fff5f5; opacity: 0.8; }
+    .booking-card:hover { 
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18); 
+      z-index: 20; 
+    }
+    .booking-card.dragging { 
+      opacity: 0.7; 
+      cursor: grabbing; 
+      z-index: 50; 
+    }
+    .booking-card--pending { 
+      border-left: 4px solid #fcc419; 
+      background: #fff9db; 
+    }
+    .booking-card--confirmed { 
+      border-left: 4px solid #40c057; 
+      background: #ebfbee; 
+    }
+    .booking-card--cancelled { 
+      border-left: 4px solid #fa5252; 
+      background: #fff5f5; 
+      opacity: 0.75; 
+    }
     .booking-card--draft {
-      border-left-color: #4263eb;
+      border: 2px dashed #4263eb;
       background: #edf2ff;
-      border-style: dashed;
-      border-width: 2px;
-      border-color: #4263eb;
       border-radius: 8px;
     }
     .booking-card-name {
@@ -356,30 +393,44 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      font-size: 12px;
     }
     .booking-card-time {
-      font-size: 11px;
+      font-size: 10px;
       opacity: 0.8;
       margin-top: 2px;
+      font-family: 'SF Mono', 'Courier New', monospace;
     }
     .resize-handle {
       position: absolute;
       top: 0;
       bottom: 0;
-      width: 8px;
+      width: 10px;
       background: transparent;
       cursor: ew-resize;
-      z-index: 5;
+      z-index: 6;
     }
-    .resize-handle--left { left: -4px; }
-    .resize-handle--right { right: -4px; }
+    .resize-handle--left { left: -5px; }
+    .resize-handle--right { right: -5px; }
+    .resize-handle:hover { background: rgba(0,0,0,0.1); }
     .ghost-preview {
       position: absolute;
       background: rgba(250, 176, 5, 0.3);
       border: 2px dashed #fab005;
-      border-radius: 6px;
+      border-radius: 8px;
       pointer-events: none;
       z-index: 25;
+      transition: none;
+    }
+    .ghost-drag {
+      position: absolute;
+      background: rgba(66, 99, 235, 0.25);
+      border: 2px solid #4263eb;
+      border-radius: 8px;
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.6;
+      transition: none;
     }
 
     /* МОДАЛЬНЫЕ ОКНА */
@@ -405,7 +456,7 @@
       border-radius: 24px;
       padding: 24px;
       width: 90%;
-      max-width: 440px;
+      max-width: 460px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.2);
       transform: scale(0.95);
       transition: transform 0.2s;
@@ -429,7 +480,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: background 0.15s;
     }
+    .modal-close:hover { background: #e9ecef; }
     .form-group { margin-bottom: 20px; }
     .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
     .form-input, .form-textarea {
@@ -441,10 +494,11 @@
       font-family: var(--font);
       background: #f8f9fa;
       outline: none;
-      transition: border-color 0.15s;
+      transition: border-color 0.15s, background 0.15s;
       user-select: text;
     }
     .form-input:focus, .form-textarea:focus { border-color: var(--accent); background: white; }
+    .form-textarea { resize: vertical; min-height: 60px; }
     .btn-group { display: flex; gap: 12px; margin-top: 24px; }
     .btn {
       flex: 1;
@@ -455,53 +509,83 @@
       border: none;
       cursor: pointer;
       transition: all 0.15s;
+      font-family: var(--font);
     }
     .btn--primary { background: var(--accent); color: white; }
+    .btn--primary:hover { background: #3b5bdb; }
     .btn--secondary { background: #f1f3f5; color: var(--text); }
-    .btn--danger { background: #fff5f5; color: #c92a2a; }
+    .btn--secondary:hover { background: #e9ecef; }
+    .btn--success { background: #d3f9d8; color: #2b8a3e; }
+    .btn--success:hover { background: #b2f2bb; }
+    .btn--danger { background: #ffe3e3; color: #c92a2a; }
+    .btn--danger:hover { background: #ffc9c9; }
+    .btn--full { width: 100%; margin-top: 8px; }
     .info-row {
       display: flex;
       justify-content: space-between;
-      padding: 12px 0;
+      align-items: center;
+      padding: 14px 0;
       border-bottom: 1px solid var(--border);
     }
-    .info-label { color: var(--text-secondary); }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: var(--text-secondary); font-size: 14px; }
+    .info-value { font-weight: 600; text-align: right; max-width: 60%; word-break: break-word; }
+
+    /* ЗАГРУЗЧИК */
     .loader {
       position: fixed;
       inset: 0;
       background: rgba(255,255,255,0.8);
       backdrop-filter: blur(4px);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 16px;
       z-index: 5000;
       opacity: 0;
       visibility: hidden;
+      transition: opacity 0.2s;
     }
     .loader.active { opacity: 1; visibility: visible; }
     .spinner {
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       border: 4px solid #e9ecef;
       border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
     }
+    .loader-text { font-size: 15px; color: var(--text-secondary); font-weight: 500; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* СХЕМА ЗАЛА */
     .schema-image {
       max-width: 100%;
+      max-height: 80vh;
       border-radius: 16px;
       cursor: pointer;
+    }
+
+    /* АДАПТИВНОСТЬ */
+    @media (max-width: 768px) {
+      .main-content { padding: 16px 12px; gap: 16px; }
+      .control-bar { flex-direction: column; align-items: stretch; }
+      .draft-inline { margin-left: 0; justify-content: flex-start; }
+      .btn-primary { width: 100%; justify-content: center; }
+      .navbar { padding: 0 16px; }
+      .modal { padding: 20px; }
     }
   </style>
 </head>
 <body>
 
-<!-- Экран входа -->
+<!-- ЭКРАН АВТОРИЗАЦИИ -->
 <div id="authScreen" class="auth-screen">
   <div class="auth-icon">🎱</div>
   <div class="auth-title">Lucky Strike</div>
-  <div class="auth-subtitle">Бронирование бильярдных столов</div>
+  <div class="auth-subtitle">Система бронирования бильярдных столов</div>
+  <div class="auth-divider"></div>
   <div id="g_id_onload"
        data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com"
        data-callback="handleAuth"
@@ -510,18 +594,26 @@
   <div class="g_id_signin" data-type="standard"></div>
 </div>
 
-<!-- Основное приложение -->
+<!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
 <div id="app" class="app">
+  <!-- Навигация -->
   <nav class="navbar">
     <span class="navbar-brand">🎱 Lucky Strike</span>
-    <button class="navbar-action" onclick="showSchema()">📐 Схема зала</button>
+    <div class="navbar-actions">
+      <button class="btn-nav" onclick="showSchema()">📐 Схема зала</button>
+      <button class="btn-nav btn-logout" onclick="logout()">🚪 Выйти</button>
+    </div>
   </nav>
 
+  <!-- Основной контент -->
   <div class="main-content">
     <!-- Панель управления -->
     <div class="control-bar">
       <div class="date-picker-wrapper">
-        <span>📅</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <path d="M16 2v4M8 2v4M3 10h18"/>
+        </svg>
         <input type="date" id="datePicker">
       </div>
       <button class="btn-primary" onclick="openBookingForm()">➕ Новая бронь</button>
@@ -552,86 +644,99 @@
   </div>
 </div>
 
-<!-- Модальное окно: форма бронирования -->
+<!-- Модальное окно: Новая бронь -->
 <div id="bookingModal" class="modal-overlay">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">Новая бронь</div>
+      <div class="modal-title">📝 Новая бронь</div>
       <button class="modal-close" onclick="closeBookingForm()">✕</button>
     </div>
     <div class="form-group">
       <label class="form-label">Имя *</label>
-      <input class="form-input" id="nameInput" placeholder="Иван Петров">
+      <input class="form-input" id="nameInput" placeholder="Иван Петров" autocomplete="off">
     </div>
     <div class="form-group">
       <label class="form-label">Телефон</label>
-      <input class="form-input" id="phoneInput" placeholder="+7 123 456-78-90">
+      <input class="form-input" id="phoneInput" placeholder="+7 123 456-78-90" autocomplete="off">
     </div>
     <div class="form-group">
       <label class="form-label">Комментарий</label>
-      <textarea class="form-textarea" id="commentInput" rows="2" placeholder="Пожелания..."></textarea>
+      <textarea class="form-textarea" id="commentInput" rows="2" placeholder="Пожелания, особые условия..."></textarea>
     </div>
     <div class="btn-group">
-      <button class="btn btn--primary" onclick="submitBooking()">Сохранить</button>
+      <button class="btn btn--primary" onclick="submitBooking()">💾 Сохранить</button>
       <button class="btn btn--secondary" onclick="closeBookingForm()">Отмена</button>
     </div>
   </div>
 </div>
 
-<!-- Модальное окно: информация о брони -->
+<!-- Модальное окно: Детали брони -->
 <div id="infoModal" class="modal-overlay">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">Детали брони</div>
+      <div class="modal-title">📋 Детали брони</div>
       <button class="modal-close" onclick="closeInfoModal()">✕</button>
     </div>
     <div id="infoContent"></div>
     <div class="btn-group" style="margin-top:16px;">
-      <button class="btn btn--primary" onclick="updateBookingStatus(true)">✅ Пришли</button>
+      <button class="btn btn--success" onclick="updateBookingStatus(true)">✅ Пришли</button>
       <button class="btn btn--danger" onclick="updateBookingStatus(false)">❌ Не пришли</button>
     </div>
-    <button class="btn btn--secondary" style="width:100%; margin-top:8px;" onclick="removeBooking()">🗑 Удалить</button>
+    <button class="btn btn--secondary btn--full" onclick="removeBooking()">🗑 Удалить бронь</button>
   </div>
 </div>
 
-<!-- Схема зала -->
-<div id="schemaModal" class="modal-overlay" onclick="this.classList.remove('active')">
-  <div class="modal" style="max-width:90vw; background:transparent; box-shadow:none;">
-    <img src="https://i.postimg.cc/52ZDKDDw/55.png" class="schema-image" alt="Схема зала">
+<!-- Модальное окно: Схема зала -->
+<div id="schemaModal" class="modal-overlay">
+  <div class="modal" style="max-width:90vw; background:transparent; box-shadow:none; padding:0;">
+    <button class="modal-close" style="position:absolute; top:10px; right:10px; z-index:10;" onclick="closeSchema()">✕</button>
+    <img src="https://i.postimg.cc/52ZDKDDw/55.png" class="schema-image" alt="Схема зала" onclick="closeSchema()">
   </div>
 </div>
 
 <!-- Загрузчик -->
 <div id="loader" class="loader">
   <div class="spinner"></div>
+  <div class="loader-text">Загрузка данных...</div>
 </div>
 
 <script>
   (function() {
-    // Конфигурация
+    // ==================== КОНФИГУРАЦИЯ ====================
     const API_URL = "https://script.google.com/macros/s/AKfycbzLxSrpcGOIm34gLlFZS-EYZmG8liMLcUST3MRMoAp56y6XDC2ClapCDB18yiYmdrHZ/exec";
+    
     const ALLOWED_EMAILS = [
-      "vadiksss900@gmail.com", "sergey99belov@gmail.com", "popadinecvasil3@gmail.com",
-      "veronicadiakova04@gmail.com", "info.luckystrike.kh@gmail.com", "sashavolobuev123890@gmail.com",
-      "egorgorbushko@gmail.com", "shatrava.o@gmail.com", "Craftmax30@gmail.com",
-      "bowlingblock.b@gmail.com", "lana.arnaut@gmail.com", "polosinnikita1224@gmail.com",
-      "sofialat1506@gmail.com", "ll3991940@gmail.com", "ken040888@gmail.com"
+      "vadiksss900@gmail.com",
+      "sergey99belov@gmail.com",
+      "popadinecvasil3@gmail.com",
+      "veronicadiakova04@gmail.com",
+      "info.luckystrike.kh@gmail.com",
+      "sashavolobuev123890@gmail.com",
+      "egorgorbushko@gmail.com",
+      "shatrava.o@gmail.com",
+      "Craftmax30@gmail.com",
+      "bowlingblock.b@gmail.com",
+      "lana.arnaut@gmail.com",
+      "polosinnikita1224@gmail.com",
+      "sofialat1506@gmail.com",
+      "ll3991940@gmail.com",
+      "ken040888@gmail.com"
     ];
+    
     const TABLE_COUNT = 12;
     const START_HOUR = 11;
     const END_HOUR = 22;
+    const GROUP_MAP = [0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2];
+    const GROUP_COLORS = ['#4c6ef5', '#20c997', '#f76707'];
     
-    // Генерация временных слотов
+    // Генерация временных слотов (11:00, 11:30, 12:00, ..., 22:00)
     const timeSlots = [];
     for (let h = START_HOUR; h <= END_HOUR; h++) {
       timeSlots.push({ label: `${h}:00`, value: h });
       if (h < END_HOUR) timeSlots.push({ label: `${h}:30`, value: h + 0.5 });
     }
-    
-    const GROUP_MAP = [0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2]; // 0-синий, 1-зеленый, 2-оранжевый
-    const GROUP_COLORS = ['#4c6ef5', '#20c997', '#f76707'];
 
-    // Состояние приложения
+    // ==================== СОСТОЯНИЕ ====================
     const state = {
       currentDate: new Date().toISOString().split('T')[0],
       bookings: [],
@@ -642,17 +747,20 @@
       resizeState: null
     };
 
-    // Утилиты
+    // ==================== УТИЛИТЫ ====================
     const $ = (id) => document.getElementById(id);
+    
     const formatTime = (val) => {
       const h = Math.floor(val);
       const m = val % 1 === 0.5 ? '30' : '00';
       return `${h}:${m}`;
     };
+    
+    const formatTimeRange = (start, end) => `${formatTime(start)} – ${formatTime(end)}`;
 
-    // DOM элементы
+    // ==================== DOM ЭЛЕМЕНТЫ ====================
     const authScreen = $('authScreen');
-    const app = $('app');
+    const appEl = $('app');
     const datePicker = $('datePicker');
     const draftContainer = $('draftContainer');
     const tableHead = $('tableHead');
@@ -664,7 +772,7 @@
     const schemaModal = $('schemaModal');
     const loader = $('loader');
 
-    // Инициализация
+    // ==================== ИНИЦИАЛИЗАЦИЯ ====================
     function init() {
       datePicker.value = state.currentDate;
       datePicker.min = state.currentDate;
@@ -675,9 +783,9 @@
 
     function buildTable() {
       // Заголовок таблицы
-      let headHtml = '<tr><th>Стол</th>';
+      let headHtml = '<tr><th>СТОЛ</th>';
       timeSlots.forEach(slot => {
-        headHtml += `<th data-time="${slot.value}">${slot.label}</th>`;
+        headHtml += `<th data-time="${slot.value}" title="${slot.label}">${slot.label}</th>`;
       });
       headHtml += '</tr>';
       tableHead.innerHTML = headHtml;
@@ -685,8 +793,9 @@
       // Тело таблицы
       let bodyHtml = '';
       for (let i = 0; i < TABLE_COUNT; i++) {
+        const groupColor = GROUP_COLORS[GROUP_MAP[i]];
         bodyHtml += `<tr data-table="${i}">`;
-        bodyHtml += `<td style="color:${GROUP_COLORS[GROUP_MAP[i]]}; font-weight:700; background:#f8f9fa;">№ ${i + 1}</td>`;
+        bodyHtml += `<td style="color:${groupColor}; font-weight:700; background:#f8f9fa;">№ ${i + 1}</td>`;
         timeSlots.forEach(slot => {
           bodyHtml += `<td data-table="${i}" data-time="${slot.value}"></td>`;
         });
@@ -695,7 +804,9 @@
       tableBody.innerHTML = bodyHtml;
     }
 
+    // ==================== ОБРАБОТЧИКИ СОБЫТИЙ ====================
     function attachEvents() {
+      // Изменение даты
       datePicker.addEventListener('change', () => {
         state.currentDate = datePicker.value;
         state.drafts = [];
@@ -706,7 +817,7 @@
       // Drag-to-select для создания черновиков
       tableBody.addEventListener('mousedown', (e) => {
         const cell = e.target.closest('td');
-        if (!cell || cell.cellIndex === 0) return; // Игнорируем первый столбец
+        if (!cell || cell.cellIndex === 0) return;
         
         const tableIndex = parseInt(cell.dataset.table);
         const timeValue = parseFloat(cell.dataset.time);
@@ -718,12 +829,14 @@
           currentEndIdx: startIdx,
           isDragging: true
         };
+        
         highlightDragRange(tableIndex, startIdx, startIdx);
         e.preventDefault();
       });
 
       document.addEventListener('mousemove', (e) => {
         if (!state.dragState?.isDragging) return;
+        
         const cell = document.elementFromPoint(e.clientX, e.clientY);
         if (!cell || cell.tagName !== 'TD' || cell.cellIndex === 0) return;
         
@@ -742,6 +855,7 @@
 
       document.addEventListener('mouseup', () => {
         if (!state.dragState?.isDragging) return;
+        
         const { table, startIdx, currentEndIdx } = state.dragState;
         
         if (currentEndIdx > startIdx) {
@@ -751,18 +865,22 @@
           // Проверка конфликтов с существующими бронями
           const conflict = state.bookings.some(b => 
             b.table === table && 
+            b.status !== 'cancelled' &&
             !(b.end <= startTime || b.start >= endTime)
           );
           
           if (conflict) {
-            alert('Это время уже занято.');
+            alert('⚠️ Это время уже занято подтверждённой бронью.');
           } else {
             // Проверка на пересечение с другими черновиками
             const draftConflict = state.drafts.some(d =>
               d.table === table &&
               !(d.end <= startTime || d.start >= endTime)
             );
-            if (!draftConflict) {
+            
+            if (draftConflict) {
+              alert('⚠️ Это время пересекается с другим черновиком.');
+            } else {
               state.drafts.push({
                 id: state.draftIdCounter++,
                 table: table,
@@ -774,29 +892,65 @@
           }
         }
         
-        clearHighlights();
+        clearDragHighlights();
         state.dragState = null;
         renderSliders();
+        highlightDraftCells();
+      });
+
+      // Закрытие модальных окон по клику на оверлей
+      [bookingModal, infoModal, schemaModal].forEach(modal => {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.classList.remove('active');
+            if (modal === infoModal) state.activeBooking = null;
+          }
+        });
+      });
+
+      // Закрытие по Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeBookingForm();
+          closeInfoModal();
+          closeSchema();
+        }
       });
     }
 
     function highlightDragRange(table, startIdx, endIdx) {
-      clearHighlights();
+      clearDragHighlights();
       const rows = tableBody.querySelectorAll('tr');
       const row = rows[table];
       if (!row) return;
       
       for (let i = startIdx; i <= endIdx; i++) {
-        const cell = row.cells[i + 1]; // +1 из-за первого столбца
+        const cell = row.cells[i + 1];
         if (cell) cell.classList.add('drag-hover');
       }
     }
 
-    function clearHighlights() {
+    function clearDragHighlights() {
       document.querySelectorAll('.drag-hover').forEach(el => el.classList.remove('drag-hover'));
     }
 
-    // Работа с черновиками
+    function highlightDraftCells() {
+      document.querySelectorAll('.draft-selected').forEach(el => el.classList.remove('draft-selected'));
+      
+      state.drafts.forEach(draft => {
+        const startIdx = timeSlots.findIndex(s => s.value === draft.start);
+        const endIdx = timeSlots.findIndex(s => s.value === draft.end);
+        const row = tableBody.rows[draft.table];
+        if (!row) return;
+        
+        for (let i = startIdx; i <= endIdx; i++) {
+          const cell = row.cells[i + 1];
+          if (cell) cell.classList.add('draft-selected');
+        }
+      });
+    }
+
+    // ==================== ЧЕРНОВИКИ ====================
     function renderDrafts() {
       if (state.drafts.length === 0) {
         draftContainer.innerHTML = '';
@@ -804,47 +958,46 @@
       }
       
       let html = `<div class="draft-badge">✏️ Черновики <span>${state.drafts.length}</span></div>`;
+      
       state.drafts.forEach((draft, index) => {
         html += `
           <div class="draft-card">
             <strong>Стол ${draft.table + 1}</strong>
-            <span class="draft-card-time">${formatTime(draft.start)}–${formatTime(draft.end)}</span>
-            <button class="draft-card-remove" data-draft-index="${index}">✕</button>
+            <span class="draft-card-time">${formatTimeRange(draft.start, draft.end)}</span>
+            <button class="draft-card-remove" data-draft-index="${index}" title="Удалить черновик">✕</button>
           </div>
         `;
       });
+      
       draftContainer.innerHTML = html;
       
-      // Вешаем обработчики на кнопки удаления
+      // Обработчики удаления
       draftContainer.querySelectorAll('.draft-card-remove').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           const index = parseInt(btn.dataset.draftIndex);
           state.drafts.splice(index, 1);
           renderDrafts();
+          highlightDraftCells();
           renderSliders();
         });
       });
-      
-      renderSliders();
     }
 
-    // Рендер слайдеров
+    // ==================== СЛАЙДЕРЫ ====================
     function renderSliders() {
       sliderLayer.innerHTML = '';
+      
       const rows = tableBody.querySelectorAll('tr');
-      const headerCells = tableHead.querySelectorAll('th');
+      if (!rows.length) return;
       
-      if (!rows.length || !headerCells.length) return;
-      
-      // Получаем размеры ячеек для позиционирования
       const firstDataCell = rows[0]?.cells[1];
       if (!firstDataCell) return;
       
       const cellWidth = firstDataCell.offsetWidth;
       const startOffset = firstDataCell.offsetLeft;
       
-      // Функция для создания карточки
+      // Функция создания карточки
       function createCard(item, isDraft = false) {
         const row = rows[item.table];
         if (!row) return null;
@@ -859,109 +1012,126 @@
         const height = row.offsetHeight;
         
         const card = document.createElement('div');
-        card.className = isDraft ? 'booking-card booking-card--draft' : 
-          `booking-card booking-card--${item.status || 'pending'}`;
-        card.style.cssText = `left:${left}px; top:${top}px; width:${width}px; height:${height}px;`;
+        
+        if (isDraft) {
+          card.className = 'booking-card booking-card--draft';
+        } else {
+          card.className = `booking-card booking-card--${item.status || 'pending'}`;
+        }
+        
+        card.style.cssText = `
+          left: ${left}px;
+          top: ${top}px;
+          width: ${width}px;
+          height: ${height}px;
+        `;
         
         card.innerHTML = `
-          <div class="booking-card-name">${isDraft ? 'Черновик' : item.name}</div>
-          <div class="booking-card-time">${formatTime(item.start)} – ${formatTime(item.end)}</div>
+          <div class="booking-card-name">${isDraft ? '📝 Черновик' : (item.name || 'Бронь')}</div>
+          <div class="booking-card-time">${formatTimeRange(item.start, item.end)}</div>
           <div class="resize-handle resize-handle--left"></div>
           <div class="resize-handle resize-handle--right"></div>
         `;
         
-        // Обработчики
+        // Клик для просмотра деталей
         card.addEventListener('click', (e) => {
           if (e.target.classList.contains('resize-handle')) return;
           if (!isDraft) showInfoModal(item);
         });
         
-        // Перетаскивание
+        // Drag & Drop карточки
         card.addEventListener('mousedown', (e) => {
           if (e.target.classList.contains('resize-handle')) return;
-          startDrag(item, e, card, isDraft);
+          startDragItem(item, e, card, isDraft);
         });
         
-        // Ресайз
+        // Resize за левый край
         card.querySelector('.resize-handle--left').addEventListener('mousedown', (e) => {
           e.stopPropagation();
-          startResize(item, 'left', e, isDraft);
+          startResizeItem(item, 'left', e, isDraft);
         });
+        
+        // Resize за правый край
         card.querySelector('.resize-handle--right').addEventListener('mousedown', (e) => {
           e.stopPropagation();
-          startResize(item, 'right', e, isDraft);
+          startResizeItem(item, 'right', e, isDraft);
         });
         
         return card;
       }
       
-      // Рендерим подтвержденные брони
+      // Рендерим подтверждённые брони (сначала)
       state.bookings.forEach(booking => {
-        const card = createCard(booking);
+        const card = createCard(booking, false);
         if (card) sliderLayer.appendChild(card);
       });
       
-      // Рендерим черновики
+      // Рендерим черновики (поверх)
       state.drafts.forEach(draft => {
         const card = createCard(draft, true);
         if (card) sliderLayer.appendChild(card);
       });
-      
-      // Подсветка ячеек для черновиков
-      highlightDraftCells();
     }
 
-    function highlightDraftCells() {
-      document.querySelectorAll('.draft-selected').forEach(el => el.classList.remove('draft-selected'));
-      state.drafts.forEach(draft => {
-        const startIdx = timeSlots.findIndex(s => s.value === draft.start);
-        const endIdx = timeSlots.findIndex(s => s.value === draft.end);
-        const row = tableBody.rows[draft.table];
-        if (!row) return;
-        for (let i = startIdx; i <= endIdx; i++) {
-          const cell = row.cells[i + 1];
-          if (cell) cell.classList.add('draft-selected');
-        }
-      });
-    }
-
-    // Drag & Drop
-    function startDrag(item, event, element, isDraft) {
+    // ==================== DRAG & DROP КАРТОЧЕК ====================
+    function startDragItem(item, event, element, isDraft) {
       event.preventDefault();
-      const ghost = element.cloneNode(true);
+      event.stopPropagation();
+      
+      // Создаём призрак
+      const ghost = document.createElement('div');
+      ghost.className = 'ghost-drag';
+      ghost.style.cssText = element.style.cssText;
       ghost.style.opacity = '0.6';
-      ghost.style.position = 'absolute';
       ghost.style.pointerEvents = 'none';
       ghost.style.zIndex = '999';
       sliderLayer.appendChild(ghost);
       
       element.classList.add('dragging');
+      document.body.style.cursor = 'grabbing';
       
-      let currentTable = item.table;
       const startIdxOriginal = timeSlots.findIndex(s => s.value === item.start);
       const endIdxOriginal = timeSlots.findIndex(s => s.value === item.end);
       const duration = endIdxOriginal - startIdxOriginal;
       
+      let currentTable = item.table;
+      let currentStartIdx = startIdxOriginal;
+      
+      function getTargetFromPoint(x, y) {
+        const el = document.elementFromPoint(x, y);
+        const cell = el?.closest?.('td[data-table]');
+        if (!cell || cell.cellIndex === 0) return null;
+        return {
+          table: parseInt(cell.dataset.table),
+          idx: timeSlots.findIndex(s => s.value === parseFloat(cell.dataset.time))
+        };
+      }
+      
+      function updateGhost(table, startIdx) {
+        const rows = tableBody.querySelectorAll('tr');
+        const row = rows[table];
+        if (!row) return;
+        
+        const startCell = row.cells[startIdx + 1];
+        const endCell = row.cells[startIdx + duration + 1];
+        
+        if (startCell && endCell) {
+          ghost.style.left = (startCell.offsetLeft) + 'px';
+          ghost.style.top = (row.offsetTop) + 'px';
+          ghost.style.width = (endCell.offsetLeft + endCell.offsetWidth - startCell.offsetLeft) + 'px';
+          ghost.style.height = (row.offsetHeight) + 'px';
+        }
+      }
+      
       function onMove(e) {
-        const target = document.elementFromPoint(e.clientX, e.clientY);
-        const cell = target?.closest('td[data-table]');
-        if (!cell || cell.cellIndex === 0) return;
-        
-        const newTable = parseInt(cell.dataset.table);
-        const targetIdx = timeSlots.findIndex(s => s.value === parseFloat(cell.dataset.time));
-        const newStartIdx = Math.max(0, Math.min(targetIdx, timeSlots.length - duration - 1));
-        
-        currentTable = newTable;
-        
-        const row = tableBody.rows[newTable];
-        if (row) {
-          const startCell = row.cells[newStartIdx + 1];
-          const endCell = row.cells[newStartIdx + duration + 1];
-          if (startCell && endCell) {
-            ghost.style.left = `${startCell.offsetLeft}px`;
-            ghost.style.top = `${row.offsetTop}px`;
-            ghost.style.width = `${endCell.offsetLeft + endCell.offsetWidth - startCell.offsetLeft}px`;
-            ghost.style.height = `${row.offsetHeight}px`;
+        const target = getTargetFromPoint(e.clientX, e.clientY);
+        if (target) {
+          const newStartIdx = Math.max(0, Math.min(target.idx, timeSlots.length - duration - 1));
+          
+          if (target.table !== currentTable || newStartIdx !== currentStartIdx) {
+            currentTable = target.table;
+            currentStartIdx = newStartIdx;
+            updateGhost(currentTable, currentStartIdx);
           }
         }
       }
@@ -971,45 +1141,71 @@
         document.removeEventListener('mouseup', onEnd);
         ghost.remove();
         element.classList.remove('dragging');
+        document.body.style.cursor = '';
         
-        const target = document.elementFromPoint(e.clientX, e.clientY);
-        const cell = target?.closest('td[data-table]');
-        if (cell && cell.cellIndex !== 0) {
-          const newTable = parseInt(cell.dataset.table);
-          const targetIdx = timeSlots.findIndex(s => s.value === parseFloat(cell.dataset.time));
-          const newStartIdx = Math.max(0, Math.min(targetIdx, timeSlots.length - duration - 1));
+        const target = getTargetFromPoint(e.clientX, e.clientY);
+        if (target) {
+          const newStartIdx = Math.max(0, Math.min(target.idx, timeSlots.length - duration - 1));
           const newStart = timeSlots[newStartIdx].value;
           const newEnd = timeSlots[newStartIdx + duration].value;
           
-          const conflict = state.bookings.some(b => 
-            b.id !== item.id && b.table === newTable &&
-            !(b.end <= newStart || b.start >= newEnd)
-          );
+          // Проверка конфликтов
+          let conflict = false;
           
-          if (!conflict) {
-            item.table = newTable;
-            item.start = newStart;
-            item.end = newEnd;
-            
-            if (!isDraft) {
-              updateBookingOnServer(item);
-            }
-            renderSliders();
-            renderDrafts();
+          if (!isDraft) {
+            conflict = state.bookings.some(b => 
+              b.id !== item.id && 
+              b.table === target.table &&
+              b.status !== 'cancelled' &&
+              !(b.end <= newStart || b.start >= newEnd)
+            );
           } else {
-            alert('Невозможно переместить: конфликт с другой бронью');
-            renderSliders();
+            conflict = state.bookings.some(b => 
+              b.table === target.table &&
+              b.status !== 'cancelled' &&
+              !(b.end <= newStart || b.start >= newEnd)
+            );
+            if (!conflict) {
+              conflict = state.drafts.some(d =>
+                d.id !== item.id &&
+                d.table === target.table &&
+                !(d.end <= newStart || d.start >= newEnd)
+              );
+            }
           }
+          
+          if (conflict) {
+            alert('⚠️ Невозможно переместить: конфликт с другой бронью.');
+            renderSliders();
+            highlightDraftCells();
+            return;
+          }
+          
+          // Применяем изменения
+          item.table = target.table;
+          item.start = newStart;
+          item.end = newEnd;
+          
+          if (!isDraft) {
+            updateBookingOnServer(item);
+          }
+          
+          renderSliders();
+          renderDrafts();
+          highlightDraftCells();
         }
       }
       
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onEnd);
+      updateGhost(currentTable, currentStartIdx);
     }
 
-    // Resize
-    function startResize(item, side, event, isDraft) {
+    // ==================== RESIZE КАРТОЧЕК ====================
+    function startResizeItem(item, side, event, isDraft) {
       event.stopPropagation();
+      event.preventDefault();
+      
       const preview = document.createElement('div');
       preview.className = 'ghost-preview';
       sliderLayer.appendChild(preview);
@@ -1018,167 +1214,253 @@
       const endIdx = timeSlots.findIndex(s => s.value === item.end);
       const cellWidth = tableBody.rows[0]?.cells[1]?.offsetWidth || 70;
       
+      const startX = event.clientX;
+      const initialStart = item.start;
+      const initialEnd = item.end;
+      const initialStartIdx = startIdx;
+      const initialEndIdx = endIdx;
+      
       function onMove(e) {
-        const deltaX = e.clientX - event.clientX;
+        const deltaX = e.clientX - startX;
         const idxDelta = Math.round(deltaX / cellWidth);
         
         if (side === 'left') {
-          const newStartIdx = Math.max(0, Math.min(endIdx - 1, startIdx + idxDelta));
-          item.start = timeSlots[newStartIdx].value;
+          const newIdx = Math.max(0, Math.min(initialEndIdx - 1, initialStartIdx + idxDelta));
+          const newKey = timeSlots[newIdx]?.value;
+          if (newKey !== undefined) item.start = newKey;
         } else {
-          const newEndIdx = Math.max(startIdx + 1, Math.min(timeSlots.length - 1, endIdx + idxDelta));
-          item.end = timeSlots[newEndIdx].value;
+          const newIdx = Math.max(initialStartIdx + 1, Math.min(timeSlots.length - 1, initialEndIdx + idxDelta));
+          const newKey = timeSlots[newIdx]?.value;
+          if (newKey !== undefined) item.end = newKey;
         }
         
+        // Обновляем превью
+        const curStartIdx = timeSlots.findIndex(s => s.value === item.start);
+        const curEndIdx = timeSlots.findIndex(s => s.value === item.end);
         const row = tableBody.rows[item.table];
-        const newStartIdx = timeSlots.findIndex(s => s.value === item.start);
-        const newEndIdx = timeSlots.findIndex(s => s.value === item.end);
         
         if (row) {
-          const startCell = row.cells[newStartIdx + 1];
-          const endCell = row.cells[newEndIdx + 1];
+          const startCell = row.cells[curStartIdx + 1];
+          const endCell = row.cells[curEndIdx + 1];
           if (startCell && endCell) {
-            preview.style.left = `${startCell.offsetLeft}px`;
-            preview.style.top = `${row.offsetTop}px`;
-            preview.style.width = `${endCell.offsetLeft + endCell.offsetWidth - startCell.offsetLeft}px`;
-            preview.style.height = `${row.offsetHeight}px`;
+            preview.style.left = (startCell.offsetLeft) + 'px';
+            preview.style.top = (row.offsetTop) + 'px';
+            preview.style.width = (endCell.offsetLeft + endCell.offsetWidth - startCell.offsetLeft) + 'px';
+            preview.style.height = (row.offsetHeight) + 'px';
           }
         }
         
         renderSliders();
+        highlightDraftCells();
       }
       
       function onEnd() {
         preview.remove();
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onEnd);
+        document.body.style.cursor = '';
         
-        if (!isDraft) updateBookingOnServer(item);
+        // Проверка на минимальную длительность
+        const finalStartIdx = timeSlots.findIndex(s => s.value === item.start);
+        const finalEndIdx = timeSlots.findIndex(s => s.value === item.end);
+        if (finalEndIdx <= finalStartIdx) {
+          item.start = initialStart;
+          item.end = initialEnd;
+        }
+        
+        // Проверка конфликтов
+        let conflict = false;
+        if (!isDraft) {
+          conflict = state.bookings.some(b => 
+            b.id !== item.id && 
+            b.table === item.table &&
+            b.status !== 'cancelled' &&
+            !(b.end <= item.start || b.start >= item.end)
+          );
+        }
+        
+        if (conflict) {
+          alert('⚠️ Конфликт с другой бронью. Изменения отменены.');
+          item.start = initialStart;
+          item.end = initialEnd;
+        }
+        
+        if (!isDraft && !conflict) {
+          updateBookingOnServer(item);
+        }
+        
         renderSliders();
         renderDrafts();
+        highlightDraftCells();
       }
       
+      document.body.style.cursor = 'ew-resize';
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onEnd);
+      onMove(event);
     }
 
-    // API взаимодействие
+    // ==================== API ВЗАИМОДЕЙСТВИЕ ====================
     async function loadBookings() {
       showLoader();
       try {
         const response = await fetch(`${API_URL}?action=get&date=${state.currentDate}`);
+        if (!response.ok) throw new Error('Network error');
         const data = await response.json();
+        
         state.bookings = (data.bookings || []).map(b => ({
           id: b.id,
-          table: b.table - 1,
+          table: (b.table || b.tableNumber || 1) - 1,
           start: parseFloat(b.start),
           end: parseFloat(b.end),
           name: b.name || '',
           phone: b.phone || '',
           comment: b.comment || '',
-          status: b.confirmed === 'Да' ? 'confirmed' : b.confirmed === 'Нет' ? 'cancelled' : 'pending'
+          status: b.confirmed === 'Да' ? 'confirmed' : 
+                  b.confirmed === 'Нет' ? 'cancelled' : 'pending'
         }));
+        
         renderSliders();
         renderDrafts();
+        highlightDraftCells();
       } catch (error) {
         console.error('Ошибка загрузки:', error);
+        alert('Не удалось загрузить данные. Проверьте соединение.');
       }
       hideLoader();
     }
 
     async function updateBookingOnServer(booking) {
-      await fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify({
-          action: 'update',
-          id: booking.id,
-          date: state.currentDate,
-          tableNumber: booking.table + 1,
-          start: booking.start,
-          end: booking.end,
-          name: booking.name,
-          phone: booking.phone,
-          comment: booking.comment
-        })
-      });
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify({
+            action: 'update',
+            id: booking.id,
+            date: state.currentDate,
+            tableNumber: booking.table + 1,
+            start: booking.start,
+            end: booking.end,
+            name: booking.name,
+            phone: booking.phone,
+            comment: booking.comment
+          })
+        });
+      } catch (error) {
+        console.error('Ошибка обновления:', error);
+      }
     }
 
     async function submitBooking() {
       const name = $('nameInput').value.trim();
-      if (!name) { alert('Введите имя'); return; }
-      if (state.drafts.length === 0) { alert('Нет черновиков для сохранения'); return; }
-      
       const phone = $('phoneInput').value.trim();
       const comment = $('commentInput').value.trim();
       
+      if (!name) {
+        alert('⚠️ Пожалуйста, введите имя клиента.');
+        return;
+      }
+      
+      if (state.drafts.length === 0) {
+        alert('⚠️ Нет черновиков для сохранения. Выделите время на столе.');
+        return;
+      }
+      
       showLoader();
-      const payload = {
-        bookings: state.drafts.map(d => ({
-          date: state.currentDate,
-          tableNumber: d.table + 1,
-          start: d.start,
-          end: d.end,
-          name, phone, comment
-        }))
-      };
       
-      await fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify(payload)
-      });
+      try {
+        const payload = {
+          bookings: state.drafts.map(d => ({
+            date: state.currentDate,
+            tableNumber: d.table + 1,
+            start: d.start,
+            end: d.end,
+            name: name,
+            phone: phone,
+            comment: comment
+          }))
+        };
+        
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify(payload)
+        });
+        
+        state.drafts = [];
+        renderDrafts();
+        highlightDraftCells();
+        closeBookingForm();
+        await loadBookings();
+        
+      } catch (error) {
+        console.error('Ошибка сохранения:', error);
+        alert('Не удалось сохранить бронь. Попробуйте ещё раз.');
+      }
       
-      state.drafts = [];
-      renderDrafts();
-      closeBookingForm();
-      await loadBookings();
       hideLoader();
     }
 
     async function updateBookingStatus(confirmed) {
       if (!state.activeBooking) return;
+      
       showLoader();
-      await fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify({
-          action: 'confirm',
-          id: state.activeBooking.id,
-          confirmed: confirmed
-        })
-      });
-      closeInfoModal();
-      await loadBookings();
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify({
+            action: 'confirm',
+            id: state.activeBooking.id,
+            confirmed: confirmed
+          })
+        });
+        
+        closeInfoModal();
+        await loadBookings();
+      } catch (error) {
+        console.error('Ошибка:', error);
+      }
       hideLoader();
     }
 
     async function removeBooking() {
-      if (!state.activeBooking || !confirm('Удалить бронь?')) return;
+      if (!state.activeBooking) return;
+      
+      if (!confirm('Вы уверены, что хотите удалить эту бронь?')) return;
+      
       showLoader();
-      await fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify({
-          action: 'delete',
-          id: state.activeBooking.id
-        })
-      });
-      closeInfoModal();
-      await loadBookings();
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify({
+            action: 'delete',
+            id: state.activeBooking.id
+          })
+        });
+        
+        closeInfoModal();
+        await loadBookings();
+      } catch (error) {
+        console.error('Ошибка удаления:', error);
+      }
       hideLoader();
     }
 
-    // Модальные окна
+    // ==================== МОДАЛЬНЫЕ ОКНА ====================
     function openBookingForm() {
       if (state.drafts.length === 0) {
-        alert('Сначала выделите время: зажмите левую кнопку мыши и протяните по ячейкам стола.');
+        alert('💡 Сначала выделите время на столе:\nЗажмите левую кнопку мыши и протяните по ячейкам нужного стола.');
         return;
       }
+      
       $('nameInput').value = '';
       $('phoneInput').value = '';
       $('commentInput').value = '';
       bookingModal.classList.add('active');
+      $('nameInput').focus();
     }
 
     function closeBookingForm() {
@@ -1187,14 +1469,41 @@
 
     function showInfoModal(booking) {
       state.activeBooking = booking;
+      
+      const statusLabels = {
+        'pending': '⏳ Ожидает',
+        'confirmed': '✅ Подтверждено',
+        'cancelled': '❌ Отменено'
+      };
+      
       const content = $('infoContent');
       content.innerHTML = `
-        <div class="info-row"><span class="info-label">Стол</span><strong>№ ${booking.table + 1}</strong></div>
-        <div class="info-row"><span class="info-label">Время</span><strong>${formatTime(booking.start)} – ${formatTime(booking.end)}</strong></div>
-        <div class="info-row"><span class="info-label">Имя</span><strong>${booking.name || '—'}</strong></div>
-        <div class="info-row"><span class="info-label">Телефон</span><strong>${booking.phone || '—'}</strong></div>
-        <div class="info-row"><span class="info-label">Комментарий</span><span>${booking.comment || '—'}</span></div>
+        <div class="info-row">
+          <span class="info-label">Стол</span>
+          <span class="info-value">№ ${booking.table + 1}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Время</span>
+          <span class="info-value">${formatTimeRange(booking.start, booking.end)}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Статус</span>
+          <span class="info-value">${statusLabels[booking.status] || '⏳ Ожидает'}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Имя</span>
+          <span class="info-value">${booking.name || '—'}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Телефон</span>
+          <span class="info-value">${booking.phone || '—'}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Комментарий</span>
+          <span class="info-value" style="font-weight:normal;">${booking.comment || '—'}</span>
+        </div>
       `;
+      
       infoModal.classList.add('active');
     }
 
@@ -1207,30 +1516,61 @@
       schemaModal.classList.add('active');
     }
 
-    function showLoader() { loader.classList.add('active'); }
-    function hideLoader() { loader.classList.remove('active'); }
+    function closeSchema() {
+      schemaModal.classList.remove('active');
+    }
 
-    // Авторизация
+    // ==================== ЗАГРУЗЧИК ====================
+    function showLoader() {
+      loader.classList.add('active');
+    }
+
+    function hideLoader() {
+      loader.classList.remove('active');
+    }
+
+    // ==================== АВТОРИЗАЦИЯ ====================
     function parseJwt(token) {
-      return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(atob(base64));
     }
 
     window.handleAuth = function(response) {
-      const payload = parseJwt(response.credential);
-      if (ALLOWED_EMAILS.includes(payload.email)) {
-        localStorage.setItem('userEmail', payload.email);
-        authScreen.style.display = 'none';
-        app.style.display = 'flex';
-        init();
-      } else {
-        alert('Доступ запрещен');
+      try {
+        const payload = parseJwt(response.credential);
+        
+        if (ALLOWED_EMAILS.includes(payload.email)) {
+          localStorage.setItem('userEmail', payload.email);
+          localStorage.setItem('userName', payload.name || '');
+          localStorage.setItem('userPicture', payload.picture || '');
+          
+          authScreen.style.display = 'none';
+          appEl.style.display = 'flex';
+          init();
+        } else {
+          alert('⛔ Доступ запрещён. Ваш email не в списке разрешённых.');
+        }
+      } catch (error) {
+        console.error('Ошибка авторизации:', error);
+        alert('Ошибка авторизации. Попробуйте ещё раз.');
       }
     };
 
-    // Проверка авторизации при загрузке
-    if (localStorage.getItem('userEmail') && ALLOWED_EMAILS.includes(localStorage.getItem('userEmail'))) {
+    function logout() {
+      if (confirm('Выйти из системы?')) {
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userPicture');
+        location.reload();
+      }
+    }
+
+    // ==================== ЗАПУСК ====================
+    const savedEmail = localStorage.getItem('userEmail');
+    if (savedEmail && ALLOWED_EMAILS.includes(savedEmail)) {
       authScreen.style.display = 'none';
-      app.style.display = 'flex';
+      appEl.style.display = 'flex';
       init();
     }
   })();

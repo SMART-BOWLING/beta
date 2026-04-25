@@ -87,7 +87,6 @@
       gap: 24px;
     }
 
-    /* Управляющая панель: дата + кнопка + контейнер с карточками черновиков */
     .ctrl {
       display: flex;
       gap: 18px;
@@ -120,13 +119,12 @@
     }
     .btn-book:hover { background: var(--blue-h); transform: scale(0.98); }
 
-    /* НОВЫЙ КОНТЕЙНЕР ДЛЯ КАРТОЧЕК — справа от кнопки "Новая бронь" */
     .inline-temp-cards {
       display: flex;
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
-      margin-left: auto;   /* прижимаем к правому краю, но если места мало — перенос */
+      margin-left: auto;
     }
     .temp-badge {
       display: flex;
@@ -370,7 +368,6 @@
     }
     .drag-handle:active { cursor: grabbing; }
 
-    /* старый контейнер больше не нужен, но оставим скрытым */
     #tempContainer { display: none; }
 
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); z-index: 2000; justify-content: center; align-items: center; }
@@ -439,15 +436,12 @@
     <button class="nav-btn" onclick="openImg()">📐 Схема зала</button>
   </nav>
   <div class="page">
-    <!-- Панель: дата + кнопка + карточки черновиков (inline) -->
     <div class="ctrl">
       <div class="date-field">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         <input type="date" id="dateInput"/>
       </div>
       <button class="btn-book" onclick="openBookModal()">➕ Новая бронь</button>
-      
-      <!-- КОНТЕЙНЕР ДЛЯ КАРТОЧЕК ЧЕРНОВИКОВ - поялятся справа от кнопки -->
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
 
@@ -577,7 +571,6 @@
     }
   }
   
-  // Новая функция рендера карточек прямо в панели, справа от кнопки
   function renderInlineTempCards(){
     const container = $("inlineTempContainer");
     if(!container) return;
@@ -606,7 +599,6 @@
     });
   }
   
-  // DRAG to create temp
   function onMouseDown(e){
     let target = e.target;
     if(target.classList && target.classList.contains("slot")){
@@ -748,7 +740,6 @@
     }, 50);
   }
   
-  // --- плавное перемещение ---
   function startMoveEntity(entity, e, isTemp) {
     e.stopPropagation();
     const slider = e.currentTarget.closest('.slider');
@@ -980,11 +971,15 @@
       let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right";
       rightHandle.addEventListener("mousedown", (e) => startResize(booking, 'right', e));
       slider.appendChild(leftHandle); slider.appendChild(rightHandle);
-      // Двойной клик на любую часть ползунка
+      
+      // ВАЖНО: используем addEventListener с явным указанием, что событие должно обрабатываться
       slider.addEventListener("dblclick", (e) => { 
         e.stopPropagation(); 
+        e.preventDefault();
+        console.log("Double click on slider", booking);
         showInfoModal(booking); 
       });
+      
       container.appendChild(slider);
     });
     
@@ -1011,11 +1006,12 @@
       let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right";
       rightHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'right', e));
       slider.appendChild(leftHandle); slider.appendChild(rightHandle);
-      // Для черновиков тоже можно добавить двойной клик (показывает текущий объект, но у него нет деталей)
+      
       slider.addEventListener("dblclick", (e) => { 
         e.stopPropagation(); 
         alert(`Черновик: Стол ${temp.lane+1}, ${fmt(temp.start)}–${fmt(temp.end)}`); 
       });
+      
       container.appendChild(slider);
     });
   }
@@ -1026,7 +1022,15 @@
   }
   
   let currentBooking = null;
-  function showInfoModal(b){ currentBooking = b; $("i-table").textContent = "№ "+(b.lane+1); $("i-time").textContent = `${fmt(b.start)} – ${fmt(b.end)}`; $("i-name").textContent = b.name; $("i-phone").textContent = b.phone || "—"; $("i-comment").textContent = b.comment || "—"; $("infoModal").classList.add("open"); }
+  function showInfoModal(b){ 
+    currentBooking = b; 
+    $("i-table").textContent = "№ "+(b.lane+1); 
+    $("i-time").textContent = `${fmt(b.start)} – ${fmt(b.end)}`; 
+    $("i-name").textContent = b.name; 
+    $("i-phone").textContent = b.phone || "—"; 
+    $("i-comment").textContent = b.comment || "—"; 
+    $("infoModal").classList.add("open"); 
+  }
   function closeInfoModal(){ $("infoModal").classList.remove("open"); currentBooking=null; }
   function showLoad(){ $("loader").style.display="flex"; }
   function hideLoad(){ $("loader").style.display="none"; }

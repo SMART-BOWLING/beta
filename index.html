@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8"/>
@@ -87,7 +87,7 @@
       gap: 24px;
     }
 
-    /* Управляющая панель: дата + кнопка + контейнер с карточками черновиков */
+    /* Управляющая панель: дата + кнопка + контейнер с карточками черновиков + кнопка с ! */
     .ctrl {
       display: flex;
       gap: 18px;
@@ -97,6 +97,7 @@
       border-radius: var(--r2);
       padding: 18px 24px;
       box-shadow: 0 2px 12px rgba(0,0,0,.04);
+      position: relative;
     }
     .date-field {
       flex: 1; min-width: 220px; max-width: 280px;
@@ -120,13 +121,36 @@
     }
     .btn-book:hover { background: var(--blue-h); transform: scale(0.98); }
 
-    /* НОВЫЙ КОНТЕЙНЕР ДЛЯ КАРТОЧЕК — справа от кнопки "Новая бронь" */
+    /* Кнопка с восклицательным знаком (инфо) */
+    .info-draft-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 52px;
+      background: #f0f0f2;
+      border: 1px solid var(--border2);
+      cursor: pointer;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--blue);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .info-draft-btn:hover {
+      background: var(--blue-dim);
+      transform: scale(1.02);
+      border-color: var(--blue);
+    }
+
+    /* КОНТЕЙНЕР ДЛЯ КАРТОЧЕК ЧЕРНОВИКОВ */
     .inline-temp-cards {
       display: flex;
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
-      margin-left: auto;   /* прижимаем к правому краю, но если места мало — перенос */
+      flex: 2;
     }
     .temp-badge {
       display: flex;
@@ -298,6 +322,7 @@
       .ctrl { flex-direction: column; align-items: stretch; }
       .inline-temp-cards { margin-left: 0; justify-content: flex-start; }
       .btn-book { width: 100%; }
+      .info-draft-btn { align-self: center; }
     }
 
     #slidersLayer {
@@ -370,9 +395,6 @@
     }
     .drag-handle:active { cursor: grabbing; }
 
-    /* старый контейнер больше не нужен, но оставим скрытым */
-    #tempContainer { display: none; }
-
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); z-index: 2000; justify-content: center; align-items: center; }
     .overlay.open { display: flex; }
     .sheet { background: var(--surface); border-radius: 32px; width: 100%; max-width: 480px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
@@ -439,7 +461,7 @@
     <button class="nav-btn" onclick="openImg()">📐 Схема зала</button>
   </nav>
   <div class="page">
-    <!-- Панель: дата + кнопка + карточки черновиков (inline) -->
+    <!-- Панель: дата + кнопка брони + карточки черновиков + КНОПКА С ! -->
     <div class="ctrl">
       <div class="date-field">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -447,8 +469,11 @@
       </div>
       <button class="btn-book" onclick="openBookModal()">➕ Новая бронь</button>
       
-      <!-- КОНТЕЙНЕР ДЛЯ КАРТОЧЕК ЧЕРНОВИКОВ - поялятся справа от кнопки -->
+      <!-- Контейнер для карточек черновиков -->
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
+      
+      <!-- Кнопка с восклицательным знаком по середине правого края (информация о бронях) -->
+      <button class="info-draft-btn" id="infoDraftBtn" title="Информация о бронях">!</button>
     </div>
 
     <div class="pills">
@@ -476,6 +501,10 @@
 <div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Подтверждение брони</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div class="f-group"><label class="f-label">Имя *</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+7 123 456-78-90"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания / особые условия"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitTempBookings()">Сохранить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
 <div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали брони</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><strong id="i-table"></strong></div><div class="info-row"><span>Время</span><strong id="i-time"></strong></div><div class="info-row"><span>Имя</span><strong id="i-name"></strong></div><div class="info-row"><span>Телефон</span><strong id="i-phone"></strong></div><div class="info-row"><span>Комментарий</span><strong id="i-comment" style="font-weight:normal;"></strong></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Пришла бронь</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">🗑 Удалить бронь</button></div></div></div>
 <div id="imgPopup" class="overlay"><div class="sheet" style="max-width:90vw; background:transparent; box-shadow:none;"><img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width:100%; border-radius:28px;" onclick="closeImg()"/></div></div>
+
+<!-- Модалка для информации о бронях (черновики + статистика) -->
+<div id="draftInfoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">📋 Информация о бронях</div><button class="sheet-x" onclick="closeDraftInfoModal()">×</button></div><div class="sheet-body" id="draftInfoContent"><div style="padding: 8px 0;">Загрузка...</div></div></div></div>
+
 <div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
 
 <script>
@@ -517,6 +546,8 @@
     buildDesktopTable();
     $("dateInput").addEventListener("change", ()=>{ loadFromServer(); clearTempSelections(); });
     loadFromServer();
+    // Добавляем обработчик на кнопку "!"
+    $("infoDraftBtn").addEventListener("click", showDraftInfo);
   }
   
   function buildDesktopTable(){
@@ -577,7 +608,6 @@
     }
   }
   
-  // Новая функция рендера карточек прямо в панели, справа от кнопки
   function renderInlineTempCards(){
     const container = $("inlineTempContainer");
     if(!container) return;
@@ -605,6 +635,49 @@
       container.appendChild(card);
     });
   }
+  
+  // -------------------- ИНФО о бронях (кнопка !) --------------------
+  function showDraftInfo(){
+    const container = $("draftInfoContent");
+    if(!container) return;
+    const draftCount = tempBookings.length;
+    let draftHtml = draftCount === 0 ? "<p style='color:gray'>Нет активных черновиков</p>" : "<ul style='margin-left:20px;'>";
+    tempBookings.forEach(tb => {
+      draftHtml += `<li><strong>Стол ${tb.lane+1}</strong> | ${fmt(tb.start)} – ${fmt(tb.end)} (временная)</li>`;
+    });
+    if(draftCount > 0) draftHtml += "</ul>";
+    const activeCount = bookings.filter(b => b.confirmed !== false).length;
+    const pendingCount = bookings.filter(b => b.confirmed === null || b.confirmed === undefined).length;
+    const confirmedCount = bookings.filter(b => b.confirmed === true).length;
+    const rejectedCount = bookings.filter(b => b.confirmed === false).length;
+    const totalBookings = bookings.length;
+    container.innerHTML = `
+      <div style="background:#f8f9fc; border-radius:20px; padding:12px 16px; margin-bottom:18px;">
+        <div style="font-weight:600; margin-bottom:12px;">📊 Статистика за выбранную дату (${$("dateInput").value})</div>
+        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+          <div><span style="color:var(--ink3);">Всего броней:</span> <strong>${totalBookings}</strong></div>
+          <div><span style="color:var(--amber);">Ожидают:</span> <strong>${pendingCount}</strong></div>
+          <div><span style="color:var(--green);">Подтверждено:</span> <strong>${confirmedCount}</strong></div>
+          <div><span style="color:var(--red);">Отменено:</span> <strong>${rejectedCount}</strong></div>
+        </div>
+      </div>
+      <div style="margin-bottom:16px;">
+        <div style="font-weight:600; margin-bottom:8px;">✏️ Черновики (несохранённые):</div>
+        ${draftHtml}
+      </div>
+      <div style="background:#faf9fe; border-radius:20px; padding:12px 16px;">
+        <div style="font-weight:600; margin-bottom:6px;">💡 Подсказка:</div>
+        <ul style="margin-left:20px; font-size:13px; color:var(--ink2);">
+          <li>Выделите диапазон мышей (зажмите левую кнопку) на нужном столе → появится черновик</li>
+          <li>Черновики можно перемещать и менять размер</li>
+          <li>Нажмите «Новая бронь», чтобы сохранить все черновики на сервер</li>
+        </ul>
+      </div>
+    `;
+    $("draftInfoModal").classList.add("open");
+  }
+  
+  function closeDraftInfoModal(){ $("draftInfoModal").classList.remove("open"); }
   
   // DRAG to create temp
   function onMouseDown(e){
@@ -748,273 +821,66 @@
     }, 50);
   }
   
-  // --- плавное перемещение ---
-  function startMoveEntity(entity, e, isTemp) {
-    e.stopPropagation();
-    const slider = e.currentTarget.closest('.slider');
-    if (!slider) return;
-    const rows = $("dtBody").rows;
-    const durationCells = slots.findIndex(s => s.key === entity.end) - slots.findIndex(s => s.key === entity.start);
-    const startIdxOrig = slots.findIndex(s => s.key === entity.start);
-    const ghost = document.createElement('div');
-    ghost.className = 'ghost-slider';
-    ghost.style.cssText = slider.style.cssText;
-    ghost.style.opacity = '0.6';
-    $('slidersLayer').appendChild(ghost);
-    slider.classList.add('dragging');
-    
-    let currentLane = entity.lane;
-    let currentStartIdx = startIdxOrig;
-    
-    function getTargetFromCoords(clientX, clientY) {
-      const el = document.elementsFromPoint(clientX, clientY).find(el => el.classList?.contains('slot'));
-      if (!el) return null;
-      return { lane: parseInt(el.dataset.lane), idx: parseInt(el.dataset.si) };
-    }
-    
-    function updateGhost(lane, startIdx) {
-      const row = rows[lane];
-      if (!row) return;
-      const startCell = row.cells[startIdx + 1];
-      const endCell = row.cells[startIdx + durationCells + 1];
-      if (startCell && endCell) {
-        ghost.style.left = (startCell.offsetLeft + 1) + 'px';
-        ghost.style.top = (row.offsetTop + 1) + 'px';
-        ghost.style.width = (endCell.offsetLeft + endCell.offsetWidth - startCell.offsetLeft - 2) + 'px';
-        ghost.style.height = (row.offsetHeight - 2) + 'px';
-      }
-    }
-    
-    function onDragMove(ev) {
-      const target = getTargetFromCoords(ev.clientX, ev.clientY);
-      if (target) {
-        let newLane = target.lane;
-        let newStartIdx = target.idx;
-        newStartIdx = Math.min(Math.max(0, newStartIdx), slots.length - durationCells - 1);
-        if (newLane !== currentLane || newStartIdx !== currentStartIdx) {
-          currentLane = newLane;
-          currentStartIdx = newStartIdx;
-          updateGhost(currentLane, currentStartIdx);
-        }
-      }
-    }
-    
-    function onDragEnd(ev) {
-      const target = getTargetFromCoords(ev.clientX, ev.clientY);
-      if (target) {
-        let finalLane = target.lane;
-        let finalStartIdx = target.idx;
-        finalStartIdx = Math.min(Math.max(0, finalStartIdx), slots.length - durationCells - 1);
-        const newStart = slots[finalStartIdx].key;
-        const newEnd = slots[finalStartIdx + durationCells].key;
-        let conflict = false;
-        if (!isTemp) {
-          conflict = bookings.some(b => b.id !== entity.id && b.lane === finalLane && !(b.end <= newStart || b.start >= newEnd));
-        }
-        if (!conflict) {
-          entity.lane = finalLane;
-          entity.start = newStart;
-          entity.end = newEnd;
-          if (isTemp) {
-            highlightAllTempBookings();
-            renderInlineTempCards();
-          } else {
-            saveToServer(entity);
-          }
-        } else if (!isTemp) alert("Невозможно переместить: конфликт с другой бронью");
-      }
-      ghost.remove();
-      slider.classList.remove('dragging');
-      document.body.style.cursor = '';
-      document.removeEventListener('mousemove', onDragMove);
-      document.removeEventListener('mouseup', onDragEnd);
-      renderAllSliders();
-    }
-    document.body.style.cursor = 'grabbing';
-    document.addEventListener('mousemove', onDragMove);
-    document.addEventListener('mouseup', onDragEnd);
-    updateGhost(currentLane, currentStartIdx);
+  // Функции перемещения/ресайза (сокращено для читаемости, но оставлена полная логика)
+  function startMoveEntity(entity, e, isTemp) { /* ... полная реализация ... */ 
+    e.stopPropagation(); const slider = e.currentTarget.closest('.slider'); if (!slider) return;
+    const rows = $("dtBody").rows; const durationCells = slots.findIndex(s => s.key === entity.end) - slots.findIndex(s => s.key === entity.start);
+    const startIdxOrig = slots.findIndex(s => s.key === entity.start); const ghost = document.createElement('div');
+    ghost.className = 'ghost-slider'; ghost.style.cssText = slider.style.cssText; ghost.style.opacity = '0.6';
+    $('slidersLayer').appendChild(ghost); slider.classList.add('dragging');
+    let currentLane = entity.lane, currentStartIdx = startIdxOrig;
+    function getTargetFromCoords(clientX, clientY) { const el = document.elementsFromPoint(clientX, clientY).find(el => el.classList?.contains('slot')); if (!el) return null; return { lane: parseInt(el.dataset.lane), idx: parseInt(el.dataset.si) }; }
+    function updateGhost(lane, startIdx) { const row = rows[lane]; if (!row) return; const startCell = row.cells[startIdx + 1], endCell = row.cells[startIdx + durationCells + 1]; if (startCell && endCell) { ghost.style.left = (startCell.offsetLeft + 1) + 'px'; ghost.style.top = (row.offsetTop + 1) + 'px'; ghost.style.width = (endCell.offsetLeft + endCell.offsetWidth - startCell.offsetLeft - 2) + 'px'; ghost.style.height = (row.offsetHeight - 2) + 'px'; } }
+    function onDragMove(ev) { const tgt = getTargetFromCoords(ev.clientX, ev.clientY); if (tgt) { let newLane = tgt.lane, newStartIdx = tgt.idx; newStartIdx = Math.min(Math.max(0, newStartIdx), slots.length - durationCells - 1); if (newLane !== currentLane || newStartIdx !== currentStartIdx) { currentLane = newLane; currentStartIdx = newStartIdx; updateGhost(currentLane, currentStartIdx); } } }
+    function onDragEnd(ev) { const tgt = getTargetFromCoords(ev.clientX, ev.clientY); if (tgt) { let finalLane = tgt.lane, finalStartIdx = tgt.idx; finalStartIdx = Math.min(Math.max(0, finalStartIdx), slots.length - durationCells - 1); const newStart = slots[finalStartIdx].key, newEnd = slots[finalStartIdx + durationCells].key; let conflict = false; if (!isTemp) conflict = bookings.some(b => b.id !== entity.id && b.lane === finalLane && !(b.end <= newStart || b.start >= newEnd)); if (!conflict) { entity.lane = finalLane; entity.start = newStart; entity.end = newEnd; if (isTemp) { highlightAllTempBookings(); renderInlineTempCards(); } else { saveToServer(entity); } } else if (!isTemp) alert("Невозможно переместить: конфликт с другой бронью"); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor = ''; document.removeEventListener('mousemove', onDragMove); document.removeEventListener('mouseup', onDragEnd); renderAllSliders(); }
+    document.body.style.cursor = 'grabbing'; document.addEventListener('mousemove', onDragMove); document.addEventListener('mouseup', onDragEnd); updateGhost(currentLane, currentStartIdx);
   }
-  
   function startMove(booking, e) { if (booking.id) startMoveEntity(booking, e, false); }
   function startMoveForTemp(temp, e) { startMoveEntity(temp, e, true); }
-  
-  function startResize(booking, side, e){
-    if(!booking.id) return;
-    e.stopPropagation(); e.preventDefault();
-    resizePreview = document.createElement("div");
-    resizePreview.className = "resize-preview";
-    const scrollDiv = document.getElementById("gridScroll");
-    scrollDiv.style.position = "relative";
-    scrollDiv.appendChild(resizePreview);
-    let cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
-    let startIdx = slots.findIndex(s => s.key === booking.start);
-    let endIdx = slots.findIndex(s => s.key === booking.end);
-    let ctx = { booking, side, startX: e.clientX, startIdx, endIdx, initialStartIdx: startIdx, initialEndIdx: endIdx, cellWidth };
-    function update(clientX){
-      let deltaX = clientX - ctx.startX;
-      let idxDelta = deltaX / ctx.cellWidth;
-      if(ctx.side === 'left'){
-        let rawIdx = ctx.initialStartIdx + idxDelta;
-        let newIdx = Math.max(0, Math.min(ctx.initialEndIdx - 0.01, rawIdx));
-        newIdx = Math.round(newIdx);
-        let newKey = slots[newIdx]?.key;
-        if(newKey && newKey !== ctx.booking.start) ctx.booking.start = newKey;
-      } else {
-        let rawIdx = ctx.initialEndIdx + idxDelta;
-        let newIdx = Math.max(ctx.initialStartIdx + 0.01, Math.min(slots.length - 1, rawIdx));
-        newIdx = Math.round(newIdx);
-        let newKey = slots[newIdx]?.key;
-        if(newKey && newKey !== ctx.booking.end) ctx.booking.end = newKey;
-      }
-      let curStart = slots.findIndex(s => s.key === ctx.booking.start);
-      let curEnd = slots.findIndex(s => s.key === ctx.booking.end);
-      let row = $("dtBody").rows[ctx.booking.lane];
-      if(row && row.cells[curStart+1] && row.cells[curEnd+1]){
-        let left = row.cells[curStart+1].offsetLeft + 1;
-        let top = row.offsetTop + 1;
-        let width = (row.cells[curEnd+1].offsetLeft + row.cells[curEnd+1].offsetWidth) - row.cells[curStart+1].offsetLeft - 2;
-        let height = row.offsetHeight - 2;
-        resizePreview.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
-      }
-      renderAllSliders();
-      scheduleUpdate(booking);
-    }
-    function onMove(e){ if(ctx) update(e.clientX); }
-    function onEnd(){
-      if(resizePreview) resizePreview.remove();
-      document.body.style.cursor = "";
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onEnd);
-      renderAllSliders(); saveToServer(booking);
-    }
-    document.body.style.cursor = "ew-resize";
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onEnd);
-    update(e.clientX);
-  }
-  
-  function startResizeForTemp(temp, side, e){
-    e.stopPropagation(); e.preventDefault();
-    resizePreview = document.createElement("div");
-    resizePreview.className = "resize-preview";
-    const scrollDiv = document.getElementById("gridScroll");
-    scrollDiv.style.position = "relative";
-    scrollDiv.appendChild(resizePreview);
-    let cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
-    let startIdx = slots.findIndex(s => s.key === temp.start);
-    let endIdx = slots.findIndex(s => s.key === temp.end);
-    let ctx = { temp, side, startX: e.clientX, startIdx, endIdx, initialStartIdx: startIdx, initialEndIdx: endIdx, cellWidth };
-    function update(clientX){
-      let deltaX = clientX - ctx.startX;
-      let idxDelta = deltaX / ctx.cellWidth;
-      if(ctx.side === 'left'){
-        let rawIdx = ctx.initialStartIdx + idxDelta;
-        let newIdx = Math.max(0, Math.min(ctx.initialEndIdx - 0.01, rawIdx));
-        newIdx = Math.round(newIdx);
-        let newKey = slots[newIdx]?.key;
-        if(newKey && newKey !== ctx.temp.start) ctx.temp.start = newKey;
-      } else {
-        let rawIdx = ctx.initialEndIdx + idxDelta;
-        let newIdx = Math.max(ctx.initialStartIdx + 0.01, Math.min(slots.length - 1, rawIdx));
-        newIdx = Math.round(newIdx);
-        let newKey = slots[newIdx]?.key;
-        if(newKey && newKey !== ctx.temp.end) ctx.temp.end = newKey;
-      }
-      let curStart = slots.findIndex(s => s.key === ctx.temp.start);
-      let curEnd = slots.findIndex(s => s.key === ctx.temp.end);
-      let row = $("dtBody").rows[ctx.temp.lane];
-      if(row && row.cells[curStart+1] && row.cells[curEnd+1]){
-        let left = row.cells[curStart+1].offsetLeft + 1;
-        let top = row.offsetTop + 1;
-        let width = (row.cells[curEnd+1].offsetLeft + row.cells[curEnd+1].offsetWidth) - row.cells[curStart+1].offsetLeft - 2;
-        let height = row.offsetHeight - 2;
-        resizePreview.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
-      }
-      renderAllSliders();
-      scheduleUpdateForTemp();
-    }
-    function onMove(e){ if(ctx) update(e.clientX); }
-    function onEnd(){
-      if(resizePreview) resizePreview.remove();
-      document.body.style.cursor = "";
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onEnd);
-      renderAllSliders(); highlightAllTempBookings(); renderInlineTempCards();
-    }
-    document.body.style.cursor = "ew-resize";
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onEnd);
-    update(e.clientX);
-  }
+  function startResize(booking, side, e) { /* полный код ресайза (аналогично оригиналу) */ if(!booking.id) return; e.stopPropagation(); e.preventDefault(); resizePreview = document.createElement("div"); resizePreview.className = "resize-preview"; const scrollDiv = document.getElementById("gridScroll"); scrollDiv.style.position = "relative"; scrollDiv.appendChild(resizePreview); let cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70; let startIdx = slots.findIndex(s => s.key === booking.start); let endIdx = slots.findIndex(s => s.key === booking.end); let ctx = { booking, side, startX: e.clientX, startIdx, endIdx, initialStartIdx: startIdx, initialEndIdx: endIdx, cellWidth }; function update(clientX){ let deltaX = clientX - ctx.startX; let idxDelta = deltaX / ctx.cellWidth; if(ctx.side === 'left'){ let rawIdx = ctx.initialStartIdx + idxDelta; let newIdx = Math.max(0, Math.min(ctx.initialEndIdx - 0.01, rawIdx)); newIdx = Math.round(newIdx); let newKey = slots[newIdx]?.key; if(newKey && newKey !== ctx.booking.start) ctx.booking.start = newKey; } else { let rawIdx = ctx.initialEndIdx + idxDelta; let newIdx = Math.max(ctx.initialStartIdx + 0.01, Math.min(slots.length - 1, rawIdx)); newIdx = Math.round(newIdx); let newKey = slots[newIdx]?.key; if(newKey && newKey !== ctx.booking.end) ctx.booking.end = newKey; } let curStart = slots.findIndex(s => s.key === ctx.booking.start); let curEnd = slots.findIndex(s => s.key === ctx.booking.end); let row = $("dtBody").rows[ctx.booking.lane]; if(row && row.cells[curStart+1] && row.cells[curEnd+1]){ let left = row.cells[curStart+1].offsetLeft + 1, top = row.offsetTop + 1, width = (row.cells[curEnd+1].offsetLeft + row.cells[curEnd+1].offsetWidth) - row.cells[curStart+1].offsetLeft - 2, height = row.offsetHeight - 2; resizePreview.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; } renderAllSliders(); scheduleUpdate(booking); } function onMove(e){ if(ctx) update(e.clientX); } function onEnd(){ if(resizePreview) resizePreview.remove(); document.body.style.cursor = ""; document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onEnd); renderAllSliders(); saveToServer(booking); } document.body.style.cursor = "ew-resize"; document.addEventListener("mousemove", onMove); document.addEventListener("mouseup", onEnd); update(e.clientX); }
+  function startResizeForTemp(temp, side, e){ if(!temp) return; e.stopPropagation(); e.preventDefault(); resizePreview = document.createElement("div"); resizePreview.className = "resize-preview"; const scrollDiv = document.getElementById("gridScroll"); scrollDiv.style.position = "relative"; scrollDiv.appendChild(resizePreview); let cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70; let startIdx = slots.findIndex(s => s.key === temp.start); let endIdx = slots.findIndex(s => s.key === temp.end); let ctx = { temp, side, startX: e.clientX, startIdx, endIdx, initialStartIdx: startIdx, initialEndIdx: endIdx, cellWidth }; function update(clientX){ let deltaX = clientX - ctx.startX; let idxDelta = deltaX / ctx.cellWidth; if(ctx.side === 'left'){ let rawIdx = ctx.initialStartIdx + idxDelta; let newIdx = Math.max(0, Math.min(ctx.initialEndIdx - 0.01, rawIdx)); newIdx = Math.round(newIdx); let newKey = slots[newIdx]?.key; if(newKey && newKey !== ctx.temp.start) ctx.temp.start = newKey; } else { let rawIdx = ctx.initialEndIdx + idxDelta; let newIdx = Math.max(ctx.initialStartIdx + 0.01, Math.min(slots.length - 1, rawIdx)); newIdx = Math.round(newIdx); let newKey = slots[newIdx]?.key; if(newKey && newKey !== ctx.temp.end) ctx.temp.end = newKey; } let curStart = slots.findIndex(s => s.key === ctx.temp.start); let curEnd = slots.findIndex(s => s.key === ctx.temp.end); let row = $("dtBody").rows[ctx.temp.lane]; if(row && row.cells[curStart+1] && row.cells[curEnd+1]){ let left = row.cells[curStart+1].offsetLeft + 1, top = row.offsetTop + 1, width = (row.cells[curEnd+1].offsetLeft + row.cells[curEnd+1].offsetWidth) - row.cells[curStart+1].offsetLeft - 2, height = row.offsetHeight - 2; resizePreview.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; } renderAllSliders(); scheduleUpdateForTemp(); } function onMove(e){ if(ctx) update(e.clientX); } function onEnd(){ if(resizePreview) resizePreview.remove(); document.body.style.cursor = ""; document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onEnd); renderAllSliders(); highlightAllTempBookings(); renderInlineTempCards(); } document.body.style.cursor = "ew-resize"; document.addEventListener("mousemove", onMove); document.addEventListener("mouseup", onEnd); update(e.clientX); }
   
   function renderAllSliders(){
     let container = $("slidersLayer");
-    if(!container) return;
-    container.innerHTML = "";
+    if(!container) return; container.innerHTML = "";
     if(!$("tableDesktop") || !$("dtBody")) return;
     let rows = Array.from($("dtBody").querySelectorAll("tr"));
     if(rows.length === 0) return;
-    
     bookings.forEach(booking => {
-      let startIdx = slots.findIndex(s => s.key === booking.start);
-      let endIdx = slots.findIndex(s => s.key === booking.end);
-      if(startIdx === -1 || endIdx === -1) return;
-      let row = rows[booking.lane];
-      if(!row) return;
-      let sc = row.cells[startIdx+1], ec = row.cells[endIdx+1];
-      if(!sc || !ec) return;
+      let startIdx = slots.findIndex(s => s.key === booking.start), endIdx = slots.findIndex(s => s.key === booking.end);
+      if(startIdx === -1 || endIdx === -1) return; let row = rows[booking.lane]; if(!row) return;
+      let sc = row.cells[startIdx+1], ec = row.cells[endIdx+1]; if(!sc || !ec) return;
       let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2;
-      let slider = document.createElement("div");
-      let status = booking.confirmed === true ? "confirmed" : (booking.confirmed === false ? "rejected" : "pending");
-      slider.className = `slider ${status}`;
-      slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+      let slider = document.createElement("div"); let status = booking.confirmed === true ? "confirmed" : (booking.confirmed === false ? "rejected" : "pending");
+      slider.className = `slider ${status}`; slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
       let nameSpan = document.createElement("div"); nameSpan.className = "sl-name"; nameSpan.textContent = booking.name || "Бронь";
       let timeSpan = document.createElement("div"); timeSpan.className = "sl-time"; timeSpan.textContent = `${fmt(booking.start)} – ${fmt(booking.end)}`;
       slider.appendChild(nameSpan); slider.appendChild(timeSpan);
-      let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
-      dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
-      slider.appendChild(dragHandle);
-      let leftHandle = document.createElement("div"); leftHandle.className = "resize-handle handle-left";
-      leftHandle.addEventListener("mousedown", (e) => startResize(booking, 'left', e));
-      let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right";
-      rightHandle.addEventListener("mousedown", (e) => startResize(booking, 'right', e));
+      let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle"; dragHandle.addEventListener("mousedown", (e) => startMove(booking, e)); slider.appendChild(dragHandle);
+      let leftHandle = document.createElement("div"); leftHandle.className = "resize-handle handle-left"; leftHandle.addEventListener("mousedown", (e) => startResize(booking, 'left', e));
+      let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right"; rightHandle.addEventListener("mousedown", (e) => startResize(booking, 'right', e));
       slider.appendChild(leftHandle); slider.appendChild(rightHandle);
       slider.addEventListener("click", (e) => { if(e.target === leftHandle || e.target === rightHandle || e.target === dragHandle) return; showInfoModal(booking); });
       container.appendChild(slider);
     });
-    
     tempBookings.forEach(temp => {
-      let startIdx = slots.findIndex(s => s.key === temp.start);
-      let endIdx = slots.findIndex(s => s.key === temp.end);
-      if(startIdx === -1 || endIdx === -1) return;
-      let row = rows[temp.lane];
-      if(!row) return;
-      let sc = row.cells[startIdx+1], ec = row.cells[endIdx+1];
-      if(!sc || !ec) return;
+      let startIdx = slots.findIndex(s => s.key === temp.start), endIdx = slots.findIndex(s => s.key === temp.end);
+      if(startIdx === -1 || endIdx === -1) return; let row = rows[temp.lane]; if(!row) return;
+      let sc = row.cells[startIdx+1], ec = row.cells[endIdx+1]; if(!sc || !ec) return;
       let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2;
-      let slider = document.createElement("div");
-      slider.className = "slider temp";
-      slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+      let slider = document.createElement("div"); slider.className = "slider temp"; slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
       let nameSpan = document.createElement("div"); nameSpan.className = "sl-name"; nameSpan.textContent = "Черновик";
       let timeSpan = document.createElement("div"); timeSpan.className = "sl-time"; timeSpan.textContent = `${fmt(temp.start)} – ${fmt(temp.end)}`;
       slider.appendChild(nameSpan); slider.appendChild(timeSpan);
-      let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
-      dragHandle.addEventListener("mousedown", (e) => startMoveForTemp(temp, e));
-      slider.appendChild(dragHandle);
-      let leftHandle = document.createElement("div"); leftHandle.className = "resize-handle handle-left";
-      leftHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'left', e));
-      let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right";
-      rightHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'right', e));
+      let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle"; dragHandle.addEventListener("mousedown", (e) => startMoveForTemp(temp, e)); slider.appendChild(dragHandle);
+      let leftHandle = document.createElement("div"); leftHandle.className = "resize-handle handle-left"; leftHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'left', e));
+      let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right"; rightHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'right', e));
       slider.appendChild(leftHandle); slider.appendChild(rightHandle);
       container.appendChild(slider);
     });
   }
   
-  function renderAll(){
-    renderAllSliders();
-    highlightAllTempBookings();
-  }
+  function renderAll(){ renderAllSliders(); highlightAllTempBookings(); }
   
   let currentBooking = null;
   function showInfoModal(b){ currentBooking = b; $("i-table").textContent = "№ "+(b.lane+1); $("i-time").textContent = `${fmt(b.start)} – ${fmt(b.end)}`; $("i-name").textContent = b.name; $("i-phone").textContent = b.phone || "—"; $("i-comment").textContent = b.comment || "—"; $("infoModal").classList.add("open"); }
@@ -1027,7 +893,7 @@
   $("tableDesktop").addEventListener("mousedown", onMouseDown);
   document.body.addEventListener("mousemove", onMouseMove);
   document.body.addEventListener("mouseup", onMouseUp);
-  ["bookModal","infoModal","imgPopup"].forEach(id=>{ $(id)?.addEventListener("click",e=>{ if(e.target=== $(id)) $(id).classList.remove("open"); }); });
+  ["bookModal","infoModal","imgPopup","draftInfoModal"].forEach(id=>{ $(id)?.addEventListener("click",e=>{ if(e.target=== $(id)) $(id).classList.remove("open"); }); });
 </script>
 </body>
 </html>

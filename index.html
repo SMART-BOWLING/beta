@@ -414,6 +414,11 @@
       opacity: 0.65;
       transition: none;
     }
+    
+    /* Класс для блокировки двойного клика на ручках */
+    .no-dblclick {
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -832,7 +837,8 @@
   
   function startResize(booking, side, e){
     if(!booking.id) return;
-    e.stopPropagation(); e.preventDefault();
+    e.stopPropagation(); 
+    e.preventDefault();
     resizePreview = document.createElement("div");
     resizePreview.className = "resize-preview";
     const scrollDiv = document.getElementById("gridScroll");
@@ -972,13 +978,17 @@
       rightHandle.addEventListener("mousedown", (e) => startResize(booking, 'right', e));
       slider.appendChild(leftHandle); slider.appendChild(rightHandle);
       
-      // ВАЖНО: используем addEventListener с явным указанием, что событие должно обрабатываться
-      slider.addEventListener("dblclick", (e) => { 
+      // ТОЛЬКО двойной клик - никакого одинарного!
+      slider.ondblclick = (e) => { 
         e.stopPropagation(); 
         e.preventDefault();
-        console.log("Double click on slider", booking);
         showInfoModal(booking); 
-      });
+      };
+      
+      // Блокируем любой клик на элементах управления
+      leftHandle.ondblclick = (e) => e.stopPropagation();
+      rightHandle.ondblclick = (e) => e.stopPropagation();
+      dragHandle.ondblclick = (e) => e.stopPropagation();
       
       container.appendChild(slider);
     });
@@ -1007,10 +1017,14 @@
       rightHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'right', e));
       slider.appendChild(leftHandle); slider.appendChild(rightHandle);
       
-      slider.addEventListener("dblclick", (e) => { 
+      slider.ondblclick = (e) => { 
         e.stopPropagation(); 
         alert(`Черновик: Стол ${temp.lane+1}, ${fmt(temp.start)}–${fmt(temp.end)}`); 
-      });
+      };
+      
+      leftHandle.ondblclick = (e) => e.stopPropagation();
+      rightHandle.ondblclick = (e) => e.stopPropagation();
+      dragHandle.ondblclick = (e) => e.stopPropagation();
       
       container.appendChild(slider);
     });

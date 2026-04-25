@@ -1,1113 +1,1092 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Бильярд Клуб · Бронирование</title>
-  <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Lucky Strike — Бильярд Клуб | Бронирование столов</title>
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: #f5f5f7;
-      color: #1d1d1f;
-    }
+        :root {
+            --bg: #f1f2f6;
+            --surface: #ffffff;
+            --surface-2: #f8f9fc;
+            --border: #e2e4e8;
+            --border-dark: #cbd0d6;
+            --text: #1e293b;
+            --text-light: #5b677b;
+            --text-muted: #8e99ab;
+            --blue: #3b82f6;
+            --blue-hover: #2563eb;
+            --blue-bg: #eff6ff;
+            --green: #10b981;
+            --green-bg: #ecfdf5;
+            --amber: #f59e0b;
+            --amber-bg: #fffbeb;
+            --red: #ef4444;
+            --red-bg: #fef2f2;
+            --gray: #94a3b8;
+            --radius: 1rem;
+            --radius-sm: 0.75rem;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+            --cell-height: 56px;
+            --cell-width: 80px;
+            --lane-width: 100px;
+        }
 
-    /* Авторизация */
-    .login-screen {
-      position: fixed;
-      inset: 0;
-      background: #f5f5f7;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      z-index: 10000;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+        }
 
-    /* Основной контент */
-    .app {
-      display: none;
-      min-height: 100vh;
-    }
+        /* Login Screen */
+        .login-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
 
-    /* Шапка */
-    .header {
-      position: sticky;
-      top: 0;
-      background: rgba(255,255,255,0.94);
-      backdrop-filter: blur(20px);
-      border-bottom: 0.5px solid rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 28px;
-      height: 60px;
-      z-index: 100;
-    }
+        .login-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.2);
+        }
 
-    .header h1 {
-      font-size: 20px;
-      font-weight: 600;
-    }
+        .login-emoji {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
 
-    .scheme-btn {
-      background: white;
-      border: 0.5px solid rgba(0,0,0,0.1);
-      border-radius: 50px;
-      padding: 8px 18px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #0071e3;
-      cursor: pointer;
-    }
+        .login-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
 
-    /* Основная область */
-    .container {
-      padding: 24px 28px 60px;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
+        .login-sub {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
 
-    /* Панель инструментов */
-    .toolbar {
-      background: white;
-      border-radius: 18px;
-      padding: 18px 24px;
-      margin-bottom: 24px;
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      align-items: center;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-    }
+        .divider {
+            width: 40px;
+            height: 2px;
+            background: var(--border);
+            margin: 1rem auto;
+        }
 
-    .date-box {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: #f5f5f7;
-      border-radius: 14px;
-      padding: 0 18px;
-      height: 52px;
-      border: 0.5px solid rgba(0,0,0,0.08);
-    }
+        /* Main App */
+        .app {
+            display: none;
+            min-height: 100vh;
+        }
 
-    .date-box input {
-      border: none;
-      background: transparent;
-      font-size: 17px;
-      font-weight: 500;
-      cursor: pointer;
-    }
+        /* Navbar */
+        .navbar {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+        }
 
-    .new-booking-btn {
-      background: #0071e3;
-      color: white;
-      border: none;
-      border-radius: 50px;
-      padding: 0 32px;
-      height: 52px;
-      font-size: 17px;
-      font-weight: 600;
-      cursor: pointer;
-    }
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-    .temp-list {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-left: auto;
-    }
+        .logo span {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
 
-    .temp-item {
-      background: white;
-      border: 1px solid #0071e3;
-      border-radius: 32px;
-      padding: 6px 14px 6px 18px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-    }
+        .map-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 2rem;
+            padding: 0.5rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-    .temp-item button {
-      background: #ffe5e2;
-      border: none;
-      border-radius: 30px;
-      width: 26px;
-      height: 26px;
-      cursor: pointer;
-      font-weight: bold;
-      color: #b81c00;
-    }
+        .map-btn:hover {
+            background: var(--blue-bg);
+            border-color: var(--blue);
+        }
 
-    /* Легенда */
-    .legend {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 24px;
-    }
+        /* Main Container */
+        .main {
+            padding: 1.5rem 1.5rem 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
 
-    .legend span {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: white;
-      border-radius: 50px;
-      padding: 6px 16px;
-      font-size: 13px;
-      border: 0.5px solid rgba(0,0,0,0.08);
-    }
+        /* Control Bar */
+        .control-bar {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
 
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-    .dot.navy { background: #3a7bd5; }
-    .dot.sage { background: #30a862; }
-    .dot.rust { background: #e05c2a; }
-    .dot.pending { background: #ff9f0a; }
-    .dot.confirmed { background: #34c759; }
-    .dot.rejected { background: #ff3b30; }
-    .dot.temp { background: #0071e3; }
+        .date-picker {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--surface-2);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            border: 1px solid var(--border);
+        }
 
-    /* Таблица */
-    .table-wrapper {
-      background: white;
-      border-radius: 24px;
-      overflow: auto;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-      position: relative;
-    }
+        .date-picker input {
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
 
-    .schedule-table {
-      border-collapse: collapse;
-      width: 100%;
-      min-width: 1100px;
-    }
+        .btn-primary {
+            background: var(--blue);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-    .schedule-table th {
-      height: 58px;
-      padding: 0 12px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #8e8e93;
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-      border-right: 0.5px solid rgba(0,0,0,0.05);
-      background: #fafafc;
-      position: sticky;
-      top: 0;
-    }
+        .btn-primary:hover {
+            background: var(--blue-hover);
+            transform: scale(0.98);
+        }
 
-    .schedule-table th:first-child {
-      width: 100px;
-      position: sticky;
-      left: 0;
-      background: #fafafc;
-      z-index: 2;
-    }
+        /* Draft Cards */
+        .draft-strip {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-left: auto;
+        }
 
-    .schedule-table td {
-      height: 58px;
-      border-bottom: 0.5px solid rgba(0,0,0,0.05);
-      border-right: 0.5px solid rgba(0,0,0,0.05);
-    }
+        .draft-badge {
+            background: var(--amber-bg);
+            border: 1px solid var(--amber);
+            border-radius: 2rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--amber);
+        }
 
-    .schedule-table td:first-child {
-      font-weight: 700;
-      text-align: center;
-      background: #fafafc;
-      position: sticky;
-      left: 0;
-    }
+        .draft-card {
+            background: var(--blue-bg);
+            border: 1px solid var(--blue);
+            border-radius: 2rem;
+            padding: 0.35rem 0.75rem 0.35rem 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
 
-    .time-cell {
-      cursor: crosshair;
-    }
+        .draft-card button {
+            background: var(--red-bg);
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: var(--red);
+            font-weight: bold;
+            transition: all 0.1s;
+        }
 
-    .time-cell.selected {
-      background: #ffe6a3 !important;
-    }
+        .draft-card button:hover {
+            background: var(--red);
+            color: white;
+        }
 
-    /* Слой с полосками броней */
-    .bars-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      pointer-events: none;
-    }
+        /* Legends */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
 
-    .bar {
-      position: absolute;
-      pointer-events: auto;
-      border-radius: 8px;
-      padding: 6px 12px;
-      font-size: 11px;
-      font-weight: 700;
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.6);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      transition: 0.05s linear;
-    }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
 
-    .bar:hover {
-      transform: scale(1.01);
-      z-index: 60;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
 
-    .bar.pending {
-      background: rgba(255,159,10,0.35);
-      border-left: 4px solid #ff9f0a;
-    }
+        .legend-dot.table-1-3 { background: #3b82f6; }
+        .legend-dot.table-4-6 { background: #10b981; }
+        .legend-dot.table-7-12 { background: #f97316; }
+        .legend-dot.pending { background: var(--amber); }
+        .legend-dot.confirmed { background: var(--green); }
+        .legend-dot.rejected { background: var(--red); }
+        .legend-dot.draft { background: var(--blue); }
 
-    .bar.confirmed {
-      background: rgba(52,199,89,0.35);
-      border-left: 4px solid #34c759;
-    }
+        /* Table Grid */
+        .grid-wrapper {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            overflow: auto;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+        }
 
-    .bar.rejected {
-      background: rgba(255,59,48,0.3);
-      border-left: 4px solid #ff3b30;
-    }
+        .schedule-table {
+            border-collapse: collapse;
+            min-width: 1100px;
+            font-size: 0.8rem;
+        }
 
-    .bar.temp {
-      background: rgba(0,113,227,0.35);
-      border-left: 4px solid #0071e3;
-    }
+        .schedule-table th {
+            background: var(--surface-2);
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-light);
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--surface-2);
+            z-index: 5;
+        }
 
-    .bar .time {
-      font-size: 9px;
-      opacity: 0.8;
-      font-weight: normal;
-    }
+        .schedule-table th:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            background: var(--surface-2);
+        }
 
-    /* Модальные окна */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(10px);
-      z-index: 2000;
-      justify-content: center;
-      align-items: center;
-    }
+        .schedule-table td {
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            height: var(--cell-height);
+        }
 
-    .modal.open {
-      display: flex;
-    }
+        .lane-cell {
+            position: sticky;
+            left: 0;
+            background: var(--surface-2);
+            font-weight: 700;
+            font-size: 1rem;
+            text-align: center;
+            width: var(--lane-width);
+            z-index: 2;
+        }
 
-    .modal-card {
-      background: white;
-      border-radius: 32px;
-      width: 100%;
-      max-width: 480px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-    }
+        .slot-cell {
+            cursor: crosshair;
+            transition: background 0.05s;
+            background: #ffffff;
+        }
 
-    .modal-header {
-      padding: 20px 24px 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+        .slot-cell:hover {
+            background: #fef9e3 !important;
+        }
 
-    .modal-header h2 {
-      font-size: 24px;
-      font-weight: 700;
-    }
+        .slot-cell.drag-highlight {
+            background: #fde68a !important;
+        }
 
-    .modal-header button {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #f5f5f7;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-    }
+        .slot-cell.temp-highlight {
+            background: #bfdbfe !important;
+            border: 2px solid var(--blue) !important;
+        }
 
-    .modal-body {
-      padding: 12px 24px 28px;
-    }
+        /* Slider Layer */
+        .sliders-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
 
-    .form-row {
-      margin-bottom: 20px;
-    }
+        .booking-card {
+            position: absolute;
+            border-radius: 0.6rem;
+            pointer-events: auto;
+            cursor: grab;
+            padding: 0.4rem 0.6rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.05s ease;
+            z-index: 25;
+        }
 
-    .form-row label {
-      font-size: 13px;
-      font-weight: 600;
-      color: #6e6e73;
-      display: block;
-      margin-bottom: 6px;
-    }
+        .booking-card:active {
+            cursor: grabbing;
+        }
 
-    .form-row input,
-    .form-row textarea {
-      width: 100%;
-      background: #f5f5f7;
-      border: 0.5px solid rgba(0,0,0,0.08);
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 16px;
-      font-family: inherit;
-    }
+        .booking-card:hover {
+            transform: scale(1.01);
+            z-index: 30;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
 
-    .info-line {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 0.5px solid rgba(0,0,0,0.08);
-    }
+        .booking-card.pending {
+            background: rgba(245, 158, 11, 0.35);
+            border-left: 4px solid var(--amber);
+        }
 
-    .danger-btn {
-      width: 100%;
-      height: 48px;
-      background: #ffe5e2;
-      border: none;
-      border-radius: 50px;
-      margin-top: 20px;
-      cursor: pointer;
-      font-weight: 600;
-      color: #b81c00;
-    }
+        .booking-card.confirmed {
+            background: rgba(16, 185, 129, 0.3);
+            border-left: 4px solid var(--green);
+        }
 
-    .action-btns {
-      display: flex;
-      gap: 12px;
-      margin-top: 12px;
-    }
+        .booking-card.rejected {
+            background: rgba(239, 68, 68, 0.25);
+            border-left: 4px solid var(--red);
+        }
 
-    .action-btns button {
-      flex: 1;
-      height: 48px;
-      border-radius: 50px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-    }
+        .booking-card.draft {
+            background: rgba(59, 130, 246, 0.25);
+            border-left: 4px solid var(--blue);
+        }
 
-    .btn-confirm {
-      background: rgba(52,199,89,0.15);
-      color: #1a6630;
-    }
+        .booking-name {
+            font-size: 0.7rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-    .btn-reject {
-      background: rgba(255,59,48,0.1);
-      color: #a81a10;
-    }
+        .booking-time {
+            font-size: 0.6rem;
+            opacity: 0.85;
+        }
 
-    /* Загрузчик */
-    .loader {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.3);
-      backdrop-filter: blur(4px);
-      z-index: 5000;
-      justify-content: center;
-      align-items: center;
-    }
+        .resize-handle {
+            position: absolute;
+            width: 12px;
+            height: 60%;
+            top: 20%;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 20px;
+            cursor: ew-resize;
+        }
 
-    .loader.active {
-      display: flex;
-    }
+        .resize-handle-left {
+            left: 2px;
+        }
 
-    .loader-box {
-      background: white;
-      border-radius: 32px;
-      padding: 28px 40px;
-      text-align: center;
-    }
+        .resize-handle-right {
+            right: 2px;
+        }
 
-    .spinner {
-      width: 38px;
-      height: 38px;
-      border: 3px solid #ddd;
-      border-top-color: #0071e3;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      margin: 0 auto 14px;
-    }
+        .drag-area {
+            position: absolute;
+            top: 0;
+            left: 20px;
+            right: 20px;
+            height: 100%;
+            cursor: grab;
+        }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-  </style>
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 1.5rem;
+            width: 90%;
+            max-width: 450px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-light);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            padding: 0.7rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Loader */
+        .loader-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+        }
+
+        .loader-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--blue);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .control-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .draft-strip {
+                margin-left: 0;
+            }
+            .main {
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<div class="login-screen" id="loginScreen">
-  <div style="font-size: 58px;">🎱</div>
-  <div style="font-size: 32px; font-weight: 700;">Бильярд Клуб</div>
-  <div style="font-size: 16px; color: #6e6e73;">Бронирование столов</div>
-  <div style="width: 1px; height: 28px; background: rgba(0,0,0,0.1);"></div>
-  <div id="g_id_onload"
-    data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com"
-    data-callback="onGoogleLogin"
-    data-auto_prompt="false"></div>
-  <div class="g_id_signin" data-type="standard"></div>
+<div id="loginScreen" class="login-screen">
+    <div class="login-card">
+        <div class="login-emoji">🎱</div>
+        <div class="login-title">Lucky Strike</div>
+        <div class="login-sub">Бильярд Клуб · Бронирование столов</div>
+        <div class="divider"></div>
+        <div id="g_id_onload"
+            data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com"
+            data-callback="onGoogleLogin"
+            data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin" data-type="standard" data-theme="outline"></div>
+    </div>
 </div>
 
-<div class="app" id="app">
-  <div class="header">
-    <h1>🎱 LUCKY STRIKE · Бронирование</h1>
-    <button class="scheme-btn" onclick="showScheme()">📐 Схема зала</button>
-  </div>
+<div id="app" class="app">
+    <nav class="navbar">
+        <div class="logo">
+            🎱 <span>Lucky Strike</span>
+        </div>
+        <button class="map-btn" onclick="openHallMap()">📐 Схема зала</button>
+    </nav>
 
-  <div class="container">
-    <div class="toolbar">
-      <div class="date-box">
-        <span>📅</span>
-        <input type="date" id="datePicker">
-      </div>
-      <button class="new-booking-btn" onclick="openBookingDialog()">➕ Новая бронь</button>
-      <div class="temp-list" id="tempList"></div>
-    </div>
+    <div class="main">
+        <div class="control-bar">
+            <div class="date-picker">
+                📅 <input type="date" id="dateInput">
+            </div>
+            <button class="btn-primary" id="newBookingBtn">➕ Новая бронь</button>
+            <div id="draftContainer" class="draft-strip"></div>
+        </div>
 
-    <div class="legend">
-      <span><div class="dot navy"></div>Столы 1–3</span>
-      <span><div class="dot sage"></div>Столы 4–6</span>
-      <span><div class="dot rust"></div>Столы 7–12</span>
-      <span><div class="dot pending"></div>Ожидает</span>
-      <span><div class="dot confirmed"></div>Подтверждено</span>
-      <span><div class="dot rejected"></div>Отменено</span>
-      <span><div class="dot temp"></div>Черновик</span>
-    </div>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot table-1-3"></div>Столы 1–3</div>
+            <div class="legend-item"><div class="legend-dot table-4-6"></div>Столы 4–6</div>
+            <div class="legend-item"><div class="legend-dot table-7-12"></div>Столы 7–12</div>
+            <div class="legend-item"><div class="legend-dot pending"></div>Ожидает</div>
+            <div class="legend-item"><div class="legend-dot confirmed"></div>Подтверждено</div>
+            <div class="legend-item"><div class="legend-dot rejected"></div>Отменено</div>
+            <div class="legend-item"><div class="legend-dot draft"></div>Черновик</div>
+        </div>
 
-    <div class="table-wrapper" id="tableWrapper">
-      <div style="position: relative;">
-        <table class="schedule-table" id="mainTable">
-          <thead id="tableHead"></thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-        <div id="barsLayer" class="bars-layer"></div>
-      </div>
+        <div class="grid-wrapper" id="gridWrapper">
+            <div style="position: relative; overflow: auto;" id="scrollArea">
+                <div style="position: relative;">
+                    <table class="schedule-table" id="scheduleTable">
+                        <thead id="tableHeader"></thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                    <div id="slidersLayer" class="sliders-container"></div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
-<!-- Модалка новой брони -->
-<div id="bookingDialog" class="modal">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h2>Подтверждение брони</h2>
-      <button onclick="closeBookingDialog()">×</button>
+<!-- Modals -->
+<div id="bookingModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Подтверждение брони</h3>
+            <button onclick="closeBookingModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Имя гостя *</label>
+                <input type="text" id="guestName" placeholder="Иван Петров">
+            </div>
+            <div class="form-group">
+                <label>Телефон</label>
+                <input type="tel" id="guestPhone" placeholder="+7 (999) 123-45-67">
+            </div>
+            <div class="form-group">
+                <label>Комментарий</label>
+                <textarea id="guestComment" rows="2" placeholder="Особые пожелания..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeBookingModal()">Отмена</button>
+                <button class="btn-primary" onclick="saveDrafts()">Сохранить бронь</button>
+            </div>
+        </div>
     </div>
-    <div class="modal-body">
-      <div class="form-row">
-        <label>Имя *</label>
-        <input type="text" id="clientName" placeholder="Иван Петров">
-      </div>
-      <div class="form-row">
-        <label>Телефон</label>
-        <input type="text" id="clientPhone" placeholder="+7 123 456-78-90">
-      </div>
-      <div class="form-row">
-        <label>Комментарий</label>
-        <textarea id="clientComment" rows="2" placeholder="Пожелания / особые условия"></textarea>
-      </div>
-      <div style="display: flex; gap: 12px;">
-        <button class="new-booking-btn" style="flex:1;" onclick="saveTempBookings()">Сохранить</button>
-        <button style="flex:1; background:#f5f5f7; border:0.5px solid rgba(0,0,0,0.08); border-radius:50px;" onclick="closeBookingDialog()">Отмена</button>
-      </div>
-    </div>
-  </div>
 </div>
 
-<!-- Модалка информации о брони -->
-<div id="infoDialog" class="modal">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h2>Детали брони</h2>
-      <button onclick="closeInfoDialog()">×</button>
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Детали брони</h3>
+            <button onclick="closeInfoModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="info-row"><span>Стол</span><strong id="infoTable"></strong></div>
+            <div class="info-row"><span>Время</span><strong id="infoTime"></strong></div>
+            <div class="info-row"><span>Имя</span><strong id="infoName"></strong></div>
+            <div class="info-row"><span>Телефон</span><strong id="infoPhone"></strong></div>
+            <div class="info-row"><span>Комментарий</span><span id="infoComment"></span></div>
+            <div style="display: flex; gap: 0.5rem; margin: 1rem 0;">
+                <button class="btn-primary" style="background: var(--green);" onclick="confirmBookingAction(true)">✅ Пришли</button>
+                <button class="btn-primary" style="background: var(--red);" onclick="confirmBookingAction(false)">❌ Не пришли</button>
+            </div>
+            <button class="btn-secondary" style="width: 100%; background: var(--red-bg); color: var(--red);" onclick="deleteBookingAction()">🗑 Удалить бронь</button>
+        </div>
     </div>
-    <div class="modal-body">
-      <div class="info-line"><span>Стол</span><strong id="infoTableNum"></strong></div>
-      <div class="info-line"><span>Время</span><strong id="infoTimeRange"></strong></div>
-      <div class="info-line"><span>Имя</span><strong id="infoClientName"></strong></div>
-      <div class="info-line"><span>Телефон</span><strong id="infoClientPhone"></strong></div>
-      <div class="info-line"><span>Комментарий</span><strong id="infoClientComment"></strong></div>
-      <div class="action-btns">
-        <button class="btn-confirm" onclick="updateBookingStatus(true)">✅ Пришла бронь</button>
-        <button class="btn-reject" onclick="updateBookingStatus(false)">❌ Не пришли</button>
-      </div>
-      <button class="danger-btn" onclick="deleteCurrentBooking()">🗑 Удалить бронь</button>
-    </div>
-  </div>
 </div>
 
-<!-- Модалка схемы зала -->
-<div id="schemeDialog" class="modal">
-  <div class="modal-card" style="max-width:90vw; background:transparent; box-shadow:none;">
-    <img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width:100%; border-radius:28px; cursor:pointer;" onclick="closeScheme()">
-  </div>
+<div id="mapModal" class="modal">
+    <div class="modal-content" style="max-width: 90vw; background: transparent; box-shadow: none;">
+        <img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width: 100%; border-radius: 1rem;" onclick="closeMapModal()">
+    </div>
 </div>
 
-<div id="globalLoader" class="loader">
-  <div class="loader-box">
-    <div class="spinner"></div>
-    <div>Загрузка...</div>
-  </div>
+<div id="loader" class="loader-overlay">
+    <div class="loader-card">
+        <div class="spinner"></div>
+        <div>Загрузка...</div>
+    </div>
 </div>
 
 <script>
-  // ==================== КОНФИГ ====================
-  const API_URL = "https://script.google.com/macros/s/AKfycbzLxSrpcGOIm34gLlFZS-EYZmG8liMLcUST3MRMoAp56y6XDC2ClapCDB18yiYmdrHZ/exec";
-  const ALLOWED_EMAILS = [
-    "vadiksss900@gmail.com", "sergey99belov@gmail.com", "popadinecvasil3@gmail.com",
-    "veronicadiakova04@gmail.com", "info.luckystrike.kh@gmail.com", "sashavolobuev123890@gmail.com",
-    "egorgorbushko@gmail.com", "shatrava.o@gmail.com", "Craftmax30@gmail.com",
-    "bowlingblock.b@gmail.com", "lana.arnaut@gmail.com", "polosinnikita1224@gmail.com",
-    "sofialat1506@gmail.com", "ll3991940@gmail.com", "ken040888@gmail.com"
-  ];
-
-  const TABLES_COUNT = 12;
-  const TIME_LIST = [];
-  for (let hour = 11; hour <= 22; hour++) {
-    TIME_LIST.push({ value: hour, label: `${hour}:00` });
-    if (hour < 22) TIME_LIST.push({ value: hour + 0.5, label: `${hour}:30` });
-  }
-
-  let allBookings = [];
-  let draftBookings = [];
-  let nextDraftId = 1;
-  let selectedBooking = null;
-  
-  let isSelecting = false;
-  let selectStartData = null;
-  let selectRange = null;
-
-  // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
-  function formatTime(value) {
-    const h = Math.floor(value);
-    const m = value % 1 === 0.5 ? "30" : "00";
-    return `${h}:${m}`;
-  }
-
-  function getTableGroup(tableIndex) {
-    if (tableIndex < 3) return "navy";
-    if (tableIndex < 6) return "sage";
-    return "rust";
-  }
-
-  function getBookingClass(booking) {
-    if (booking.confirmed === true) return "confirmed";
-    if (booking.confirmed === false) return "rejected";
-    return "pending";
-  }
-
-  // ==================== ПОСТРОЕНИЕ ТАБЛИЦЫ ====================
-  function buildTable() {
-    const thead = document.getElementById("tableHead");
-    const tbody = document.getElementById("tableBody");
+    // ==================== CONFIG ====================
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzLxSrpcGOIm34gLlFZS-EYZmG8liMLcUST3MRMoAp56y6XDC2ClapCDB18yiYmdrHZ/exec";
+    const ALLOWED_EMAILS = ["vadiksss900@gmail.com","sergey99belov@gmail.com","popadinecvasil3@gmail.com","veronicadiakova04@gmail.com","info.luckystrike.kh@gmail.com","sashavolobuev123890@gmail.com","egorgorbushko@gmail.com","shatrava.o@gmail.com","Craftmax30@gmail.com","bowlingblock.b@gmail.com","lana.arnaut@gmail.com","polosinnikita1224@gmail.com","sofialat1506@gmail.com","ll3991940@gmail.com","ken040888@gmail.com"];
     
-    // Заголовок
-    let headerHtml = "<tr><th>СТОЛ</th>";
-    TIME_LIST.forEach(t => { headerHtml += `<th>${t.label}</th>`; });
-    headerHtml += "</tr>";
-    thead.innerHTML = headerHtml;
-    
-    // Тело
-    tbody.innerHTML = "";
-    const colors = { navy: "#f8fafd", sage: "#f6fcf8", rust: "#fef8f4" };
-    
-    for (let t = 0; t < TABLES_COUNT; t++) {
-      const group = getTableGroup(t);
-      let rowHtml = `<tr><td style="background:#fafafc; font-weight:700;">№ ${t + 1}</td>`;
-      for (let s = 0; s < TIME_LIST.length; s++) {
-        rowHtml += `<td class="time-cell" data-table="${t}" data-slot="${s}" style="background:${colors[group]}"></td>`;
-      }
-      rowHtml += "</tr>";
-      tbody.insertAdjacentHTML('beforeend', rowHtml);
+    const HOURS = [];
+    for (let h = 11; h <= 22; h++) {
+        HOURS.push({ key: h, label: `${h}:00` });
+        if (h < 22) HOURS.push({ key: h + 0.5, label: `${h}:30` });
     }
-  }
-
-  // ==================== ВЫДЕЛЕНИЕ ДЛЯ ЧЕРНОВИКОВ ====================
-  function initSelection() {
-    const wrapper = document.getElementById("tableWrapper");
     
-    wrapper.addEventListener("mousedown", (e) => {
-      const cell = e.target.closest(".time-cell");
-      if (!cell) return;
-      e.preventDefault();
-      
-      isSelecting = true;
-      selectStartData = {
-        table: parseInt(cell.dataset.table),
-        slot: parseInt(cell.dataset.slot)
-      };
-      selectRange = { ...selectStartData, endSlot: selectStartData.slot };
-      highlightSelection();
-    });
+    const LANE_COUNT = 12;
+    const LANE_GROUPS = [0,0,0,1,1,1,2,2,2,2,2,2];
+    const GROUP_CLASS = ['table-1-3', 'table-4-6', 'table-7-12'];
     
-    wrapper.addEventListener("mousemove", (e) => {
-      if (!isSelecting) return;
-      const cell = e.target.closest(".time-cell");
-      if (!cell) return;
-      
-      const table = parseInt(cell.dataset.table);
-      const slot = parseInt(cell.dataset.slot);
-      
-      if (table === selectStartData.table) {
-        selectRange = {
-          table,
-          startSlot: Math.min(selectStartData.slot, slot),
-          endSlot: Math.max(selectStartData.slot, slot)
-        };
-        highlightSelection();
-      }
-    });
+    let bookings = [];
+    let drafts = [];        // { lane, start, end, tempId }
+    let nextTempId = 1;
+    let currentBooking = null;
+    let dragState = { active: false, lane: null, startIdx: null, endIdx: null };
     
-    wrapper.addEventListener("mouseup", () => {
-      if (!isSelecting || !selectRange || selectRange.startSlot === selectRange.endSlot) {
-        clearSelectionHighlight();
-        isSelecting = false;
-        selectStartData = null;
-        selectRange = null;
-        return;
-      }
-      
-      const { table, startSlot, endSlot } = selectRange;
-      const startTime = TIME_LIST[startSlot].value;
-      const endTime = TIME_LIST[endSlot].value;
-      
-      const hasConflict = allBookings.some(b => 
-        b.table === table && !(b.end <= startTime || b.start >= endTime)
-      );
-      
-      if (hasConflict) {
-        alert("Это время уже занято!");
-      } else {
-        draftBookings.push({
-          id: nextDraftId++,
-          table: table,
-          start: Math.min(startTime, endTime),
-          end: Math.max(startTime, endTime)
+    // ==================== HELPERS ====================
+    function formatTime(key) {
+        return `${Math.floor(key)}:${key % 1 === 0.5 ? '30' : '00'}`;
+    }
+    
+    function showLoader() { document.getElementById('loader').style.display = 'flex'; }
+    function hideLoader() { document.getElementById('loader').style.display = 'none'; }
+    
+    function getSlotCell(lane, slotIdx) {
+        const row = document.getElementById('tableBody')?.rows[lane];
+        return row?.cells[slotIdx + 1];
+    }
+    
+    function parseJwt(token) {
+        return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    }
+    
+    function onGoogleLogin(response) {
+        const payload = parseJwt(response.credential);
+        if (ALLOWED_EMAILS.includes(payload.email)) {
+            localStorage.setItem('userEmail', payload.email);
+            initApp();
+        } else {
+            alert('Доступ запрещен. Обратитесь к администратору.');
+        }
+    }
+    
+    // ==================== UI BUILD ====================
+    function buildTable() {
+        const thead = document.getElementById('tableHeader');
+        const tbody = document.getElementById('tableBody');
+        thead.innerHTML = '';
+        tbody.innerHTML = '';
+        
+        // Header row
+        const headerRow = document.createElement('tr');
+        const cornerTh = document.createElement('th');
+        cornerTh.textContent = 'СТОЛ';
+        headerRow.appendChild(cornerTh);
+        HOURS.forEach(slot => {
+            const th = document.createElement('th');
+            th.textContent = slot.label;
+            headerRow.appendChild(th);
         });
-        updateDraftsUI();
-        renderAllBars();
-      }
-      
-      clearSelectionHighlight();
-      isSelecting = false;
-      selectStartData = null;
-      selectRange = null;
-    });
-  }
-  
-  function highlightSelection() {
-    clearSelectionHighlight();
-    if (!selectRange) return;
-    
-    for (let i = selectRange.startSlot; i <= selectRange.endSlot; i++) {
-      const cell = document.querySelector(`.time-cell[data-table="${selectRange.table}"][data-slot="${i}"]`);
-      if (cell) cell.classList.add("selected");
-    }
-  }
-  
-  function clearSelectionHighlight() {
-    document.querySelectorAll(".time-cell.selected").forEach(cell => cell.classList.remove("selected"));
-  }
-  
-  // ==================== ОТОБРАЖЕНИЕ ЧЕРНОВИКОВ ====================
-  function updateDraftsUI() {
-    const container = document.getElementById("tempList");
-    if (!container) return;
-    
-    if (draftBookings.length === 0) {
-      container.innerHTML = "";
-      return;
-    }
-    
-    container.innerHTML = `<div style="background:rgba(0,113,227,0.08); border-radius:40px; padding:4px 16px; font-size:13px;">✏️ Черновики <span style="background:white; border-radius:30px; padding:4px 12px;">${draftBookings.length}</span></div>`;
-    
-    draftBookings.forEach((draft, idx) => {
-      const card = document.createElement("div");
-      card.className = "temp-item";
-      card.innerHTML = `
-        <strong>Стол ${draft.table + 1}</strong>
-        <span>${formatTime(draft.start)}–${formatTime(draft.end)}</span>
-        <button data-idx="${idx}">✕</button>
-      `;
-      card.querySelector("button").onclick = () => {
-        draftBookings.splice(idx, 1);
-        updateDraftsUI();
-        renderAllBars();
-      };
-      container.appendChild(card);
-    });
-  }
-  
-  // ==================== ОТРИСОВКА ПОЛЗУНКОВ (С НУЛЯ) ====================
-  function renderAllBars() {
-    const layer = document.getElementById("barsLayer");
-    if (!layer) return;
-    layer.innerHTML = "";
-    layer.style.pointerEvents = "auto";
-    
-    const table = document.getElementById("mainTable");
-    const tableRect = table.getBoundingClientRect();
-    const rows = table.querySelectorAll("tbody tr");
-    if (rows.length === 0) return;
-    
-    // Создание одного бара
-    function createBar(item, isDraft, onDoubleClick) {
-      const row = rows[item.table];
-      if (!row) return null;
-      
-      const startIdx = TIME_LIST.findIndex(t => t.value === item.start);
-      const endIdx = TIME_LIST.findIndex(t => t.value === item.end);
-      if (startIdx === -1 || endIdx === -1) return null;
-      
-      const startCell = row.cells[startIdx + 1];
-      const endCell = row.cells[endIdx + 1];
-      if (!startCell || !endCell) return null;
-      
-      const startRect = startCell.getBoundingClientRect();
-      const endRect = endCell.getBoundingClientRect();
-      
-      const bar = document.createElement("div");
-      const statusClass = isDraft ? "temp" : getBookingClass(item);
-      bar.className = `bar ${statusClass}`;
-      bar.style.left = (startRect.left - tableRect.left + 2) + "px";
-      bar.style.top = (startRect.top - tableRect.top + 2) + "px";
-      bar.style.width = (endRect.right - startRect.left - 4) + "px";
-      bar.style.height = (startRect.height - 4) + "px";
-      
-      const nameText = isDraft ? "Черновик" : (item.name || "Бронь");
-      bar.innerHTML = `
-        <div style="font-weight:700;">${nameText}</div>
-        <div class="time">${formatTime(item.start)}–${formatTime(item.end)}</div>
-      `;
-      
-      // ДВОЙНОЙ КЛИК - открывает информацию
-      bar.ondblclick = (e) => {
-        e.stopPropagation();
-        if (onDoubleClick) onDoubleClick();
-      };
-      
-      // ПЕРЕТАСКИВАНИЕ
-      let isDragging = false;
-      let dragStartX = 0;
-      let dragStartTable = item.table;
-      let dragStartStartIdx = startIdx;
-      const duration = endIdx - startIdx;
-      
-      bar.onmousedown = (dragEvent) => {
-        if (dragEvent.button !== 0) return;
-        dragEvent.stopPropagation();
-        dragEvent.preventDefault();
+        thead.appendChild(headerRow);
         
-        isDragging = true;
-        dragStartX = dragEvent.clientX;
-        dragStartTable = item.table;
-        dragStartStartIdx = startIdx;
-        
-        const ghost = bar.cloneNode(true);
-        ghost.style.opacity = "0.5";
-        ghost.style.pointerEvents = "none";
-        layer.appendChild(ghost);
-        bar.style.opacity = "0.3";
-        
-        const onMouseMove = (moveEvent) => {
-          if (!isDragging) return;
-          
-          const targetCell = document.elementsFromPoint(moveEvent.clientX, moveEvent.clientY)
-            .find(el => el.classList && el.classList.contains("time-cell"));
-          
-          if (targetCell) {
-            const newTable = parseInt(targetCell.dataset.table);
-            let newSlot = parseInt(targetCell.dataset.slot);
-            newSlot = Math.min(Math.max(0, newSlot), TIME_LIST.length - duration - 1);
+        // Body rows
+        for (let lane = 0; lane < LANE_COUNT; lane++) {
+            const tr = document.createElement('tr');
+            const laneTd = document.createElement('td');
+            laneTd.className = 'lane-cell';
+            laneTd.textContent = `№ ${lane + 1}`;
+            tr.appendChild(laneTd);
             
-            if (newTable !== dragStartTable || newSlot !== dragStartStartIdx) {
-              const newRow = rows[newTable];
-              if (newRow) {
-                const newStartCell = newRow.cells[newSlot + 1];
-                const newEndCell = newRow.cells[newSlot + duration + 1];
-                if (newStartCell && newEndCell) {
-                  const newStartRect = newStartCell.getBoundingClientRect();
-                  const newEndRect = newEndCell.getBoundingClientRect();
-                  ghost.style.left = (newStartRect.left - tableRect.left + 2) + "px";
-                  ghost.style.top = (newStartRect.top - tableRect.top + 2) + "px";
-                  ghost.style.width = (newEndRect.right - newStartRect.left - 4) + "px";
-                }
-              }
+            for (let si = 0; si < HOURS.length; si++) {
+                const td = document.createElement('td');
+                td.className = 'slot-cell';
+                td.dataset.lane = lane;
+                td.dataset.slotIdx = si;
+                td.dataset.timeKey = HOURS[si].key;
+                tr.appendChild(td);
             }
-          }
-        };
+            tbody.appendChild(tr);
+        }
+    }
+    
+    // ==================== RENDER SLIDERS ====================
+    function renderAllSliders() {
+        const container = document.getElementById('slidersLayer');
+        container.innerHTML = '';
+        const wrapper = document.querySelector('.schedule-table');
+        const wrapperRect = wrapper.getBoundingClientRect();
+        const scrollArea = document.getElementById('scrollArea');
+        const scrollLeft = scrollArea.scrollLeft;
+        const scrollTop = scrollArea.scrollTop;
         
-        const onMouseUp = (upEvent) => {
-          isDragging = false;
-          
-          const targetCell = document.elementsFromPoint(upEvent.clientX, upEvent.clientY)
-            .find(el => el.classList && el.classList.contains("time-cell"));
-          
-          if (targetCell) {
-            const newTable = parseInt(targetCell.dataset.table);
-            let newSlot = parseInt(targetCell.dataset.slot);
-            newSlot = Math.min(Math.max(0, newSlot), TIME_LIST.length - duration - 1);
+        // Render real bookings
+        bookings.forEach(booking => {
+            const startIdx = HOURS.findIndex(h => h.key === booking.start);
+            const endIdx = HOURS.findIndex(h => h.key === booking.end);
+            if (startIdx === -1 || endIdx === -1) return;
+            const row = document.getElementById('tableBody').rows[booking.lane];
+            if (!row) return;
+            const startCell = row.cells[startIdx + 1];
+            const endCell = row.cells[endIdx + 1];
+            if (!startCell || !endCell) return;
             
-            const newStart = TIME_LIST[newSlot].value;
-            const newEnd = TIME_LIST[newSlot + duration].value;
+            const left = startCell.offsetLeft - scrollLeft;
+            const top = row.offsetTop - scrollTop;
+            const width = (endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft;
+            const height = row.offsetHeight;
             
-            let conflict = false;
-            if (!isDraft) {
-              conflict = allBookings.some(b => 
-                b.id !== item.id && b.table === newTable && !(b.end <= newStart || b.start >= newEnd)
-              );
-            }
+            const status = booking.confirmed === true ? 'confirmed' : (booking.confirmed === false ? 'rejected' : 'pending');
+            const slider = document.createElement('div');
+            slider.className = `booking-card ${status}`;
+            slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+            slider.innerHTML = `
+                <div class="booking-name">${booking.name || 'Бронь'}</div>
+                <div class="booking-time">${formatTime(booking.start)} — ${formatTime(booking.end)}</div>
+                <div class="drag-area"></div>
+                <div class="resize-handle resize-handle-left"></div>
+                <div class="resize-handle resize-handle-right"></div>
+            `;
             
-            if (!conflict) {
-              item.table = newTable;
-              item.start = newStart;
-              item.end = newEnd;
-              if (!isDraft) saveBookingToServer(item);
-              renderAllBars();
-              if (isDraft) updateDraftsUI();
-            } else if (!isDraft) {
-              alert("Конфликт с другой бронью!");
-              renderAllBars();
-            }
-          }
-          
-          ghost.remove();
-          bar.style.opacity = "1";
-          document.removeEventListener("mousemove", onMouseMove);
-          document.removeEventListener("mouseup", onMouseUp);
-        };
+            slider.querySelector('.drag-area').addEventListener('mousedown', (e) => startDragBooking(booking, e));
+            slider.querySelector('.resize-handle-left').addEventListener('mousedown', (e) => startResizeBooking(booking, 'left', e));
+            slider.querySelector('.resize-handle-right').addEventListener('mousedown', (e) => startResizeBooking(booking, 'right', e));
+            slider.addEventListener('click', (e) => { if (e.target === slider || e.target.classList.contains('booking-name')) showBookingInfo(booking); });
+            container.appendChild(slider);
+        });
         
-        document.addEventListener("mousemove", onMouseMove);
-        document.addEventListener("mouseup", onMouseUp);
-      };
-      
-      return bar;
+        // Render drafts
+        drafts.forEach(draft => {
+            const startIdx = HOURS.findIndex(h => h.key === draft.start);
+            const endIdx = HOURS.findIndex(h => h.key === draft.end);
+            if (startIdx === -1 || endIdx === -1) return;
+            const row = document.getElementById('tableBody').rows[draft.lane];
+            if (!row) return;
+            const startCell = row.cells[startIdx + 1];
+            const endCell = row.cells[endIdx + 1];
+            if (!startCell || !endCell) return;
+            
+            const left = startCell.offsetLeft - scrollLeft;
+            const top = row.offsetTop - scrollTop;
+            const width = (endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft;
+            const height = row.offsetHeight;
+            
+            const slider = document.createElement('div');
+            slider.className = 'booking-card draft';
+            slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+            slider.innerHTML = `
+                <div class="booking-name">Черновик</div>
+                <div class="booking-time">${formatTime(draft.start)} — ${formatTime(draft.end)}</div>
+                <div class="drag-area"></div>
+                <div class="resize-handle resize-handle-left"></div>
+                <div class="resize-handle resize-handle-right"></div>
+            `;
+            slider.querySelector('.drag-area').addEventListener('mousedown', (e) => startDragDraft(draft, e));
+            slider.querySelector('.resize-handle-left').addEventListener('mousedown', (e) => startResizeDraft(draft, 'left', e));
+            slider.querySelector('.resize-handle-right').addEventListener('mousedown', (e) => startResizeDraft(draft, 'right', e));
+            container.appendChild(slider);
+        });
     }
     
-    // Реальные брони
-    allBookings.forEach(booking => {
-      const bar = createBar(booking, false, () => openInfoDialog(booking));
-      if (bar) layer.appendChild(bar);
-    });
-    
-    // Черновики
-    draftBookings.forEach(draft => {
-      const bar = createBar(draft, true, () => {
-        alert(`Черновик: Стол ${draft.table + 1}, ${formatTime(draft.start)}–${formatTime(draft.end)}`);
-      });
-      if (bar) layer.appendChild(bar);
-    });
-  }
-  
-  // ==================== РАБОТА С СЕРВЕРОМ ====================
-  let saveTimeout;
-  function scheduleSave(booking) {
-    if (saveTimeout) clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(() => {
-      if (booking.id) saveBookingToServer(booking);
-    }, 200);
-  }
-  
-  async function loadDataFromServer() {
-    showLoader();
-    try {
-      const date = document.getElementById("datePicker").value;
-      const response = await fetch(`${API_URL}?action=get&date=${date}`);
-      const data = await response.json();
-      allBookings = data.bookings ? data.bookings.map(b => ({
-        id: b.id,
-        table: b.table - 1,
-        start: parseFloat(b.start),
-        end: parseFloat(b.end),
-        name: b.name,
-        phone: b.phone,
-        comment: b.comment,
-        confirmed: b.confirmed === "Да" ? true : (b.confirmed === "Нет" ? false : null)
-      })) : [];
-      renderAllBars();
-    } catch(e) { console.error("Ошибка загрузки:", e); }
-    hideLoader();
-  }
-  
-  async function saveBookingToServer(booking) {
-    if (!booking.id) return;
-    const date = document.getElementById("datePicker").value;
-    await fetch(API_URL, {
-      method: "POST",
-      mode: "no-cors",
-      body: JSON.stringify({
-        action: "update",
-        id: booking.id,
-        date: date,
-        tableNumber: booking.table + 1,
-        start: booking.start,
-        end: booking.end,
-        name: booking.name,
-        phone: booking.phone,
-        comment: booking.comment
-      })
-    });
-  }
-  
-  async function saveTempBookings() {
-    const name = document.getElementById("clientName").value.trim();
-    const phone = document.getElementById("clientPhone").value.trim();
-    const comment = document.getElementById("clientComment").value.trim();
-    
-    if (!name) { alert("Введите имя"); return; }
-    if (draftBookings.length === 0) { alert("Нет черновиков"); return; }
-    
-    showLoader();
-    const date = document.getElementById("datePicker").value;
-    try {
-      const payload = { bookings: draftBookings.map(d => ({
-        date: date,
-        tableNumber: d.table + 1,
-        start: d.start,
-        end: d.end,
-        name: name,
-        phone: phone,
-        comment: comment
-      })) };
-      await fetch(API_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
-      draftBookings = [];
-      updateDraftsUI();
-      await loadDataFromServer();
-      closeBookingDialog();
-    } catch(e) { console.error(e); alert("Ошибка сохранения"); }
-    hideLoader();
-  }
-  
-  async function updateBookingStatus(confirmed) {
-    if (!selectedBooking) return;
-    showLoader();
-    await fetch(API_URL, {
-      method: "POST",
-      mode: "no-cors",
-      body: JSON.stringify({
-        action: "confirm",
-        id: selectedBooking.id,
-        confirmed: confirmed
-      })
-    });
-    closeInfoDialog();
-    await loadDataFromServer();
-    hideLoader();
-  }
-  
-  async function deleteCurrentBooking() {
-    if (!selectedBooking || !confirm("Удалить бронь?")) return;
-    showLoader();
-    await fetch(API_URL, {
-      method: "POST",
-      mode: "no-cors",
-      body: JSON.stringify({
-        action: "delete",
-        id: selectedBooking.id
-      })
-    });
-    closeInfoDialog();
-    await loadDataFromServer();
-    hideLoader();
-  }
-  
-  // ==================== UI ОКНА ====================
-  function openBookingDialog() {
-    if (draftBookings.length === 0) {
-      alert("Сначала выделите время: зажмите левую кнопку и протяните по ячейкам");
-      return;
+    // ==================== DRAFT MANAGEMENT ====================
+    function renderDraftCards() {
+        const container = document.getElementById('draftContainer');
+        if (drafts.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+        container.innerHTML = `<div class="draft-badge">✏️ Черновики ${drafts.length}</div>`;
+        drafts.forEach((draft, idx) => {
+            const card = document.createElement('div');
+            card.className = 'draft-card';
+            card.innerHTML = `Стол ${draft.lane+1} ${formatTime(draft.start)}–${formatTime(draft.end)} <button data-idx="${idx}">✕</button>`;
+            card.querySelector('button').onclick = () => {
+                drafts.splice(idx, 1);
+                renderDraftCards();
+                clearTempHighlight();
+                highlightTempSlots();
+                renderAllSliders();
+            };
+            container.appendChild(card);
+        });
     }
-    document.getElementById("clientName").value = "";
-    document.getElementById("clientPhone").value = "";
-    document.getElementById("clientComment").value = "";
-    document.getElementById("bookingDialog").classList.add("open");
-  }
-  
-  function closeBookingDialog() {
-    document.getElementById("bookingDialog").classList.remove("open");
-  }
-  
-  function openInfoDialog(booking) {
-    selectedBooking = booking;
-    document.getElementById("infoTableNum").textContent = `№ ${booking.table + 1}`;
-    document.getElementById("infoTimeRange").textContent = `${formatTime(booking.start)} – ${formatTime(booking.end)}`;
-    document.getElementById("infoClientName").textContent = booking.name;
-    document.getElementById("infoClientPhone").textContent = booking.phone || "—";
-    document.getElementById("infoClientComment").textContent = booking.comment || "—";
-    document.getElementById("infoDialog").classList.add("open");
-  }
-  
-  function closeInfoDialog() {
-    document.getElementById("infoDialog").classList.remove("open");
-    selectedBooking = null;
-  }
-  
-  function showScheme() { document.getElementById("schemeDialog").classList.add("open"); }
-  function closeScheme() { document.getElementById("schemeDialog").classList.remove("open"); }
-  
-  function showLoader() { document.getElementById("globalLoader").classList.add("active"); }
-  function hideLoader() { document.getElementById("globalLoader").classList.remove("active"); }
-  
-  // ==================== АВТОРИЗАЦИЯ ====================
-  function parseJwt(token) {
-    return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-  }
-  
-  function onGoogleLogin(response) {
-    const user = parseJwt(response.credential);
-    if (ALLOWED_EMAILS.includes(user.email)) {
-      localStorage.setItem("userEmail", user.email);
-      location.reload();
-    } else {
-      alert("Доступ запрещён");
-    }
-  }
-  
-  // ==================== ЗАПУСК ====================
-  window.onload = () => {
-    const savedEmail = localStorage.getItem("userEmail");
-    if (savedEmail && ALLOWED_EMAILS.includes(savedEmail)) {
-      document.getElementById("loginScreen").style.display = "none";
-      document.getElementById("app").style.display = "block";
-      startApp();
-    }
-  };
-  
-  function startApp() {
-    buildTable();
-    initSelection();
     
-    const today = new Date().toISOString().split('T')[0];
-    const dateInput = document.getElementById("datePicker");
-    dateInput.min = today;
-    dateInput.value = today;
-    dateInput.addEventListener("change", () => {
-      draftBookings = [];
-      updateDraftsUI();
-      loadDataFromServer();
-    });
+    function clearTempHighlight() {
+        document.querySelectorAll('.slot-cell.temp-highlight').forEach(cell => cell.classList.remove('temp-highlight'));
+    }
     
-    loadDataFromServer();
-    window.addEventListener("resize", () => renderAllBars());
-  }
+    function highlightTempSlots() {
+        clearTempHighlight();
+        drafts.forEach(draft => {
+            const startIdx = HOURS.findIndex(h => h.key === draft.start);
+            const endIdx = HOURS.findIndex(h => h.key === draft.end);
+            for (let i = startIdx; i <= endIdx; i++) {
+                const cell = getSlotCell(draft.lane, i);
+                if (cell) cell.classList.add('temp-highlight');
+            }
+        });
+    }
+    
+    // ==================== DRAG CREATE ====================
+    function attachDragEvents() {
+        document.querySelectorAll('.slot-cell').forEach(cell => {
+            cell.removeEventListener('mousedown', onSlotMouseDown);
+            cell.addEventListener('mousedown', onSlotMouseDown);
+        });
+    }
+    
+    function onSlotMouseDown(e) {
+        e.preventDefault();
+        const lane = parseInt(e.currentTarget.dataset.lane);
+        const idx = parseInt(e.currentTarget.dataset.slotIdx);
+        dragState = { active: true, lane, startIdx: idx, endIdx: idx };
+        highlightDragInterval(lane, idx, idx);
+    }
+    
+    function highlightDragInterval(lane, start, end) {
+        document.querySelectorAll('.slot-cell.drag-highlight').forEach(cell => cell.classList.remove('drag-highlight'));
+        for (let i = Math.min(start, end); i <= Math.max(start, end); i++) {
+            const cell = getSlotCell(lane, i);
+            if (cell) cell.classList.add('drag-highlight');
+        }
+    }
+    
+    function onGlobalMouseMove(e) {
+        if (!dragState.active) return;
+        const hoverCell = document.elementsFromPoint(e.clientX, e.clientY).find(el => el.classList?.contains('slot-cell'));
+        if (hoverCell && hoverCell.dataset.lane == dragState.lane) {
+            const newIdx = parseInt(hoverCell.dataset.slotIdx);
+            dragState.endIdx = newIdx;
+            highlightDragInterval(dragState.lane, dragState.startIdx, dragState.endIdx);
+        }
+    }
+    
+    function onGlobalMouseUp() {
+        if (dragState.active && dragState.startIdx !== dragState.endIdx) {
+            const start = HOURS[Math.min(dragState.startIdx, dragState.endIdx)].key;
+            const end = HOURS[Math.max(dragState.startIdx, dragState.endIdx)].key;
+            const hasConflict = bookings.some(b => b.lane === dragState.lane && !(b.end <= start || b.start >= end));
+            if (!hasConflict) {
+                drafts.push({ id: nextTempId++, lane: dragState.lane, start, end });
+                renderDraftCards();
+                highlightTempSlots();
+                renderAllSliders();
+            } else {
+                alert('Это время уже занято');
+            }
+        }
+        dragState.active = false;
+        document.querySelectorAll('.slot-cell.drag-highlight').forEach(cell => cell.classList.remove('drag-highlight'));
+    }
+    
+    // ==================== MOVING & RESIZING (simplified) ====================
+    function startDragBooking(booking, e) { e.stopPropagation(); alert('Перетаскивание броней в разработке'); }
+    function startResizeBooking(booking, side, e) { e.stopPropagation(); alert('Изменение броней в разработке'); }
+    function startDragDraft(draft, e) { e.stopPropagation(); alert('Перетаскивание черновиков в разработке'); }
+    function startResizeDraft(draft, side, e) { e.stopPropagation(); alert('Изменение черновиков в разработке'); }
+    
+    // ==================== API ====================
+    async function loadBookings() {
+        showLoader();
+        const date = document.getElementById('dateInput').value;
+        try {
+            const res = await fetch(`${GAS_URL}?action=get&date=${date}`);
+            const data = await res.json();
+            bookings = (data.bookings || []).map(b => ({
+                id: b.id,
+                lane: b.table - 1,
+                start: parseFloat(b.start),
+                end: parseFloat(b.end),
+                name: b.name,
+                phone: b.phone,
+                comment: b.comment,
+                confirmed: b.confirmed === "Да" ? true : (b.confirmed === "Нет" ? false : null)
+            }));
+            renderAllSliders();
+        } catch (err) {
+            console.error(err);
+            alert('Ошибка загрузки данных');
+        }
+        hideLoader();
+    }
+    
+    async function saveDrafts() {
+        if (drafts.length === 0) { alert('Нет черновиков для сохранения'); return; }
+        const name = document.getElementById('guestName').value.trim();
+        if (!name) { alert('Введите имя гостя'); return; }
+        const phone = document.getElementById('guestPhone').value;
+        const comment = document.getElementById('guestComment').value;
+        const date = document.getElementById('dateInput').value;
+        showLoader();
+        const payload = drafts.map(d => ({
+            date, tableNumber: d.lane + 1, start: d.start, end: d.end,
+            name, phone, comment
+        }));
+        try {
+            await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            drafts = [];
+            renderDraftCards();
+            clearTempHighlight();
+            await loadBookings();
+            closeBookingModal();
+        } catch(err) { alert('Ошибка сохранения'); }
+        hideLoader();
+    }
+    
+    async function confirmBookingAction(confirmed) {
+        if (!currentBooking) return;
+        showLoader();
+        await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'confirm', id: currentBooking.id, confirmed }) });
+        closeInfoModal();
+        await loadBookings();
+        hideLoader();
+    }
+    
+    async function deleteBookingAction() {
+        if (!currentBooking || !confirm('Удалить бронь навсегда?')) return;
+        showLoader();
+        await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'delete', id: currentBooking.id }) });
+        closeInfoModal();
+        await loadBookings();
+        hideLoader();
+    }
+    
+    // ==================== UI CONTROLS ====================
+    function openNewBooking() {
+        if (drafts.length === 0) { alert('Сначала выделите время: зажмите мышку и протяните по ячейкам'); return; }
+        document.getElementById('guestName').value = '';
+        document.getElementById('guestPhone').value = '';
+        document.getElementById('guestComment').value = '';
+        document.getElementById('bookingModal').classList.add('open');
+    }
+    
+    function closeBookingModal() { document.getElementById('bookingModal').classList.remove('open'); }
+    function closeInfoModal() { document.getElementById('infoModal').classList.remove('open'); currentBooking = null; }
+    function openHallMap() { document.getElementById('mapModal').classList.add('open'); }
+    function closeMapModal() { document.getElementById('mapModal').classList.remove('open'); }
+    
+    function showBookingInfo(booking) {
+        currentBooking = booking;
+        document.getElementById('infoTable').textContent = `№ ${booking.lane + 1}`;
+        document.getElementById('infoTime').textContent = `${formatTime(booking.start)} — ${formatTime(booking.end)}`;
+        document.getElementById('infoName').textContent = booking.name;
+        document.getElementById('infoPhone').textContent = booking.phone || '—';
+        document.getElementById('infoComment').textContent = booking.comment || '—';
+        document.getElementById('infoModal').classList.add('open');
+    }
+    
+    function initApp() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        buildTable();
+        const today = new Date().toISOString().split('T')[0];
+        const dateInput = document.getElementById('dateInput');
+        dateInput.min = today;
+        dateInput.value = today;
+        dateInput.addEventListener('change', () => { loadBookings(); clearTempHighlight(); drafts = []; renderDraftCards(); });
+        document.getElementById('newBookingBtn').addEventListener('click', openNewBooking);
+        loadBookings();
+        document.addEventListener('mousemove', onGlobalMouseMove);
+        document.addEventListener('mouseup', onGlobalMouseUp);
+        setTimeout(() => attachDragEvents(), 200);
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+        });
+    }
+    
+    if (localStorage.getItem('userEmail') && ALLOWED_EMAILS.includes(localStorage.getItem('userEmail'))) {
+        initApp();
+    }
 </script>
 </body>
 </html>

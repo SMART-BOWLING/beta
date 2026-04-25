@@ -502,15 +502,12 @@
     const thead = document.getElementById("tableHead");
     const tbody = document.getElementById("tableBody");
     
-    // Header
     let headerRow = "<tr><th>СТОЛ</th>";
     TIME_SLOTS.forEach(slot => { headerRow += `<th>${slot.label}</th>`; });
     headerRow += "</tr>";
     thead.innerHTML = headerRow;
     
-    // Body
     tbody.innerHTML = "";
-    const groups = ["navy", "sage", "rust"];
     const groupColors = { navy: "#eef3fc", sage: "#edf7f0", rust: "#fdf0ea" };
     
     for (let lane = 0; lane < LANES; lane++) {
@@ -573,7 +570,6 @@
       const timeStart = TIME_SLOTS[start].key;
       const timeEnd = TIME_SLOTS[end].key;
       
-      // Check conflict
       const hasConflict = bookings.some(b => b.lane === lane && !(b.end <= timeStart || b.start >= timeEnd));
       if (hasConflict) {
         alert("Это время уже занято существующей бронью!");
@@ -704,11 +700,28 @@
       leftResize.onmousedown = (e) => startResize(booking, 'left', e, false);
       rightResize.onmousedown = (e) => startResize(booking, 'right', e, false);
       
-      // Double click
-      bar.ondblclick = (e) => {
+      // Двойной клик на ВСЕМ ползунке
+      bar.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        showInfoModal(booking);
+      });
+      
+      // Также на каждой части, чтобы гарантированно сработало
+      dragArea.addEventListener("dblclick", (e) => {
         e.stopPropagation();
         showInfoModal(booking);
-      };
+      });
+      
+      leftResize.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
+        showInfoModal(booking);
+      });
+      
+      rightResize.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
+        showInfoModal(booking);
+      });
       
       container.appendChild(bar);
     });
@@ -753,7 +766,25 @@
       leftResize.onmousedown = (e) => startResize(temp, 'left', e, true);
       rightResize.onmousedown = (e) => startResize(temp, 'right', e, true);
       
-      bar.ondblclick = () => alert(`Черновик: Стол ${temp.lane+1}, ${formatTime(temp.start)}–${formatTime(temp.end)}`);
+      bar.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
+        alert(`Черновик: Стол ${temp.lane+1}, ${formatTime(temp.start)}–${formatTime(temp.end)}`);
+      });
+      
+      dragArea.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
+        alert(`Черновик: Стол ${temp.lane+1}, ${formatTime(temp.start)}–${formatTime(temp.end)}`);
+      });
+      
+      leftResize.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
+        alert(`Черновик: Стол ${temp.lane+1}, ${formatTime(temp.start)}–${formatTime(temp.end)}`);
+      });
+      
+      rightResize.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
+        alert(`Черновик: Стол ${temp.lane+1}, ${formatTime(temp.start)}–${formatTime(temp.end)}`);
+      });
       
       container.appendChild(bar);
     });

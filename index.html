@@ -3,33 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>LUCKY STRIKE — Бронирование столов</title>
+  <title>Lucky Strike — Бронирование столов</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
-      --bg: #0a0a0a;
-      --surface: #1a1a1a;
-      --surface2: #242424;
-      --border: #333;
-      --text: #f0f0f0;
-      --text2: #aaa;
-      --accent: #f0b90b;
-      --accent2: #f8d33a;
-      --green: #00c853;
-      --red: #ff1744;
-      --blue: #2979ff;
-      --r: 16px;
-      --font: 'Inter', system-ui, -apple-system, sans-serif;
-      --cell-w: 70px;
-      --cell-h: 56px;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --border: #e9ecef;
+      --text: #212529;
+      --text-secondary: #6c757d;
+      --accent: #4263eb;
+      --accent-light: #dbe4ff;
+      --success: #2b8a3e;
+      --warning: #e67700;
+      --danger: #c92a2a;
+      --table-even: #f1f3f5;
+      --table-odd: #ffffff;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: var(--font);
@@ -37,186 +36,230 @@
       color: var(--text);
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
+      line-height: 1.5;
+      user-select: none;
     }
 
-    /* Экран входа */
-    .login-screen {
+    /* АВТОРИЗАЦИЯ */
+    .auth-screen {
       position: fixed;
       inset: 0;
-      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a0a 100%);
+      background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      z-index: 9999;
       gap: 24px;
+      z-index: 9999;
     }
-    .login-screen .logo {
-      font-size: 64px;
-      animation: float 3s ease-in-out infinite;
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-    .login-screen h1 {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      background: linear-gradient(to right, #f0b90b, #f8d33a);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .login-screen p {
-      color: var(--text2);
-      font-size: 14px;
-    }
+    .auth-icon { font-size: 64px; }
+    .auth-title { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+    .auth-subtitle { color: var(--text-secondary); font-size: 15px; margin-top: -12px; }
 
-    /* Основной контент */
-    .app {
-      display: none;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
+    /* ОСНОВНОЙ КОНТЕЙНЕР */
+    .app { display: none; flex-direction: column; min-height: 100vh; }
 
-    /* Навигация */
+    /* НАВИГАЦИЯ */
     .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 64px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 0;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-      gap: 12px;
     }
-    .navbar .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 20px;
-      font-weight: 700;
-    }
-    .navbar .brand span {
-      color: var(--accent);
-    }
-    .navbar .btn {
-      background: var(--surface2);
+    .navbar-brand { font-weight: 700; font-size: 20px; letter-spacing: -0.3px; }
+    .navbar-action {
+      background: var(--surface);
       border: 1px solid var(--border);
-      color: var(--text);
-      padding: 10px 20px;
       border-radius: 100px;
-      cursor: pointer;
-      font-size: 14px;
+      padding: 8px 18px;
       font-weight: 500;
-      transition: all 0.2s;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      color: var(--text);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
-    .navbar .btn:hover {
-      background: #333;
+    .navbar-action:hover {
+      background: var(--accent-light);
       border-color: var(--accent);
       color: var(--accent);
     }
 
-    /* Панель управления */
-    .toolbar {
+    /* ОСНОВНОЙ КОНТЕНТ */
+    .main-content {
+      flex: 1;
+      padding: 24px;
       display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 20px;
-      background: var(--surface);
-      padding: 16px;
-      border-radius: var(--r);
-      border: 1px solid var(--border);
-    }
-    .toolbar input[type="date"] {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-family: var(--font);
-      cursor: pointer;
-      min-width: 200px;
-    }
-    .toolbar .btn-primary {
-      background: var(--accent);
-      color: #000;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 100px;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 15px;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-    .toolbar .btn-primary:hover {
-      background: var(--accent2);
-      transform: scale(1.02);
-    }
-    .toolbar .btn-primary:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 100%;
+      overflow-x: hidden;
     }
 
-    /* Черновики */
-    .drafts {
+    /* ПАНЕЛЬ УПРАВЛЕНИЯ */
+    .control-bar {
       display: flex;
-      gap: 8px;
       flex-wrap: wrap;
       align-items: center;
+      gap: 16px;
+      background: var(--surface);
+      padding: 18px 24px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+    .date-picker-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg);
+      border-radius: 100px;
+      padding: 8px 20px;
+      border: 1px solid var(--border);
+      flex: 1;
+      min-width: 200px;
+      max-width: 280px;
+    }
+    .date-picker-wrapper input[type="date"] {
+      border: none;
+      background: transparent;
+      font-size: 16px;
+      font-weight: 500;
+      outline: none;
+      width: 100%;
+      color: var(--text);
+      font-family: var(--font);
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 100px;
+      padding: 12px 28px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(66, 99, 235, 0.25);
+    }
+    .btn-primary:hover { background: #3b5bdb; transform: scale(0.98); }
+
+    /* ЧЕРНОВИКИ В СТРОКЕ */
+    .draft-inline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
       margin-left: auto;
     }
-    .draft-tag {
-      background: rgba(41, 121, 255, 0.15);
-      border: 1px solid var(--blue);
-      color: var(--blue);
+    .draft-badge {
+      background: var(--accent-light);
+      color: var(--accent);
       padding: 6px 16px;
       border-radius: 100px;
       font-size: 13px;
       font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+    }
+    .draft-badge span {
+      background: white;
+      padding: 2px 10px;
+      border-radius: 100px;
+      font-size: 12px;
     }
     .draft-card {
-      background: var(--surface2);
-      border: 1px solid var(--blue);
-      border-radius: 12px;
-      padding: 8px 14px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      background: white;
+      border: 1px solid var(--accent);
+      border-radius: 100px;
+      padding: 4px 10px 4px 16px;
       font-size: 13px;
+      box-shadow: var(--shadow-sm);
     }
-    .draft-card .remove-draft {
-      background: none;
+    .draft-card strong { font-size: 14px; }
+    .draft-card-time {
+      background: #f1f3f5;
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .draft-card-remove {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ffe3e3;
       border: none;
-      color: #ff5252;
       cursor: pointer;
-      font-size: 18px;
-      padding: 0 4px;
+      color: #c92a2a;
       font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
     }
+    .draft-card-remove:hover { background: #ffc9c9; }
 
-    /* Сетка */
+    /* ЛЕГЕНДА */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      background: var(--surface);
+      padding: 6px 14px;
+      border-radius: 100px;
+      box-shadow: var(--shadow-sm);
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .legend-dot--navy { background: #4c6ef5; }
+    .legend-dot--teal { background: #20c997; }
+    .legend-dot--orange { background: #f76707; }
+    .legend-dot--warning { background: #fcc419; }
+    .legend-dot--success { background: #40c057; }
+    .legend-dot--danger { background: #fa5252; }
+    .legend-dot--draft { background: #4263eb; }
+
+    /* ТАБЛИЦА */
     .grid-container {
       background: var(--surface);
-      border-radius: var(--r);
-      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
       overflow: hidden;
+      position: relative;
+      border: 1px solid var(--border);
     }
     .grid-scroll {
       overflow-x: auto;
-      position: relative;
+      overflow-y: auto;
+      max-height: 70vh;
+      -webkit-overflow-scrolling: touch;
     }
     table {
       border-collapse: collapse;
@@ -224,247 +267,244 @@
       min-width: 900px;
       table-layout: fixed;
     }
-    th {
-      background: var(--surface2);
-      color: var(--text2);
-      font-size: 12px;
+    thead th {
+      background: #f8f9fa;
       font-weight: 600;
-      padding: 12px 4px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      padding: 10px 4px;
       text-align: center;
-      border-bottom: 1px solid var(--border);
-      border-right: 1px solid var(--border);
+      border-bottom: 2px solid var(--border);
       position: sticky;
       top: 0;
-      z-index: 2;
-    }
-    th.corner {
-      width: 90px;
-      left: 0;
       z-index: 3;
-      background: var(--surface2);
-    }
-    td {
-      border-bottom: 1px solid var(--border);
-      border-right: 1px solid var(--border);
-      height: var(--cell-h);
-      text-align: center;
       cursor: pointer;
       transition: background 0.1s;
     }
-    td.lane-label {
+    thead th:hover { background: #e9ecef; }
+    thead th:first-child {
       width: 90px;
+      z-index: 4;
+    }
+    tbody td {
+      height: 52px;
+      border-bottom: 1px solid #f1f3f5;
+      border-right: 1px solid #f1f3f5;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.1s;
+      position: relative;
+    }
+    tbody td:first-child {
       font-weight: 700;
-      font-size: 16px;
-      background: var(--surface2);
+      font-size: 15px;
+      background: #f8f9fa;
+      border-right: 2px solid var(--border);
       position: sticky;
       left: 0;
-      z-index: 1;
-      cursor: default;
+      z-index: 2;
     }
-    td.slot {
-      background: rgba(255,255,255,0.01);
-    }
-    td.slot:hover {
-      background: rgba(255,255,255,0.03);
-    }
-    td.slot.dragging {
-      background: rgba(240, 185, 11, 0.2) !important;
-    }
-    td.slot.selected {
-      background: rgba(41, 121, 255, 0.25) !important;
-      border: 2px solid var(--blue);
+    tbody td.drag-hover { background: #fff3bf !important; }
+    tbody td.draft-selected {
+      background: #dbe4ff !important;
+      box-shadow: inset 0 0 0 2px var(--accent);
     }
 
-    /* Слайдеры броней */
-    .slider {
+    /* СЛАЙДЕРЫ БРОНЕЙ */
+    .slider-layer {
       position: absolute;
-      border-radius: 8px;
+      top: 0;
+      left: 90px; /* ширина первого столбца */
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .booking-card {
+      position: absolute;
+      border-radius: 6px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.95);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      backdrop-filter: blur(4px);
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 4px 8px;
+      pointer-events: auto;
       cursor: grab;
-      font-size: 11px;
+      transition: box-shadow 0.15s;
+      border-left: 4px solid #adb5bd;
       overflow: hidden;
-      z-index: 10;
-      transition: box-shadow 0.2s;
-      border: 2px solid transparent;
+      font-size: 13px;
+      z-index: 15;
     }
-    .slider:hover {
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-      z-index: 20;
+    .booking-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 20; }
+    .booking-card.dragging { opacity: 0.7; cursor: grabbing; z-index: 50; }
+    .booking-card--pending { border-left-color: #fcc419; background: #fff9db; }
+    .booking-card--confirmed { border-left-color: #40c057; background: #ebfbee; }
+    .booking-card--cancelled { border-left-color: #fa5252; background: #fff5f5; opacity: 0.8; }
+    .booking-card--draft {
+      border-left-color: #4263eb;
+      background: #edf2ff;
+      border-style: dashed;
+      border-width: 2px;
+      border-color: #4263eb;
+      border-radius: 8px;
     }
-    .slider.dragging {
-      opacity: 0.7;
-      cursor: grabbing;
-      z-index: 100;
-    }
-    .slider.pending {
-      background: rgba(240, 185, 11, 0.25);
-      border-color: var(--accent);
-    }
-    .slider.confirmed {
-      background: rgba(0, 200, 83, 0.25);
-      border-color: var(--green);
-    }
-    .slider.rejected {
-      background: rgba(255, 23, 68, 0.2);
-      border-color: var(--red);
-      opacity: 0.7;
-    }
-    .slider.temp {
-      background: rgba(41, 121, 255, 0.3);
-      border-color: var(--blue);
-    }
-    .slider .sl-name {
+    .booking-card-name {
       font-weight: 700;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .slider .sl-time {
+    .booking-card-time {
+      font-size: 11px;
       opacity: 0.8;
-      font-size: 10px;
+      margin-top: 2px;
     }
     .resize-handle {
       position: absolute;
       top: 0;
       bottom: 0;
-      width: 12px;
+      width: 8px;
+      background: transparent;
       cursor: ew-resize;
-      background: rgba(255,255,255,0.1);
       z-index: 5;
     }
-    .resize-handle.left {
-      left: 0;
-      border-radius: 8px 0 0 8px;
-    }
-    .resize-handle.right {
-      right: 0;
-      border-radius: 0 8px 8px 0;
-    }
-    .resize-handle:hover {
-      background: rgba(255,255,255,0.3);
+    .resize-handle--left { left: -4px; }
+    .resize-handle--right { right: -4px; }
+    .ghost-preview {
+      position: absolute;
+      background: rgba(250, 176, 5, 0.3);
+      border: 2px dashed #fab005;
+      border-radius: 6px;
+      pointer-events: none;
+      z-index: 25;
     }
 
-    /* Модальные окна */
+    /* МОДАЛЬНЫЕ ОКНА */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(8px);
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(6px);
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
-      padding: 20px;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s;
     }
-    .modal-overlay.hidden {
-      display: none;
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
     }
     .modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: white;
       border-radius: 24px;
-      padding: 28px;
-      width: 100%;
+      padding: 24px;
+      width: 90%;
       max-width: 440px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      transform: scale(0.95);
+      transition: transform 0.2s;
     }
-    .modal h2 {
-      font-size: 22px;
-      margin-bottom: 20px;
-    }
-    .modal label {
-      display: block;
-      font-size: 13px;
-      color: var(--text2);
-      margin-bottom: 6px;
-      font-weight: 600;
-    }
-    .modal input, .modal textarea {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 12px;
-      border-radius: 12px;
-      font-family: var(--font);
-      font-size: 15px;
-      margin-bottom: 16px;
-      resize: vertical;
-    }
-    .modal .btn-row {
+    .modal-overlay.active .modal { transform: scale(1); }
+    .modal-header {
       display: flex;
-      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
     }
-    .modal .btn {
-      flex: 1;
-      padding: 14px;
-      border-radius: 100px;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 15px;
+    .modal-title { font-size: 22px; font-weight: 700; }
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #f1f3f5;
       border: none;
-      text-align: center;
-    }
-    .modal .btn.confirm {
-      background: var(--accent);
-      color: #000;
-    }
-    .modal .btn.cancel {
-      background: var(--surface2);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .modal .btn.danger {
-      background: rgba(255,23,68,0.15);
-      color: var(--red);
-      border: 1px solid var(--red);
-    }
-
-    /* Легенда */
-    .legend {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-      font-size: 12px;
-    }
-    .legend-item {
+      font-size: 20px;
+      cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
     }
-    .legend-dot {
-      width: 10px;
-      height: 10px;
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-size: 16px;
+      font-family: var(--font);
+      background: #f8f9fa;
+      outline: none;
+      transition: border-color 0.15s;
+      user-select: text;
+    }
+    .form-input:focus, .form-textarea:focus { border-color: var(--accent); background: white; }
+    .btn-group { display: flex; gap: 12px; margin-top: 24px; }
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn--primary { background: var(--accent); color: white; }
+    .btn--secondary { background: #f1f3f5; color: var(--text); }
+    .btn--danger { background: #fff5f5; color: #c92a2a; }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .info-label { color: var(--text-secondary); }
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5000;
+      opacity: 0;
+      visibility: hidden;
+    }
+    .loader.active { opacity: 1; visibility: visible; }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e9ecef;
+      border-top-color: var(--accent);
       border-radius: 50%;
+      animation: spin 0.7s linear infinite;
     }
-
-    @media (max-width: 768px) {
-      .toolbar {
-        flex-direction: column;
-      }
-      .drafts {
-        margin-left: 0;
-      }
-      .modal {
-        padding: 20px;
-      }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .schema-image {
+      max-width: 100%;
+      border-radius: 16px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
 <!-- Экран входа -->
-<div id="loginScreen" class="login-screen">
-  <div class="logo">🎱</div>
-  <h1>LUCKY STRIKE</h1>
-  <p>Бронирование бильярдных столов</p>
+<div id="authScreen" class="auth-screen">
+  <div class="auth-icon">🎱</div>
+  <div class="auth-title">Lucky Strike</div>
+  <div class="auth-subtitle">Бронирование бильярдных столов</div>
   <div id="g_id_onload"
        data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com"
-       data-callback="onGoogleSignIn"
+       data-callback="handleAuth"
        data-auto_prompt="false">
   </div>
   <div class="g_id_signin" data-type="standard"></div>
@@ -473,70 +513,97 @@
 <!-- Основное приложение -->
 <div id="app" class="app">
   <nav class="navbar">
-    <div class="brand">🎱 <span>LUCKY STRIKE</span></div>
-    <button class="btn" onclick="showHallScheme()">📐 Схема зала</button>
+    <span class="navbar-brand">🎱 Lucky Strike</span>
+    <button class="navbar-action" onclick="showSchema()">📐 Схема зала</button>
   </nav>
 
-  <div class="toolbar">
-    <input type="date" id="datePicker">
-    <button class="btn-primary" id="bookBtn" onclick="openBookingModal()" disabled>
-      ➕ Забронировать
-    </button>
-    <div class="drafts" id="draftsContainer"></div>
-  </div>
+  <div class="main-content">
+    <!-- Панель управления -->
+    <div class="control-bar">
+      <div class="date-picker-wrapper">
+        <span>📅</span>
+        <input type="date" id="datePicker">
+      </div>
+      <button class="btn-primary" onclick="openBookingForm()">➕ Новая бронь</button>
+      <div id="draftContainer" class="draft-inline"></div>
+    </div>
 
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:#f0b90b;"></div> Ожидает</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#00c853;"></div> Подтверждено</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#ff1744;"></div> Отменено</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#2979ff;"></div> Черновик</div>
-  </div>
+    <!-- Легенда -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot legend-dot--navy"></div>Столы 1–3</div>
+      <div class="legend-item"><div class="legend-dot legend-dot--teal"></div>Столы 4–6</div>
+      <div class="legend-item"><div class="legend-dot legend-dot--orange"></div>Столы 7–12</div>
+      <div class="legend-item"><div class="legend-dot legend-dot--warning"></div>Ожидает</div>
+      <div class="legend-item"><div class="legend-dot legend-dot--success"></div>Подтверждено</div>
+      <div class="legend-item"><div class="legend-dot legend-dot--danger"></div>Отменено</div>
+      <div class="legend-item"><div class="legend-dot legend-dot--draft"></div>Черновик</div>
+    </div>
 
-  <div class="grid-container">
-    <div class="grid-scroll" id="gridScroll">
-      <table id="gridTable">
-        <thead id="gridHead"></thead>
-        <tbody id="gridBody"></tbody>
-      </table>
-      <div id="slidersLayer" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></div>
+    <!-- Таблица бронирования -->
+    <div class="grid-container" id="gridContainer">
+      <div class="grid-scroll" id="gridScroll">
+        <table id="bookingTable">
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="slider-layer" id="sliderLayer"></div>
     </div>
   </div>
 </div>
 
-<!-- Модалка бронирования -->
-<div id="bookingModal" class="modal-overlay hidden">
+<!-- Модальное окно: форма бронирования -->
+<div id="bookingModal" class="modal-overlay">
   <div class="modal">
-    <h2>Новая бронь</h2>
-    <label>Имя *</label>
-    <input type="text" id="guestName" placeholder="Иван Петров">
-    <label>Телефон</label>
-    <input type="tel" id="guestPhone" placeholder="+7 123 456-78-90">
-    <label>Комментарий</label>
-    <textarea id="guestComment" rows="2" placeholder="Пожелания..."></textarea>
-    <div class="btn-row">
-      <button class="btn cancel" onclick="closeBookingModal()">Отмена</button>
-      <button class="btn confirm" onclick="submitBooking()">Сохранить</button>
+    <div class="modal-header">
+      <div class="modal-title">Новая бронь</div>
+      <button class="modal-close" onclick="closeBookingForm()">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Имя *</label>
+      <input class="form-input" id="nameInput" placeholder="Иван Петров">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Телефон</label>
+      <input class="form-input" id="phoneInput" placeholder="+7 123 456-78-90">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Комментарий</label>
+      <textarea class="form-textarea" id="commentInput" rows="2" placeholder="Пожелания..."></textarea>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn--primary" onclick="submitBooking()">Сохранить</button>
+      <button class="btn btn--secondary" onclick="closeBookingForm()">Отмена</button>
     </div>
   </div>
 </div>
 
-<!-- Модалка деталей -->
-<div id="infoModal" class="modal-overlay hidden">
+<!-- Модальное окно: информация о брони -->
+<div id="infoModal" class="modal-overlay">
   <div class="modal">
-    <h2>Детали брони</h2>
+    <div class="modal-header">
+      <div class="modal-title">Детали брони</div>
+      <button class="modal-close" onclick="closeInfoModal()">✕</button>
+    </div>
     <div id="infoContent"></div>
-    <div class="btn-row" style="margin-top:16px;">
-      <button class="btn cancel" onclick="closeInfoModal()">Закрыть</button>
+    <div class="btn-group" style="margin-top:16px;">
+      <button class="btn btn--primary" onclick="updateBookingStatus(true)">✅ Пришли</button>
+      <button class="btn btn--danger" onclick="updateBookingStatus(false)">❌ Не пришли</button>
     </div>
-    <button class="btn danger" style="width:100%;margin-top:8px;" onclick="deleteCurrentBooking()">
-      🗑 Удалить бронь
-    </button>
+    <button class="btn btn--secondary" style="width:100%; margin-top:8px;" onclick="removeBooking()">🗑 Удалить</button>
   </div>
 </div>
 
-<!-- Модалка схемы -->
-<div id="hallModal" class="modal-overlay hidden" onclick="closeHallScheme()">
-  <img src="https://i.postimg.cc/52ZDKDDw/55.png" style="max-width:90vw;max-height:90vh;border-radius:20px;cursor:pointer;" onclick="event.stopPropagation()">
+<!-- Схема зала -->
+<div id="schemaModal" class="modal-overlay" onclick="this.classList.remove('active')">
+  <div class="modal" style="max-width:90vw; background:transparent; box-shadow:none;">
+    <img src="https://i.postimg.cc/52ZDKDDw/55.png" class="schema-image" alt="Схема зала">
+  </div>
+</div>
+
+<!-- Загрузчик -->
+<div id="loader" class="loader">
+  <div class="spinner"></div>
 </div>
 
 <script>
@@ -553,619 +620,620 @@
     const TABLE_COUNT = 12;
     const START_HOUR = 11;
     const END_HOUR = 22;
-
-    // Состояние
-    let currentUser = null;
-    let bookings = [];
-    let drafts = [];
-    let draftIdCounter = 0;
-    let currentInfoBooking = null;
-
+    
     // Генерация временных слотов
-    function generateSlots() {
-      const slots = [];
-      for (let h = START_HOUR; h <= END_HOUR; h++) {
-        slots.push({ label: `${h}:00`, value: h });
-        if (h < END_HOUR) slots.push({ label: `${h}:30`, value: h + 0.5 });
-      }
-      return slots;
+    const timeSlots = [];
+    for (let h = START_HOUR; h <= END_HOUR; h++) {
+      timeSlots.push({ label: `${h}:00`, value: h });
+      if (h < END_HOUR) timeSlots.push({ label: `${h}:30`, value: h + 0.5 });
     }
-    const SLOTS = generateSlots();
+    
+    const GROUP_MAP = [0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2]; // 0-синий, 1-зеленый, 2-оранжевый
+    const GROUP_COLORS = ['#4c6ef5', '#20c997', '#f76707'];
 
-    // DOM элементы
-    const $ = (id) => document.getElementById(id);
-    const loginScreen = $('loginScreen');
-    const app = $('app');
-    const datePicker = $('datePicker');
-    const bookBtn = $('bookBtn');
-    const draftsContainer = $('draftsContainer');
-    const gridHead = $('gridHead');
-    const gridBody = $('gridBody');
-    const slidersLayer = $('slidersLayer');
-    const gridScroll = $('gridScroll');
-    const bookingModal = $('bookingModal');
-    const infoModal = $('infoModal');
-    const infoContent = $('infoContent');
-    const hallModal = $('hallModal');
-    const guestName = $('guestName');
-    const guestPhone = $('guestPhone');
-    const guestComment = $('guestComment');
-
-    // Авторизация Google
-    function parseJwt(token) {
-      const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      return JSON.parse(atob(base64));
-    }
-
-    window.onGoogleSignIn = function(response) {
-      const payload = parseJwt(response.credential);
-      if (ALLOWED_EMAILS.includes(payload.email)) {
-        currentUser = payload.email;
-        localStorage.setItem('pool_user', payload.email);
-        loginScreen.style.display = 'none';
-        app.style.display = 'block';
-        initApp();
-      } else {
-        alert('Доступ запрещён. Ваш email не в списке разрешённых.');
-      }
+    // Состояние приложения
+    const state = {
+      currentDate: new Date().toISOString().split('T')[0],
+      bookings: [],
+      drafts: [],
+      activeBooking: null,
+      draftIdCounter: 1,
+      dragState: null,
+      resizeState: null
     };
 
-    // Инициализация
-    function initApp() {
-      const today = new Date().toISOString().split('T')[0];
-      datePicker.value = today;
-      datePicker.min = today;
-      datePicker.addEventListener('change', loadBookings);
+    // Утилиты
+    const $ = (id) => document.getElementById(id);
+    const formatTime = (val) => {
+      const h = Math.floor(val);
+      const m = val % 1 === 0.5 ? '30' : '00';
+      return `${h}:${m}`;
+    };
 
-      buildGrid();
+    // DOM элементы
+    const authScreen = $('authScreen');
+    const app = $('app');
+    const datePicker = $('datePicker');
+    const draftContainer = $('draftContainer');
+    const tableHead = $('tableHead');
+    const tableBody = $('tableBody');
+    const gridScroll = $('gridScroll');
+    const sliderLayer = $('sliderLayer');
+    const bookingModal = $('bookingModal');
+    const infoModal = $('infoModal');
+    const schemaModal = $('schemaModal');
+    const loader = $('loader');
+
+    // Инициализация
+    function init() {
+      datePicker.value = state.currentDate;
+      datePicker.min = state.currentDate;
+      buildTable();
+      attachEvents();
       loadBookings();
     }
 
-    // Построение сетки
-    function buildGrid() {
-      // Заголовок
-      const headerRow = document.createElement('tr');
-      const cornerTh = document.createElement('th');
-      cornerTh.className = 'corner';
-      cornerTh.textContent = 'СТОЛ';
-      headerRow.appendChild(cornerTh);
-
-      SLOTS.forEach(slot => {
-        const th = document.createElement('th');
-        th.textContent = slot.label;
-        headerRow.appendChild(th);
+    function buildTable() {
+      // Заголовок таблицы
+      let headHtml = '<tr><th>Стол</th>';
+      timeSlots.forEach(slot => {
+        headHtml += `<th data-time="${slot.value}">${slot.label}</th>`;
       });
-      gridHead.innerHTML = '';
-      gridHead.appendChild(headerRow);
+      headHtml += '</tr>';
+      tableHead.innerHTML = headHtml;
 
-      // Тело
-      gridBody.innerHTML = '';
+      // Тело таблицы
+      let bodyHtml = '';
       for (let i = 0; i < TABLE_COUNT; i++) {
-        const tr = document.createElement('tr');
-        const labelTd = document.createElement('td');
-        labelTd.className = 'lane-label';
-        labelTd.textContent = `№ ${i + 1}`;
-        tr.appendChild(labelTd);
-
-        SLOTS.forEach((slot, idx) => {
-          const td = document.createElement('td');
-          td.className = 'slot';
-          td.dataset.lane = i;
-          td.dataset.slotIndex = idx;
-          td.dataset.time = slot.value;
-          tr.appendChild(td);
+        bodyHtml += `<tr data-table="${i}">`;
+        bodyHtml += `<td style="color:${GROUP_COLORS[GROUP_MAP[i]]}; font-weight:700; background:#f8f9fa;">№ ${i + 1}</td>`;
+        timeSlots.forEach(slot => {
+          bodyHtml += `<td data-table="${i}" data-time="${slot.value}"></td>`;
         });
-        gridBody.appendChild(tr);
+        bodyHtml += '</tr>';
       }
-
-      // Обработчики для выделения
-      setupDragSelect();
+      tableBody.innerHTML = bodyHtml;
     }
 
-    // Выделение ячеек мышью
-    let isSelecting = false;
-    let selectStart = null;
-    let selectEnd = null;
+    function attachEvents() {
+      datePicker.addEventListener('change', () => {
+        state.currentDate = datePicker.value;
+        state.drafts = [];
+        renderDrafts();
+        loadBookings();
+      });
 
-    function setupDragSelect() {
-      const table = $('gridTable');
-
-      table.addEventListener('mousedown', (e) => {
-        const td = e.target.closest('td.slot');
-        if (!td) return;
+      // Drag-to-select для создания черновиков
+      tableBody.addEventListener('mousedown', (e) => {
+        const cell = e.target.closest('td');
+        if (!cell || cell.cellIndex === 0) return; // Игнорируем первый столбец
+        
+        const tableIndex = parseInt(cell.dataset.table);
+        const timeValue = parseFloat(cell.dataset.time);
+        const startIdx = timeSlots.findIndex(s => s.value === timeValue);
+        
+        state.dragState = {
+          table: tableIndex,
+          startIdx: startIdx,
+          currentEndIdx: startIdx,
+          isDragging: true
+        };
+        highlightDragRange(tableIndex, startIdx, startIdx);
         e.preventDefault();
-        isSelecting = true;
-        selectStart = { lane: +td.dataset.lane, idx: +td.dataset.slotIndex };
-        selectEnd = { ...selectStart };
-        clearSelection();
-        highlightSelection();
       });
 
       document.addEventListener('mousemove', (e) => {
-        if (!isSelecting) return;
-        const td = document.elementFromPoint(e.clientX, e.clientY);
-        if (!td || !td.classList.contains('slot')) return;
-        const lane = +td.dataset.lane;
-        const idx = +td.dataset.slotIndex;
-        if (lane === selectStart.lane) {
-          selectEnd = { lane, idx };
-          clearSelection();
-          highlightSelection();
+        if (!state.dragState?.isDragging) return;
+        const cell = document.elementFromPoint(e.clientX, e.clientY);
+        if (!cell || cell.tagName !== 'TD' || cell.cellIndex === 0) return;
+        
+        const tableIndex = parseInt(cell.dataset.table);
+        if (tableIndex !== state.dragState.table) return;
+        
+        const timeValue = parseFloat(cell.dataset.time);
+        const currentIdx = timeSlots.findIndex(s => s.value === timeValue);
+        const newEndIdx = Math.max(state.dragState.startIdx, currentIdx);
+        
+        if (newEndIdx !== state.dragState.currentEndIdx) {
+          state.dragState.currentEndIdx = newEndIdx;
+          highlightDragRange(state.dragState.table, state.dragState.startIdx, newEndIdx);
         }
       });
 
       document.addEventListener('mouseup', () => {
-        if (!isSelecting) return;
-        isSelecting = false;
-        if (selectStart && selectEnd && selectStart.idx !== selectEnd.idx) {
-          addDraftFromSelection();
+        if (!state.dragState?.isDragging) return;
+        const { table, startIdx, currentEndIdx } = state.dragState;
+        
+        if (currentEndIdx > startIdx) {
+          const startTime = timeSlots[startIdx].value;
+          const endTime = timeSlots[currentEndIdx].value;
+          
+          // Проверка конфликтов с существующими бронями
+          const conflict = state.bookings.some(b => 
+            b.table === table && 
+            !(b.end <= startTime || b.start >= endTime)
+          );
+          
+          if (conflict) {
+            alert('Это время уже занято.');
+          } else {
+            // Проверка на пересечение с другими черновиками
+            const draftConflict = state.drafts.some(d =>
+              d.table === table &&
+              !(d.end <= startTime || d.start >= endTime)
+            );
+            if (!draftConflict) {
+              state.drafts.push({
+                id: state.draftIdCounter++,
+                table: table,
+                start: startTime,
+                end: endTime
+              });
+              renderDrafts();
+            }
+          }
         }
+        
+        clearHighlights();
+        state.dragState = null;
+        renderSliders();
       });
     }
 
-    function clearSelection() {
-      document.querySelectorAll('td.slot.dragging').forEach(td => td.classList.remove('dragging'));
-    }
-
-    function highlightSelection() {
-      if (!selectStart || !selectEnd) return;
-      const minIdx = Math.min(selectStart.idx, selectEnd.idx);
-      const maxIdx = Math.max(selectStart.idx, selectEnd.idx);
-      for (let i = minIdx; i <= maxIdx; i++) {
-        const cell = getSlotCell(selectStart.lane, i);
-        if (cell) cell.classList.add('dragging');
+    function highlightDragRange(table, startIdx, endIdx) {
+      clearHighlights();
+      const rows = tableBody.querySelectorAll('tr');
+      const row = rows[table];
+      if (!row) return;
+      
+      for (let i = startIdx; i <= endIdx; i++) {
+        const cell = row.cells[i + 1]; // +1 из-за первого столбца
+        if (cell) cell.classList.add('drag-hover');
       }
     }
 
-    function getSlotCell(lane, slotIndex) {
-      return gridBody?.rows[lane]?.cells[slotIndex + 1];
+    function clearHighlights() {
+      document.querySelectorAll('.drag-hover').forEach(el => el.classList.remove('drag-hover'));
     }
 
-    function addDraftFromSelection() {
-      const minIdx = Math.min(selectStart.idx, selectEnd.idx);
-      const maxIdx = Math.max(selectStart.idx, selectEnd.idx);
-      const startTime = SLOTS[minIdx].value;
-      const endTime = SLOTS[maxIdx].value;
-
-      // Проверка конфликтов с бронями
-      const hasConflict = bookings.some(b =>
-        b.lane === selectStart.lane &&
-        !(b.end <= startTime || b.start >= endTime)
-      );
-      if (hasConflict) {
-        alert('Это время уже занято!');
-        return;
-      }
-
-      // Проверка пересечения с другими черновиками на том же столе
-      const overlapsDraft = drafts.some(d =>
-        d.lane === selectStart.lane &&
-        !(d.end <= startTime || d.start >= endTime)
-      );
-      if (overlapsDraft) {
-        alert('Пересекается с другим черновиком на этом столе!');
-        return;
-      }
-
-      drafts.push({
-        id: ++draftIdCounter,
-        lane: selectStart.lane,
-        start: startTime,
-        end: endTime
-      });
-
-      renderDrafts();
-      renderSliders();
-      bookBtn.disabled = false;
-    }
-
-    // Рендер черновиков
+    // Работа с черновиками
     function renderDrafts() {
-      draftsContainer.innerHTML = '';
-      if (drafts.length === 0) {
-        bookBtn.disabled = true;
+      if (state.drafts.length === 0) {
+        draftContainer.innerHTML = '';
         return;
       }
-      bookBtn.disabled = false;
-
-      const tag = document.createElement('div');
-      tag.className = 'draft-tag';
-      tag.textContent = `✏️ Черновики: ${drafts.length}`;
-      draftsContainer.appendChild(tag);
-
-      drafts.forEach((draft, index) => {
-        const card = document.createElement('div');
-        card.className = 'draft-card';
-        card.innerHTML = `
-          <strong>Стол ${draft.lane + 1}</strong>
-          <span>${formatTime(draft.start)}–${formatTime(draft.end)}</span>
-          <button class="remove-draft" data-index="${index}">✕</button>
+      
+      let html = `<div class="draft-badge">✏️ Черновики <span>${state.drafts.length}</span></div>`;
+      state.drafts.forEach((draft, index) => {
+        html += `
+          <div class="draft-card">
+            <strong>Стол ${draft.table + 1}</strong>
+            <span class="draft-card-time">${formatTime(draft.start)}–${formatTime(draft.end)}</span>
+            <button class="draft-card-remove" data-draft-index="${index}">✕</button>
+          </div>
         `;
-        card.querySelector('.remove-draft').addEventListener('click', (e) => {
-          e.stopPropagation();
-          removeDraft(index);
-        });
-        draftsContainer.appendChild(card);
       });
-    }
-
-    function removeDraft(index) {
-      drafts.splice(index, 1);
-      renderDrafts();
-      renderSliders();
-    }
-
-    function clearAllDrafts() {
-      drafts = [];
-      renderDrafts();
+      draftContainer.innerHTML = html;
+      
+      // Вешаем обработчики на кнопки удаления
+      draftContainer.querySelectorAll('.draft-card-remove').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const index = parseInt(btn.dataset.draftIndex);
+          state.drafts.splice(index, 1);
+          renderDrafts();
+          renderSliders();
+        });
+      });
+      
       renderSliders();
     }
 
     // Рендер слайдеров
     function renderSliders() {
-      slidersLayer.innerHTML = '';
-      const rows = gridBody.querySelectorAll('tr');
-      if (rows.length === 0) return;
-
-      const allItems = [
-        ...bookings.map(b => ({ ...b, type: b.confirmed === true ? 'confirmed' : b.confirmed === false ? 'rejected' : 'pending' })),
-        ...drafts.map(d => ({ ...d, type: 'temp', name: 'Черновик', phone: '', comment: '' }))
-      ];
-
-      allItems.forEach(item => {
-        const startIdx = SLOTS.findIndex(s => s.value === item.start);
-        const endIdx = SLOTS.findIndex(s => s.value === item.end);
-        if (startIdx === -1 || endIdx === -1) return;
-
-        const row = rows[item.lane];
-        if (!row) return;
-
-        const startCell = row.cells[startIdx + 1];
-        const endCell = row.cells[endIdx + 1];
-        if (!startCell || !endCell) return;
-
-        const left = startCell.offsetLeft + 2;
-        const top = row.offsetTop + 2;
-        const width = endCell.offsetLeft + endCell.offsetWidth - startCell.offsetLeft - 4;
-        const height = row.offsetHeight - 4;
-
-        const slider = document.createElement('div');
-        slider.className = `slider ${item.type}`;
-        slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;pointer-events:auto;`;
-        slider.innerHTML = `
-          <div class="sl-name">${item.name || 'Бронь'}</div>
-          <div class="sl-time">${formatTime(item.start)} – ${formatTime(item.end)}</div>
-          <div class="resize-handle left"></div>
-          <div class="resize-handle right"></div>
+      sliderLayer.innerHTML = '';
+      const rows = tableBody.querySelectorAll('tr');
+      const headerCells = tableHead.querySelectorAll('th');
+      
+      if (!rows.length || !headerCells.length) return;
+      
+      // Получаем размеры ячеек для позиционирования
+      const firstDataCell = rows[0]?.cells[1];
+      if (!firstDataCell) return;
+      
+      const cellWidth = firstDataCell.offsetWidth;
+      const startOffset = firstDataCell.offsetLeft;
+      
+      // Функция для создания карточки
+      function createCard(item, isDraft = false) {
+        const row = rows[item.table];
+        if (!row) return null;
+        
+        const startIdx = timeSlots.findIndex(s => s.value === item.start);
+        const endIdx = timeSlots.findIndex(s => s.value === item.end);
+        if (startIdx === -1 || endIdx === -1) return null;
+        
+        const left = startOffset + startIdx * cellWidth;
+        const top = row.offsetTop;
+        const width = (endIdx - startIdx + 1) * cellWidth;
+        const height = row.offsetHeight;
+        
+        const card = document.createElement('div');
+        card.className = isDraft ? 'booking-card booking-card--draft' : 
+          `booking-card booking-card--${item.status || 'pending'}`;
+        card.style.cssText = `left:${left}px; top:${top}px; width:${width}px; height:${height}px;`;
+        
+        card.innerHTML = `
+          <div class="booking-card-name">${isDraft ? 'Черновик' : item.name}</div>
+          <div class="booking-card-time">${formatTime(item.start)} – ${formatTime(item.end)}</div>
+          <div class="resize-handle resize-handle--left"></div>
+          <div class="resize-handle resize-handle--right"></div>
         `;
-
+        
         // Обработчики
-        slider.addEventListener('click', (e) => {
-          if (item.type === 'temp') return;
+        card.addEventListener('click', (e) => {
           if (e.target.classList.contains('resize-handle')) return;
-          showInfoModal(item);
+          if (!isDraft) showInfoModal(item);
         });
-
+        
         // Перетаскивание
-        slider.addEventListener('mousedown', (e) => {
+        card.addEventListener('mousedown', (e) => {
           if (e.target.classList.contains('resize-handle')) return;
-          startDragItem(item, e, slider);
+          startDrag(item, e, card, isDraft);
         });
-
+        
         // Ресайз
-        slider.querySelector('.resize-handle.left').addEventListener('mousedown', (e) => {
+        card.querySelector('.resize-handle--left').addEventListener('mousedown', (e) => {
           e.stopPropagation();
-          startResizeItem(item, 'left', e);
+          startResize(item, 'left', e, isDraft);
         });
-        slider.querySelector('.resize-handle.right').addEventListener('mousedown', (e) => {
+        card.querySelector('.resize-handle--right').addEventListener('mousedown', (e) => {
           e.stopPropagation();
-          startResizeItem(item, 'right', e);
+          startResize(item, 'right', e, isDraft);
         });
+        
+        return card;
+      }
+      
+      // Рендерим подтвержденные брони
+      state.bookings.forEach(booking => {
+        const card = createCard(booking);
+        if (card) sliderLayer.appendChild(card);
+      });
+      
+      // Рендерим черновики
+      state.drafts.forEach(draft => {
+        const card = createCard(draft, true);
+        if (card) sliderLayer.appendChild(card);
+      });
+      
+      // Подсветка ячеек для черновиков
+      highlightDraftCells();
+    }
 
-        slidersLayer.appendChild(slider);
+    function highlightDraftCells() {
+      document.querySelectorAll('.draft-selected').forEach(el => el.classList.remove('draft-selected'));
+      state.drafts.forEach(draft => {
+        const startIdx = timeSlots.findIndex(s => s.value === draft.start);
+        const endIdx = timeSlots.findIndex(s => s.value === draft.end);
+        const row = tableBody.rows[draft.table];
+        if (!row) return;
+        for (let i = startIdx; i <= endIdx; i++) {
+          const cell = row.cells[i + 1];
+          if (cell) cell.classList.add('draft-selected');
+        }
       });
     }
 
-    // Перетаскивание
-    function startDragItem(item, e, slider) {
-      e.preventDefault();
-      const startX = e.clientX;
-      const startY = e.clientY;
-      const startLeft = parseInt(slider.style.left);
-      const startTop = parseInt(slider.style.top);
-      const startLane = item.lane;
-      const startTime = item.start;
-
-      slider.classList.add('dragging');
-      const clone = slider.cloneNode(true);
-      clone.style.position = 'fixed';
-      clone.style.zIndex = '200';
-      clone.style.opacity = '0.8';
-      document.body.appendChild(clone);
-
-      function onMove(ev) {
-        clone.style.left = (startLeft + ev.clientX - startX) + 'px';
-        clone.style.top = (startTop + ev.clientY - startY) + 'px';
+    // Drag & Drop
+    function startDrag(item, event, element, isDraft) {
+      event.preventDefault();
+      const ghost = element.cloneNode(true);
+      ghost.style.opacity = '0.6';
+      ghost.style.position = 'absolute';
+      ghost.style.pointerEvents = 'none';
+      ghost.style.zIndex = '999';
+      sliderLayer.appendChild(ghost);
+      
+      element.classList.add('dragging');
+      
+      let currentTable = item.table;
+      const startIdxOriginal = timeSlots.findIndex(s => s.value === item.start);
+      const endIdxOriginal = timeSlots.findIndex(s => s.value === item.end);
+      const duration = endIdxOriginal - startIdxOriginal;
+      
+      function onMove(e) {
+        const target = document.elementFromPoint(e.clientX, e.clientY);
+        const cell = target?.closest('td[data-table]');
+        if (!cell || cell.cellIndex === 0) return;
+        
+        const newTable = parseInt(cell.dataset.table);
+        const targetIdx = timeSlots.findIndex(s => s.value === parseFloat(cell.dataset.time));
+        const newStartIdx = Math.max(0, Math.min(targetIdx, timeSlots.length - duration - 1));
+        
+        currentTable = newTable;
+        
+        const row = tableBody.rows[newTable];
+        if (row) {
+          const startCell = row.cells[newStartIdx + 1];
+          const endCell = row.cells[newStartIdx + duration + 1];
+          if (startCell && endCell) {
+            ghost.style.left = `${startCell.offsetLeft}px`;
+            ghost.style.top = `${row.offsetTop}px`;
+            ghost.style.width = `${endCell.offsetLeft + endCell.offsetWidth - startCell.offsetLeft}px`;
+            ghost.style.height = `${row.offsetHeight}px`;
+          }
+        }
       }
-
-      function onUp(ev) {
+      
+      function onEnd(e) {
         document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
-        clone.remove();
-        slider.classList.remove('dragging');
-
-        const target = document.elementFromPoint(ev.clientX, ev.clientY);
-        if (!target || !target.classList.contains('slot')) {
-          renderSliders();
-          return;
-        }
-
-        const newLane = +target.dataset.lane;
-        const newSlotIdx = +target.dataset.slotIndex;
-        const duration = getSlotCount(item.start, item.end);
-        const newStartIdx = Math.min(Math.max(0, newSlotIdx), SLOTS.length - duration);
-        const newStart = SLOTS[newStartIdx].value;
-        const newEnd = SLOTS[newStartIdx + duration - 1].value;
-
-        // Проверка конфликтов
-        if (item.type === 'temp') {
-          const conflict = drafts.some(d => d.id !== item.id && d.lane === newLane && !(d.end <= newStart || d.start >= newEnd));
+        document.removeEventListener('mouseup', onEnd);
+        ghost.remove();
+        element.classList.remove('dragging');
+        
+        const target = document.elementFromPoint(e.clientX, e.clientY);
+        const cell = target?.closest('td[data-table]');
+        if (cell && cell.cellIndex !== 0) {
+          const newTable = parseInt(cell.dataset.table);
+          const targetIdx = timeSlots.findIndex(s => s.value === parseFloat(cell.dataset.time));
+          const newStartIdx = Math.max(0, Math.min(targetIdx, timeSlots.length - duration - 1));
+          const newStart = timeSlots[newStartIdx].value;
+          const newEnd = timeSlots[newStartIdx + duration].value;
+          
+          const conflict = state.bookings.some(b => 
+            b.id !== item.id && b.table === newTable &&
+            !(b.end <= newStart || b.start >= newEnd)
+          );
+          
           if (!conflict) {
-            item.lane = newLane;
+            item.table = newTable;
             item.start = newStart;
             item.end = newEnd;
-          }
-        } else {
-          const conflict = bookings.some(b => b.id !== item.id && b.lane === newLane && !(b.end <= newStart || b.start >= newEnd));
-          if (!conflict) {
-            item.lane = newLane;
-            item.start = newStart;
-            item.end = newEnd;
-            updateBooking(item);
+            
+            if (!isDraft) {
+              updateBookingOnServer(item);
+            }
+            renderSliders();
+            renderDrafts();
+          } else {
+            alert('Невозможно переместить: конфликт с другой бронью');
+            renderSliders();
           }
         }
-        renderSliders();
-        if (item.type === 'temp') renderDrafts();
       }
-
+      
       document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
+      document.addEventListener('mouseup', onEnd);
     }
 
-    // Ресайз
-    function startResizeItem(item, side, e) {
-      e.stopPropagation();
-      e.preventDefault();
-      const startX = e.clientX;
-      const startStart = item.start;
-      const startEnd = item.end;
-
-      function onMove(ev) {
-        const deltaX = ev.clientX - startX;
-        const cellWidth = 70;
+    // Resize
+    function startResize(item, side, event, isDraft) {
+      event.stopPropagation();
+      const preview = document.createElement('div');
+      preview.className = 'ghost-preview';
+      sliderLayer.appendChild(preview);
+      
+      const startIdx = timeSlots.findIndex(s => s.value === item.start);
+      const endIdx = timeSlots.findIndex(s => s.value === item.end);
+      const cellWidth = tableBody.rows[0]?.cells[1]?.offsetWidth || 70;
+      
+      function onMove(e) {
+        const deltaX = e.clientX - event.clientX;
         const idxDelta = Math.round(deltaX / cellWidth);
-
+        
         if (side === 'left') {
-          const startIdx = SLOTS.findIndex(s => s.value === startStart);
-          const newIdx = Math.max(0, Math.min(startIdx + idxDelta, SLOTS.findIndex(s => s.value === item.end) - 1));
-          item.start = SLOTS[newIdx].value;
+          const newStartIdx = Math.max(0, Math.min(endIdx - 1, startIdx + idxDelta));
+          item.start = timeSlots[newStartIdx].value;
         } else {
-          const endIdx = SLOTS.findIndex(s => s.value === startEnd);
-          const newIdx = Math.min(SLOTS.length - 1, Math.max(endIdx + idxDelta, SLOTS.findIndex(s => s.value === item.start) + 1));
-          item.end = SLOTS[newIdx].value;
+          const newEndIdx = Math.max(startIdx + 1, Math.min(timeSlots.length - 1, endIdx + idxDelta));
+          item.end = timeSlots[newEndIdx].value;
         }
+        
+        const row = tableBody.rows[item.table];
+        const newStartIdx = timeSlots.findIndex(s => s.value === item.start);
+        const newEndIdx = timeSlots.findIndex(s => s.value === item.end);
+        
+        if (row) {
+          const startCell = row.cells[newStartIdx + 1];
+          const endCell = row.cells[newEndIdx + 1];
+          if (startCell && endCell) {
+            preview.style.left = `${startCell.offsetLeft}px`;
+            preview.style.top = `${row.offsetTop}px`;
+            preview.style.width = `${endCell.offsetLeft + endCell.offsetWidth - startCell.offsetLeft}px`;
+            preview.style.height = `${row.offsetHeight}px`;
+          }
+        }
+        
         renderSliders();
       }
-
-      function onUp() {
+      
+      function onEnd() {
+        preview.remove();
         document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
-        if (item.type !== 'temp') updateBooking(item);
-        if (item.type === 'temp') renderDrafts();
+        document.removeEventListener('mouseup', onEnd);
+        
+        if (!isDraft) updateBookingOnServer(item);
         renderSliders();
+        renderDrafts();
       }
-
+      
       document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
+      document.addEventListener('mouseup', onEnd);
     }
 
-    function getSlotCount(start, end) {
-      const startIdx = SLOTS.findIndex(s => s.value === start);
-      const endIdx = SLOTS.findIndex(s => s.value === end);
-      return endIdx - startIdx + 1;
-    }
-
-    // API
+    // API взаимодействие
     async function loadBookings() {
-      const date = datePicker.value;
-      clearAllDrafts();
+      showLoader();
       try {
-        const res = await fetch(`${API_URL}?action=get&date=${date}`);
-        const data = await res.json();
-        bookings = (data.bookings || []).map(b => ({
+        const response = await fetch(`${API_URL}?action=get&date=${state.currentDate}`);
+        const data = await response.json();
+        state.bookings = (data.bookings || []).map(b => ({
           id: b.id,
-          lane: b.table - 1,
+          table: b.table - 1,
           start: parseFloat(b.start),
           end: parseFloat(b.end),
           name: b.name || '',
           phone: b.phone || '',
           comment: b.comment || '',
-          confirmed: b.confirmed === 'Да' ? true : b.confirmed === 'Нет' ? false : null
+          status: b.confirmed === 'Да' ? 'confirmed' : b.confirmed === 'Нет' ? 'cancelled' : 'pending'
         }));
-      } catch (e) {
-        console.error('Ошибка загрузки:', e);
-        bookings = [];
+        renderSliders();
+        renderDrafts();
+      } catch (error) {
+        console.error('Ошибка загрузки:', error);
       }
-      renderSliders();
+      hideLoader();
     }
 
-    async function updateBooking(booking) {
-      const date = datePicker.value;
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: JSON.stringify({
-            action: 'update',
-            id: booking.id,
-            date,
-            tableNumber: booking.lane + 1,
-            start: booking.start,
-            end: booking.end,
-            name: booking.name,
-            phone: booking.phone,
-            comment: booking.comment
-          })
-        });
-      } catch (e) {
-        console.error('Ошибка обновления:', e);
-      }
+    async function updateBookingOnServer(booking) {
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({
+          action: 'update',
+          id: booking.id,
+          date: state.currentDate,
+          tableNumber: booking.table + 1,
+          start: booking.start,
+          end: booking.end,
+          name: booking.name,
+          phone: booking.phone,
+          comment: booking.comment
+        })
+      });
     }
 
     async function submitBooking() {
-      const name = guestName.value.trim();
-      if (!name) return alert('Введите имя');
-      if (drafts.length === 0) return alert('Нет черновиков');
-
-      const date = datePicker.value;
-      const phone = guestPhone.value.trim();
-      const comment = guestComment.value.trim();
-
+      const name = $('nameInput').value.trim();
+      if (!name) { alert('Введите имя'); return; }
+      if (state.drafts.length === 0) { alert('Нет черновиков для сохранения'); return; }
+      
+      const phone = $('phoneInput').value.trim();
+      const comment = $('commentInput').value.trim();
+      
+      showLoader();
       const payload = {
-        bookings: drafts.map(d => ({
-          date,
-          tableNumber: d.lane + 1,
+        bookings: state.drafts.map(d => ({
+          date: state.currentDate,
+          tableNumber: d.table + 1,
           start: d.start,
           end: d.end,
-          name,
-          phone,
-          comment
+          name, phone, comment
         }))
       };
-
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: JSON.stringify(payload)
-        });
-        clearAllDrafts();
-        closeBookingModal();
-        await loadBookings();
-      } catch (e) {
-        console.error('Ошибка сохранения:', e);
-        alert('Ошибка при сохранении');
-      }
+      
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify(payload)
+      });
+      
+      state.drafts = [];
+      renderDrafts();
+      closeBookingForm();
+      await loadBookings();
+      hideLoader();
     }
 
-    async function deleteCurrentBooking() {
-      if (!currentInfoBooking) return;
-      if (!confirm('Удалить эту бронь?')) return;
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: JSON.stringify({ action: 'delete', id: currentInfoBooking.id })
-        });
-        closeInfoModal();
-        await loadBookings();
-      } catch (e) {
-        console.error('Ошибка удаления:', e);
-      }
+    async function updateBookingStatus(confirmed) {
+      if (!state.activeBooking) return;
+      showLoader();
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({
+          action: 'confirm',
+          id: state.activeBooking.id,
+          confirmed: confirmed
+        })
+      });
+      closeInfoModal();
+      await loadBookings();
+      hideLoader();
     }
 
-    async function confirmBooking(confirmed) {
-      if (!currentInfoBooking) return;
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: JSON.stringify({ action: 'confirm', id: currentInfoBooking.id, confirmed })
-        });
-        closeInfoModal();
-        await loadBookings();
-      } catch (e) {
-        console.error('Ошибка:', e);
-      }
+    async function removeBooking() {
+      if (!state.activeBooking || !confirm('Удалить бронь?')) return;
+      showLoader();
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({
+          action: 'delete',
+          id: state.activeBooking.id
+        })
+      });
+      closeInfoModal();
+      await loadBookings();
+      hideLoader();
     }
 
     // Модальные окна
-    function openBookingModal() {
-      guestName.value = '';
-      guestPhone.value = '';
-      guestComment.value = '';
-      bookingModal.classList.remove('hidden');
+    function openBookingForm() {
+      if (state.drafts.length === 0) {
+        alert('Сначала выделите время: зажмите левую кнопку мыши и протяните по ячейкам стола.');
+        return;
+      }
+      $('nameInput').value = '';
+      $('phoneInput').value = '';
+      $('commentInput').value = '';
+      bookingModal.classList.add('active');
     }
 
-    function closeBookingModal() {
-      bookingModal.classList.add('hidden');
+    function closeBookingForm() {
+      bookingModal.classList.remove('active');
     }
 
     function showInfoModal(booking) {
-      currentInfoBooking = booking;
-      const status = booking.confirmed === true ? '✅ Подтверждено' : booking.confirmed === false ? '❌ Отменено' : '⏳ Ожидает';
-      infoContent.innerHTML = `
-        <p><strong>Стол:</strong> № ${booking.lane + 1}</p>
-        <p><strong>Время:</strong> ${formatTime(booking.start)} – ${formatTime(booking.end)}</p>
-        <p><strong>Имя:</strong> ${booking.name}</p>
-        <p><strong>Телефон:</strong> ${booking.phone || '—'}</p>
-        <p><strong>Комментарий:</strong> ${booking.comment || '—'}</p>
-        <p><strong>Статус:</strong> ${status}</p>
-        <div class="btn-row" style="margin-top:12px;">
-          <button class="btn confirm" onclick="confirmBooking(true)">✅ Пришли</button>
-          <button class="btn cancel" onclick="confirmBooking(false)">❌ Не пришли</button>
-        </div>
+      state.activeBooking = booking;
+      const content = $('infoContent');
+      content.innerHTML = `
+        <div class="info-row"><span class="info-label">Стол</span><strong>№ ${booking.table + 1}</strong></div>
+        <div class="info-row"><span class="info-label">Время</span><strong>${formatTime(booking.start)} – ${formatTime(booking.end)}</strong></div>
+        <div class="info-row"><span class="info-label">Имя</span><strong>${booking.name || '—'}</strong></div>
+        <div class="info-row"><span class="info-label">Телефон</span><strong>${booking.phone || '—'}</strong></div>
+        <div class="info-row"><span class="info-label">Комментарий</span><span>${booking.comment || '—'}</span></div>
       `;
-      infoModal.classList.remove('hidden');
+      infoModal.classList.add('active');
     }
 
     function closeInfoModal() {
-      infoModal.classList.add('hidden');
-      currentInfoBooking = null;
+      infoModal.classList.remove('active');
+      state.activeBooking = null;
     }
 
-    function showHallScheme() {
-      hallModal.classList.remove('hidden');
+    function showSchema() {
+      schemaModal.classList.add('active');
     }
 
-    function closeHallScheme() {
-      hallModal.classList.add('hidden');
+    function showLoader() { loader.classList.add('active'); }
+    function hideLoader() { loader.classList.remove('active'); }
+
+    // Авторизация
+    function parseJwt(token) {
+      return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
     }
 
-    // Закрытие модалок по фону
-    [bookingModal, infoModal].forEach(modal => {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.classList.add('hidden');
-      });
-    });
+    window.handleAuth = function(response) {
+      const payload = parseJwt(response.credential);
+      if (ALLOWED_EMAILS.includes(payload.email)) {
+        localStorage.setItem('userEmail', payload.email);
+        authScreen.style.display = 'none';
+        app.style.display = 'flex';
+        init();
+      } else {
+        alert('Доступ запрещен');
+      }
+    };
 
-    // Вспомогательные функции
-    function formatTime(value) {
-      const h = Math.floor(value);
-      const m = value % 1 === 0.5 ? '30' : '00';
-      return `${h}:${m}`;
-    }
-
-    // Экспорт для глобального доступа
-    window.openBookingModal = openBookingModal;
-    window.closeBookingModal = closeBookingModal;
-    window.submitBooking = submitBooking;
-    window.confirmBooking = confirmBooking;
-    window.deleteCurrentBooking = deleteCurrentBooking;
-    window.closeInfoModal = closeInfoModal;
-    window.showHallScheme = showHallScheme;
-    window.closeHallScheme = closeHallScheme;
-
-    // Запуск при загрузке
-    const savedUser = localStorage.getItem('pool_user');
-    if (savedUser && ALLOWED_EMAILS.includes(savedUser)) {
-      currentUser = savedUser;
-      loginScreen.style.display = 'none';
-      app.style.display = 'block';
-      initApp();
+    // Проверка авторизации при загрузке
+    if (localStorage.getItem('userEmail') && ALLOWED_EMAILS.includes(localStorage.getItem('userEmail'))) {
+      authScreen.style.display = 'none';
+      app.style.display = 'flex';
+      init();
     }
   })();
 </script>
-
 </body>
 </html>

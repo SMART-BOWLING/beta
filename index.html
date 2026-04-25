@@ -367,15 +367,6 @@
       z-index: 2;
     }
     .drag-handle:active { cursor: grabbing; }
-    .click-handle {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 1;
-      cursor: pointer;
-    }
 
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); z-index: 2000; justify-content: center; align-items: center; }
     .overlay.open { display: flex; }
@@ -465,7 +456,7 @@
     <div class="grid-card">
       <div class="grid-scroll" id="gridScroll">
         <table id="tableDesktop">
-          <thead id="dtHead"></tr><th class="corner">СТОЛ</th></tr></thead>
+          <thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead>
           <tbody id="dtBody"></tbody>
         </table>
         <div id="slidersLayer"></div>
@@ -747,7 +738,7 @@
     }, 50);
   }
   
-  // Перемещение (drag) — инициализация
+  // --- Перемещение с разграничением клик/драг ---
   function startMoveEntity(entity, e, isTemp) {
     e.stopPropagation();
     const slider = e.currentTarget.closest('.slider');
@@ -784,7 +775,11 @@
       }
     }
     
+    let dragStarted = false;
     function onDragMove(ev) {
+      if (!dragStarted) {
+        dragStarted = true;
+      }
       const target = getTargetFromCoords(ev.clientX, ev.clientY);
       if (target) {
         let newLane = target.lane;
@@ -799,30 +794,32 @@
     }
     
     function onDragEnd(ev) {
-      const target = getTargetFromCoords(ev.clientX, ev.clientY);
-      if (target) {
-        let finalLane = target.lane;
-        let finalStartIdx = target.idx;
-        finalStartIdx = Math.min(Math.max(0, finalStartIdx), slots.length - durationCells - 1);
-        const newStart = slots[finalStartIdx].key;
-        const newEnd = slots[finalStartIdx + durationCells].key;
-        let conflict = false;
-        if (!isTemp) {
-          conflict = bookings.some(b => b.id !== entity.id && b.lane === finalLane && !(b.end <= newStart || b.start >= newEnd));
-        }
-        if (!conflict) {
-          entity.lane = finalLane;
-          entity.start = newStart;
-          entity.end = newEnd;
-          if (isTemp) {
-            highlightAllTempBookings();
-            renderInlineTempCards();
-            renderAllSliders();
-          } else {
-            saveToServer(entity);
-            renderAllSliders();
+      if (dragStarted) {
+        const target = getTargetFromCoords(ev.clientX, ev.clientY);
+        if (target) {
+          let finalLane = target.lane;
+          let finalStartIdx = target.idx;
+          finalStartIdx = Math.min(Math.max(0, finalStartIdx), slots.length - durationCells - 1);
+          const newStart = slots[finalStartIdx].key;
+          const newEnd = slots[finalStartIdx + durationCells].key;
+          let conflict = false;
+          if (!isTemp) {
+            conflict = bookings.some(b => b.id !== entity.id && b.lane === finalLane && !(b.end <= newStart || b.start >= newEnd));
           }
-        } else if (!isTemp) alert("Невозможно переместить: конфликт с другой бронью");
+          if (!conflict) {
+            entity.lane = finalLane;
+            entity.start = newStart;
+            entity.end = newEnd;
+            if (isTemp) {
+              highlightAllTempBookings();
+              renderInlineTempCards();
+              renderAllSliders();
+            } else {
+              saveToServer(entity);
+              renderAllSliders();
+            }
+          } else if (!isTemp) alert("Невозможно переместить: конфликт с другой бронью");
+        }
       }
       ghost.remove();
       slider.classList.remove('dragging');
@@ -840,7 +837,7 @@
   function startMove(booking, e) { if (booking.id) startMoveEntity(booking, e, false); }
   function startMoveForTemp(temp, e) { startMoveEntity(temp, e, true); }
   
-  // Resize
+  // Resize (без изменений)
   function startResize(booking, side, e){
     if(!booking.id) return;
     e.stopPropagation(); e.preventDefault();
@@ -975,7 +972,7 @@
       let timeSpan = document.createElement("div"); timeSpan.className = "sl-time"; timeSpan.textContent = `${fmt(booking.start)} – ${fmt(booking.end)}`;
       slider.appendChild(nameSpan); slider.appendChild(timeSpan);
       
-      // Drag handle (зона для перетаскивания)
+      // Drag handle (центральная зона) - для перемещения
       let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
       dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
       slider.appendChild(dragHandle);
@@ -987,10 +984,13 @@
       rightHandle.addEventListener("mousedown", (e) => startResize(booking, 'right', e));
       slider.appendChild(leftHandle); slider.appendChild(rightHandle);
       
-      // Кликабельная область для показа информации (на всю остальную площадь)
-      let clickHandle = document.createElement("div"); clickHandle.className = "click-handle";
-      clickHandle.addEventListener("click", (e) => { e.stopPropagation(); showInfoModal(booking); });
-      slider.appendChild(clickHandle);
+      // Вся остальная площадь (весь слайдер) - клик для инфо. Но чтобы не мешать резизам и драгу,
+      // вешаем обработчик на сам слайдер, но игнорируем события от дочерних зон.
+      slider.addEventListener("click", (e) => {
+        // Если клик произошел на handle или drag-handle — не открываем инфо
+        if(e.target === leftHandle || e.target === rightHandle || e.target === dragHandle) return;
+        showInfoModal(booking);
+      });
       
       container.appendChild(slider);
     });
@@ -1021,10 +1021,11 @@
       rightHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'right', e));
       slider.appendChild(leftHandle); slider.appendChild(rightHandle);
       
-      // Для черновиков клик можно не показывать детали, но пусть будет просто для информации (можно оставить)
-      let clickHandle = document.createElement("div"); clickHandle.className = "click-handle";
-      clickHandle.addEventListener("click", (e) => { e.stopPropagation(); alert("Это черновик. Подтвердите бронь, чтобы сохранить."); });
-      slider.appendChild(clickHandle);
+      // Для черновиков — по клику (не на handle/drag) просто сообщение
+      slider.addEventListener("click", (e) => {
+        if(e.target === leftHandle || e.target === rightHandle || e.target === dragHandle) return;
+        alert("Это черновик. Подтвердите бронь, чтобы сохранить.");
+      });
       
       container.appendChild(slider);
     });

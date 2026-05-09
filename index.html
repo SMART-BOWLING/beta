@@ -118,6 +118,34 @@
       white-space: nowrap;
     }
     .btn-book:hover { background: var(--blue-h); transform: scale(0.98); }
+    
+    /* Новая кнопка активации перетяжки */
+    .btn-move-toggle {
+      height: 52px; padding: 0 28px;
+      background: var(--surface); color: var(--blue);
+      border: 1.5px solid var(--blue);
+      border-radius: 980px;
+      font-family: var(--font); font-size: 16px; font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-move-toggle.active {
+      background: var(--blue);
+      color: white;
+      box-shadow: 0 2px 8px rgba(0,113,227,.4);
+    }
+    .btn-move-toggle.active::before {
+      content: "🔓";
+      font-size: 14px;
+    }
+    .btn-move-toggle:not(.active)::before {
+      content: "🔒";
+      font-size: 14px;
+    }
 
     .inline-temp-cards {
       display: flex;
@@ -295,7 +323,8 @@
       .page { padding: 16px 12px 70px; gap: 16px; }
       .ctrl { flex-direction: column; align-items: stretch; }
       .inline-temp-cards { margin-left: 0; justify-content: flex-start; }
-      .btn-book { width: 100%; }
+      .btn-book, .btn-move-toggle { width: 100%; justify-content: center; }
+      .btn-move-toggle { margin-top: 0; }
     }
 
     #slidersLayer {
@@ -340,6 +369,12 @@
       border-left: 4px solid #0071e3;
       backdrop-filter: blur(4px);
     }
+    /* Стиль для брони, когда режим перетаскивания выключен - нельзя двигать */
+    .slider.move-disabled .drag-handle {
+      cursor: default !important;
+      background: transparent !important;
+      pointer-events: none !important;
+    }
     .sl-name { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sl-time { font-size: 9px; opacity: 0.85; white-space: nowrap; }
     .resize-handle {
@@ -370,7 +405,7 @@
     }
     .drag-handle:active { cursor: grabbing; }
     
-    /* Для существующих броней скрываем ручки изменения размера */
+    /* Для существующих броней ручки изменения размера не показываем */
     .slider:not(.temp) .resize-handle {
       display: none !important;
       pointer-events: none !important;
@@ -448,6 +483,7 @@
         <input type="date" id="dateInput"/>
       </div>
       <button class="btn-book" onclick="openBookModal()">➕ Новая бронь</button>
+      <button id="toggleMoveBtn" class="btn-move-toggle" onclick="toggleMoveMode()">Перемещение броней</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
 
@@ -490,6 +526,7 @@
   let bookings = [];
   let tempBookings = [];
   let nextTempId = 1;
+  let moveModeActive = false; // Флаг: разрешено ли перемещение существующих броней
   
   let isDragging = false;
   let dragStartCell = null;
@@ -517,6 +554,19 @@
     buildDesktopTable();
     $("dateInput").addEventListener("change", ()=>{ loadFromServer(); clearTempSelections(); });
     loadFromServer();
+  }
+  
+  function toggleMoveMode(){
+    moveModeActive = !moveModeActive;
+    const btn = $("#toggleMoveBtn");
+    if(moveModeActive){
+      btn.classList.add("active");
+      btn.textContent = "🔓 Перемещение активно";
+    } else {
+      btn.classList.remove("active");
+      btn.textContent = "🔒 Перемещение броней";
+    }
+    renderAllSliders(); // перерисовываем, чтобы добавить/убрать drag-handle
   }
   
   function buildDesktopTable(){
@@ -728,8 +778,13 @@
     }, 50);
   }
   
-  // Перемещение для существующей брони (без изменения размера)
+  // Перемещение для существующей брони (с проверкой флага moveModeActive)
   function startMove(booking, e) {
+    if(!moveModeActive) {
+      alert("Сначала включите режим перемещения броней (кнопка вверху)");
+      e.stopPropagation();
+      return;
+    }
     e.stopPropagation();
     const slider = e.currentTarget.closest('.slider');
     if (!slider) return;
@@ -965,14 +1020,19 @@
       let slider = document.createElement("div");
       let status = booking.confirmed === true ? "confirmed" : (booking.confirmed === false ? "rejected" : "pending");
       slider.className = `slider ${status}`;
+      if(!moveModeActive) slider.classList.add("move-disabled");
       slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
       let nameSpan = document.createElement("div"); nameSpan.className = "sl-name"; nameSpan.textContent = booking.name || "Бронь";
       let timeSpan = document.createElement("div"); timeSpan.className = "sl-time"; timeSpan.textContent = `${fmt(booking.start)} – ${fmt(booking.end)}`;
       slider.appendChild(nameSpan); slider.appendChild(timeSpan);
       
-      // Только drag-handle для перемещения, resize-handle отсутствует
       let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
-      dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
+      if(moveModeActive) {
+        dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
+      } else {
+        dragHandle.style.cursor = "default";
+        dragHandle.style.pointerEvents = "none";
+      }
       slider.appendChild(dragHandle);
       
       slider.addEventListener("click", (e) => { if(e.target === dragHandle) return; showInfoModal(booking); });

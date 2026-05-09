@@ -352,6 +352,7 @@
       cursor: ew-resize;
       transition: all 0.1s;
       z-index: 5;
+      pointer-events: auto;
     }
     .resize-handle:hover { background: rgba(0,0,0,0.65); width: 16px; }
     .handle-left { left: 3px; }
@@ -365,8 +366,15 @@
       cursor: grab;
       background: transparent;
       z-index: 2;
+      pointer-events: auto;
     }
     .drag-handle:active { cursor: grabbing; }
+    
+    /* Для существующих броней скрываем ручки изменения размера */
+    .slider:not(.temp) .resize-handle {
+      display: none !important;
+      pointer-events: none !important;
+    }
 
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); z-index: 2000; justify-content: center; align-items: center; }
     .overlay.open { display: flex; }
@@ -720,7 +728,7 @@
     }, 50);
   }
   
-  // Перемещение для существующей брони
+  // Перемещение для существующей брони (без изменения размера)
   function startMove(booking, e) {
     e.stopPropagation();
     const slider = e.currentTarget.closest('.slider');
@@ -883,61 +891,6 @@
     updateGhost(currentLane, currentStartIdx);
   }
   
-  function startResize(booking, side, e){
-    if(!booking.id) return;
-    e.stopPropagation(); e.preventDefault();
-    resizePreview = document.createElement("div");
-    resizePreview.className = "resize-preview";
-    const scrollDiv = document.getElementById("gridScroll");
-    scrollDiv.style.position = "relative";
-    scrollDiv.appendChild(resizePreview);
-    let cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
-    let startIdx = slots.findIndex(s => s.key === booking.start);
-    let endIdx = slots.findIndex(s => s.key === booking.end);
-    let ctx = { booking, side, startX: e.clientX, startIdx, endIdx, initialStartIdx: startIdx, initialEndIdx: endIdx, cellWidth };
-    function update(clientX){
-      let deltaX = clientX - ctx.startX;
-      let idxDelta = deltaX / ctx.cellWidth;
-      if(ctx.side === 'left'){
-        let rawIdx = ctx.initialStartIdx + idxDelta;
-        let newIdx = Math.max(0, Math.min(ctx.initialEndIdx - 0.01, rawIdx));
-        newIdx = Math.round(newIdx);
-        let newKey = slots[newIdx]?.key;
-        if(newKey && newKey !== ctx.booking.start) ctx.booking.start = newKey;
-      } else {
-        let rawIdx = ctx.initialEndIdx + idxDelta;
-        let newIdx = Math.max(ctx.initialStartIdx + 0.01, Math.min(slots.length - 1, rawIdx));
-        newIdx = Math.round(newIdx);
-        let newKey = slots[newIdx]?.key;
-        if(newKey && newKey !== ctx.booking.end) ctx.booking.end = newKey;
-      }
-      let curStart = slots.findIndex(s => s.key === ctx.booking.start);
-      let curEnd = slots.findIndex(s => s.key === ctx.booking.end);
-      let row = $("dtBody").rows[ctx.booking.lane];
-      if(row && row.cells[curStart+1] && row.cells[curEnd+1]){
-        let left = row.cells[curStart+1].offsetLeft + 1;
-        let top = row.offsetTop + 1;
-        let width = (row.cells[curEnd+1].offsetLeft + row.cells[curEnd+1].offsetWidth) - row.cells[curStart+1].offsetLeft - 2;
-        let height = row.offsetHeight - 2;
-        resizePreview.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
-      }
-      renderAllSliders();
-      scheduleUpdate(ctx.booking);
-    }
-    function onMove(e){ if(ctx) update(e.clientX); }
-    function onEnd(){
-      if(resizePreview) resizePreview.remove();
-      document.body.style.cursor = "";
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onEnd);
-      renderAllSliders(); saveToServer(booking);
-    }
-    document.body.style.cursor = "ew-resize";
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onEnd);
-    update(e.clientX);
-  }
-  
   function startResizeForTemp(temp, side, e){
     e.stopPropagation(); e.preventDefault();
     resizePreview = document.createElement("div");
@@ -1017,17 +970,12 @@
       let timeSpan = document.createElement("div"); timeSpan.className = "sl-time"; timeSpan.textContent = `${fmt(booking.start)} – ${fmt(booking.end)}`;
       slider.appendChild(nameSpan); slider.appendChild(timeSpan);
       
+      // Только drag-handle для перемещения, resize-handle отсутствует
       let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
       dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
       slider.appendChild(dragHandle);
       
-      let leftHandle = document.createElement("div"); leftHandle.className = "resize-handle handle-left";
-      leftHandle.addEventListener("mousedown", (e) => startResize(booking, 'left', e));
-      let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right";
-      rightHandle.addEventListener("mousedown", (e) => startResize(booking, 'right', e));
-      slider.appendChild(leftHandle); slider.appendChild(rightHandle);
-      
-      slider.addEventListener("click", (e) => { if(e.target === leftHandle || e.target === rightHandle || e.target === dragHandle) return; showInfoModal(booking); });
+      slider.addEventListener("click", (e) => { if(e.target === dragHandle) return; showInfoModal(booking); });
       container.appendChild(slider);
     });
     

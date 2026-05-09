@@ -1,4 +1,4 @@
-ПЕРЕДЕЛАЙ ПОЛНОСТЬЮ ВСЕ С НУЛЯ ВКЛЮЧАЯ СТРУКТУРУ ДИЗАН ВСЕ , КУЧА БАГОВ ВЕСЬ КОД ПОЛОХОЙ : <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8"/>
@@ -120,7 +120,7 @@
     }
     .btn-book:hover { background: var(--blue-h); transform: scale(0.98); }
 
-    /* НОВЫЙ КОНТЕЙНЕР ДЛЯ КАРТОЧЕК — справа от кнопки "Новая бронь" */
+    /* КОНТЕЙНЕР ДЛЯ КАРТОЧЕК ЧЕРНОВИКОВ — справа от кнопки "Новая бронь" */
     .inline-temp-cards {
       display: flex;
       align-items: center;
@@ -313,7 +313,7 @@
       position: absolute;
       border-radius: 12px;
       pointer-events: auto;
-      cursor: grab;
+      cursor: pointer;
       padding: 6px 10px;
       display: flex;
       flex-direction: column;
@@ -325,15 +325,8 @@
       will-change: left, top;
       transition: none;
     }
-    .slider:active { cursor: grabbing; }
+    .slider:active { cursor: pointer; }
     .slider:hover { opacity: 0.98; transform: scale(1.01); z-index: 30; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
-    .slider.dragging {
-      opacity: 0.7 !important;
-      z-index: 100 !important;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.25) !important;
-      pointer-events: none !important;
-      transition: none !important;
-    }
     .slider.pending { background: rgba(255,159,10,0.3); border-left: 4px solid #ff9f0a; }
     .slider.confirmed { background: rgba(52,199,89,0.3); border-left: 4px solid #34c759; }
     .slider.rejected { background: rgba(255,59,48,0.25); border-left: 4px solid #ff3b30; opacity: 0.85; }
@@ -341,9 +334,13 @@
       background: rgba(0, 113, 227, 0.35);
       border-left: 4px solid #0071e3;
       backdrop-filter: blur(4px);
+      cursor: grab;
     }
+    .slider.temp:active { cursor: grabbing; }
     .sl-name { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sl-time { font-size: 9px; opacity: 0.85; white-space: nowrap; }
+    
+    /* РУЧКИ РАЗМЕРА И ПЕРЕМЕЩЕНИЯ — ТОЛЬКО ДЛЯ ЧЕРНОВИКОВ, ДЛЯ ОСНОВНЫХ БРОНЕЙ СКРЫТЫ */
     .resize-handle {
       position: absolute;
       width: 14px;
@@ -354,6 +351,7 @@
       cursor: ew-resize;
       transition: all 0.1s;
       z-index: 5;
+      pointer-events: auto;
     }
     .resize-handle:hover { background: rgba(0,0,0,0.65); width: 16px; }
     .handle-left { left: 3px; }
@@ -367,11 +365,16 @@
       cursor: grab;
       background: transparent;
       z-index: 2;
+      pointer-events: auto;
     }
     .drag-handle:active { cursor: grabbing; }
-
-    /* старый контейнер больше не нужен, но оставим скрытым */
-    #tempContainer { display: none; }
+    
+    /* Броням без права редактирования запрещаем любые движения/изменения */
+    .slider:not(.temp) .drag-handle,
+    .slider:not(.temp) .resize-handle {
+      display: none !important;
+      pointer-events: none !important;
+    }
 
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); z-index: 2000; justify-content: center; align-items: center; }
     .overlay.open { display: flex; }
@@ -447,7 +450,7 @@
       </div>
       <button class="btn-book" onclick="openBookModal()">➕ Новая бронь</button>
       
-      <!-- КОНТЕЙНЕР ДЛЯ КАРТОЧЕК ЧЕРНОВИКОВ - поялятся справа от кнопки -->
+      <!-- КОНТЕЙНЕР ДЛЯ КАРТОЧЕК ЧЕРНОВИКОВ - появляется справа от кнопки -->
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
 
@@ -577,7 +580,6 @@
     }
   }
   
-  // Новая функция рендера карточек прямо в панели, справа от кнопки
   function renderInlineTempCards(){
     const container = $("inlineTempContainer");
     if(!container) return;
@@ -606,7 +608,7 @@
     });
   }
   
-  // DRAG to create temp
+  // DRAG to create temp (только для черновиков)
   function onMouseDown(e){
     let target = e.target;
     if(target.classList && target.classList.contains("slot")){
@@ -715,29 +717,6 @@
     await fetch(GAS_URL, { method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id: booking.id, date, tableNumber: booking.lane+1, start: booking.start, end: booking.end, name: booking.name, phone: booking.phone, comment: booking.comment }) });
   }
   
-  function scheduleUpdate(booking){
-    if(updateTimeout) clearTimeout(updateTimeout);
-    updateTimeout = setTimeout(() => { renderAllSliders(); updateTimeout = null; }, 50);
-  }
-  
-  async function confirmBooking(yes){
-    if(!currentBooking) return;
-    showLoad();
-    await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"confirm", id:currentBooking.id, confirmed:yes }) });
-    closeInfoModal();
-    await loadFromServer();
-    hideLoad();
-  }
-  
-  async function deleteBooking(){
-    if(!currentBooking || !confirm("Удалить бронь?")) return;
-    showLoad();
-    await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"delete", id:currentBooking.id }) });
-    closeInfoModal();
-    await loadFromServer();
-    hideLoad();
-  }
-  
   function scheduleUpdateForTemp(){
     if(updateTimeout) clearTimeout(updateTimeout);
     updateTimeout = setTimeout(() => {
@@ -748,9 +727,20 @@
     }, 50);
   }
   
-  // --- плавное перемещение ---
-  function startMoveEntity(entity, e, isTemp) {
+  // ФУНКЦИИ ПЕРЕМЕЩЕНИЯ/ИЗМЕНЕНИЯ РАЗМЕРА ТОЛЬКО ДЛЯ ЧЕРНОВИКОВ
+  function startMoveForTemp(temp, e){ 
     e.stopPropagation();
+    // черновики перемещаются как раньше
+    startMoveEntity(temp, e, true); 
+  }
+  function startResizeForTemp(temp, side, e){
+    e.stopPropagation(); e.preventDefault();
+    startResizeEntity(temp, side, e, true);
+  }
+  
+  // универсальная логика, но только для temp мы разрешаем
+  function startMoveEntity(entity, e, isTemp) {
+    if(!isTemp) return; // для реальных броней перемещение запрещено
     const slider = e.currentTarget.closest('.slider');
     if (!slider) return;
     const rows = $("dtBody").rows;
@@ -808,9 +798,8 @@
         const newStart = slots[finalStartIdx].key;
         const newEnd = slots[finalStartIdx + durationCells].key;
         let conflict = false;
-        if (!isTemp) {
-          conflict = bookings.some(b => b.id !== entity.id && b.lane === finalLane && !(b.end <= newStart || b.start >= newEnd));
-        }
+        if (!isTemp) conflict = bookings.some(b => b.id !== entity.id && b.lane === finalLane && !(b.end <= newStart || b.start >= newEnd));
+        else conflict = bookings.some(b => b.lane === finalLane && !(b.end <= newStart || b.start >= newEnd));
         if (!conflict) {
           entity.lane = finalLane;
           entity.start = newStart;
@@ -821,7 +810,7 @@
           } else {
             saveToServer(entity);
           }
-        } else if (!isTemp) alert("Невозможно переместить: конфликт с другой бронью");
+        } else if (!isTemp) alert("Невозможно переместить: конфликт");
       }
       ghost.remove();
       slider.classList.remove('dragging');
@@ -836,11 +825,8 @@
     updateGhost(currentLane, currentStartIdx);
   }
   
-  function startMove(booking, e) { if (booking.id) startMoveEntity(booking, e, false); }
-  function startMoveForTemp(temp, e) { startMoveEntity(temp, e, true); }
-  
-  function startResize(booking, side, e){
-    if(!booking.id) return;
+  function startResizeEntity(entity, side, e, isTemp) {
+    if(!isTemp) return;
     e.stopPropagation(); e.preventDefault();
     resizePreview = document.createElement("div");
     resizePreview.className = "resize-preview";
@@ -848,9 +834,9 @@
     scrollDiv.style.position = "relative";
     scrollDiv.appendChild(resizePreview);
     let cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
-    let startIdx = slots.findIndex(s => s.key === booking.start);
-    let endIdx = slots.findIndex(s => s.key === booking.end);
-    let ctx = { booking, side, startX: e.clientX, startIdx, endIdx, initialStartIdx: startIdx, initialEndIdx: endIdx, cellWidth };
+    let startIdx = slots.findIndex(s => s.key === entity.start);
+    let endIdx = slots.findIndex(s => s.key === entity.end);
+    let ctx = { entity, side, startX: e.clientX, startIdx, endIdx, initialStartIdx: startIdx, initialEndIdx: endIdx, cellWidth, isTemp };
     function update(clientX){
       let deltaX = clientX - ctx.startX;
       let idxDelta = deltaX / ctx.cellWidth;
@@ -859,71 +845,17 @@
         let newIdx = Math.max(0, Math.min(ctx.initialEndIdx - 0.01, rawIdx));
         newIdx = Math.round(newIdx);
         let newKey = slots[newIdx]?.key;
-        if(newKey && newKey !== ctx.booking.start) ctx.booking.start = newKey;
+        if(newKey && newKey !== ctx.entity.start) ctx.entity.start = newKey;
       } else {
         let rawIdx = ctx.initialEndIdx + idxDelta;
         let newIdx = Math.max(ctx.initialStartIdx + 0.01, Math.min(slots.length - 1, rawIdx));
         newIdx = Math.round(newIdx);
         let newKey = slots[newIdx]?.key;
-        if(newKey && newKey !== ctx.booking.end) ctx.booking.end = newKey;
+        if(newKey && newKey !== ctx.entity.end) ctx.entity.end = newKey;
       }
-      let curStart = slots.findIndex(s => s.key === ctx.booking.start);
-      let curEnd = slots.findIndex(s => s.key === ctx.booking.end);
-      let row = $("dtBody").rows[ctx.booking.lane];
-      if(row && row.cells[curStart+1] && row.cells[curEnd+1]){
-        let left = row.cells[curStart+1].offsetLeft + 1;
-        let top = row.offsetTop + 1;
-        let width = (row.cells[curEnd+1].offsetLeft + row.cells[curEnd+1].offsetWidth) - row.cells[curStart+1].offsetLeft - 2;
-        let height = row.offsetHeight - 2;
-        resizePreview.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
-      }
-      renderAllSliders();
-      scheduleUpdate(booking);
-    }
-    function onMove(e){ if(ctx) update(e.clientX); }
-    function onEnd(){
-      if(resizePreview) resizePreview.remove();
-      document.body.style.cursor = "";
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onEnd);
-      renderAllSliders(); saveToServer(booking);
-    }
-    document.body.style.cursor = "ew-resize";
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onEnd);
-    update(e.clientX);
-  }
-  
-  function startResizeForTemp(temp, side, e){
-    e.stopPropagation(); e.preventDefault();
-    resizePreview = document.createElement("div");
-    resizePreview.className = "resize-preview";
-    const scrollDiv = document.getElementById("gridScroll");
-    scrollDiv.style.position = "relative";
-    scrollDiv.appendChild(resizePreview);
-    let cellWidth = $("dtBody").rows[0]?.cells[1]?.offsetWidth || 70;
-    let startIdx = slots.findIndex(s => s.key === temp.start);
-    let endIdx = slots.findIndex(s => s.key === temp.end);
-    let ctx = { temp, side, startX: e.clientX, startIdx, endIdx, initialStartIdx: startIdx, initialEndIdx: endIdx, cellWidth };
-    function update(clientX){
-      let deltaX = clientX - ctx.startX;
-      let idxDelta = deltaX / ctx.cellWidth;
-      if(ctx.side === 'left'){
-        let rawIdx = ctx.initialStartIdx + idxDelta;
-        let newIdx = Math.max(0, Math.min(ctx.initialEndIdx - 0.01, rawIdx));
-        newIdx = Math.round(newIdx);
-        let newKey = slots[newIdx]?.key;
-        if(newKey && newKey !== ctx.temp.start) ctx.temp.start = newKey;
-      } else {
-        let rawIdx = ctx.initialEndIdx + idxDelta;
-        let newIdx = Math.max(ctx.initialStartIdx + 0.01, Math.min(slots.length - 1, rawIdx));
-        newIdx = Math.round(newIdx);
-        let newKey = slots[newIdx]?.key;
-        if(newKey && newKey !== ctx.temp.end) ctx.temp.end = newKey;
-      }
-      let curStart = slots.findIndex(s => s.key === ctx.temp.start);
-      let curEnd = slots.findIndex(s => s.key === ctx.temp.end);
-      let row = $("dtBody").rows[ctx.temp.lane];
+      let curStart = slots.findIndex(s => s.key === ctx.entity.start);
+      let curEnd = slots.findIndex(s => s.key === ctx.entity.end);
+      let row = $("dtBody").rows[ctx.entity.lane];
       if(row && row.cells[curStart+1] && row.cells[curEnd+1]){
         let left = row.cells[curStart+1].offsetLeft + 1;
         let top = row.offsetTop + 1;
@@ -956,6 +888,7 @@
     let rows = Array.from($("dtBody").querySelectorAll("tr"));
     if(rows.length === 0) return;
     
+    // основные брони (только просмотр, без ручек и перетаскивания)
     bookings.forEach(booking => {
       let startIdx = slots.findIndex(s => s.key === booking.start);
       let endIdx = slots.findIndex(s => s.key === booking.end);
@@ -972,18 +905,12 @@
       let nameSpan = document.createElement("div"); nameSpan.className = "sl-name"; nameSpan.textContent = booking.name || "Бронь";
       let timeSpan = document.createElement("div"); timeSpan.className = "sl-time"; timeSpan.textContent = `${fmt(booking.start)} – ${fmt(booking.end)}`;
       slider.appendChild(nameSpan); slider.appendChild(timeSpan);
-      let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
-      dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
-      slider.appendChild(dragHandle);
-      let leftHandle = document.createElement("div"); leftHandle.className = "resize-handle handle-left";
-      leftHandle.addEventListener("mousedown", (e) => startResize(booking, 'left', e));
-      let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right";
-      rightHandle.addEventListener("mousedown", (e) => startResize(booking, 'right', e));
-      slider.appendChild(leftHandle); slider.appendChild(rightHandle);
-      slider.addEventListener("click", (e) => { if(e.target === leftHandle || e.target === rightHandle || e.target === dragHandle) return; showInfoModal(booking); });
+      // нет drag-handle и resize-handle — только клик для просмотра
+      slider.addEventListener("click", (e) => { e.stopPropagation(); showInfoModal(booking); });
       container.appendChild(slider);
     });
     
+    // черновики (с полным управлением: перемещение + изменение размера)
     tempBookings.forEach(temp => {
       let startIdx = slots.findIndex(s => s.key === temp.start);
       let endIdx = slots.findIndex(s => s.key === temp.end);
@@ -1007,6 +934,7 @@
       let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right";
       rightHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'right', e));
       slider.appendChild(leftHandle); slider.appendChild(rightHandle);
+      // для черновиков клик не показываем модалку, но можно по желанию — сейчас просто без лишнего
       container.appendChild(slider);
     });
   }
@@ -1019,6 +947,22 @@
   let currentBooking = null;
   function showInfoModal(b){ currentBooking = b; $("i-table").textContent = "№ "+(b.lane+1); $("i-time").textContent = `${fmt(b.start)} – ${fmt(b.end)}`; $("i-name").textContent = b.name; $("i-phone").textContent = b.phone || "—"; $("i-comment").textContent = b.comment || "—"; $("infoModal").classList.add("open"); }
   function closeInfoModal(){ $("infoModal").classList.remove("open"); currentBooking=null; }
+  async function confirmBooking(yes){
+    if(!currentBooking) return;
+    showLoad();
+    await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"confirm", id:currentBooking.id, confirmed:yes }) });
+    closeInfoModal();
+    await loadFromServer();
+    hideLoad();
+  }
+  async function deleteBooking(){
+    if(!currentBooking || !confirm("Удалить бронь?")) return;
+    showLoad();
+    await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"delete", id:currentBooking.id }) });
+    closeInfoModal();
+    await loadFromServer();
+    hideLoad();
+  }
   function showLoad(){ $("loader").style.display="flex"; }
   function hideLoad(){ $("loader").style.display="none"; }
   function openImg(){ $("imgPopup").classList.add("open"); }

@@ -138,14 +138,7 @@
       color: white;
       box-shadow: 0 2px 8px rgba(0,113,227,.4);
     }
-    .btn-move-toggle.active::before {
-      content: "🔓";
-      font-size: 14px;
-    }
-    .btn-move-toggle:not(.active)::before {
-      content: "🔒";
-      font-size: 14px;
-    }
+    .btn-move-toggle:active { transform: scale(0.97); }
 
     .inline-temp-cards {
       display: flex;
@@ -324,7 +317,6 @@
       .ctrl { flex-direction: column; align-items: stretch; }
       .inline-temp-cards { margin-left: 0; justify-content: flex-start; }
       .btn-book, .btn-move-toggle { width: 100%; justify-content: center; }
-      .btn-move-toggle { margin-top: 0; }
     }
 
     #slidersLayer {
@@ -369,11 +361,20 @@
       border-left: 4px solid #0071e3;
       backdrop-filter: blur(4px);
     }
-    /* Стиль для брони, когда режим перетаскивания выключен - нельзя двигать */
+    /* Стиль для брони, когда режим перетаскивания выключен */
+    .slider.move-disabled {
+      cursor: pointer;
+    }
     .slider.move-disabled .drag-handle {
       cursor: default !important;
-      background: transparent !important;
       pointer-events: none !important;
+    }
+    /* Когда режим включен - показываем что можно тащить */
+    .slider:not(.move-disabled) .drag-handle {
+      cursor: grab;
+    }
+    .slider:not(.move-disabled) .drag-handle:active {
+      cursor: grabbing;
     }
     .sl-name { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sl-time { font-size: 9px; opacity: 0.85; white-space: nowrap; }
@@ -403,7 +404,6 @@
       z-index: 2;
       pointer-events: auto;
     }
-    .drag-handle:active { cursor: grabbing; }
     
     /* Для существующих броней ручки изменения размера не показываем */
     .slider:not(.temp) .resize-handle {
@@ -483,7 +483,7 @@
         <input type="date" id="dateInput"/>
       </div>
       <button class="btn-book" onclick="openBookModal()">➕ Новая бронь</button>
-      <button id="toggleMoveBtn" class="btn-move-toggle" onclick="toggleMoveMode()">Перемещение броней</button>
+      <button id="toggleMoveBtn" class="btn-move-toggle" onclick="toggleMoveMode()">🔒 Перемещение броней</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
 
@@ -526,7 +526,7 @@
   let bookings = [];
   let tempBookings = [];
   let nextTempId = 1;
-  let moveModeActive = false; // Флаг: разрешено ли перемещение существующих броней
+  let moveModeActive = false;
   
   let isDragging = false;
   let dragStartCell = null;
@@ -561,12 +561,12 @@
     const btn = $("#toggleMoveBtn");
     if(moveModeActive){
       btn.classList.add("active");
-      btn.textContent = "🔓 Перемещение активно";
+      btn.innerHTML = "🔓 Перемещение активно";
     } else {
       btn.classList.remove("active");
-      btn.textContent = "🔒 Перемещение броней";
+      btn.innerHTML = "🔒 Перемещение броней";
     }
-    renderAllSliders(); // перерисовываем, чтобы добавить/убрать drag-handle
+    renderAllSliders();
   }
   
   function buildDesktopTable(){
@@ -763,22 +763,6 @@
     await fetch(GAS_URL, { method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id: booking.id, date, tableNumber: booking.lane+1, start: booking.start, end: booking.end, name: booking.name, phone: booking.phone, comment: booking.comment }) });
   }
   
-  function scheduleUpdate(booking){
-    if(updateTimeout) clearTimeout(updateTimeout);
-    updateTimeout = setTimeout(() => { renderAllSliders(); updateTimeout = null; }, 50);
-  }
-  
-  function scheduleUpdateForTemp(){
-    if(updateTimeout) clearTimeout(updateTimeout);
-    updateTimeout = setTimeout(() => {
-      renderInlineTempCards();
-      highlightAllTempBookings();
-      renderAllSliders();
-      updateTimeout = null;
-    }, 50);
-  }
-  
-  // Перемещение для существующей брони (с проверкой флага moveModeActive)
   function startMove(booking, e) {
     if(!moveModeActive) {
       alert("Сначала включите режим перемещения броней (кнопка вверху)");
@@ -1000,6 +984,16 @@
     update(e.clientX);
   }
   
+  function scheduleUpdateForTemp(){
+    if(updateTimeout) clearTimeout(updateTimeout);
+    updateTimeout = setTimeout(() => {
+      renderInlineTempCards();
+      highlightAllTempBookings();
+      renderAllSliders();
+      updateTimeout = null;
+    }, 50);
+  }
+  
   function renderAllSliders(){
     let container = $("slidersLayer");
     if(!container) return;
@@ -1030,12 +1024,14 @@
       if(moveModeActive) {
         dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
       } else {
-        dragHandle.style.cursor = "default";
         dragHandle.style.pointerEvents = "none";
       }
       slider.appendChild(dragHandle);
       
-      slider.addEventListener("click", (e) => { if(e.target === dragHandle) return; showInfoModal(booking); });
+      slider.addEventListener("click", (e) => { 
+        if(e.target === dragHandle) return; 
+        showInfoModal(booking); 
+      });
       container.appendChild(slider);
     });
     

@@ -296,6 +296,13 @@
       border-right: .5px solid var(--border);
       transition: background 0.06s;
     }
+    
+    /* КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: в режиме перетяжки отключаем pointer-events на ячейках */
+    body.drag-mode-active #tableDesktop tbody td.slot {
+      pointer-events: none !important;
+      cursor: default !important;
+    }
+    
     #tableDesktop tbody td.slot.drag-over { background: #ffe6a3 !important; }
     #tableDesktop tbody td.slot.selected-temp {
       background: #b8e1fc !important;
@@ -541,7 +548,6 @@
   let isDragging = false;
   let dragStartCell = null;
   let dragInterval = null;
-  let resizePreview = null;
   let updateTimeout = null;
   
   let dragModeEnabled = false;
@@ -574,10 +580,12 @@
         toggleBtn.textContent = "🎯 Режим перетяжки: ВКЛ";
         toggleBtn.classList.add("active");
         $("dragModeIndicator").style.display = "block";
+        document.body.classList.add("drag-mode-active");
       } else {
         toggleBtn.textContent = "🎯 Режим перетяжки: ВЫКЛ";
         toggleBtn.classList.remove("active");
         $("dragModeIndicator").style.display = "none";
+        document.body.classList.remove("drag-mode-active");
       }
       renderAllSliders();
     });
@@ -670,13 +678,7 @@
   }
   
   function onMouseDown(e){
-    if(dragModeEnabled) {
-      if(e.target.classList && e.target.classList.contains("slot")) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      return;
-    }
+    if(dragModeEnabled) return;
     
     let target = e.target;
     if(target.classList && target.classList.contains("slot")){
@@ -693,7 +695,7 @@
   function onMouseMove(e){
     if(dragModeEnabled) return;
     
-    if(!dragModeEnabled && isDragging && dragStartCell){
+    if(isDragging && dragStartCell){
       let hoverEl = document.elementsFromPoint(e.clientX, e.clientY).find(el => el.classList && el.classList.contains("slot"));
       if(hoverEl){
         let lane = parseInt(hoverEl.dataset.lane);
@@ -721,7 +723,7 @@
   function onMouseUp(){
     if(dragModeEnabled) return;
     
-    if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){
+    if(isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){
       let { lane, startIdx, endIdx } = dragInterval;
       let start = slots[startIdx].key;
       let end = slots[endIdx].key;
@@ -789,16 +791,6 @@
     await fetch(GAS_URL, { method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id: booking.id, date, tableNumber: booking.lane+1, start: booking.start, end: booking.end, name: booking.name, phone: booking.phone, comment: booking.comment }) });
   }
   
-  function scheduleUpdateForTemp(){
-    if(updateTimeout) clearTimeout(updateTimeout);
-    updateTimeout = setTimeout(() => {
-      renderInlineTempCards();
-      highlightAllTempBookings();
-      renderAllSliders();
-      updateTimeout = null;
-    }, 50);
-  }
-  
   function startMove(booking, e) {
     if(!dragModeEnabled) return;
     e.stopPropagation();
@@ -863,7 +855,6 @@
           booking.end = newEnd;
           saveToServer(booking);
           renderAllSliders();
-          if(dragModeEnabled) renderAllSliders();
         } else alert("Конфликт");
       }
       ghost.remove();
@@ -971,7 +962,6 @@
     let rows = $("dtBody").rows;
     let startIdx = slots.findIndex(s => s.key === temp.start);
     let endIdx = slots.findIndex(s => s.key === temp.end);
-    let durationCells = endIdx - startIdx;
     
     let ghost = document.createElement('div');
     ghost.className = 'ghost-slider';

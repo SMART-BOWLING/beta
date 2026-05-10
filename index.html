@@ -297,12 +297,6 @@
       transition: background 0.06s;
     }
     
-    /* КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: в режиме перетяжки отключаем pointer-events на ячейках */
-    body.drag-mode-active #tableDesktop tbody td.slot {
-      pointer-events: none !important;
-      cursor: default !important;
-    }
-    
     #tableDesktop tbody td.slot.drag-over { background: #ffe6a3 !important; }
     #tableDesktop tbody td.slot.selected-temp {
       background: #b8e1fc !important;
@@ -580,12 +574,10 @@
         toggleBtn.textContent = "🎯 Режим перетяжки: ВКЛ";
         toggleBtn.classList.add("active");
         $("dragModeIndicator").style.display = "block";
-        document.body.classList.add("drag-mode-active");
       } else {
         toggleBtn.textContent = "🎯 Режим перетяжки: ВЫКЛ";
         toggleBtn.classList.remove("active");
         $("dragModeIndicator").style.display = "none";
-        document.body.classList.remove("drag-mode-active");
       }
       renderAllSliders();
     });
@@ -678,6 +670,7 @@
   }
   
   function onMouseDown(e){
+    // В режиме перетяжки полностью игнорируем создание новых выделений
     if(dragModeEnabled) return;
     
     let target = e.target;
@@ -693,6 +686,7 @@
   }
   
   function onMouseMove(e){
+    // В режиме перетяжки игнорируем
     if(dragModeEnabled) return;
     
     if(isDragging && dragStartCell){
@@ -721,6 +715,7 @@
   }
   
   function onMouseUp(){
+    // В режиме перетяжки игнорируем
     if(dragModeEnabled) return;
     
     if(isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){
@@ -854,7 +849,7 @@
           booking.start = newStart;
           booking.end = newEnd;
           saveToServer(booking);
-          renderAllSliders();
+          loadFromServer();
         } else alert("Конфликт");
       }
       ghost.remove();
@@ -862,7 +857,6 @@
       document.body.style.cursor = '';
       document.removeEventListener('mousemove', onDragMove);
       document.removeEventListener('mouseup', onDragEnd);
-      renderAllSliders();
     }
     document.body.style.cursor = 'grabbing';
     document.addEventListener('mousemove', onDragMove);

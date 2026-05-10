@@ -296,7 +296,6 @@
       border-right: .5px solid var(--border);
       transition: background 0.06s;
     }
-    
     #tableDesktop tbody td.slot.drag-over { background: #ffe6a3 !important; }
     #tableDesktop tbody td.slot.selected-temp {
       background: #b8e1fc !important;
@@ -338,6 +337,7 @@
       will-change: left, top;
       transition: none;
     }
+    /* Режим перетяжки ВЫКЛЮЧЕН — слайдер кликабелен, ручки скрыты */
     .slider:not(.drag-mode-enabled) {
       pointer-events: auto;
       cursor: pointer;
@@ -347,6 +347,7 @@
       display: none !important;
       pointer-events: none !important;
     }
+    /* Режим перетяжки ВКЛЮЧЕН — курсор схвати, ручки видны */
     .slider.drag-mode-enabled {
       cursor: grab;
     }
@@ -395,12 +396,12 @@
       left: 20px;
       right: 20px;
       height: 100%;
-      cursor: default;
       background: transparent;
       z-index: 2;
       pointer-events: auto;
     }
     
+    /* Для существующих броней ручки изменения размера скрыты всегда */
     .slider:not(.temp) .resize-handle {
       display: none !important;
       pointer-events: none !important;
@@ -542,6 +543,7 @@
   let isDragging = false;
   let dragStartCell = null;
   let dragInterval = null;
+  let resizePreview = null;
   let updateTimeout = null;
   
   let dragModeEnabled = false;
@@ -574,6 +576,9 @@
         toggleBtn.textContent = "🎯 Режим перетяжки: ВКЛ";
         toggleBtn.classList.add("active");
         $("dragModeIndicator").style.display = "block";
+        setTimeout(() => {
+          if($("dragModeIndicator")) $("dragModeIndicator").style.opacity = "0.8";
+        }, 100);
       } else {
         toggleBtn.textContent = "🎯 Режим перетяжки: ВЫКЛ";
         toggleBtn.classList.remove("active");
@@ -669,6 +674,7 @@
     });
   }
   
+  // Исправленный обработчик mousedown — в режиме перетяжки не создаём черновики
   function onMouseDown(e){
     if(dragModeEnabled) return;
     
@@ -685,9 +691,7 @@
   }
   
   function onMouseMove(e){
-    if(dragModeEnabled) return;
-    
-    if(isDragging && dragStartCell){
+    if(!dragModeEnabled && isDragging && dragStartCell){
       let hoverEl = document.elementsFromPoint(e.clientX, e.clientY).find(el => el.classList && el.classList.contains("slot"));
       if(hoverEl){
         let lane = parseInt(hoverEl.dataset.lane);
@@ -713,9 +717,7 @@
   }
   
   function onMouseUp(){
-    if(dragModeEnabled) return;
-    
-    if(isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){
+    if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){
       let { lane, startIdx, endIdx } = dragInterval;
       let start = slots[startIdx].key;
       let end = slots[endIdx].key;
@@ -780,26 +782,41 @@
   async function saveToServer(booking){
     if(!booking.id) return;
     let date = $("dateInput").value;
-    try {
-      await fetch(GAS_URL, { method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id: booking.id, date, tableNumber: booking.lane+1, start: booking.start, end: booking.end, name: booking.name, phone: booking.phone, comment: booking.comment }) });
-    } catch(e) {
-      console.error("Ошибка сохранения:", e);
-    }
+    await fetch(GAS_URL, { method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id: booking.id, date, tableNumber: booking.lane+1, start: booking.start, end: booking.end, name: booking.name, phone: booking.phone, comment: booking.comment }) });
   }
   
+  function scheduleUpdateForTemp(){
+    if(updateTimeout) clearTimeout(updateTimeout);
+    updateTimeout = setTimeout(() => {
+      renderInlineTempCards();
+      highlightAllTempBookings();
+      renderAllSliders();
+      updateTimeout = null;
+    }, 50);
+  }
+  
+  // Исправленная функция перемещения брони
   function startMove(booking, e) {
-    if(!dragModeEnabled) return;
+    if(!dragModeEnabled) {
+      e.stopPropagation();
+      showInfoModal(booking);
+      return;
+    }
+    
     e.stopPropagation();
     const slider = e.currentTarget.closest('.slider');
     if (!slider) return;
     
     let rows = $("dtBody").rows;
-    let durationCells = slots.findIndex(s => s.key === booking.end) - slots.findIndex(s => s.key === booking.start);
     let startIdxOrig = slots.findIndex(s => s.key === booking.start);
+    let endIdxOrig = slots.findIndex(s => s.key === booking.end);
+    let durationCells = endIdxOrig - startIdxOrig;
+    
     let ghost = document.createElement('div');
     ghost.className = 'ghost-slider';
     ghost.style.cssText = slider.style.cssText;
     ghost.style.opacity = '0.6';
+    ghost.style.pointerEvents = 'none';
     $('slidersLayer').appendChild(ghost);
     slider.classList.add('dragging');
     
@@ -811,6 +828,7 @@
       if (!el) return null;
       return { lane: parseInt(el.dataset.lane), idx: parseInt(el.dataset.si) };
     }
+    
     function updateGhost(lane, startIdx) {
       const row = rows[lane];
       if (!row) return;
@@ -823,6 +841,7 @@
         ghost.style.height = (row.offsetHeight - 2) + 'px';
       }
     }
+    
     function onDragMove(ev) {
       const target = getTargetFromCoords(ev.clientX, ev.clientY);
       if (target) {
@@ -836,6 +855,7 @@
         }
       }
     }
+    
     function onDragEnd(ev) {
       const target = getTargetFromCoords(ev.clientX, ev.clientY);
       if (target) {
@@ -845,15 +865,13 @@
         const newStart = slots[finalStartIdx].key;
         const newEnd = slots[finalStartIdx + durationCells].key;
         let conflict = bookings.some(b => b.id !== booking.id && b.lane === finalLane && !(b.end <= newStart || b.start >= newEnd));
-        if (!conflict) {
+        if (!conflict && (finalLane !== booking.lane || finalStartIdx !== startIdxOrig)) {
           booking.lane = finalLane;
           booking.start = newStart;
           booking.end = newEnd;
-          saveToServer(booking).catch(console.error);
-          renderAllSliders();
-        } else {
-          alert("Конфликт");
-          renderAllSliders();
+          saveToServer(booking);
+        } else if (conflict) {
+          alert("Конфликт с другой бронью");
         }
       }
       ghost.remove();
@@ -861,26 +879,33 @@
       document.body.style.cursor = '';
       document.removeEventListener('mousemove', onDragMove);
       document.removeEventListener('mouseup', onDragEnd);
+      renderAllSliders();
     }
+    
     document.body.style.cursor = 'grabbing';
     document.addEventListener('mousemove', onDragMove);
     document.addEventListener('mouseup', onDragEnd);
     updateGhost(currentLane, currentStartIdx);
   }
   
-  function startMoveForTemp(temp, e){
+  // Перемещение черновика
+  function startMoveForTemp(temp, e) {
     if(!dragModeEnabled) return;
     e.stopPropagation();
-    const slider = e.currentTarget.closest('.slider');
-    if (!slider) return;
     
     let rows = $("dtBody").rows;
-    let durationCells = slots.findIndex(s => s.key === temp.end) - slots.findIndex(s => s.key === temp.start);
     let startIdxOrig = slots.findIndex(s => s.key === temp.start);
+    let endIdxOrig = slots.findIndex(s => s.key === temp.end);
+    let durationCells = endIdxOrig - startIdxOrig;
+    
+    let slider = e.currentTarget.closest('.slider');
+    if (!slider) return;
+    
     let ghost = document.createElement('div');
     ghost.className = 'ghost-slider';
     ghost.style.cssText = slider.style.cssText;
     ghost.style.opacity = '0.6';
+    ghost.style.pointerEvents = 'none';
     $('slidersLayer').appendChild(ghost);
     slider.classList.add('dragging');
     
@@ -892,6 +917,7 @@
       if (!el) return null;
       return { lane: parseInt(el.dataset.lane), idx: parseInt(el.dataset.si) };
     }
+    
     function updateGhost(lane, startIdx) {
       const row = rows[lane];
       if (!row) return;
@@ -904,6 +930,7 @@
         ghost.style.height = (row.offsetHeight - 2) + 'px';
       }
     }
+    
     function onDragMove(ev) {
       const target = getTargetFromCoords(ev.clientX, ev.clientY);
       if (target) {
@@ -917,6 +944,7 @@
         }
       }
     }
+    
     function onDragEnd(ev) {
       const target = getTargetFromCoords(ev.clientX, ev.clientY);
       if (target) {
@@ -925,20 +953,18 @@
         finalStartIdx = Math.min(Math.max(0, finalStartIdx), slots.length - durationCells - 1);
         const newStart = slots[finalStartIdx].key;
         const newEnd = slots[finalStartIdx + durationCells].key;
+        
         let conflict = bookings.some(b => b.lane === finalLane && !(b.end <= newStart || b.start >= newEnd));
         if (!conflict) {
-          const tempIndex = tempBookings.findIndex(t => t.id === temp.id);
-          if(tempIndex !== -1) {
-            tempBookings[tempIndex].lane = finalLane;
-            tempBookings[tempIndex].start = newStart;
-            tempBookings[tempIndex].end = newEnd;
-            renderInlineTempCards();
-            highlightAllTempBookings();
-            renderAllSliders();
-          }
-        } else {
-          alert("Конфликт");
+          temp.lane = finalLane;
+          temp.start = newStart;
+          temp.end = newEnd;
+          temp.id = nextTempId++;
+          renderInlineTempCards();
+          highlightAllTempBookings();
           renderAllSliders();
+        } else {
+          alert("Конфликт с существующей бронью");
         }
       }
       ghost.remove();
@@ -946,39 +972,36 @@
       document.body.style.cursor = '';
       document.removeEventListener('mousemove', onDragMove);
       document.removeEventListener('mouseup', onDragEnd);
+      renderAllSliders();
     }
+    
     document.body.style.cursor = 'grabbing';
     document.addEventListener('mousemove', onDragMove);
     document.addEventListener('mouseup', onDragEnd);
     updateGhost(currentLane, currentStartIdx);
   }
   
-  function startResizeForTemp(temp, side, e){
+  // Изменение размера черновика
+  function startResizeForTemp(temp, side, e) {
     if(!dragModeEnabled) return;
     e.stopPropagation();
-    const slider = e.currentTarget.closest('.slider');
-    if (!slider) return;
     
     let rows = $("dtBody").rows;
     let startIdx = slots.findIndex(s => s.key === temp.start);
     let endIdx = slots.findIndex(s => s.key === temp.end);
     
+    let slider = e.currentTarget.closest('.slider');
     let ghost = document.createElement('div');
     ghost.className = 'ghost-slider';
     ghost.style.cssText = slider.style.cssText;
-    ghost.style.opacity = '0.6';
+    ghost.style.pointerEvents = 'none';
     $('slidersLayer').appendChild(ghost);
     slider.classList.add('dragging');
     
     let currentStartIdx = startIdx;
     let currentEndIdx = endIdx;
     
-    function getTargetFromCoords(clientX, clientY) {
-      const el = document.elementsFromPoint(clientX, clientY).find(el => el.classList?.contains('slot'));
-      if (!el) return null;
-      return { lane: parseInt(el.dataset.lane), idx: parseInt(el.dataset.si) };
-    }
-    function updateGhost() {
+    function updateGhostResize() {
       const row = rows[temp.lane];
       if (!row) return;
       const startCell = row.cells[currentStartIdx + 1];
@@ -990,38 +1013,34 @@
         ghost.style.height = (row.offsetHeight - 2) + 'px';
       }
     }
+    
     function onDragMove(ev) {
-      const target = getTargetFromCoords(ev.clientX, ev.clientY);
-      if (target && target.lane === temp.lane) {
-        let newIdx = target.idx;
-        if (side === 'left' && newIdx < currentEndIdx) {
-          currentStartIdx = Math.min(newIdx, currentEndIdx - 1);
-        } else if (side === 'right' && newIdx > currentStartIdx) {
-          currentEndIdx = Math.max(newIdx, currentStartIdx + 1);
+      const target = document.elementsFromPoint(ev.clientX, ev.clientY).find(el => el.classList?.contains('slot'));
+      if (target) {
+        let idx = parseInt(target.dataset.si);
+        if (side === 'left') {
+          currentStartIdx = Math.min(idx, currentEndIdx - 1);
+          currentStartIdx = Math.max(0, currentStartIdx);
+        } else {
+          currentEndIdx = Math.max(idx, currentStartIdx + 1);
+          currentEndIdx = Math.min(slots.length - 1, currentEndIdx);
         }
-        updateGhost();
+        updateGhostResize();
       }
     }
+    
     function onDragEnd(ev) {
-      const target = getTargetFromCoords(ev.clientX, ev.clientY);
-      if (target && target.lane === temp.lane) {
-        const newStart = slots[currentStartIdx].key;
-        const newEnd = slots[currentEndIdx].key;
-        let conflict = bookings.some(b => b.lane === temp.lane && !(b.end <= newStart || b.start >= newEnd));
-        if (!conflict && newStart < newEnd) {
-          const tempIndex = tempBookings.findIndex(t => t.id === temp.id);
-          if(tempIndex !== -1) {
-            tempBookings[tempIndex].start = newStart;
-            tempBookings[tempIndex].end = newEnd;
-            renderInlineTempCards();
-            highlightAllTempBookings();
-            renderAllSliders();
-          }
-        } else if(newStart >= newEnd) {
-          alert("Некорректный интервал");
-        } else {
-          alert("Конфликт");
-        }
+      const newStart = slots[currentStartIdx].key;
+      const newEnd = slots[currentEndIdx].key;
+      let conflict = bookings.some(b => b.lane === temp.lane && !(b.end <= newStart || b.start >= newEnd));
+      if (!conflict && (currentStartIdx !== startIdx || currentEndIdx !== endIdx)) {
+        temp.start = newStart;
+        temp.end = newEnd;
+        renderInlineTempCards();
+        highlightAllTempBookings();
+        renderAllSliders();
+      } else if (conflict) {
+        alert("Конфликт с существующей бронью");
       }
       ghost.remove();
       slider.classList.remove('dragging');
@@ -1030,10 +1049,11 @@
       document.removeEventListener('mouseup', onDragEnd);
       renderAllSliders();
     }
+    
     document.body.style.cursor = 'ew-resize';
     document.addEventListener('mousemove', onDragMove);
     document.addEventListener('mouseup', onDragEnd);
-    updateGhost();
+    updateGhostResize();
   }
   
   function renderAllSliders(){
@@ -1066,7 +1086,11 @@
       if(dragModeEnabled) dragHandle.style.cursor = "grab";
       dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
       slider.appendChild(dragHandle);
-      slider.addEventListener("click", (e) => { if(e.target !== dragHandle) showInfoModal(booking); });
+      
+      slider.addEventListener("click", (e) => { 
+        e.stopPropagation();
+        if(!dragModeEnabled) showInfoModal(booking); 
+      });
       container.appendChild(slider);
     });
     
@@ -1097,7 +1121,8 @@
       if(dragModeEnabled) {
         leftHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'left', e));
         rightHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'right', e));
-        slider.appendChild(leftHandle); slider.appendChild(rightHandle);
+        slider.appendChild(leftHandle); 
+        slider.appendChild(rightHandle);
       }
       container.appendChild(slider);
     });

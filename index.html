@@ -219,7 +219,8 @@
     .dot-temp { background: #0071e3; }
 
     .grid-card {
-      background: var(--surface); border-radius: 24px;
+      background: var(--surface); 
+      border-radius: 24px;
       box-shadow: 0 4px 20px rgba(0,0,0,.06);
       overflow: hidden;
       border: .5px solid var(--border);
@@ -233,6 +234,7 @@
       width: 100%;
     }
 
+    /* КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: таблица не должна перехватывать события мыши */
     #tableDesktop {
       display: table;
       border-collapse: collapse;
@@ -240,7 +242,21 @@
       width: 100%;
       min-width: 1100px;
       font-size: 14px;
+      position: relative;
+      z-index: 1;
     }
+    
+    /* Ячейки таблицы НЕ должны перехватывать события мыши в режиме перетяжки */
+    body.drag-mode-active #tableDesktop td.slot {
+      pointer-events: none !important;
+    }
+    
+    /* В обычном режиме ячейки работают */
+    #tableDesktop td.slot {
+      pointer-events: auto;
+      cursor: crosshair;
+    }
+
     #tableDesktop thead th {
       height: var(--cell-h);
       font-size: 13px;
@@ -291,7 +307,6 @@
     .lane-hdr.grp-rust { color: #a83418; background: #fdf0ea !important; }
 
     #tableDesktop tbody td.slot {
-      cursor: crosshair;
       border-bottom: .5px solid var(--border);
       border-right: .5px solid var(--border);
       transition: background 0.06s;
@@ -319,8 +334,10 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 20;
+      z-index: 10;
     }
+    
+    /* Слайдеры всегда получают события мыши */
     .slider {
       position: absolute;
       border-radius: 12px;
@@ -337,6 +354,7 @@
       will-change: left, top;
       transition: none;
     }
+    
     /* Режим перетяжки ВЫКЛЮЧЕН — слайдер кликабелен, ручки скрыты */
     .slider:not(.drag-mode-enabled) {
       pointer-events: auto;
@@ -347,6 +365,7 @@
       display: none !important;
       pointer-events: none !important;
     }
+    
     /* Режим перетяжки ВКЛЮЧЕН — курсор схвати, ручки видны */
     .slider.drag-mode-enabled {
       cursor: grab;
@@ -357,7 +376,8 @@
       display: block;
     }
     .slider.drag-mode-enabled .drag-handle:active { cursor: grabbing; }
-    .slider:hover { opacity: 0.98; transform: scale(1.01); z-index: 30; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
+    
+    .slider:hover { opacity: 0.98; transform: scale(1.01); z-index: 15; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
     .slider.dragging {
       opacity: 0.7 !important;
       z-index: 100 !important;
@@ -430,16 +450,6 @@
     .loader-box { background: white; border-radius: 32px; padding: 28px 40px; }
     .spin { width: 38px; height: 38px; border: 3px solid #ddd; border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 14px; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    
-    .resize-preview {
-      position: absolute;
-      background: rgba(255, 159, 10, 0.4);
-      border: 2px dashed #ff9f0a;
-      border-radius: 14px;
-      pointer-events: none;
-      z-index: 25;
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
-    }
     
     .ghost-slider {
       position: absolute;
@@ -543,7 +553,6 @@
   let isDragging = false;
   let dragStartCell = null;
   let dragInterval = null;
-  let resizePreview = null;
   let updateTimeout = null;
   
   let dragModeEnabled = false;
@@ -576,13 +585,14 @@
         toggleBtn.textContent = "🎯 Режим перетяжки: ВКЛ";
         toggleBtn.classList.add("active");
         $("dragModeIndicator").style.display = "block";
-        setTimeout(() => {
-          if($("dragModeIndicator")) $("dragModeIndicator").style.opacity = "0.8";
-        }, 100);
+        // КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: отключаем pointer-events у ячеек таблицы
+        document.body.classList.add("drag-mode-active");
       } else {
         toggleBtn.textContent = "🎯 Режим перетяжки: ВЫКЛ";
         toggleBtn.classList.remove("active");
         $("dragModeIndicator").style.display = "none";
+        // Включаем pointer-events обратно
+        document.body.classList.remove("drag-mode-active");
       }
       renderAllSliders();
     });
@@ -674,8 +684,9 @@
     });
   }
   
-  // Исправленный обработчик mousedown — в режиме перетяжки не создаём черновики
+  // Обработчик mousedown — создание черновиков ТОЛЬКО когда режим перетяжки выключен
   function onMouseDown(e){
+    // Если режим перетяжки включён — не создаём черновики
     if(dragModeEnabled) return;
     
     let target = e.target;
@@ -785,19 +796,10 @@
     await fetch(GAS_URL, { method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id: booking.id, date, tableNumber: booking.lane+1, start: booking.start, end: booking.end, name: booking.name, phone: booking.phone, comment: booking.comment }) });
   }
   
-  function scheduleUpdateForTemp(){
-    if(updateTimeout) clearTimeout(updateTimeout);
-    updateTimeout = setTimeout(() => {
-      renderInlineTempCards();
-      highlightAllTempBookings();
-      renderAllSliders();
-      updateTimeout = null;
-    }, 50);
-  }
-  
-  // Исправленная функция перемещения брони
+  // Перемещение брони
   function startMove(booking, e) {
     if(!dragModeEnabled) {
+      // В режиме перетяжки ВЫКЛ — показываем детали
       e.stopPropagation();
       showInfoModal(booking);
       return;
@@ -870,8 +872,12 @@
           booking.start = newStart;
           booking.end = newEnd;
           saveToServer(booking);
+          renderAllSliders();
         } else if (conflict) {
           alert("Конфликт с другой бронью");
+          renderAllSliders();
+        } else {
+          renderAllSliders();
         }
       }
       ghost.remove();
@@ -879,7 +885,6 @@
       document.body.style.cursor = '';
       document.removeEventListener('mousemove', onDragMove);
       document.removeEventListener('mouseup', onDragEnd);
-      renderAllSliders();
     }
     
     document.body.style.cursor = 'grabbing';
@@ -959,7 +964,6 @@
           temp.lane = finalLane;
           temp.start = newStart;
           temp.end = newEnd;
-          temp.id = nextTempId++;
           renderInlineTempCards();
           highlightAllTempBookings();
           renderAllSliders();
@@ -1083,14 +1087,9 @@
       slider.appendChild(nameSpan); slider.appendChild(timeSpan);
       
       let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
-      if(dragModeEnabled) dragHandle.style.cursor = "grab";
       dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
       slider.appendChild(dragHandle);
       
-      slider.addEventListener("click", (e) => { 
-        e.stopPropagation();
-        if(!dragModeEnabled) showInfoModal(booking); 
-      });
       container.appendChild(slider);
     });
     
@@ -1112,18 +1111,16 @@
       slider.appendChild(nameSpan); slider.appendChild(timeSpan);
       
       let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
-      if(dragModeEnabled) dragHandle.style.cursor = "grab";
       dragHandle.addEventListener("mousedown", (e) => startMoveForTemp(temp, e));
       slider.appendChild(dragHandle);
       
       let leftHandle = document.createElement("div"); leftHandle.className = "resize-handle handle-left";
       let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right";
-      if(dragModeEnabled) {
-        leftHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'left', e));
-        rightHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'right', e));
-        slider.appendChild(leftHandle); 
-        slider.appendChild(rightHandle);
-      }
+      leftHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'left', e));
+      rightHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'right', e));
+      slider.appendChild(leftHandle); 
+      slider.appendChild(rightHandle);
+      
       container.appendChild(slider);
     });
   }

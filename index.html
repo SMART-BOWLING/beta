@@ -242,7 +242,6 @@
       min-width: 1100px;
       font-size: 14px;
       position: relative;
-      z-index: 1;
     }
 
     #tableDesktop thead th {
@@ -343,26 +342,26 @@
       transition: none;
     }
     
-    /* Режим перетяжки выключен */
+    /* Режим перетяжки выключен — весь слайдер кликабелен */
     .slider:not(.drag-mode-enabled) {
       cursor: pointer;
     }
     .slider:not(.drag-mode-enabled) .drag-handle,
     .slider:not(.drag-mode-enabled) .resize-handle {
       display: none !important;
-      pointer-events: none !important;
     }
     
     /* Режим перетяжки включен */
     .slider.drag-mode-enabled {
-      cursor: grab;
+      cursor: default;
     }
-    .slider.drag-mode-enabled:active { cursor: grabbing; }
     .slider.drag-mode-enabled .drag-handle {
       cursor: grab;
       display: block;
     }
-    .slider.drag-mode-enabled .drag-handle:active { cursor: grabbing; }
+    .slider.drag-mode-enabled .drag-handle:active {
+      cursor: grabbing;
+    }
     
     .slider:hover { opacity: 0.98; transform: scale(1.01); z-index: 15; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
     .slider.dragging {
@@ -370,7 +369,6 @@
       z-index: 100 !important;
       box-shadow: 0 8px 25px rgba(0,0,0,0.25) !important;
       pointer-events: none !important;
-      transition: none !important;
     }
     .slider.pending { background: rgba(255,159,10,0.3); border-left: 4px solid #ff9f0a; }
     .slider.confirmed { background: rgba(52,199,89,0.3); border-left: 4px solid #34c759; }
@@ -411,7 +409,6 @@
     /* Для существующих броней ручки изменения размера скрыты всегда */
     .slider:not(.temp) .resize-handle {
       display: none !important;
-      pointer-events: none !important;
     }
 
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); z-index: 2000; justify-content: center; align-items: center; }
@@ -446,7 +443,6 @@
       pointer-events: none;
       z-index: 90;
       opacity: 0.65;
-      transition: none;
     }
     
     .drag-mode-indicator {
@@ -462,7 +458,6 @@
       z-index: 1000;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       pointer-events: none;
-      transition: opacity 0.2s;
     }
   </style>
 </head>
@@ -509,7 +504,7 @@
     <div class="grid-card">
       <div class="grid-scroll" id="gridScroll">
         <table id="tableDesktop">
-          <thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead>
+          <thead id="dtHead"><tr><th class="corner">СТОЛ</th></td></thead>
           <tbody id="dtBody"></tbody>
         </table>
         <div id="slidersLayer"></div>
@@ -667,9 +662,7 @@
     });
   }
   
-  // Обработчик mousedown — создание черновиков ТОЛЬКО когда режим перетяжки выключен
   function onMouseDown(e){
-    // Если режим перетяжки включён — не создаём черновики
     if(dragModeEnabled) return;
     
     let target = e.target;
@@ -779,17 +772,15 @@
     await fetch(GAS_URL, { method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id: booking.id, date, tableNumber: booking.lane+1, start: booking.start, end: booking.end, name: booking.name, phone: booking.phone, comment: booking.comment }) });
   }
   
-  // Перемещение брони - работает и в режиме перетяжки
+  // ПЕРЕМЕЩЕНИЕ БРОНИ
   function startMove(booking, e) {
     e.stopPropagation();
     
-    // Если режим перетяжки выключен — показываем детали
     if(!dragModeEnabled) {
       showInfoModal(booking);
       return;
     }
     
-    // Режим перетяжки включён — перемещаем
     const slider = e.currentTarget.closest('.slider');
     if (!slider) return;
     
@@ -802,7 +793,6 @@
     ghost.className = 'ghost-slider';
     ghost.style.cssText = slider.style.cssText;
     ghost.style.opacity = '0.6';
-    ghost.style.pointerEvents = 'none';
     $('slidersLayer').appendChild(ghost);
     slider.classList.add('dragging');
     
@@ -856,12 +846,8 @@
           booking.start = newStart;
           booking.end = newEnd;
           saveToServer(booking);
-          renderAllSliders();
         } else if (conflict) {
           alert("Конфликт с другой бронью");
-          renderAllSliders();
-        } else {
-          renderAllSliders();
         }
       }
       ghost.remove();
@@ -869,6 +855,7 @@
       document.body.style.cursor = '';
       document.removeEventListener('mousemove', onDragMove);
       document.removeEventListener('mouseup', onDragEnd);
+      renderAllSliders();
     }
     
     document.body.style.cursor = 'grabbing';
@@ -877,7 +864,7 @@
     updateGhost(currentLane, currentStartIdx);
   }
   
-  // Перемещение черновика
+  // ПЕРЕМЕЩЕНИЕ ЧЕРНОВИКА
   function startMoveForTemp(temp, e) {
     e.stopPropagation();
     if(!dragModeEnabled) return;
@@ -894,7 +881,6 @@
     ghost.className = 'ghost-slider';
     ghost.style.cssText = slider.style.cssText;
     ghost.style.opacity = '0.6';
-    ghost.style.pointerEvents = 'none';
     $('slidersLayer').appendChild(ghost);
     slider.classList.add('dragging');
     
@@ -950,7 +936,6 @@
           temp.end = newEnd;
           renderInlineTempCards();
           highlightAllTempBookings();
-          renderAllSliders();
         } else {
           alert("Конфликт с существующей бронью");
         }
@@ -969,7 +954,7 @@
     updateGhost(currentLane, currentStartIdx);
   }
   
-  // Изменение размера черновика
+  // ИЗМЕНЕНИЕ РАЗМЕРА ЧЕРНОВИКА
   function startResizeForTemp(temp, side, e) {
     e.stopPropagation();
     if(!dragModeEnabled) return;
@@ -982,7 +967,6 @@
     let ghost = document.createElement('div');
     ghost.className = 'ghost-slider';
     ghost.style.cssText = slider.style.cssText;
-    ghost.style.pointerEvents = 'none';
     $('slidersLayer').appendChild(ghost);
     slider.classList.add('dragging');
     
@@ -1026,7 +1010,6 @@
         temp.end = newEnd;
         renderInlineTempCards();
         highlightAllTempBookings();
-        renderAllSliders();
       } else if (conflict) {
         alert("Конфликт с существующей бронью");
       }
@@ -1071,7 +1054,7 @@
       slider.appendChild(nameSpan); slider.appendChild(timeSpan);
       
       let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
-      dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
+      dragHandle.addEventListener("mousedown", startMove.bind(null, booking));
       slider.appendChild(dragHandle);
       
       container.appendChild(slider);
@@ -1095,13 +1078,13 @@
       slider.appendChild(nameSpan); slider.appendChild(timeSpan);
       
       let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
-      dragHandle.addEventListener("mousedown", (e) => startMoveForTemp(temp, e));
+      dragHandle.addEventListener("mousedown", startMoveForTemp.bind(null, temp));
       slider.appendChild(dragHandle);
       
       let leftHandle = document.createElement("div"); leftHandle.className = "resize-handle handle-left";
       let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right";
-      leftHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'left', e));
-      rightHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'right', e));
+      leftHandle.addEventListener("mousedown", startResizeForTemp.bind(null, temp, 'left'));
+      rightHandle.addEventListener("mousedown", startResizeForTemp.bind(null, temp, 'right'));
       slider.appendChild(leftHandle); 
       slider.appendChild(rightHandle);
       
@@ -1138,8 +1121,6 @@
   function openImg(){ $("imgPopup").classList.add("open"); }
   function closeImg(){ $("imgPopup").classList.remove("open"); }
   
-  // ВАЖНО: добавляем слушатели на таблицу ТОЛЬКО для создания черновиков,
-  // но они не мешают слайдерам, потому что слайдеры выше по z-index и перехватывают события первыми
   $("tableDesktop").addEventListener("mousedown", onMouseDown);
   document.body.addEventListener("mousemove", onMouseMove);
   document.body.addEventListener("mouseup", onMouseUp);

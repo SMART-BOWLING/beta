@@ -670,7 +670,6 @@
   }
   
   function onMouseDown(e){
-    // В режиме перетяжки полностью игнорируем создание новых выделений
     if(dragModeEnabled) return;
     
     let target = e.target;
@@ -686,7 +685,6 @@
   }
   
   function onMouseMove(e){
-    // В режиме перетяжки игнорируем
     if(dragModeEnabled) return;
     
     if(isDragging && dragStartCell){
@@ -715,7 +713,6 @@
   }
   
   function onMouseUp(){
-    // В режиме перетяжки игнорируем
     if(dragModeEnabled) return;
     
     if(isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){
@@ -783,7 +780,11 @@
   async function saveToServer(booking){
     if(!booking.id) return;
     let date = $("dateInput").value;
-    await fetch(GAS_URL, { method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id: booking.id, date, tableNumber: booking.lane+1, start: booking.start, end: booking.end, name: booking.name, phone: booking.phone, comment: booking.comment }) });
+    try {
+      await fetch(GAS_URL, { method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id: booking.id, date, tableNumber: booking.lane+1, start: booking.start, end: booking.end, name: booking.name, phone: booking.phone, comment: booking.comment }) });
+    } catch(e) {
+      console.error("Ошибка сохранения:", e);
+    }
   }
   
   function startMove(booking, e) {
@@ -848,9 +849,12 @@
           booking.lane = finalLane;
           booking.start = newStart;
           booking.end = newEnd;
-          saveToServer(booking);
-          loadFromServer();
-        } else alert("Конфликт");
+          saveToServer(booking).catch(console.error);
+          renderAllSliders();
+        } else {
+          alert("Конфликт");
+          renderAllSliders();
+        }
       }
       ghost.remove();
       slider.classList.remove('dragging');
@@ -932,14 +936,16 @@
             highlightAllTempBookings();
             renderAllSliders();
           }
-        } else alert("Конфликт");
+        } else {
+          alert("Конфликт");
+          renderAllSliders();
+        }
       }
       ghost.remove();
       slider.classList.remove('dragging');
       document.body.style.cursor = '';
       document.removeEventListener('mousemove', onDragMove);
       document.removeEventListener('mouseup', onDragEnd);
-      renderAllSliders();
     }
     document.body.style.cursor = 'grabbing';
     document.addEventListener('mousemove', onDragMove);
@@ -1013,7 +1019,9 @@
           }
         } else if(newStart >= newEnd) {
           alert("Некорректный интервал");
-        } else alert("Конфликт");
+        } else {
+          alert("Конфликт");
+        }
       }
       ghost.remove();
       slider.classList.remove('dragging');

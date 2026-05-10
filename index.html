@@ -38,14 +38,6 @@
       --cell-h: 58px;
       --cell-w: 68px;
       --lane-w: 100px;
-      
-      /* Цвета групп столов */
-      --group1-bg: #eef3fc;
-      --group1-border: #3a7bd5;
-      --group2-bg: #edf7f0;
-      --group2-border: #30a862;
-      --group3-bg: #fdf0ea;
-      --group3-border: #e05c2a;
     }
 
     body {
@@ -209,13 +201,22 @@
     .temp-card-inline .temp-rm:hover { background: #ffccbb; }
 
     .pills {
-      display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 4px;
     }
     .pill {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 13px; font-weight: 500; color: var(--ink3);
-      background: var(--surface); border: .5px solid var(--border2);
-      border-radius: 980px; padding: 6px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink3);
+      background: var(--surface);
+      border: .5px solid var(--border2);
+      border-radius: 980px;
+      padding: 6px 16px;
     }
     .dot { width: 10px; height: 10px; border-radius: 50%; }
     .dot-navy { background: #3a7bd5; }
@@ -294,14 +295,9 @@
       left: 0;
       z-index: 2;
     }
-    /* Цвета строк */
-    #tableDesktop tbody tr.row-group0 td.lane-hdr { background: var(--group1-bg); color: #1d4f9f; }
-    #tableDesktop tbody tr.row-group1 td.lane-hdr { background: var(--group2-bg); color: #1a6640; }
-    #tableDesktop tbody tr.row-group2 td.lane-hdr { background: var(--group3-bg); color: #a83418; }
-    
-    #tableDesktop tbody tr.row-group0 td.slot { background: #f8fafd; }
-    #tableDesktop tbody tr.row-group1 td.slot { background: #f6fcf8; }
-    #tableDesktop tbody tr.row-group2 td.slot { background: #fef8f4; }
+    .lane-hdr.grp-navy { color: #1d4f9f; background: #eef3fc !important; }
+    .lane-hdr.grp-sage { color: #1a6640; background: #edf7f0 !important; }
+    .lane-hdr.grp-rust { color: #a83418; background: #fdf0ea !important; }
 
     #tableDesktop tbody td.slot {
       cursor: crosshair;
@@ -314,6 +310,9 @@
       background: #b8e1fc !important;
       border: 2px solid #0071e3 !important;
     }
+    #tableDesktop tbody tr.row-navy td.slot { background: #f8fafd; }
+    #tableDesktop tbody tr.row-sage td.slot { background: #f6fcf8; }
+    #tableDesktop tbody tr.row-rust td.slot { background: #fef8f4; }
 
     @media (max-width: 800px) {
       .page { padding: 16px 12px 70px; gap: 16px; }
@@ -347,13 +346,14 @@
       will-change: left, top;
       transition: none;
     }
+    /* РЕЖИМ ПЕРЕТЯЖКИ ВЫКЛЮЧЕН — все элементы неактивны, курсор по умолчанию, блокируем все события перетаскивания */
     .slider:not(.drag-mode-enabled) {
-      pointer-events: auto;
+      pointer-events: auto;   /* Чтобы можно было кликнуть для просмотра деталей */
       cursor: pointer;
     }
     .slider:not(.drag-mode-enabled) .drag-handle,
     .slider:not(.drag-mode-enabled) .resize-handle {
-      display: none !important;
+      display: none !important;  /* Ручки скрыты полностью */
       pointer-events: none !important;
     }
     .slider.drag-mode-enabled {
@@ -373,19 +373,14 @@
       pointer-events: none !important;
       transition: none !important;
     }
-    .slider.pending { border-left: 4px solid #ff9f0a; }
-    .slider.confirmed { border-left: 4px solid #34c759; }
-    .slider.rejected { border-left: 4px solid #ff3b30; opacity: 0.85; }
+    .slider.pending { background: rgba(255,159,10,0.3); border-left: 4px solid #ff9f0a; }
+    .slider.confirmed { background: rgba(52,199,89,0.3); border-left: 4px solid #34c759; }
+    .slider.rejected { background: rgba(255,59,48,0.25); border-left: 4px solid #ff3b30; opacity: 0.85; }
     .slider.temp {
       background: rgba(0, 113, 227, 0.35);
       border-left: 4px solid #0071e3;
       backdrop-filter: blur(4px);
     }
-    /* Цвета слайдеров по группам столов */
-    .slider.group0 { background: rgba(58, 123, 213, 0.25); border-left-color: #3a7bd5; }
-    .slider.group1 { background: rgba(48, 168, 98, 0.25); border-left-color: #30a862; }
-    .slider.group2 { background: rgba(224, 92, 42, 0.25); border-left-color: #e05c2a; }
-    
     .sl-name { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sl-time { font-size: 9px; opacity: 0.85; white-space: nowrap; }
     .resize-handle {
@@ -415,6 +410,7 @@
       pointer-events: auto;
     }
     
+    /* Для существующих броней ручки изменения размера скрыты всегда */
     .slider:not(.temp) .resize-handle {
       display: none !important;
       pointer-events: none !important;
@@ -456,6 +452,8 @@
     
     .ghost-slider {
       position: absolute;
+      background: rgba(0, 113, 227, 0.25);
+      border: 2px solid #0071e3;
       border-radius: 12px;
       pointer-events: none;
       z-index: 90;
@@ -514,16 +512,16 @@
       <div class="pill"><div class="dot dot-navy"></div>Столы 1–3</div>
       <div class="pill"><div class="dot dot-sage"></div>Столы 4–6</div>
       <div class="pill"><div class="dot dot-rust"></div>Столы 7–12</div>
-      <div class="pill"><div class="dot dot-amber"></div>Ожидает</div>
-      <div class="pill"><div class="dot dot-green"></div>Подтверждено</div>
-      <div class="pill"><div class="dot dot-red"></div>Отменено</div>
-      <div class="pill"><div class="dot dot-temp"></div>Временная (черновик)</div>
+      <div class="pill"><div class="dot dot-amber"></div><span></span></div>
+      <div class="pill"><div class="dot dot-green"></div><span></span></div>
+      <div class="pill"><div class="dot dot-red"></div><span></span></div>
+      <div class="pill"><div class="dot dot-temp"></div><span></span></div>
     </div>
 
     <div class="grid-card">
       <div class="grid-scroll" id="gridScroll">
         <table id="tableDesktop">
-          <thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead>
+          <thead id="dtHead"><table><th class="corner">СТОЛ</th></tr></thead>
           <tbody id="dtBody"></tbody>
         </table>
         <div id="slidersLayer"></div>
@@ -544,6 +542,8 @@
   const LANES = 12, SH = 11, EH = 22;
   const slots = []; for(let h=SH; h<=EH; h++) { slots.push({ label: `${h}:00`, key: h }); if(h<EH) slots.push({ label: `${h}:30`, key: h+0.5 }); }
   const LANE_GROUPS = [0,0,0,1,1,1,2,2,2,2,2,2];
+  const GRP_CLASS = ['grp-navy','grp-sage','grp-rust'];
+  const ROW_CLASS = ['row-navy','row-sage','row-rust'];
   
   let bookings = [];
   let tempBookings = [];
@@ -552,6 +552,7 @@
   let isDragging = false;
   let dragStartCell = null;
   let dragInterval = null;
+  let resizePreview = null;
   let updateTimeout = null;
   
   let dragModeEnabled = false;
@@ -584,12 +585,15 @@
         toggleBtn.textContent = "🎯 Режим перетяжки: ВКЛ";
         toggleBtn.classList.add("active");
         $("dragModeIndicator").style.display = "block";
+        setTimeout(() => {
+          if($("dragModeIndicator")) $("dragModeIndicator").style.opacity = "0.8";
+        }, 100);
       } else {
         toggleBtn.textContent = "🎯 Режим перетяжки: ВЫКЛ";
         toggleBtn.classList.remove("active");
         $("dragModeIndicator").style.display = "none";
       }
-      renderAllSliders();
+      renderAllSliders(); // перерисуем слайдеры с правильным классом drag-mode-enabled
     });
   }
   
@@ -606,10 +610,10 @@
     let body=$("dtBody");
     for(let lane=0; lane<LANES; lane++){
       let tr=document.createElement("tr"); 
-      tr.classList.add(`row-group${LANE_GROUPS[lane]}`);
+      tr.className=ROW_CLASS[LANE_GROUPS[lane]]; 
       tr.dataset.lane=lane;
       let lhdr=document.createElement("td"); 
-      lhdr.className=`lane-hdr`; 
+      lhdr.className=`lane-hdr ${GRP_CLASS[LANE_GROUPS[lane]]}`; 
       lhdr.textContent=`№ ${lane+1}`; 
       tr.appendChild(lhdr);
       slots.forEach((sl,si)=>{ 
@@ -680,7 +684,7 @@
   }
   
   function onMouseDown(e){
-    if(dragModeEnabled) return;
+    if(dragModeEnabled) return; // в режиме перетяжки отключаем создание черновиков перетаскиванием мыши по ячейкам
     let target = e.target;
     if(target.classList && target.classList.contains("slot")){
       e.preventDefault();
@@ -782,19 +786,20 @@
     hideLoad();
   }
   
-  function getGroupClass(lane) {
-    return `group${LANE_GROUPS[lane]}`;
-  }
-  
-  function getGroupColorStyle(lane) {
-    const colors = ['#3a7bd5', '#30a862', '#e05c2a'];
-    return colors[LANE_GROUPS[lane]];
-  }
-  
   async function saveToServer(booking){
     if(!booking.id) return;
     let date = $("dateInput").value;
     await fetch(GAS_URL, { method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id: booking.id, date, tableNumber: booking.lane+1, start: booking.start, end: booking.end, name: booking.name, phone: booking.phone, comment: booking.comment }) });
+  }
+  
+  function scheduleUpdateForTemp(){
+    if(updateTimeout) clearTimeout(updateTimeout);
+    updateTimeout = setTimeout(() => {
+      renderInlineTempCards();
+      highlightAllTempBookings();
+      renderAllSliders();
+      updateTimeout = null;
+    }, 50);
   }
   
   function startMove(booking, e) {
@@ -806,11 +811,8 @@
     let durationCells = slots.findIndex(s => s.key === booking.end) - slots.findIndex(s => s.key === booking.start);
     let startIdxOrig = slots.findIndex(s => s.key === booking.start);
     let ghost = document.createElement('div');
-    ghost.className = `ghost-slider ${getGroupClass(booking.lane)}`;
-    let groupColor = getGroupColorStyle(booking.lane);
+    ghost.className = 'ghost-slider';
     ghost.style.cssText = slider.style.cssText;
-    ghost.style.background = `${groupColor}40`;
-    ghost.style.border = `2px solid ${groupColor}`;
     ghost.style.opacity = '0.6';
     $('slidersLayer').appendChild(ghost);
     slider.classList.add('dragging');
@@ -833,9 +835,6 @@
         ghost.style.top = (row.offsetTop + 1) + 'px';
         ghost.style.width = (endCell.offsetLeft + endCell.offsetWidth - startCell.offsetLeft - 2) + 'px';
         ghost.style.height = (row.offsetHeight - 2) + 'px';
-        let newColor = getGroupColorStyle(lane);
-        ghost.style.background = `${newColor}40`;
-        ghost.style.border = `2px solid ${newColor}`;
       }
     }
     function onDragMove(ev) {
@@ -866,6 +865,7 @@
           booking.end = newEnd;
           saveToServer(booking);
           renderAllSliders();
+          if(dragModeEnabled) renderAllSliders(); // повторно
         } else alert("Конфликт");
       }
       ghost.remove();
@@ -880,6 +880,9 @@
     document.addEventListener('mouseup', onDragEnd);
     updateGhost(currentLane, currentStartIdx);
   }
+  
+  function startMoveForTemp(temp, e){ if(!dragModeEnabled) return; /* логика перемещения черновика */ }
+  function startResizeForTemp(temp, side, e){ if(!dragModeEnabled) return; /* логика ресайза */ }
   
   function renderAllSliders(){
     let container = $("slidersLayer");
@@ -900,8 +903,7 @@
       let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2;
       let slider = document.createElement("div");
       let status = booking.confirmed === true ? "confirmed" : (booking.confirmed === false ? "rejected" : "pending");
-      let groupClass = getGroupClass(booking.lane);
-      slider.className = `slider ${status} ${groupClass}`;
+      slider.className = `slider ${status}`;
       if(dragModeEnabled) slider.classList.add("drag-mode-enabled");
       slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
       let nameSpan = document.createElement("div"); nameSpan.className = "sl-name"; nameSpan.textContent = booking.name || "Бронь";
@@ -926,7 +928,7 @@
       if(!sc || !ec) return;
       let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2;
       let slider = document.createElement("div");
-      slider.className = `slider temp ${getGroupClass(temp.lane)}`;
+      slider.className = "slider temp";
       if(dragModeEnabled) slider.classList.add("drag-mode-enabled");
       slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
       let nameSpan = document.createElement("div"); nameSpan.className = "sl-name"; nameSpan.textContent = "Черновик";
@@ -948,9 +950,6 @@
       container.appendChild(slider);
     });
   }
-  
-  function startMoveForTemp(temp, e){ if(!dragModeEnabled) return; }
-  function startResizeForTemp(temp, side, e){ if(!dragModeEnabled) return; }
   
   function renderAll(){
     renderAllSliders();

@@ -30,8 +30,6 @@
       --green: #34c759;
       --red: #ff3b30;
       --amber: #ff9f0a;
-      --temp-bg: rgba(0, 113, 227, 0.25);
-      --temp-border: #0071e3;
       --r: 12px;
       --r2: 18px;
       --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
@@ -39,7 +37,6 @@
       --cell-w: 68px;
       --lane-w: 100px;
       
-      /* Цвета групп столов */
       --group1-bg: #eef3fc;
       --group1-border: #3a7bd5;
       --group2-bg: #edf7f0;
@@ -294,7 +291,6 @@
       left: 0;
       z-index: 2;
     }
-    /* Цвета строк */
     #tableDesktop tbody tr.row-group0 td.lane-hdr { background: var(--group1-bg); color: #1d4f9f; }
     #tableDesktop tbody tr.row-group1 td.lane-hdr { background: var(--group2-bg); color: #1a6640; }
     #tableDesktop tbody tr.row-group2 td.lane-hdr { background: var(--group3-bg); color: #a83418; }
@@ -331,31 +327,30 @@
       pointer-events: none;
       z-index: 20;
     }
+    
+    /* УПРОЩЕННЫЙ ДИЗАЙН ПОЛЗУНКОВ */
     .slider {
       position: absolute;
-      border-radius: 12px;
       pointer-events: auto;
-      cursor: default;
       padding: 6px 10px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       gap: 2px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
-      backdrop-filter: blur(4px);
-      border: 1px solid rgba(255,255,255,0.5);
-      will-change: left, top;
+      box-sizing: border-box;
+      border-radius: 6px;
       transition: none;
+      font-family: var(--font);
     }
+    
     .slider:not(.drag-mode-enabled) {
-      pointer-events: auto;
       cursor: pointer;
     }
     .slider:not(.drag-mode-enabled) .drag-handle,
     .slider:not(.drag-mode-enabled) .resize-handle {
       display: none !important;
-      pointer-events: none !important;
     }
+    
     .slider.drag-mode-enabled {
       cursor: grab;
     }
@@ -364,52 +359,42 @@
       cursor: grab;
       display: block;
     }
-    .slider.drag-mode-enabled .drag-handle:active { cursor: grabbing; }
-    .slider:hover { opacity: 0.98; transform: scale(1.01); z-index: 30; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
-    .slider.dragging {
-      opacity: 0.7 !important;
-      z-index: 100 !important;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.25) !important;
-      pointer-events: none !important;
-      transition: none !important;
-    }
+    
+    /* Упрощенные статусные границы (только левая полоска) */
     .slider.pending { border-left: 4px solid #ff9f0a; }
     .slider.confirmed { border-left: 4px solid #34c759; }
-    .slider.rejected { border-left: 4px solid #ff3b30; opacity: 0.85; }
-    .slider.temp {
-      background: rgba(0, 113, 227, 0.35);
-      border-left: 4px solid #0071e3;
-      backdrop-filter: blur(4px);
-    }
-    /* Цвета слайдеров по группам столов */
-    .slider.group0 { background: rgba(58, 123, 213, 0.25); border-left-color: #3a7bd5; }
-    .slider.group1 { background: rgba(48, 168, 98, 0.25); border-left-color: #30a862; }
-    .slider.group2 { background: rgba(224, 92, 42, 0.25); border-left-color: #e05c2a; }
+    .slider.rejected { border-left: 4px solid #ff3b30; opacity: 0.8; }
+    .slider.temp { border-left: 4px solid #0071e3; }
     
-    .sl-name { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sl-time { font-size: 9px; opacity: 0.85; white-space: nowrap; }
+    /* Цвета фона по группам столов (упрощенные, без лишних эффектов) */
+    .slider.group0 { background: rgba(58, 123, 213, 0.2); }
+    .slider.group1 { background: rgba(48, 168, 98, 0.2); }
+    .slider.group2 { background: rgba(224, 92, 42, 0.2); }
+    
+    .sl-name { font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1d1d1f; }
+    .sl-time { font-size: 9px; opacity: 0.7; white-space: nowrap; }
+    
     .resize-handle {
       position: absolute;
-      width: 14px;
-      height: 70%;
-      top: 15%;
-      background: rgba(0,0,0,0.25);
-      border-radius: 20px;
+      width: 12px;
+      height: 60%;
+      top: 20%;
+      background: rgba(0,0,0,0.2);
+      border-radius: 4px;
       cursor: ew-resize;
-      transition: all 0.1s;
       z-index: 5;
       pointer-events: auto;
     }
-    .resize-handle:hover { background: rgba(0,0,0,0.65); width: 16px; }
-    .handle-left { left: 3px; }
-    .handle-right { right: 3px; }
+    .resize-handle:hover { background: rgba(0,0,0,0.5); }
+    .handle-left { left: 2px; }
+    .handle-right { right: 2px; }
+    
     .drag-handle {
       position: absolute;
       top: 0;
       left: 20px;
       right: 20px;
       height: 100%;
-      cursor: default;
       background: transparent;
       z-index: 2;
       pointer-events: auto;
@@ -417,7 +402,6 @@
     
     .slider:not(.temp) .resize-handle {
       display: none !important;
-      pointer-events: none !important;
     }
 
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); z-index: 2000; justify-content: center; align-items: center; }
@@ -446,20 +430,19 @@
     
     .resize-preview {
       position: absolute;
-      background: rgba(255, 159, 10, 0.4);
-      border: 2px dashed #ff9f0a;
-      border-radius: 14px;
+      background: rgba(255, 159, 10, 0.3);
+      border: 1px dashed #ff9f0a;
+      border-radius: 6px;
       pointer-events: none;
       z-index: 25;
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
     }
     
     .ghost-slider {
       position: absolute;
-      border-radius: 12px;
+      border-radius: 6px;
       pointer-events: none;
       z-index: 90;
-      opacity: 0.65;
+      opacity: 0.5;
       transition: none;
     }
     
@@ -476,7 +459,6 @@
       z-index: 1000;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       pointer-events: none;
-      transition: opacity 0.2s;
     }
   </style>
 </head>
@@ -553,7 +535,6 @@
   let dragStartCell = null;
   let dragInterval = null;
   let updateTimeout = null;
-  
   let dragModeEnabled = false;
   
   const $ = id => document.getElementById(id);
@@ -782,14 +763,8 @@
     hideLoad();
   }
   
-  function getGroupClass(lane) {
-    return `group${LANE_GROUPS[lane]}`;
-  }
-  
-  function getGroupColorStyle(lane) {
-    const colors = ['#3a7bd5', '#30a862', '#e05c2a'];
-    return colors[LANE_GROUPS[lane]];
-  }
+  function getGroupClass(lane) { return `group${LANE_GROUPS[lane]}`; }
+  function getGroupColorStyle(lane) { return ['#3a7bd5', '#30a862', '#e05c2a'][LANE_GROUPS[lane]]; }
   
   async function saveToServer(booking){
     if(!booking.id) return;
@@ -809,8 +784,8 @@
     ghost.className = `ghost-slider ${getGroupClass(booking.lane)}`;
     let groupColor = getGroupColorStyle(booking.lane);
     ghost.style.cssText = slider.style.cssText;
-    ghost.style.background = `${groupColor}40`;
-    ghost.style.border = `2px solid ${groupColor}`;
+    ghost.style.background = `${groupColor}30`;
+    ghost.style.border = `1px solid ${groupColor}`;
     ghost.style.opacity = '0.6';
     $('slidersLayer').appendChild(ghost);
     slider.classList.add('dragging');
@@ -834,8 +809,8 @@
         ghost.style.width = (endCell.offsetLeft + endCell.offsetWidth - startCell.offsetLeft - 2) + 'px';
         ghost.style.height = (row.offsetHeight - 2) + 'px';
         let newColor = getGroupColorStyle(lane);
-        ghost.style.background = `${newColor}40`;
-        ghost.style.border = `2px solid ${newColor}`;
+        ghost.style.background = `${newColor}30`;
+        ghost.style.border = `1px solid ${newColor}`;
       }
     }
     function onDragMove(ev) {

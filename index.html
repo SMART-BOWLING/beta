@@ -119,14 +119,19 @@
     }
     .btn-book:hover { background: var(--blue-h); transform: scale(0.98); }
     
-    .btn-refresh {
-      height: 52px; padding: 0 24px;
+    .btn-drag-toggle {
+      height: 52px; padding: 0 28px;
       background: var(--surface2); color: var(--ink); border: 1px solid var(--border2);
       border-radius: 980px; font-family: var(--font); font-size: 16px; font-weight: 500;
       cursor: pointer; transition: all .15s; white-space: nowrap;
       display: inline-flex; align-items: center; gap: 8px;
     }
-    .btn-refresh:hover { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+    .btn-drag-toggle.active {
+      background: var(--blue); color: white; border-color: var(--blue);
+      box-shadow: 0 2px 8px rgba(0,113,227,.3);
+    }
+    .btn-drag-toggle.active:hover { background: var(--blue-h); }
+    .btn-drag-toggle:hover:not(.active) { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
 
     .inline-temp-cards {
       display: flex;
@@ -304,7 +309,7 @@
       .page { padding: 16px 12px 70px; gap: 16px; }
       .ctrl { flex-direction: column; align-items: stretch; }
       .inline-temp-cards { margin-left: 0; justify-content: flex-start; }
-      .btn-book { width: 100%; }
+      .btn-book, .btn-drag-toggle { width: 100%; }
     }
 
     #slidersLayer {
@@ -320,7 +325,7 @@
       position: absolute;
       border-radius: 12px;
       pointer-events: auto;
-      cursor: grab;
+      cursor: default;
       padding: 6px 10px;
       display: flex;
       flex-direction: column;
@@ -332,7 +337,14 @@
       will-change: left, top;
       transition: none;
     }
-    .slider:active { cursor: grabbing; }
+    .slider.drag-mode-enabled {
+      cursor: grab;
+    }
+    .slider.drag-mode-enabled:active { cursor: grabbing; }
+    .slider.drag-mode-enabled .drag-handle {
+      cursor: grab;
+    }
+    .slider.drag-mode-enabled .drag-handle:active { cursor: grabbing; }
     .slider:hover { opacity: 0.98; transform: scale(1.01); z-index: 30; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
     .slider.dragging {
       opacity: 0.7 !important;
@@ -372,14 +384,13 @@
       left: 20px;
       right: 20px;
       height: 100%;
-      cursor: grab;
+      cursor: default;
       background: transparent;
       z-index: 2;
       pointer-events: auto;
     }
-    .drag-handle:active { cursor: grabbing; }
     
-    /* Для существующих броней ручки изменения размера скрыты */
+    /* Для существующих броней ручки изменения размера скрыты всегда */
     .slider:not(.temp) .resize-handle {
       display: none !important;
       pointer-events: none !important;
@@ -429,6 +440,22 @@
       opacity: 0.65;
       transition: none;
     }
+    
+    .drag-mode-indicator {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--blue);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 40px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
   </style>
 </head>
 <body>
@@ -457,7 +484,7 @@
         <input type="date" id="dateInput"/>
       </div>
       <button class="btn-book" onclick="openBookModal()">➕ Новая бронь</button>
-      <button class="btn-refresh" onclick="forceRefreshPositions()" title="Принудительно обновить позиции слайдеров">🔄 Обновить перетяжку</button>
+      <button id="dragToggleBtn" class="btn-drag-toggle">🎯 Режим перетяжки: ВЫКЛ</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
 
@@ -482,6 +509,7 @@
     </div>
   </div>
 </div>
+<div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">🎯 Режим перетяжки АКТИВЕН</div>
 
 <div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Подтверждение брони</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div class="f-group"><label class="f-label">Имя *</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+7 123 456-78-90"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания / особые условия"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitTempBookings()">Сохранить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
 <div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали брони</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><strong id="i-table"></strong></div><div class="info-row"><span>Время</span><strong id="i-time"></strong></div><div class="info-row"><span>Имя</span><strong id="i-name"></strong></div><div class="info-row"><span>Телефон</span><strong id="i-phone"></strong></div><div class="info-row"><span>Комментарий</span><strong id="i-comment" style="font-weight:normal;"></strong></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Пришла бронь</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">🗑 Удалить бронь</button></div></div></div>
@@ -507,6 +535,8 @@
   let resizePreview = null;
   let updateTimeout = null;
   
+  let dragModeEnabled = false;  // Режим перетяжки включен/выключен
+  
   const $ = id => document.getElementById(id);
   
   function parseJwt(t){ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
@@ -527,6 +557,43 @@
     buildDesktopTable();
     $("dateInput").addEventListener("change", ()=>{ loadFromServer(); clearTempSelections(); });
     loadFromServer();
+    
+    // Кнопка включения/выключения режима перетяжки
+    const toggleBtn = $("dragToggleBtn");
+    toggleBtn.addEventListener("click", () => {
+      dragModeEnabled = !dragModeEnabled;
+      if(dragModeEnabled) {
+        toggleBtn.textContent = "🎯 Режим перетяжки: ВКЛ";
+        toggleBtn.classList.add("active");
+        $("dragModeIndicator").style.display = "block";
+        setTimeout(() => {
+          if($("dragModeIndicator")) $("dragModeIndicator").style.opacity = "0.8";
+        }, 100);
+        enableDragModeOnSliders();
+      } else {
+        toggleBtn.textContent = "🎯 Режим перетяжки: ВЫКЛ";
+        toggleBtn.classList.remove("active");
+        $("dragModeIndicator").style.display = "none";
+        disableDragModeOnSliders();
+      }
+    });
+  }
+  
+  function enableDragModeOnSliders() {
+    document.querySelectorAll("#slidersLayer .slider").forEach(slider => {
+      slider.classList.add("drag-mode-enabled");
+      // Обновляем курсор для drag-handle
+      const dragHandle = slider.querySelector(".drag-handle");
+      if(dragHandle) dragHandle.style.cursor = "grab";
+    });
+  }
+  
+  function disableDragModeOnSliders() {
+    document.querySelectorAll("#slidersLayer .slider").forEach(slider => {
+      slider.classList.remove("drag-mode-enabled");
+      const dragHandle = slider.querySelector(".drag-handle");
+      if(dragHandle) dragHandle.style.cursor = "default";
+    });
   }
   
   function buildDesktopTable(){
@@ -676,10 +743,6 @@
     document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td => td.classList.remove("drag-over"));
   }
   
-  function forceRefreshPositions() {
-    renderAllSliders();
-  }
-  
   function openBookModal(){
     if(tempBookings.length === 0){
       alert("Сначала выделите брони: зажмите левую кнопку и протяните по ячейкам стола.");
@@ -743,6 +806,7 @@
   }
   
   function startMove(booking, e) {
+    if(!dragModeEnabled) return;  // Только если режим перетяжки включен
     e.stopPropagation();
     const slider = e.currentTarget.closest('.slider');
     if (!slider) return;
@@ -807,6 +871,7 @@
           booking.end = newEnd;
           saveToServer(booking);
           renderAllSliders();
+          if(dragModeEnabled) enableDragModeOnSliders();
         } else {
           alert("Невозможно переместить: конфликт с другой бронью");
         }
@@ -817,6 +882,7 @@
       document.removeEventListener('mousemove', onDragMove);
       document.removeEventListener('mouseup', onDragEnd);
       renderAllSliders();
+      if(dragModeEnabled) enableDragModeOnSliders();
     }
     document.body.style.cursor = 'grabbing';
     document.addEventListener('mousemove', onDragMove);
@@ -825,6 +891,7 @@
   }
   
   function startMoveForTemp(temp, e){
+    if(!dragModeEnabled) return;  // Только если режим перетяжки включен
     e.stopPropagation();
     const slider = e.currentTarget.closest('.slider');
     if (!slider) return;
@@ -897,6 +964,7 @@
       document.removeEventListener('mousemove', onDragMove);
       document.removeEventListener('mouseup', onDragEnd);
       renderAllSliders();
+      if(dragModeEnabled) enableDragModeOnSliders();
     }
     document.body.style.cursor = 'grabbing';
     document.addEventListener('mousemove', onDragMove);
@@ -951,6 +1019,7 @@
       document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseup", onEnd);
       renderAllSliders(); highlightAllTempBookings(); renderInlineTempCards();
+      if(dragModeEnabled) enableDragModeOnSliders();
     }
     document.body.style.cursor = "ew-resize";
     document.addEventListener("mousemove", onMove);
@@ -978,12 +1047,14 @@
       let slider = document.createElement("div");
       let status = booking.confirmed === true ? "confirmed" : (booking.confirmed === false ? "rejected" : "pending");
       slider.className = `slider ${status}`;
+      if(dragModeEnabled) slider.classList.add("drag-mode-enabled");
       slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
       let nameSpan = document.createElement("div"); nameSpan.className = "sl-name"; nameSpan.textContent = booking.name || "Бронь";
       let timeSpan = document.createElement("div"); timeSpan.className = "sl-time"; timeSpan.textContent = `${fmt(booking.start)} – ${fmt(booking.end)}`;
       slider.appendChild(nameSpan); slider.appendChild(timeSpan);
       
       let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
+      if(dragModeEnabled) dragHandle.style.cursor = "grab";
       dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
       slider.appendChild(dragHandle);
       
@@ -1002,12 +1073,14 @@
       let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2;
       let slider = document.createElement("div");
       slider.className = "slider temp";
+      if(dragModeEnabled) slider.classList.add("drag-mode-enabled");
       slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
       let nameSpan = document.createElement("div"); nameSpan.className = "sl-name"; nameSpan.textContent = "Черновик";
       let timeSpan = document.createElement("div"); timeSpan.className = "sl-time"; timeSpan.textContent = `${fmt(temp.start)} – ${fmt(temp.end)}`;
       slider.appendChild(nameSpan); slider.appendChild(timeSpan);
       
       let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
+      if(dragModeEnabled) dragHandle.style.cursor = "grab";
       dragHandle.addEventListener("mousedown", (e) => startMoveForTemp(temp, e));
       slider.appendChild(dragHandle);
       

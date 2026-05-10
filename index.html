@@ -200,27 +200,8 @@
     }
     .temp-card-inline .temp-rm:hover { background: #ffccbb; }
 
-    .pills {
-      display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px;
-    }
-    .pill {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 13px; font-weight: 500; color: var(--ink3);
-      background: var(--surface); border: .5px solid var(--border2);
-      border-radius: 980px; padding: 6px 16px;
-    }
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot-navy { background: #3a7bd5; }
-    .dot-sage { background: #30a862; }
-    .dot-rust { background: #e05c2a; }
-    .dot-amber { background: var(--amber); }
-    .dot-green { background: var(--green); }
-    .dot-red { background: var(--red); }
-    .dot-temp { background: #0071e3; }
-
     .grid-card {
-      background: var(--surface); 
-      border-radius: 24px;
+      background: var(--surface); border-radius: 24px;
       box-shadow: 0 4px 20px rgba(0,0,0,.06);
       overflow: hidden;
       border: .5px solid var(--border);
@@ -241,9 +222,7 @@
       width: 100%;
       min-width: 1100px;
       font-size: 14px;
-      position: relative;
     }
-
     #tableDesktop thead th {
       height: var(--cell-h);
       font-size: 13px;
@@ -289,24 +268,18 @@
       left: 0;
       z-index: 2;
     }
-    .lane-hdr.grp-navy { color: #1d4f9f; background: #eef3fc !important; }
-    .lane-hdr.grp-sage { color: #1a6640; background: #edf7f0 !important; }
-    .lane-hdr.grp-rust { color: #a83418; background: #fdf0ea !important; }
 
     #tableDesktop tbody td.slot {
+      cursor: crosshair;
       border-bottom: .5px solid var(--border);
       border-right: .5px solid var(--border);
       transition: background 0.06s;
-      cursor: crosshair;
     }
     #tableDesktop tbody td.slot.drag-over { background: #ffe6a3 !important; }
     #tableDesktop tbody td.slot.selected-temp {
       background: #b8e1fc !important;
       border: 2px solid #0071e3 !important;
     }
-    #tableDesktop tbody tr.row-navy td.slot { background: #f8fafd; }
-    #tableDesktop tbody tr.row-sage td.slot { background: #f6fcf8; }
-    #tableDesktop tbody tr.row-rust td.slot { background: #fef8f4; }
 
     @media (max-width: 800px) {
       .page { padding: 16px 12px 70px; gap: 16px; }
@@ -322,9 +295,8 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 10;
+      z-index: 20;
     }
-    
     .slider {
       position: absolute;
       border-radius: 12px;
@@ -341,34 +313,31 @@
       will-change: left, top;
       transition: none;
     }
-    
-    /* Режим перетяжки выключен — весь слайдер кликабелен */
     .slider:not(.drag-mode-enabled) {
+      pointer-events: auto;
       cursor: pointer;
     }
     .slider:not(.drag-mode-enabled) .drag-handle,
     .slider:not(.drag-mode-enabled) .resize-handle {
       display: none !important;
+      pointer-events: none !important;
     }
-    
-    /* Режим перетяжки включен */
     .slider.drag-mode-enabled {
-      cursor: default;
+      cursor: grab;
     }
+    .slider.drag-mode-enabled:active { cursor: grabbing; }
     .slider.drag-mode-enabled .drag-handle {
       cursor: grab;
       display: block;
     }
-    .slider.drag-mode-enabled .drag-handle:active {
-      cursor: grabbing;
-    }
-    
-    .slider:hover { opacity: 0.98; transform: scale(1.01); z-index: 15; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
+    .slider.drag-mode-enabled .drag-handle:active { cursor: grabbing; }
+    .slider:hover { opacity: 0.98; transform: scale(1.01); z-index: 30; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
     .slider.dragging {
       opacity: 0.7 !important;
       z-index: 100 !important;
       box-shadow: 0 8px 25px rgba(0,0,0,0.25) !important;
       pointer-events: none !important;
+      transition: none !important;
     }
     .slider.pending { background: rgba(255,159,10,0.3); border-left: 4px solid #ff9f0a; }
     .slider.confirmed { background: rgba(52,199,89,0.3); border-left: 4px solid #34c759; }
@@ -401,14 +370,15 @@
       left: 20px;
       right: 20px;
       height: 100%;
+      cursor: default;
       background: transparent;
       z-index: 2;
       pointer-events: auto;
     }
     
-    /* Для существующих броней ручки изменения размера скрыты всегда */
     .slider:not(.temp) .resize-handle {
       display: none !important;
+      pointer-events: none !important;
     }
 
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); z-index: 2000; justify-content: center; align-items: center; }
@@ -435,6 +405,16 @@
     .spin { width: 38px; height: 38px; border: 3px solid #ddd; border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 14px; }
     @keyframes spin { to { transform: rotate(360deg); } }
     
+    .resize-preview {
+      position: absolute;
+      background: rgba(255, 159, 10, 0.4);
+      border: 2px dashed #ff9f0a;
+      border-radius: 14px;
+      pointer-events: none;
+      z-index: 25;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
+    }
+    
     .ghost-slider {
       position: absolute;
       background: rgba(0, 113, 227, 0.25);
@@ -443,6 +423,7 @@
       pointer-events: none;
       z-index: 90;
       opacity: 0.65;
+      transition: none;
     }
     
     .drag-mode-indicator {
@@ -458,6 +439,7 @@
       z-index: 1000;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       pointer-events: none;
+      transition: opacity 0.2s;
     }
   </style>
 </head>
@@ -491,20 +473,10 @@
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
 
-    <div class="pills">
-      <div class="pill"><div class="dot dot-navy"></div>Столы 1–3</div>
-      <div class="pill"><div class="dot dot-sage"></div>Столы 4–6</div>
-      <div class="pill"><div class="dot dot-rust"></div>Столы 7–12</div>
-      <div class="pill"><div class="dot dot-amber"></div>Ожидает</div>
-      <div class="pill"><div class="dot dot-green"></div>Подтверждено</div>
-      <div class="pill"><div class="dot dot-red"></div>Отменено</div>
-      <div class="pill"><div class="dot dot-temp"></div>Временная (черновик)</div>
-    </div>
-
     <div class="grid-card">
       <div class="grid-scroll" id="gridScroll">
         <table id="tableDesktop">
-          <thead id="dtHead"><tr><th class="corner">СТОЛ</th></td></thead>
+          <thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead>
           <tbody id="dtBody"></tbody>
         </table>
         <div id="slidersLayer"></div>
@@ -525,8 +497,6 @@
   const LANES = 12, SH = 11, EH = 22;
   const slots = []; for(let h=SH; h<=EH; h++) { slots.push({ label: `${h}:00`, key: h }); if(h<EH) slots.push({ label: `${h}:30`, key: h+0.5 }); }
   const LANE_GROUPS = [0,0,0,1,1,1,2,2,2,2,2,2];
-  const GRP_CLASS = ['grp-navy','grp-sage','grp-rust'];
-  const ROW_CLASS = ['row-navy','row-sage','row-rust'];
   
   let bookings = [];
   let tempBookings = [];
@@ -535,6 +505,7 @@
   let isDragging = false;
   let dragStartCell = null;
   let dragInterval = null;
+  let resizePreview = null;
   let updateTimeout = null;
   
   let dragModeEnabled = false;
@@ -567,6 +538,9 @@
         toggleBtn.textContent = "🎯 Режим перетяжки: ВКЛ";
         toggleBtn.classList.add("active");
         $("dragModeIndicator").style.display = "block";
+        setTimeout(() => {
+          if($("dragModeIndicator")) $("dragModeIndicator").style.opacity = "0.8";
+        }, 100);
       } else {
         toggleBtn.textContent = "🎯 Режим перетяжки: ВЫКЛ";
         toggleBtn.classList.remove("active");
@@ -589,10 +563,9 @@
     let body=$("dtBody");
     for(let lane=0; lane<LANES; lane++){
       let tr=document.createElement("tr"); 
-      tr.className=ROW_CLASS[LANE_GROUPS[lane]]; 
       tr.dataset.lane=lane;
       let lhdr=document.createElement("td"); 
-      lhdr.className=`lane-hdr ${GRP_CLASS[LANE_GROUPS[lane]]}`; 
+      lhdr.className=`lane-hdr`; 
       lhdr.textContent=`№ ${lane+1}`; 
       tr.appendChild(lhdr);
       slots.forEach((sl,si)=>{ 
@@ -664,7 +637,6 @@
   
   function onMouseDown(e){
     if(dragModeEnabled) return;
-    
     let target = e.target;
     if(target.classList && target.classList.contains("slot")){
       e.preventDefault();
@@ -772,23 +744,24 @@
     await fetch(GAS_URL, { method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id: booking.id, date, tableNumber: booking.lane+1, start: booking.start, end: booking.end, name: booking.name, phone: booking.phone, comment: booking.comment }) });
   }
   
-  // ПЕРЕМЕЩЕНИЕ БРОНИ
+  function scheduleUpdateForTemp(){
+    if(updateTimeout) clearTimeout(updateTimeout);
+    updateTimeout = setTimeout(() => {
+      renderInlineTempCards();
+      highlightAllTempBookings();
+      renderAllSliders();
+      updateTimeout = null;
+    }, 50);
+  }
+  
   function startMove(booking, e) {
+    if(!dragModeEnabled) return;
     e.stopPropagation();
-    
-    if(!dragModeEnabled) {
-      showInfoModal(booking);
-      return;
-    }
-    
     const slider = e.currentTarget.closest('.slider');
     if (!slider) return;
-    
     let rows = $("dtBody").rows;
+    let durationCells = slots.findIndex(s => s.key === booking.end) - slots.findIndex(s => s.key === booking.start);
     let startIdxOrig = slots.findIndex(s => s.key === booking.start);
-    let endIdxOrig = slots.findIndex(s => s.key === booking.end);
-    let durationCells = endIdxOrig - startIdxOrig;
-    
     let ghost = document.createElement('div');
     ghost.className = 'ghost-slider';
     ghost.style.cssText = slider.style.cssText;
@@ -804,7 +777,6 @@
       if (!el) return null;
       return { lane: parseInt(el.dataset.lane), idx: parseInt(el.dataset.si) };
     }
-    
     function updateGhost(lane, startIdx) {
       const row = rows[lane];
       if (!row) return;
@@ -817,7 +789,6 @@
         ghost.style.height = (row.offsetHeight - 2) + 'px';
       }
     }
-    
     function onDragMove(ev) {
       const target = getTargetFromCoords(ev.clientX, ev.clientY);
       if (target) {
@@ -831,7 +802,6 @@
         }
       }
     }
-    
     function onDragEnd(ev) {
       const target = getTargetFromCoords(ev.clientX, ev.clientY);
       if (target) {
@@ -841,14 +811,14 @@
         const newStart = slots[finalStartIdx].key;
         const newEnd = slots[finalStartIdx + durationCells].key;
         let conflict = bookings.some(b => b.id !== booking.id && b.lane === finalLane && !(b.end <= newStart || b.start >= newEnd));
-        if (!conflict && (finalLane !== booking.lane || finalStartIdx !== startIdxOrig)) {
+        if (!conflict) {
           booking.lane = finalLane;
           booking.start = newStart;
           booking.end = newEnd;
           saveToServer(booking);
-        } else if (conflict) {
-          alert("Конфликт с другой бронью");
-        }
+          renderAllSliders();
+          if(dragModeEnabled) renderAllSliders();
+        } else alert("Конфликт");
       }
       ghost.remove();
       slider.classList.remove('dragging');
@@ -857,174 +827,10 @@
       document.removeEventListener('mouseup', onDragEnd);
       renderAllSliders();
     }
-    
     document.body.style.cursor = 'grabbing';
     document.addEventListener('mousemove', onDragMove);
     document.addEventListener('mouseup', onDragEnd);
     updateGhost(currentLane, currentStartIdx);
-  }
-  
-  // ПЕРЕМЕЩЕНИЕ ЧЕРНОВИКА
-  function startMoveForTemp(temp, e) {
-    e.stopPropagation();
-    if(!dragModeEnabled) return;
-    
-    let rows = $("dtBody").rows;
-    let startIdxOrig = slots.findIndex(s => s.key === temp.start);
-    let endIdxOrig = slots.findIndex(s => s.key === temp.end);
-    let durationCells = endIdxOrig - startIdxOrig;
-    
-    let slider = e.currentTarget.closest('.slider');
-    if (!slider) return;
-    
-    let ghost = document.createElement('div');
-    ghost.className = 'ghost-slider';
-    ghost.style.cssText = slider.style.cssText;
-    ghost.style.opacity = '0.6';
-    $('slidersLayer').appendChild(ghost);
-    slider.classList.add('dragging');
-    
-    let currentLane = temp.lane;
-    let currentStartIdx = startIdxOrig;
-    
-    function getTargetFromCoords(clientX, clientY) {
-      const el = document.elementsFromPoint(clientX, clientY).find(el => el.classList?.contains('slot'));
-      if (!el) return null;
-      return { lane: parseInt(el.dataset.lane), idx: parseInt(el.dataset.si) };
-    }
-    
-    function updateGhost(lane, startIdx) {
-      const row = rows[lane];
-      if (!row) return;
-      const startCell = row.cells[startIdx + 1];
-      const endCell = row.cells[startIdx + durationCells + 1];
-      if (startCell && endCell) {
-        ghost.style.left = (startCell.offsetLeft + 1) + 'px';
-        ghost.style.top = (row.offsetTop + 1) + 'px';
-        ghost.style.width = (endCell.offsetLeft + endCell.offsetWidth - startCell.offsetLeft - 2) + 'px';
-        ghost.style.height = (row.offsetHeight - 2) + 'px';
-      }
-    }
-    
-    function onDragMove(ev) {
-      const target = getTargetFromCoords(ev.clientX, ev.clientY);
-      if (target) {
-        let newLane = target.lane;
-        let newStartIdx = target.idx;
-        newStartIdx = Math.min(Math.max(0, newStartIdx), slots.length - durationCells - 1);
-        if (newLane !== currentLane || newStartIdx !== currentStartIdx) {
-          currentLane = newLane;
-          currentStartIdx = newStartIdx;
-          updateGhost(currentLane, currentStartIdx);
-        }
-      }
-    }
-    
-    function onDragEnd(ev) {
-      const target = getTargetFromCoords(ev.clientX, ev.clientY);
-      if (target) {
-        let finalLane = target.lane;
-        let finalStartIdx = target.idx;
-        finalStartIdx = Math.min(Math.max(0, finalStartIdx), slots.length - durationCells - 1);
-        const newStart = slots[finalStartIdx].key;
-        const newEnd = slots[finalStartIdx + durationCells].key;
-        
-        let conflict = bookings.some(b => b.lane === finalLane && !(b.end <= newStart || b.start >= newEnd));
-        if (!conflict) {
-          temp.lane = finalLane;
-          temp.start = newStart;
-          temp.end = newEnd;
-          renderInlineTempCards();
-          highlightAllTempBookings();
-        } else {
-          alert("Конфликт с существующей бронью");
-        }
-      }
-      ghost.remove();
-      slider.classList.remove('dragging');
-      document.body.style.cursor = '';
-      document.removeEventListener('mousemove', onDragMove);
-      document.removeEventListener('mouseup', onDragEnd);
-      renderAllSliders();
-    }
-    
-    document.body.style.cursor = 'grabbing';
-    document.addEventListener('mousemove', onDragMove);
-    document.addEventListener('mouseup', onDragEnd);
-    updateGhost(currentLane, currentStartIdx);
-  }
-  
-  // ИЗМЕНЕНИЕ РАЗМЕРА ЧЕРНОВИКА
-  function startResizeForTemp(temp, side, e) {
-    e.stopPropagation();
-    if(!dragModeEnabled) return;
-    
-    let rows = $("dtBody").rows;
-    let startIdx = slots.findIndex(s => s.key === temp.start);
-    let endIdx = slots.findIndex(s => s.key === temp.end);
-    
-    let slider = e.currentTarget.closest('.slider');
-    let ghost = document.createElement('div');
-    ghost.className = 'ghost-slider';
-    ghost.style.cssText = slider.style.cssText;
-    $('slidersLayer').appendChild(ghost);
-    slider.classList.add('dragging');
-    
-    let currentStartIdx = startIdx;
-    let currentEndIdx = endIdx;
-    
-    function updateGhostResize() {
-      const row = rows[temp.lane];
-      if (!row) return;
-      const startCell = row.cells[currentStartIdx + 1];
-      const endCell = row.cells[currentEndIdx + 1];
-      if (startCell && endCell) {
-        ghost.style.left = (startCell.offsetLeft + 1) + 'px';
-        ghost.style.top = (row.offsetTop + 1) + 'px';
-        ghost.style.width = (endCell.offsetLeft + endCell.offsetWidth - startCell.offsetLeft - 2) + 'px';
-        ghost.style.height = (row.offsetHeight - 2) + 'px';
-      }
-    }
-    
-    function onDragMove(ev) {
-      const target = document.elementsFromPoint(ev.clientX, ev.clientY).find(el => el.classList?.contains('slot'));
-      if (target) {
-        let idx = parseInt(target.dataset.si);
-        if (side === 'left') {
-          currentStartIdx = Math.min(idx, currentEndIdx - 1);
-          currentStartIdx = Math.max(0, currentStartIdx);
-        } else {
-          currentEndIdx = Math.max(idx, currentStartIdx + 1);
-          currentEndIdx = Math.min(slots.length - 1, currentEndIdx);
-        }
-        updateGhostResize();
-      }
-    }
-    
-    function onDragEnd(ev) {
-      const newStart = slots[currentStartIdx].key;
-      const newEnd = slots[currentEndIdx].key;
-      let conflict = bookings.some(b => b.lane === temp.lane && !(b.end <= newStart || b.start >= newEnd));
-      if (!conflict && (currentStartIdx !== startIdx || currentEndIdx !== endIdx)) {
-        temp.start = newStart;
-        temp.end = newEnd;
-        renderInlineTempCards();
-        highlightAllTempBookings();
-      } else if (conflict) {
-        alert("Конфликт с существующей бронью");
-      }
-      ghost.remove();
-      slider.classList.remove('dragging');
-      document.body.style.cursor = '';
-      document.removeEventListener('mousemove', onDragMove);
-      document.removeEventListener('mouseup', onDragEnd);
-      renderAllSliders();
-    }
-    
-    document.body.style.cursor = 'ew-resize';
-    document.addEventListener('mousemove', onDragMove);
-    document.addEventListener('mouseup', onDragEnd);
-    updateGhostResize();
   }
   
   function renderAllSliders(){
@@ -1054,9 +860,10 @@
       slider.appendChild(nameSpan); slider.appendChild(timeSpan);
       
       let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
-      dragHandle.addEventListener("mousedown", startMove.bind(null, booking));
+      if(dragModeEnabled) dragHandle.style.cursor = "grab";
+      dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
       slider.appendChild(dragHandle);
-      
+      slider.addEventListener("click", (e) => { if(e.target !== dragHandle) showInfoModal(booking); });
       container.appendChild(slider);
     });
     
@@ -1078,19 +885,23 @@
       slider.appendChild(nameSpan); slider.appendChild(timeSpan);
       
       let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
-      dragHandle.addEventListener("mousedown", startMoveForTemp.bind(null, temp));
+      if(dragModeEnabled) dragHandle.style.cursor = "grab";
+      dragHandle.addEventListener("mousedown", (e) => { if(dragModeEnabled) startMoveForTemp(temp, e); });
       slider.appendChild(dragHandle);
       
       let leftHandle = document.createElement("div"); leftHandle.className = "resize-handle handle-left";
       let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right";
-      leftHandle.addEventListener("mousedown", startResizeForTemp.bind(null, temp, 'left'));
-      rightHandle.addEventListener("mousedown", startResizeForTemp.bind(null, temp, 'right'));
-      slider.appendChild(leftHandle); 
-      slider.appendChild(rightHandle);
-      
+      if(dragModeEnabled) {
+        leftHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'left', e));
+        rightHandle.addEventListener("mousedown", (e) => startResizeForTemp(temp, 'right', e));
+        slider.appendChild(leftHandle); slider.appendChild(rightHandle);
+      }
       container.appendChild(slider);
     });
   }
+  
+  function startMoveForTemp(temp, e){ if(!dragModeEnabled) return; }
+  function startResizeForTemp(temp, side, e){ if(!dragModeEnabled) return; }
   
   function renderAll(){
     renderAllSliders();

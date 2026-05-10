@@ -234,7 +234,6 @@
       width: 100%;
     }
 
-    /* КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: таблица не должна перехватывать события мыши */
     #tableDesktop {
       display: table;
       border-collapse: collapse;
@@ -244,17 +243,6 @@
       font-size: 14px;
       position: relative;
       z-index: 1;
-    }
-    
-    /* Ячейки таблицы НЕ должны перехватывать события мыши в режиме перетяжки */
-    body.drag-mode-active #tableDesktop td.slot {
-      pointer-events: none !important;
-    }
-    
-    /* В обычном режиме ячейки работают */
-    #tableDesktop td.slot {
-      pointer-events: auto;
-      cursor: crosshair;
     }
 
     #tableDesktop thead th {
@@ -310,6 +298,7 @@
       border-bottom: .5px solid var(--border);
       border-right: .5px solid var(--border);
       transition: background 0.06s;
+      cursor: crosshair;
     }
     #tableDesktop tbody td.slot.drag-over { background: #ffe6a3 !important; }
     #tableDesktop tbody td.slot.selected-temp {
@@ -337,7 +326,6 @@
       z-index: 10;
     }
     
-    /* Слайдеры всегда получают события мыши */
     .slider {
       position: absolute;
       border-radius: 12px;
@@ -355,9 +343,8 @@
       transition: none;
     }
     
-    /* Режим перетяжки ВЫКЛЮЧЕН — слайдер кликабелен, ручки скрыты */
+    /* Режим перетяжки выключен */
     .slider:not(.drag-mode-enabled) {
-      pointer-events: auto;
       cursor: pointer;
     }
     .slider:not(.drag-mode-enabled) .drag-handle,
@@ -366,7 +353,7 @@
       pointer-events: none !important;
     }
     
-    /* Режим перетяжки ВКЛЮЧЕН — курсор схвати, ручки видны */
+    /* Режим перетяжки включен */
     .slider.drag-mode-enabled {
       cursor: grab;
     }
@@ -585,14 +572,10 @@
         toggleBtn.textContent = "🎯 Режим перетяжки: ВКЛ";
         toggleBtn.classList.add("active");
         $("dragModeIndicator").style.display = "block";
-        // КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: отключаем pointer-events у ячеек таблицы
-        document.body.classList.add("drag-mode-active");
       } else {
         toggleBtn.textContent = "🎯 Режим перетяжки: ВЫКЛ";
         toggleBtn.classList.remove("active");
         $("dragModeIndicator").style.display = "none";
-        // Включаем pointer-events обратно
-        document.body.classList.remove("drag-mode-active");
       }
       renderAllSliders();
     });
@@ -796,16 +779,17 @@
     await fetch(GAS_URL, { method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id: booking.id, date, tableNumber: booking.lane+1, start: booking.start, end: booking.end, name: booking.name, phone: booking.phone, comment: booking.comment }) });
   }
   
-  // Перемещение брони
+  // Перемещение брони - работает и в режиме перетяжки
   function startMove(booking, e) {
+    e.stopPropagation();
+    
+    // Если режим перетяжки выключен — показываем детали
     if(!dragModeEnabled) {
-      // В режиме перетяжки ВЫКЛ — показываем детали
-      e.stopPropagation();
       showInfoModal(booking);
       return;
     }
     
-    e.stopPropagation();
+    // Режим перетяжки включён — перемещаем
     const slider = e.currentTarget.closest('.slider');
     if (!slider) return;
     
@@ -895,8 +879,8 @@
   
   // Перемещение черновика
   function startMoveForTemp(temp, e) {
-    if(!dragModeEnabled) return;
     e.stopPropagation();
+    if(!dragModeEnabled) return;
     
     let rows = $("dtBody").rows;
     let startIdxOrig = slots.findIndex(s => s.key === temp.start);
@@ -987,8 +971,8 @@
   
   // Изменение размера черновика
   function startResizeForTemp(temp, side, e) {
-    if(!dragModeEnabled) return;
     e.stopPropagation();
+    if(!dragModeEnabled) return;
     
     let rows = $("dtBody").rows;
     let startIdx = slots.findIndex(s => s.key === temp.start);
@@ -1154,6 +1138,8 @@
   function openImg(){ $("imgPopup").classList.add("open"); }
   function closeImg(){ $("imgPopup").classList.remove("open"); }
   
+  // ВАЖНО: добавляем слушатели на таблицу ТОЛЬКО для создания черновиков,
+  // но они не мешают слайдерам, потому что слайдеры выше по z-index и перехватывают события первыми
   $("tableDesktop").addEventListener("mousedown", onMouseDown);
   document.body.addEventListener("mousemove", onMouseMove);
   document.body.addEventListener("mouseup", onMouseUp);

@@ -200,33 +200,6 @@
     }
     .temp-card-inline .temp-rm:hover { background: #ffccbb; }
 
-    .pills {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 4px;
-    }
-    .pill {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--ink3);
-      background: var(--surface);
-      border: .5px solid var(--border2);
-      border-radius: 980px;
-      padding: 6px 16px;
-    }
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot-navy { background: #3a7bd5; }
-    .dot-sage { background: #30a862; }
-    .dot-rust { background: #e05c2a; }
-    .dot-amber { background: var(--amber); }
-    .dot-green { background: var(--green); }
-    .dot-red { background: var(--red); }
-    .dot-temp { background: #0071e3; }
-
     .grid-card {
       background: var(--surface); border-radius: 24px;
       box-shadow: 0 4px 20px rgba(0,0,0,.06);
@@ -305,11 +278,26 @@
       border-right: .5px solid var(--border);
       transition: background 0.06s;
     }
+    /* Подсветка ячеек по статусу брони (полупрозрачная) */
+    #tableDesktop tbody td.slot.booking-pending {
+      background: rgba(255, 159, 10, 0.25) !important;
+    }
+    #tableDesktop tbody td.slot.booking-confirmed {
+      background: rgba(52, 199, 89, 0.25) !important;
+    }
+    #tableDesktop tbody td.slot.booking-rejected {
+      background: rgba(255, 59, 48, 0.2) !important;
+    }
+    #tableDesktop tbody td.slot.temp-highlight {
+      background: rgba(0, 113, 227, 0.35) !important;
+      border: 1px solid #0071e3 !important;
+    }
     #tableDesktop tbody td.slot.drag-over { background: #ffe6a3 !important; }
     #tableDesktop tbody td.slot.selected-temp {
       background: #b8e1fc !important;
       border: 2px solid #0071e3 !important;
     }
+    /* Групповые фоны (очень слабые) */
     #tableDesktop tbody tr.row-navy td.slot { background: #f8fafd; }
     #tableDesktop tbody tr.row-sage td.slot { background: #f6fcf8; }
     #tableDesktop tbody tr.row-rust td.slot { background: #fef8f4; }
@@ -344,7 +332,7 @@
       backdrop-filter: blur(4px);
       border: 1px solid rgba(255,255,255,0.5);
       will-change: left, top;
-      transition: none;
+      transition: all 0.1s ease;
     }
     .slider:not(.drag-mode-enabled) {
       pointer-events: auto;
@@ -364,7 +352,13 @@
       display: block;
     }
     .slider.drag-mode-enabled .drag-handle:active { cursor: grabbing; }
-    .slider:hover { opacity: 0.98; transform: scale(1.01); z-index: 30; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
+    .slider:hover {
+      opacity: 0.95;
+      transform: scale(1.01);
+      z-index: 30;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+      filter: brightness(1.02);
+    }
     .slider.dragging {
       opacity: 0.7 !important;
       z-index: 100 !important;
@@ -372,11 +366,11 @@
       pointer-events: none !important;
       transition: none !important;
     }
-    .slider.pending { background: rgba(255,159,10,0.3); border-left: 4px solid #ff9f0a; }
-    .slider.confirmed { background: rgba(52,199,89,0.3); border-left: 4px solid #34c759; }
-    .slider.rejected { background: rgba(255,59,48,0.25); border-left: 4px solid #ff3b30; opacity: 0.85; }
+    .slider.pending { background: rgba(255,159,10,0.4); border-left: 4px solid #ff9f0a; }
+    .slider.confirmed { background: rgba(52,199,89,0.4); border-left: 4px solid #34c759; }
+    .slider.rejected { background: rgba(255,59,48,0.35); border-left: 4px solid #ff3b30; opacity: 0.9; }
     .slider.temp {
-      background: rgba(0, 113, 227, 0.35);
+      background: rgba(0, 113, 227, 0.45);
       border-left: 4px solid #0071e3;
       backdrop-filter: blur(4px);
     }
@@ -540,7 +534,6 @@
   let isDragging = false;
   let dragStartCell = null;
   let dragInterval = null;
-  let resizePreview = null;
   let updateTimeout = null;
   
   let dragModeEnabled = false;
@@ -573,9 +566,6 @@
         toggleBtn.textContent = "🎯 Режим перетяжки: ВКЛ";
         toggleBtn.classList.add("active");
         $("dragModeIndicator").style.display = "block";
-        setTimeout(() => {
-          if($("dragModeIndicator")) $("dragModeIndicator").style.opacity = "0.8";
-        }, 100);
       } else {
         toggleBtn.textContent = "🎯 Режим перетяжки: ВЫКЛ";
         toggleBtn.classList.remove("active");
@@ -622,14 +612,50 @@
   
   function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
   
+  // Новая функция: подсветка ячеек согласно статусу броней
+  function updateCellsHighlight(){
+    // Сначала очищаем все классы подсветки у ячеек
+    for(let row of $("dtBody").rows){
+      for(let i=1; i<row.cells.length; i++){
+        let cell = row.cells[i];
+        cell.classList.remove("booking-pending", "booking-confirmed", "booking-rejected", "temp-highlight");
+      }
+    }
+    // Подсветка для основных броней
+    for(let b of bookings){
+      let startIdx = slots.findIndex(s => s.key === b.start);
+      let endIdx = slots.findIndex(s => s.key === b.end);
+      if(startIdx !== -1 && endIdx !== -1){
+        let statusClass = b.confirmed === true ? "booking-confirmed" : (b.confirmed === false ? "booking-rejected" : "booking-pending");
+        for(let i=startIdx; i<=endIdx; i++){
+          let cell = getSlotCell(b.lane, i);
+          if(cell) cell.classList.add(statusClass);
+        }
+      }
+    }
+    // Подсветка для временных броней
+    for(let t of tempBookings){
+      let startIdx = slots.findIndex(s => s.key === t.start);
+      let endIdx = slots.findIndex(s => s.key === t.end);
+      if(startIdx !== -1 && endIdx !== -1){
+        for(let i=startIdx; i<=endIdx; i++){
+          let cell = getSlotCell(t.lane, i);
+          if(cell) cell.classList.add("temp-highlight");
+        }
+      }
+    }
+  }
+  
   function clearTempSelections(){
     tempBookings = [];
     renderInlineTempCards();
     document.querySelectorAll("#tableDesktop td.slot.selected-temp").forEach(td => td.classList.remove("selected-temp"));
     renderAllSliders();
+    updateCellsHighlight();
   }
   
   function highlightAllTempBookings(){
+    // Для совместимости со старым кодом
     document.querySelectorAll("#tableDesktop td.slot.selected-temp").forEach(td => td.classList.remove("selected-temp"));
     for(let tb of tempBookings){
       let startIdx = slots.findIndex(s => s.key === tb.start);
@@ -641,6 +667,7 @@
         }
       }
     }
+    updateCellsHighlight(); // дополнительный вызов
   }
   
   function renderInlineTempCards(){
@@ -666,6 +693,7 @@
         renderInlineTempCards();
         highlightAllTempBookings();
         renderAllSliders();
+        updateCellsHighlight();
       };
       container.appendChild(card);
     });
@@ -725,6 +753,7 @@
         renderInlineTempCards();
         highlightAllTempBookings();
         renderAllSliders();
+        updateCellsHighlight();
       }
     }
     isDragging = false;
@@ -770,6 +799,7 @@
       let data = await res.json();
       bookings = data.bookings ? data.bookings.map(b => ({ id: b.id, lane: b.table-1, start: parseFloat(b.start), end: parseFloat(b.end), name: b.name, phone: b.phone, comment: b.comment, confirmed: b.confirmed === "Да" ? true : (b.confirmed === "Нет" ? false : null) })) : [];
       renderAll();
+      updateCellsHighlight();
     } catch(e){ console.error(e); }
     hideLoad();
   }
@@ -786,6 +816,7 @@
       renderInlineTempCards();
       highlightAllTempBookings();
       renderAllSliders();
+      updateCellsHighlight();
       updateTimeout = null;
     }, 50);
   }
@@ -853,7 +884,7 @@
           booking.end = newEnd;
           saveToServer(booking);
           renderAllSliders();
-          if(dragModeEnabled) renderAllSliders();
+          updateCellsHighlight();
         } else alert("Конфликт");
       }
       ghost.remove();
@@ -862,6 +893,7 @@
       document.removeEventListener('mousemove', onDragMove);
       document.removeEventListener('mouseup', onDragEnd);
       renderAllSliders();
+      updateCellsHighlight();
     }
     document.body.style.cursor = 'grabbing';
     document.addEventListener('mousemove', onDragMove);
@@ -931,6 +963,7 @@
           renderInlineTempCards();
           highlightAllTempBookings();
           renderAllSliders();
+          updateCellsHighlight();
         } else alert("Конфликт с существующей бронью");
       }
       ghost.remove();
@@ -939,6 +972,7 @@
       document.removeEventListener('mousemove', onDragMove);
       document.removeEventListener('mouseup', onDragEnd);
       renderAllSliders();
+      updateCellsHighlight();
     }
     document.body.style.cursor = 'grabbing';
     document.addEventListener('mousemove', onDragMove);
@@ -954,7 +988,6 @@
     let rows = $("dtBody").rows;
     let startIdxOrig = slots.findIndex(s => s.key === temp.start);
     let endIdxOrig = slots.findIndex(s => s.key === temp.end);
-    let durationCells = endIdxOrig - startIdxOrig;
     let ghost = document.createElement('div');
     ghost.className = 'ghost-slider';
     ghost.style.cssText = slider.style.cssText;
@@ -1003,6 +1036,7 @@
         renderInlineTempCards();
         highlightAllTempBookings();
         renderAllSliders();
+        updateCellsHighlight();
       } else if (!conflict) {
         alert("Некорректный диапазон");
       } else alert("Конфликт с существующей бронью");
@@ -1012,6 +1046,7 @@
       document.removeEventListener('mousemove', onDragMove);
       document.removeEventListener('mouseup', onDragEnd);
       renderAllSliders();
+      updateCellsHighlight();
     }
     document.body.style.cursor = 'ew-resize';
     document.addEventListener('mousemove', onDragMove);
@@ -1089,6 +1124,7 @@
   function renderAll(){
     renderAllSliders();
     highlightAllTempBookings();
+    updateCellsHighlight();
   }
   
   let currentBooking = null;

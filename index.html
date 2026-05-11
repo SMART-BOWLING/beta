@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8"/>
@@ -201,13 +201,22 @@
     .temp-card-inline .temp-rm:hover { background: #ffccbb; }
 
     .pills {
-      display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 4px;
     }
     .pill {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 13px; font-weight: 500; color: var(--ink3);
-      background: var(--surface); border: .5px solid var(--border2);
-      border-radius: 980px; padding: 6px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink3);
+      background: var(--surface);
+      border: .5px solid var(--border2);
+      border-radius: 980px;
+      padding: 6px 16px;
     }
     .dot { width: 10px; height: 10px; border-radius: 50%; }
     .dot-navy { background: #3a7bd5; }
@@ -337,14 +346,13 @@
       will-change: left, top;
       transition: none;
     }
-    /* РЕЖИМ ПЕРЕТЯЖКИ ВЫКЛЮЧЕН — все элементы неактивны, курсор по умолчанию, блокируем все события перетаскивания */
     .slider:not(.drag-mode-enabled) {
-      pointer-events: auto;   /* Чтобы можно было кликнуть для просмотра деталей */
+      pointer-events: auto;
       cursor: pointer;
     }
     .slider:not(.drag-mode-enabled) .drag-handle,
     .slider:not(.drag-mode-enabled) .resize-handle {
-      display: none !important;  /* Ручки скрыты полностью */
+      display: none !important;
       pointer-events: none !important;
     }
     .slider.drag-mode-enabled {
@@ -401,7 +409,6 @@
       pointer-events: auto;
     }
     
-    /* Для существующих броней ручки изменения размера скрыты всегда */
     .slider:not(.temp) .resize-handle {
       display: none !important;
       pointer-events: none !important;
@@ -499,16 +506,6 @@
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
 
-    <div class="pills">
-      <div class="pill"><div class="dot dot-navy"></div>Столы 1–3</div>
-      <div class="pill"><div class="dot dot-sage"></div>Столы 4–6</div>
-      <div class="pill"><div class="dot dot-rust"></div>Столы 7–12</div>
-      <div class="pill"><div class="dot dot-amber"></div>Ожидает</div>
-      <div class="pill"><div class="dot dot-green"></div>Подтверждено</div>
-      <div class="pill"><div class="dot dot-red"></div>Отменено</div>
-      <div class="pill"><div class="dot dot-temp"></div>Временная (черновик)</div>
-    </div>
-
     <div class="grid-card">
       <div class="grid-scroll" id="gridScroll">
         <table id="tableDesktop">
@@ -584,7 +581,7 @@
         toggleBtn.classList.remove("active");
         $("dragModeIndicator").style.display = "none";
       }
-      renderAllSliders(); // перерисуем слайдеры с правильным классом drag-mode-enabled
+      renderAllSliders();
     });
   }
   
@@ -675,7 +672,7 @@
   }
   
   function onMouseDown(e){
-    if(dragModeEnabled) return; // в режиме перетяжки отключаем создание черновиков перетаскиванием мыши по ячейкам
+    if(dragModeEnabled) return;
     let target = e.target;
     if(target.classList && target.classList.contains("slot")){
       e.preventDefault();
@@ -798,9 +795,6 @@
     e.stopPropagation();
     const slider = e.currentTarget.closest('.slider');
     if (!slider) return;
-    // ... (полная логика перемещения оставлена, но работает только в активном режиме)
-    // Сокращаю для читаемости, но она полностью идентична нужной логике (рабочая)
-    if (!dragModeEnabled) return;
     let rows = $("dtBody").rows;
     let durationCells = slots.findIndex(s => s.key === booking.end) - slots.findIndex(s => s.key === booking.start);
     let startIdxOrig = slots.findIndex(s => s.key === booking.start);
@@ -859,7 +853,7 @@
           booking.end = newEnd;
           saveToServer(booking);
           renderAllSliders();
-          if(dragModeEnabled) renderAllSliders(); // повторно
+          if(dragModeEnabled) renderAllSliders();
         } else alert("Конфликт");
       }
       ghost.remove();
@@ -875,7 +869,155 @@
     updateGhost(currentLane, currentStartIdx);
   }
   
-  // Аналогичная функция для temp с проверкой dragModeEnabled — пропущена для краткости, но она есть в финальном коде
+  function startMoveForTemp(temp, e){
+    if(!dragModeEnabled) return;
+    e.stopPropagation();
+    const slider = e.currentTarget.closest('.slider');
+    if (!slider) return;
+    let rows = $("dtBody").rows;
+    let durationCells = slots.findIndex(s => s.key === temp.end) - slots.findIndex(s => s.key === temp.start);
+    let startIdxOrig = slots.findIndex(s => s.key === temp.start);
+    let ghost = document.createElement('div');
+    ghost.className = 'ghost-slider';
+    ghost.style.cssText = slider.style.cssText;
+    ghost.style.opacity = '0.6';
+    $('slidersLayer').appendChild(ghost);
+    slider.classList.add('dragging');
+    let currentLane = temp.lane;
+    let currentStartIdx = startIdxOrig;
+    function getTargetFromCoords(clientX, clientY) {
+      const el = document.elementsFromPoint(clientX, clientY).find(el => el.classList?.contains('slot'));
+      if (!el) return null;
+      return { lane: parseInt(el.dataset.lane), idx: parseInt(el.dataset.si) };
+    }
+    function updateGhost(lane, startIdx) {
+      const row = rows[lane];
+      if (!row) return;
+      const startCell = row.cells[startIdx + 1];
+      const endCell = row.cells[startIdx + durationCells + 1];
+      if (startCell && endCell) {
+        ghost.style.left = (startCell.offsetLeft + 1) + 'px';
+        ghost.style.top = (row.offsetTop + 1) + 'px';
+        ghost.style.width = (endCell.offsetLeft + endCell.offsetWidth - startCell.offsetLeft - 2) + 'px';
+        ghost.style.height = (row.offsetHeight - 2) + 'px';
+      }
+    }
+    function onDragMove(ev) {
+      const target = getTargetFromCoords(ev.clientX, ev.clientY);
+      if (target) {
+        let newLane = target.lane;
+        let newStartIdx = target.idx;
+        newStartIdx = Math.min(Math.max(0, newStartIdx), slots.length - durationCells - 1);
+        if (newLane !== currentLane || newStartIdx !== currentStartIdx) {
+          currentLane = newLane;
+          currentStartIdx = newStartIdx;
+          updateGhost(currentLane, currentStartIdx);
+        }
+      }
+    }
+    function onDragEnd(ev) {
+      const target = getTargetFromCoords(ev.clientX, ev.clientY);
+      if (target) {
+        let finalLane = target.lane;
+        let finalStartIdx = target.idx;
+        finalStartIdx = Math.min(Math.max(0, finalStartIdx), slots.length - durationCells - 1);
+        const newStart = slots[finalStartIdx].key;
+        const newEnd = slots[finalStartIdx + durationCells].key;
+        let conflict = bookings.some(b => b.lane === finalLane && !(b.end <= newStart || b.start >= newEnd));
+        if (!conflict) {
+          temp.lane = finalLane;
+          temp.start = newStart;
+          temp.end = newEnd;
+          renderInlineTempCards();
+          highlightAllTempBookings();
+          renderAllSliders();
+        } else alert("Конфликт с существующей бронью");
+      }
+      ghost.remove();
+      slider.classList.remove('dragging');
+      document.body.style.cursor = '';
+      document.removeEventListener('mousemove', onDragMove);
+      document.removeEventListener('mouseup', onDragEnd);
+      renderAllSliders();
+    }
+    document.body.style.cursor = 'grabbing';
+    document.addEventListener('mousemove', onDragMove);
+    document.addEventListener('mouseup', onDragEnd);
+    updateGhost(currentLane, currentStartIdx);
+  }
+  
+  function startResizeForTemp(temp, side, e){
+    if(!dragModeEnabled) return;
+    e.stopPropagation();
+    const slider = e.currentTarget.closest('.slider');
+    if (!slider) return;
+    let rows = $("dtBody").rows;
+    let startIdxOrig = slots.findIndex(s => s.key === temp.start);
+    let endIdxOrig = slots.findIndex(s => s.key === temp.end);
+    let durationCells = endIdxOrig - startIdxOrig;
+    let ghost = document.createElement('div');
+    ghost.className = 'ghost-slider';
+    ghost.style.cssText = slider.style.cssText;
+    ghost.style.opacity = '0.6';
+    $('slidersLayer').appendChild(ghost);
+    slider.classList.add('dragging');
+    let currentStartIdx = startIdxOrig;
+    let currentEndIdx = endIdxOrig;
+    function updateGhost(lane, startIdx, endIdx) {
+      const row = rows[lane];
+      if (!row) return;
+      const startCell = row.cells[startIdx + 1];
+      const endCell = row.cells[endIdx + 1];
+      if (startCell && endCell) {
+        ghost.style.left = (startCell.offsetLeft + 1) + 'px';
+        ghost.style.top = (row.offsetTop + 1) + 'px';
+        ghost.style.width = (endCell.offsetLeft + endCell.offsetWidth - startCell.offsetLeft - 2) + 'px';
+        ghost.style.height = (row.offsetHeight - 2) + 'px';
+      }
+    }
+    function onDragMove(ev) {
+      const el = document.elementsFromPoint(ev.clientX, ev.clientY).find(el => el.classList?.contains('slot'));
+      if (!el) return;
+      let idx = parseInt(el.dataset.si);
+      let newStart = currentStartIdx, newEnd = currentEndIdx;
+      if (side === 'left') {
+        newStart = Math.min(idx, currentEndIdx - 1);
+        newStart = Math.max(0, newStart);
+      } else {
+        newEnd = Math.max(idx, currentStartIdx + 1);
+        newEnd = Math.min(slots.length - 1, newEnd);
+      }
+      if (newStart !== currentStartIdx || newEnd !== currentEndIdx) {
+        currentStartIdx = newStart;
+        currentEndIdx = newEnd;
+        updateGhost(temp.lane, currentStartIdx, currentEndIdx);
+      }
+    }
+    function onDragEnd() {
+      const newStart = slots[currentStartIdx].key;
+      const newEnd = slots[currentEndIdx].key;
+      let conflict = bookings.some(b => b.lane === temp.lane && !(b.end <= newStart || b.start >= newEnd));
+      if (!conflict && currentStartIdx < currentEndIdx) {
+        temp.start = newStart;
+        temp.end = newEnd;
+        renderInlineTempCards();
+        highlightAllTempBookings();
+        renderAllSliders();
+      } else if (!conflict) {
+        alert("Некорректный диапазон");
+      } else alert("Конфликт с существующей бронью");
+      ghost.remove();
+      slider.classList.remove('dragging');
+      document.body.style.cursor = '';
+      document.removeEventListener('mousemove', onDragMove);
+      document.removeEventListener('mouseup', onDragEnd);
+      renderAllSliders();
+    }
+    document.body.style.cursor = 'ew-resize';
+    document.addEventListener('mousemove', onDragMove);
+    document.addEventListener('mouseup', onDragEnd);
+    updateGhost(temp.lane, currentStartIdx, currentEndIdx);
+  }
   
   function renderAllSliders(){
     let container = $("slidersLayer");
@@ -930,7 +1072,7 @@
       
       let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
       if(dragModeEnabled) dragHandle.style.cursor = "grab";
-      dragHandle.addEventListener("mousedown", (e) => { if(dragModeEnabled) startMoveForTemp(temp, e); });
+      dragHandle.addEventListener("mousedown", (e) => startMoveForTemp(temp, e));
       slider.appendChild(dragHandle);
       
       let leftHandle = document.createElement("div"); leftHandle.className = "resize-handle handle-left";
@@ -943,9 +1085,6 @@
       container.appendChild(slider);
     });
   }
-  
-  function startMoveForTemp(temp, e){ if(!dragModeEnabled) return; /* логика перемещения черновика */ }
-  function startResizeForTemp(temp, side, e){ if(!dragModeEnabled) return; /* логика ресайза */ }
   
   function renderAll(){
     renderAllSliders();

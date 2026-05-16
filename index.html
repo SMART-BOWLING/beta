@@ -11,48 +11,31 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      user-select: none;
     }
 
     :root {
-      /* Основная палитра — Премиальный темный клубный стиль */
-      --bg: #0f1115;
-      --surface: #161920;
-      --surface-glass: rgba(22, 25, 32, 0.75);
-      --surface2: #1e222b;
-      --border: rgba(255, 255, 255, 0.06);
-      --border2: rgba(255, 255, 255, 0.12);
-      
-      /* Текст */
-      --ink: #f5f5f7;
-      --ink2: #9a9ab0;
-      --ink3: #6e6e80;
-      --ink4: #868692;
-      
-      /* Акценты и Статусы */
-      --blue: #2f80ed;
-      --blue-h: #1b6fd1;
-      --blue-dim: rgba(47, 128, 237, 0.15);
-      
-      --green: #27ae60;
-      --green-dim: rgba(39, 174, 96, 0.15);
-      
-      --red: #eb5757;
-      --red-dim: rgba(235, 87, 87, 0.15);
-      
-      --amber: #f2a93b;
-      --amber-dim: rgba(242, 169, 59, 0.15);
-      
-      /* Зоны столов (Приглушенные благородные оттенки) */
-      --zone-navy: #222b45;
-      --zone-sage: #1e3d2f;
-      --zone-rust: #4a2825;
-
-      --r: 16px;
-      --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
-      --cell-h: 54px;
+      --bg: #F4F2EE;
+      --surface: rgba(255, 255, 255, 0.96);
+      --surface-glass: rgba(255, 255, 245, 0.72);
+      --surface2: #FDFCF9;
+      --border: rgba(100, 80, 60, 0.10);
+      --border2: rgba(100, 80, 60, 0.16);
+      --ink: #2C2418;
+      --ink2: #5A4A38;
+      --ink3: #8F7E6B;
+      --ink4: #B5A590;
+      --blue: #2C6A4E;
+      --blue-h: #23573F;
+      --blue-dim: rgba(44, 106, 78, 0.12);
+      --green: #4A7C59;
+      --green-dim: rgba(74, 124, 89, 0.12);
+      --red: #C2534B;
+      --amber: #C27E3A;
+      --r: 24px;
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Georgia", "Times New Roman", serif;
+      --cell-h: 60px;
       --cell-w: 76px;
-      --lane-w: 96px;
+      --lane-w: 110px;
     }
 
     body {
@@ -61,271 +44,401 @@
       color: var(--ink);
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
-      font-weight: 400;
+      font-weight: 450;
     }
 
-    /* Элементы Логина */
     #login {
-      position: fixed; inset: 0; background: var(--bg);
+      position: fixed; inset: 0; background: linear-gradient(145deg, #F0EDE6 0%, #E6E1D8 100%);
       display: flex; flex-direction: column; align-items: center;
       justify-content: center; gap: 24px; z-index: 9999; padding: 32px;
     }
-    .login-glyph { font-size: 64px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5)); }
-    .login-title { font-size: 36px; font-weight: 700; letter-spacing: -0.5px; color: var(--ink); }
-    .login-sub { font-size: 16px; color: var(--ink2); margin-top: -8px; font-weight: 400; }
-    .login-sep { width: 40px; height: 2px; background: var(--border2); border-radius: 2px; }
+    .login-glyph { font-size: 72px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.08)); }
+    .login-title { font-size: 36px; font-weight: 620; letter-spacing: -0.5px; color: #2C2418; text-shadow: 0 1px 2px rgba(255,255,255,0.5); }
+    .login-sub { font-size: 17px; color: var(--ink3); margin-top: -4px; font-weight: 470; font-style: italic; }
+    .login-sep { width: 48px; height: 1px; background: linear-gradient(90deg, transparent, var(--ink4), transparent); margin: 8px 0; }
 
     #content { display: none; min-height: 100vh; }
 
-    /* Шапка сайта */
     .nav {
       position: sticky; top: 0; z-index: 100;
       background: var(--surface-glass);
-      backdrop-filter: blur(20px) saturate(120%);
-      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 0.5px solid var(--border2);
       height: 68px; display: flex; align-items: center;
-      justify-content: space-between; padding: 0 24px;
+      justify-content: space-between; padding: 0 36px;
     }
-    .nav-title { font-size: 18px; font-weight: 600; letter-spacing: -0.2px; color: var(--ink); }
+    .nav-title { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; color: #2C2418; background: none; -webkit-background-clip: unset; background-clip: unset; }
     .nav-btn {
       display: flex; align-items: center; gap: 8px;
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 12px; padding: 10px 18px;
-      font-family: var(--font); font-size: 14px; font-weight: 500; color: var(--ink);
-      cursor: pointer; transition: all 0.2s ease;
+      background: var(--surface); border: 0.5px solid var(--border2);
+      border-radius: 100px; padding: 8px 24px;
+      font-family: var(--font); font-size: 14px; font-weight: 510; color: var(--blue);
+      cursor: pointer; transition: all 0.25s ease;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
     }
-    .nav-btn:hover { background: var(--surface); border-color: var(--ink3); }
+    .nav-btn:hover { background: var(--blue-dim); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
-    /* Контентная область */
     .page {
-      width: 100%; max-width: 1600px; margin: 0 auto;
-      padding: 24px 24px 80px; display: flex; flex-direction: column; gap: 24px;
+      width: 100%;
+      margin: 0;
+      padding: 32px 36px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
     }
 
-    /* Панель управления */
     .ctrl {
-      display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
-      background: var(--surface); border-radius: 20px; padding: 16px 20px;
-      border: 1px solid var(--border);
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+      background: var(--surface);
+      border-radius: 48px;
+      padding: 16px 28px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.04);
+      border: 0.5px solid var(--border);
     }
     .date-field {
-      flex: 1; min-width: 200px; max-width: 260px;
+      flex: 1; min-width: 240px; max-width: 320px;
       display: flex; align-items: center; gap: 12px;
-      background: var(--surface2); border-radius: 12px;
-      padding: 0 16px; height: 48px; border: 1px solid var(--border);
-      color: var(--ink2); transition: all 0.2s;
+      background: var(--surface2); border-radius: 48px;
+      padding: 0 22px; height: 54px; border: 0.5px solid var(--border2);
+      transition: all 0.2s;
     }
-    .date-field:focus-within { border-color: var(--blue); background: var(--surface); color: var(--blue); }
+    .date-field:focus-within { border-color: var(--blue); box-shadow: 0 0 0 4px var(--blue-dim); }
     #dateInput {
       flex: 1; border: none; background: transparent;
-      font-family: var(--font); font-size: 15px; font-weight: 500; color: var(--ink);
-      cursor: pointer; outline: none; color-scheme: dark;
+      font-family: var(--font); font-size: 17px; font-weight: 500; color: var(--ink);
+      cursor: pointer;
     }
     .btn-book {
-      height: 48px; padding: 0 28px;
-      background: var(--blue); color: white; border: none; border-radius: 12px;
-      font-family: var(--font); font-size: 15px; font-weight: 600;
-      cursor: pointer; transition: all 0.2s ease;
+      height: 54px; padding: 0 42px;
+      background: var(--blue); color: white; border: none; border-radius: 100px;
+      font-family: var(--font); font-size: 17px; font-weight: 590;
+      cursor: pointer; transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       white-space: nowrap;
     }
-    .btn-book:hover { background: var(--blue-h); transform: translateY(-1px); }
+    .btn-book:hover { background: var(--blue-h); transform: translateY(-2px); box-shadow: 0 6px 14px rgba(44,106,78,0.25); }
     
     .btn-drag-toggle {
-      height: 48px; padding: 0 20px;
-      background: var(--surface2); color: var(--ink2); border: 1px solid var(--border);
-      border-radius: 12px; font-family: var(--font); font-size: 14px; font-weight: 500;
+      height: 54px; padding: 0 32px;
+      background: var(--surface2); color: var(--ink); border: 1px solid var(--border2);
+      border-radius: 100px; font-family: var(--font); font-size: 16px; font-weight: 500;
       cursor: pointer; transition: all 0.2s; white-space: nowrap;
       display: inline-flex; align-items: center; gap: 8px;
     }
     .btn-drag-toggle.active {
-      background: var(--amber-dim); color: var(--amber); border-color: var(--amber);
+      background: var(--blue); color: white; border-color: var(--blue);
+      box-shadow: 0 4px 12px rgba(44,106,78,0.3);
     }
-    .btn-drag-toggle:hover:not(.active) { background: var(--surface2); border-color: var(--ink3); color: var(--ink); }
+    .btn-drag-toggle.active:hover { background: var(--blue-h); transform: translateY(-2px); }
+    .btn-drag-toggle:hover:not(.active) { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
 
-    /* Временные карточки выделения */
-    .inline-temp-cards { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-left: auto; }
+    .inline-temp-cards {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
     .temp-badge {
-      display: flex; align-items: center; gap: 8px;
-      background: var(--blue-dim); border-radius: 30px;
-      padding: 6px 14px; font-size: 13px; font-weight: 500; color: var(--blue);
-      border: 1px solid rgba(47, 128, 237, 0.3); white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(44,106,78,0.12);
+      border-radius: 48px;
+      padding: 6px 16px 6px 24px;
+      font-size: 13px;
+      font-weight: 510;
+      color: var(--blue);
+      border: 0.5px solid rgba(44,106,78,0.2);
+      white-space: nowrap;
     }
     .temp-card-inline {
-      display: flex; align-items: center; gap: 10px;
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 30px; padding: 4px 8px 4px 14px; font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 48px;
+      padding: 6px 18px 6px 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      font-size: 13px;
+      transition: all 0.2s;
     }
-    .temp-card-inline strong { font-weight: 600; color: var(--ink); }
+    .temp-card-inline strong { font-size: 15px; font-weight: 600; margin-right: 6px; color: var(--ink); }
     .temp-card-inline .temp-time {
-      font-size: 12px; background: rgba(255,255,255,0.05);
-      padding: 2px 8px; border-radius: 10px; color: var(--ink2);
+      font-family: monospace;
+      font-size: 13px;
+      font-weight: 500;
+      background: #F0EDE6;
+      padding: 4px 12px;
+      border-radius: 40px;
+      color: var(--ink2);
     }
     .temp-card-inline .temp-rm {
-      width: 24px; height: 24px; border-radius: 50%;
-      background: rgba(255,255,255,0.08); border: none; cursor: pointer;
-      font-size: 11px; color: var(--ink2); display: flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px; border-radius: 40px;
+      background: #FDF4F0; border: none; cursor: pointer;
+      font-size: 16px; font-weight: 600; color: var(--red);
       transition: all 0.15s;
     }
-    .temp-card-inline .temp-rm:hover { background: var(--red-dim); color: var(--red); }
+    .temp-card-inline .temp-rm:hover { background: #FDE4DC; transform: scale(0.96); }
 
-    /* Таблица / Сетка */
     .grid-card {
-      background: var(--surface); border-radius: 20px;
-      overflow: hidden; border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 40px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+      overflow: hidden;
+      border: 0.5px solid var(--border);
+      transition: all 0.2s;
     }
-    .grid-scroll { overflow-x: auto; position: relative; width: 100%; scrollbar-width: thin; }
+    .grid-scroll {
+      overflow-x: auto;
+      overflow-y: visible;
+      -webkit-overflow-scrolling: touch;
+      position: relative;
+      width: 100%;
+      scrollbar-width: thin;
+    }
 
-    #tableDesktop { display: table; border-collapse: collapse; table-layout: fixed; width: 100%; min-width: 1120px; font-size: 13px; }
+    #tableDesktop {
+      display: table;
+      border-collapse: collapse;
+      table-layout: fixed;
+      width: 100%;
+      min-width: 1140px;
+      font-size: 14px;
+      font-family: var(--font);
+    }
     #tableDesktop thead th {
-      height: var(--cell-h); font-size: 12px; font-weight: 600;
-      color: var(--ink4); border-bottom: 1px solid var(--border2);
-      border-right: 1px solid var(--border); text-align: center;
-      vertical-align: middle; background: var(--surface2);
-      position: sticky; top: 0; z-index: 3;
+      height: var(--cell-h);
+      font-size: 13.5px;
+      font-weight: 540;
+      letter-spacing: 0.2px;
+      color: var(--ink4);
+      border-bottom: 1px solid var(--border2);
+      border-right: 0.5px solid var(--border);
+      text-align: center;
+      vertical-align: middle;
+      background: var(--surface2);
+      position: sticky;
+      top: 0;
+      z-index: 3;
     }
     #tableDesktop thead th.corner {
-      width: var(--lane-w); min-width: var(--lane-w);
-      background: var(--surface2); position: sticky; left: 0; z-index: 5;
-      font-size: 13px; font-weight: 700; color: var(--ink);
-      border-right: 1px solid var(--border2);
+      width: var(--lane-w);
+      min-width: var(--lane-w);
+      background: #F0EDE6;
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      font-size: 16px;
+      font-weight: 620;
+      color: #2C2418;
+      border-right: 0.5px solid var(--border2);
     }
-    #tableDesktop thead th.th-time { transition: all 0.15s; }
-    #tableDesktop thead th.th-time:hover { background: var(--surface); color: var(--blue); }
+    #tableDesktop thead th.th-time {
+      cursor: pointer;
+      width: var(--cell-w);
+      min-width: var(--cell-w);
+      transition: all 0.15s;
+    }
+    #tableDesktop thead th.th-time:hover { background: #FDF8F0; color: var(--amber); }
 
-    #tableDesktop tbody tr { height: var(--cell-h); }
+    #tableDesktop tbody tr { height: var(--cell-h); transition: background 0.2s; }
     #tableDesktop tbody td.lane-hdr {
-      width: var(--lane-w); min-width: var(--lane-w);
-      font-size: 15px; font-weight: 700;
-      border-bottom: 1px solid var(--border);
+      width: var(--lane-w);
+      min-width: var(--lane-w);
+      font-size: 19px;
+      font-weight: 620;
+      border-bottom: 1px solid var(--border2);
       border-right: 1px solid var(--border2);
-      text-align: center; position: sticky; left: 0; z-index: 2;
+      text-align: center;
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      letter-spacing: -0.2px;
     }
-    
-    /* Специфичные цвета для зон заголовков */
-    .lane-hdr.grp-navy { background: var(--zone-navy) !important; color: #a1b5f8; }
-    .lane-hdr.grp-sage { background: var(--zone-sage) !important; color: #87dba8; }
-    .lane-hdr.grp-rust { background: var(--zone-rust) !important; color: #f2a299; }
+    .lane-hdr.grp-navy { background: #3E3A35 !important; color: #F5F0E6; }
+    .lane-hdr.grp-sage { background: #4F6B52 !important; color: #F5F0E6; }
+    .lane-hdr.grp-rust { background: #A56942 !important; color: #F5F0E6; }
 
-    /* Подложки строк */
-    #tableDesktop tbody tr.row-navy td.slot { background: #181d2a; }
-    #tableDesktop tbody tr.row-sage td.slot { background: #16221c; }
-    #tableDesktop tbody tr.row-rust td.slot { background: #241918; }
+    #tableDesktop tbody tr.row-navy td.slot { background: #FCFAF5; }
+    #tableDesktop tbody tr.row-sage td.slot { background: #F8FCF6; }
+    #tableDesktop tbody tr.row-rust td.slot { background: #FEF9F5; }
     
-    #tableDesktop tbody tr.row-navy:hover td.slot { background: #1d2537; }
-    #tableDesktop tbody tr.row-sage:hover td.slot { background: #1f3127; }
-    #tableDesktop tbody tr.row-rust:hover td.slot { background: #322321; }
+    #tableDesktop tbody tr.row-navy:hover td.slot { background: #F6F2EA; }
+    #tableDesktop tbody tr.row-sage:hover td.slot { background: #F0F8EE; }
+    #tableDesktop tbody tr.row-rust:hover td.slot { background: #FDF1E8; }
 
     #tableDesktop tbody td.slot {
-      cursor: crosshair; border-bottom: 1px solid var(--border);
-      border-right: 1px solid var(--border); transition: background 0.1s ease;
+      cursor: crosshair;
+      border-bottom: 0.5px solid var(--border);
+      border-right: 0.5px solid var(--border);
+      transition: background 0.15s ease;
     }
-    
-    /* Состояния ячеек сетки */
-    #tableDesktop tbody td.slot.booking-pending { background: rgba(242, 169, 59, 0.25) !important; }
-    #tableDesktop tbody td.slot.booking-confirmed { background: rgba(39, 174, 96, 0.25) !important; }
-    #tableDesktop tbody td.slot.booking-rejected { background: rgba(235, 87, 87, 0.2) !important; }
-    #tableDesktop tbody td.slot.temp-highlight { background: rgba(47, 128, 237, 0.35) !important; }
-    #tableDesktop tbody td.slot.drag-over { background: rgba(255, 255, 255, 0.15) !important; }
-
-    /* Слайдеры бронирования над сеткой */
-    #slidersLayer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
-    .slider {
-      position: absolute; border-radius: 8px; pointer-events: auto;
-      padding: 6px 10px; display: flex; flex-direction: column; justify-content: center;
-      gap: 2px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-      border: 1px solid rgba(255,255,255,0.1); will-change: left, top;
-      transition: all 0.15s ease; font-weight: 500; font-family: var(--font);
-      overflow: hidden; white-space: nowrap; color: #ffffff;
-    }
-    
-    .slider[data-lane-type="navy"] { background: #324475; }
-    .slider[data-lane-type="sage"] { background: #27543f; }
-    .slider[data-lane-type="rust"] { background: #6e3530; }
-    
-    /* Цветовые статусы слайдеров */
-    .slider.confirmed { border-left: 4px solid var(--green); }
-    .slider.pending { border-left: 4px solid var(--amber); }
-    .slider.rejected { border-left: 4px solid var(--red); opacity: 0.6; }
-    .slider.temp { border: 2px dashed var(--blue); background: rgba(47, 128, 237, 0.5); }
-    
-    .slider:hover { filter: brightness(1.15); z-index: 30; transform: translateY(-1px); }
-    .sl-name { font-size: 12px; font-weight: 600; text-overflow: ellipsis; overflow: hidden; }
-    .sl-time { font-size: 11px; opacity: 0.75; }
-
-    /* Окна Модальные / Шторки */
-    .overlay {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(10px); z-index: 2000; justify-content: center; align-items: center;
-      padding: 16px;
-    }
-    .overlay.open { display: flex; }
-    .sheet {
-      background: var(--surface); border-radius: 24px; width: 100%;
-      max-width: 480px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-      border: 1px solid var(--border2); overflow: hidden;
-      animation: fadeInModal 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    @keyframes fadeInModal { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
-    
-    .sheet-head { padding: 24px 24px 12px; display: flex; justify-content: space-between; align-items: center; }
-    .sheet-title { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; }
-    .sheet-x {
-      width: 32px; height: 32px; border-radius: 50%; background: var(--surface2);
-      border: none; font-size: 18px; cursor: pointer; color: var(--ink2);
-      display: flex; align-items: center; justify-content: center; transition: 0.2s;
-    }
-    .sheet-x:hover { background: rgba(255,255,255,0.1); color: var(--ink); }
-    .sheet-body { padding: 12px 24px 28px; }
-    
-    /* Формы */
-    .f-group { margin-bottom: 18px; }
-    .f-label { font-size: 13px; font-weight: 500; color: var(--ink4); margin-bottom: 6px; display: block; }
-    .f-input {
-      width: 100%; background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 12px; font-size: 15px; padding: 12px 16px; color: var(--ink);
-      font-family: var(--font); outline: none; transition: all 0.2s;
-    }
-    .f-input:focus { border-color: var(--blue); background: rgba(255,255,255,0.02); }
-    textarea.f-input { resize: none; }
-    
-    .f-actions { display: flex; gap: 12px; margin-top: 24px; }
-    .f-btn-ok { flex: 1; height: 46px; background: var(--blue); color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; transition: background 0.2s; }
-    .f-btn-ok:hover { background: var(--blue-h); }
-    .f-btn-cancel { flex: 1; height: 46px; background: var(--surface2); border: 1px solid var(--border); color: var(--ink2); border-radius: 12px; font-weight: 500; font-size: 15px; cursor: pointer; transition: all 0.2s; }
-    .f-btn-cancel:hover { background: rgba(255,255,255,0.05); color: var(--ink); }
-    
-    .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 15px; }
-    .info-row span { color: var(--ink4); }
-    .info-row strong { color: var(--ink); font-weight: 500; }
-    
-    .del-btn { width: 100%; height: 46px; background: var(--red-dim); border: 1px solid rgba(235, 87, 87, 0.2); border-radius: 12px; margin-top: 20px; cursor: pointer; font-weight: 600; color: var(--red); transition: all 0.2s; }
-    .del-btn:hover { background: var(--red); color: white; }
-    
-    .confirm-btns { display: flex; gap: 12px; margin: 20px 0 4px; }
-    .cb-yes, .cb-no { flex: 1; height: 44px; border-radius: 12px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: opacity 0.2s; }
-    .cb-yes { background: var(--green-dim); color: #6fcf97; border: 1px solid rgba(39, 174, 96, 0.2); }
-    .cb-no { background: var(--red-dim); color: #f2994a; border: 1px solid rgba(235, 87, 87, 0.2); }
-    .cb-yes:hover, .cb-no:hover { filter: brightness(1.2); }
-    
-    /* Индикатор режима перетяжки */
-    .drag-mode-indicator {
-      position: fixed; bottom: 24px; right: 24px;
-      background: var(--amber); color: #000; padding: 12px 24px;
-      border-radius: 30px; font-size: 14px; font-weight: 700; z-index: 1000;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4); pointer-events: none;
-    }
-
-    /* Лоадер */
-    #loader { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 5000; align-items: center; justify-content: center; }
-    .loader-box { background: var(--surface); border: 1px solid var(--border2); border-radius: 20px; padding: 24px 40px; text-align: center; }
-    .spin { width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    #tableDesktop tbody td.slot.booking-pending { background: rgba(194, 126, 58, 0.18) !important; }
+    #tableDesktop tbody td.slot.booking-confirmed { background: rgba(74, 124, 89, 0.16) !important; }
+    #tableDesktop tbody td.slot.booking-rejected { background: rgba(194, 83, 75, 0.12) !important; }
+    #tableDesktop tbody td.slot.temp-highlight { background: rgba(44, 106, 78, 0.22) !important; border: 1px solid #2C6A4E !important; }
+    #tableDesktop tbody td.slot.drag-over { background: rgba(194, 126, 58, 0.28) !important; }
 
     @media (max-width: 780px) {
-      .page { padding: 16px 12px 70px; gap: 16px; }
+      .page { padding: 20px 18px 70px; gap: 20px; }
       .ctrl { flex-direction: column; align-items: stretch; }
       .inline-temp-cards { margin-left: 0; justify-content: flex-start; }
-      .btn-book, .btn-drag-toggle, .date-field { max-width: 100%; width: 100%; }
+      .btn-book, .btn-drag-toggle { width: 100%; }
+      .nav { padding: 0 20px; }
+    }
+
+    #slidersLayer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 20;
+    }
+    
+    .slider {
+      position: absolute;
+      border-radius: 32px;
+      pointer-events: auto;
+      cursor: default;
+      padding: 8px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      backdrop-filter: blur(12px);
+      border: 0.5px solid rgba(255,255,245,0.3);
+      will-change: left, top;
+      transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      font-weight: 510;
+      letter-spacing: -0.2px;
+      font-family: var(--font);
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    
+    .slider[data-lane-type="navy"] { background: rgba(62, 58, 53, 0.9); color: #F5F0E6; }
+    .slider[data-lane-type="sage"] { background: rgba(79, 107, 82, 0.9); color: #F5F0E6; }
+    .slider[data-lane-type="rust"] { background: rgba(165, 105, 66, 0.9); color: #F5F0E6; }
+    
+    .slider.pending[data-lane-type="navy"] { background: rgba(62, 58, 53, 0.92); border-left: 3px solid #C27E3A; }
+    .slider.pending[data-lane-type="sage"] { background: rgba(79, 107, 82, 0.92); border-left: 3px solid #C27E3A; }
+    .slider.pending[data-lane-type="rust"] { background: rgba(165, 105, 66, 0.92); border-left: 3px solid #C27E3A; }
+    
+    .slider.confirmed[data-lane-type="navy"] { background: #3E3A35; box-shadow: 0 6px 16px rgba(0,0,0,0.15); border-left: 3px solid #4A7C59; }
+    .slider.confirmed[data-lane-type="sage"] { background: #4F6B52; border-left: 3px solid #C2C7A7; }
+    .slider.confirmed[data-lane-type="rust"] { background: #A56942; border-left: 3px solid #E6C7A2; }
+    
+    .slider.rejected[data-lane-type="navy"] { background: rgba(62, 58, 53, 0.65); opacity: 0.8; text-decoration: line-through; }
+    .slider.rejected[data-lane-type="sage"] { background: rgba(79, 107, 82, 0.65); }
+    .slider.rejected[data-lane-type="rust"] { background: rgba(165, 105, 66, 0.65); }
+    
+    .slider.temp[data-lane-type="navy"] { background: rgba(62, 58, 53, 0.85); border: 1px solid #E6B87E; box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
+    .slider.temp[data-lane-type="sage"] { background: rgba(79, 107, 82, 0.85); border: 1px solid #E6B87E; }
+    .slider.temp[data-lane-type="rust"] { background: rgba(165, 105, 66, 0.85); border: 1px solid #E6B87E; }
+    
+    .slider:not(.drag-mode-enabled) { pointer-events: auto; cursor: pointer; }
+    .slider.drag-mode-enabled { cursor: grab; transition: transform 0.05s, box-shadow 0.1s; }
+    .slider.drag-mode-enabled:active { cursor: grabbing; }
+    
+    .slider:hover { transform: scale(1.01) translateY(-1px); filter: brightness(1.02); z-index: 30; box-shadow: 0 12px 28px rgba(0,0,0,0.2); }
+    .slider.dragging { opacity: 0.8 !important; z-index: 100 !important; box-shadow: 0 16px 32px rgba(0,0,0,0.25) !important; pointer-events: none !important; transform: scale(1.02); }
+    
+    .sl-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.1px; text-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+    .sl-time { font-size: 10px; opacity: 0.9; white-space: nowrap; font-weight: 500; font-family: monospace; }
+    
+    .resize-handle {
+      position: absolute;
+      width: 14px;
+      height: 60%;
+      top: 20%;
+      background: rgba(230, 200, 160, 0.8);
+      border-radius: 20px;
+      cursor: ew-resize;
+      transition: all 0.1s;
+      z-index: 5;
+      pointer-events: auto;
+    }
+    .resize-handle:hover { background: rgba(230, 184, 126, 1); width: 18px; }
+    .handle-left { left: 6px; }
+    .handle-right { right: 6px; }
+    .drag-handle {
+      position: absolute;
+      top: 0;
+      left: 20px;
+      right: 20px;
+      height: 100%;
+      cursor: default;
+      background: transparent;
+      z-index: 2;
+      pointer-events: auto;
+    }
+    .slider:not(.temp) .resize-handle { display: none !important; }
+
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(12px); z-index: 2000; justify-content: center; align-items: center; }
+    .overlay.open { display: flex; }
+    .sheet { background: rgba(255, 252, 245, 0.98); border-radius: 48px; width: 100%; max-width: 540px; box-shadow: 0 40px 70px rgba(0, 0, 0, 0.25); backdrop-filter: blur(2px); border: 0.5px solid rgba(255,255,240,0.8); overflow: hidden; }
+    .sheet-head { padding: 28px 32px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid var(--border2); }
+    .sheet-title { font-size: 28px; font-weight: 620; letter-spacing: -0.6px; color: #2C2418; }
+    .sheet-x { width: 44px; height: 44px; border-radius: 100px; background: #F0EDE6; border: none; font-size: 24px; cursor: pointer; transition: 0.15s; }
+    .sheet-x:hover { background: #E6E0D5; transform: scale(0.96); }
+    .sheet-body { padding: 24px 32px 36px; }
+    .f-group { margin-bottom: 28px; }
+    .f-label { font-size: 14px; font-weight: 590; color: var(--ink3); margin-bottom: 8px; display: block; letter-spacing: -0.2px; }
+    .f-input { width: 100%; background: #FDFCF9; border: 0.5px solid var(--border2); border-radius: 24px; font-size: 16px; padding: 14px 20px; font-family: var(--font); transition: all 0.2s; }
+    .f-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 4px var(--blue-dim); }
+    .f-actions { display: flex; gap: 16px; margin-top: 32px; }
+    .f-btn-ok { flex:1; height: 56px; background: var(--blue); color: white; border: none; border-radius: 100px; font-weight: 600; cursor: pointer; font-size: 17px; transition: 0.2s; }
+    .f-btn-ok:hover { background: var(--blue-h); transform: translateY(-2px); }
+    .f-btn-cancel { flex:1; height: 56px; background: #F0EDE6; border: none; border-radius: 100px; font-weight: 500; cursor: pointer; transition: 0.2s; }
+    .info-row { display: flex; justify-content: space-between; padding: 16px 0; border-bottom: 0.5px solid var(--border); font-size: 16px; }
+    .del-btn { width:100%; height: 54px; background: #FDF4F0; border: none; border-radius: 100px; margin-top: 28px; cursor: pointer; font-weight: 600; color: var(--red); transition: 0.15s; }
+    .del-btn:hover { background: #FDE4DC; transform: translateY(-1px); }
+    .confirm-btns { display: flex; gap: 16px; margin: 20px 0 8px; }
+    .cb-yes, .cb-no { flex:1; height: 54px; border-radius: 100px; font-weight: 600; border: none; cursor: pointer; font-size: 16px; transition: 0.2s; }
+    .cb-yes { background: rgba(74, 124, 89, 0.18); color: #2C5A3A; }
+    .cb-yes:hover { background: rgba(74, 124, 89, 0.35); }
+    .cb-no { background: rgba(194, 83, 75, 0.12); color: #A54139; }
+    .cb-no:hover { background: rgba(194, 83, 75, 0.25); }
+    #loader { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); backdrop-filter: blur(14px); z-index:5000; align-items:center; justify-content:center; }
+    .loader-box { background: rgba(255, 252, 245, 0.96); border-radius: 56px; padding: 36px 56px; text-align: center; box-shadow: 0 24px 48px rgba(0,0,0,0.2); }
+    .spin { width: 44px; height: 44px; border: 3px solid #E6E0D5; border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .ghost-slider { position: absolute; border-radius: 32px; pointer-events: none; z-index: 25; opacity: 0.55; background: rgba(44,106,78,0.4); border: 2px dashed #2C6A4E; box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+    .drag-mode-indicator {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: #2C2418dd;
+      backdrop-filter: blur(20px);
+      color: #F5F0E6;
+      padding: 12px 26px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 590;
+      z-index: 1000;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      border: 0.5px solid rgba(255,245,230,0.2);
+      pointer-events: none;
+      letter-spacing: -0.2px;
+    }
+    #bookingTimePreview {
+      background: #F0EDE6;
+      border-radius: 28px;
+      padding: 14px 20px;
+      margin-bottom: 24px;
+      font-size: 15px;
+      font-weight: 500;
+      color: #2C2418;
     }
   </style>
 </head>
@@ -334,7 +447,7 @@
 <div id="login">
   <div class="login-glyph">🎱</div>
   <div class="login-title">Бильярд Клуб</div>
-  <div class="login-sub">Элегантное бронирование</div>
+  <div class="login-sub">Атмосфера игры, стиль бронирования</div>
   <div class="login-sep"></div>
   <div id="g_id_onload"
     data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com"
@@ -350,86 +463,21 @@
   </nav>
   <div class="page">
     <div class="ctrl">
-      <div class="date-field">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-        <input type="date" id="dateInput"/>
-      </div>
+      <div class="date-field"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><input type="date" id="dateInput"/></div>
       <button class="btn-book" onclick="openBookModal()">➕ Новая бронь</button>
       <button id="dragToggleBtn" class="btn-drag-toggle">🎯 Режим перетяжки: ВЫКЛ</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
-    <div class="grid-card">
-      <div class="grid-scroll" id="gridScroll">
-        <table id="tableDesktop">
-          <thead id="dtHead">
-            <tr><th class="corner">СТОЛ</th></tr>
-          </thead>
-          <tbody id="dtBody"></tbody>
-        </table>
-        <div id="slidersLayer"></div>
-      </div>
-    </div>
+    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
   </div>
 </div>
 <div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">🎯 Режим перетяжки АКТИВЕН</div>
 
-<!-- МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ -->
-<div id="bookModal" class="overlay">
-  <div class="sheet">
-    <div class="sheet-head">
-      <div class="sheet-title">Подтверждение брони</div>
-      <button class="sheet-x" onclick="closeBookModal()">×</button>
-    </div>
-    <div class="sheet-body">
-      <div id="bookingTimePreview" style="background:var(--surface2); border: 1px solid var(--border); border-radius:12px; padding:12px 16px; margin-bottom:20px; font-size:14px; font-weight:500; color:var(--ink);">
-        <span>🕒 Выбранное время: </span><span id="previewTimes" style="color: var(--blue); font-weight:600;">—</span>
-      </div>
-      <div class="f-group"><label class="f-label">Имя *</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div>
-      <div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+7 123 456-78-90"/></div>
-      <div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания / особые условия"></textarea></div>
-      <div class="f-actions">
-        <button class="f-btn-ok" onclick="submitTempBookings()">Сохранить</button>
-        <button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button>
-      </div>
-    </div>
-  </div>
-</div>
+<div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Подтверждение брони</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div id="bookingTimePreview"><span>🕒 Выбранное время: </span><span id="previewTimes">—</span></div><div class="f-group"><label class="f-label">Имя *</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+7 123 456-78-90"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания / особые условия"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitTempBookings()">Сохранить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
 
-<div id="infoModal" class="overlay">
-  <div class="sheet">
-    <div class="sheet-head">
-      <div class="sheet-title">Детали брони</div>
-      <button class="sheet-x" onclick="closeInfoModal()">×</button>
-    </div>
-    <div class="sheet-body">
-      <div class="info-list">
-        <div class="info-row"><span>Стол</span><strong id="i-table"></strong></div>
-        <div class="info-row"><span>Время</span><strong id="i-time"></strong></div>
-        <div class="info-row"><span>Имя</span><strong id="i-name"></strong></div>
-        <div class="info-row"><span>Телефон</span><strong id="i-phone"></strong></div>
-        <div class="info-row"><span>Комментарий</span><strong id="i-comment" style="font-weight:normal; color: var(--ink2);"></strong></div>
-      </div>
-      <div class="confirm-btns">
-        <button class="cb-yes" onclick="confirmBooking(true)">✅ Пришла бронь</button>
-        <button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button>
-      </div>
-      <button class="del-btn" onclick="deleteBooking()">🗑 Удалить бронь</button>
-    </div>
-  </div>
-</div>
-
-<div id="imgPopup" class="overlay">
-  <div class="sheet" style="max-width:90vw; background:transparent; box-shadow:none; border:none;">
-    <img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width:100%; border-radius:16px; border: 1px solid var(--border2);" onclick="closeImg()"/>
-  </div>
-</div>
-
-<div id="loader">
-  <div class="loader-box">
-    <div class="spin"></div>
-    <div style="font-size:14px; color: var(--ink2);">Загрузка...</div>
-  </div>
-</div>
+<div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали брони</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><strong id="i-table"></strong></div><div class="info-row"><span>Время</span><strong id="i-time"></strong></div><div class="info-row"><span>Имя</span><strong id="i-name"></strong></div><div class="info-row"><span>Телефон</span><strong id="i-phone"></strong></div><div class="info-row"><span>Комментарий</span><strong id="i-comment" style="font-weight:normal;"></strong></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Пришла бронь</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">🗑 Удалить бронь</button></div></div></div>
+<div id="imgPopup" class="overlay"><div class="sheet" style="max-width:90vw; background:transparent; box-shadow:none;"><img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width:100%; border-radius:36px; border:0.5px solid rgba(255,255,245,0.5);" onclick="closeImg()"/></div></div>
+<div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка данных...</div></div></div>
 
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLxSrpcGOIm34gLlFZS-EYZmG8liMLcUST3MRMoAp56y6XDC2ClapCDB18yiYmdrHZ/exec";
@@ -493,17 +541,7 @@
   }
   function clearTempSelections(){ tempBookings = []; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); }
   function renderInlineTempCards(){ const container=$("inlineTempContainer"); if(!container) return; if(tempBookings.length===0){ container.innerHTML=""; return; } container.innerHTML=`<div class="temp-badge">📋 Выделено броней <span>${tempBookings.length}</span></div>`; tempBookings.forEach((tb,idx)=>{ let card=document.createElement("div"); card.className="temp-card-inline"; card.innerHTML=`<strong>Стол ${tb.lane+1}</strong><span class="temp-time">${fmt(tb.start)}–${fmt(tb.end)}</span><button class="temp-rm" data-idx="${idx}">✕</button>`; card.querySelector(".temp-rm").onclick=(e)=>{ e.stopPropagation(); tempBookings.splice(idx,1); renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); updatePreviewTimes(); }; container.appendChild(card); }); updatePreviewTimes(); }
-  
-  function updatePreviewTimes() {
-    const previewSpan = document.getElementById("previewTimes");
-    if(previewSpan) {
-      if(tempBookings.length === 0) previewSpan.innerText = "—";
-      else {
-        const timesStr = tempBookings.map(tb => `Стол ${tb.lane+1} (${fmt(tb.start)}–${fmt(tb.end)})`).join("; ");
-        previewSpan.innerText = timesStr;
-      }
-    }
-  }
+  function updatePreviewTimes() { const previewSpan = document.getElementById("previewTimes"); if(previewSpan) { if(tempBookings.length === 0) previewSpan.innerText = "—"; else { const timesStr = tempBookings.map(tb => `Стол ${tb.lane+1} (${fmt(tb.start)}–${fmt(tb.end)})`).join("; "); previewSpan.innerText = timesStr; } } }
   
   function onMouseDown(e){ if(dragModeEnabled) return; let target=e.target; if(target.classList?.contains("slot")){ e.preventDefault(); let lane=parseInt(target.dataset.lane), startIdx=parseInt(target.dataset.si); isDragging=true; dragStartCell={lane,startIdx}; dragInterval={lane,startIdx,endIdx:startIdx}; highlightDragInterval(lane,startIdx,startIdx); } }
   function onMouseMove(e){ if(!dragModeEnabled && isDragging && dragStartCell){ let hoverEl=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); if(hoverEl){ let lane=parseInt(hoverEl.dataset.lane), idx=parseInt(hoverEl.dataset.si); if(lane===dragStartCell.lane){ let newStart=Math.min(dragStartCell.startIdx,idx), newEnd=Math.max(dragStartCell.startIdx,idx); if(dragInterval.startIdx!==newStart||dragInterval.endIdx!==newEnd) dragInterval={lane,startIdx:newStart,endIdx:newEnd}; highlightDragInterval(lane,newStart,newEnd); } } } }
@@ -516,18 +554,66 @@
   async function loadFromServer(){ showLoad(); try{ let res=await fetch(GAS_URL+"?action=get&date="+$("dateInput").value); let data=await res.json(); bookings=data.bookings?data.bookings.map(b=>({id:b.id,lane:b.table-1,start:parseFloat(b.start),end:parseFloat(b.end),name:b.name,phone:b.phone,comment:b.comment,confirmed:b.confirmed==="Да"?true:(b.confirmed==="Нет"?false:null)})):[]; renderAllSliders(); updateCellsHighlight(); } catch(e){console.error(e);} hideLoad(); }
   async function saveToServer(booking){ if(!booking.id) return; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"update",id:booking.id,date:$("dateInput").value,tableNumber:booking.lane+1,start:booking.start,end:booking.end,name:booking.name,phone:booking.phone,comment:booking.comment})}); }
   
-  function startMove(booking, e){ if(!dragModeEnabled) return; e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let rows=$("dtBody").rows; let durationCells=slots.findIndex(s=>s.key===booking.end)-slots.findIndex(s=>s.key===booking.start); let startIdxOrig=slots.findIndex(s=>s.key===booking.start); let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); let currentLane=booking.lane, currentStartIdx=startIdxOrig; 
-    function getTargetFromCoords(clientX,clientY){ const el=document.elementsFromPoint(clientX,clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane),idx:parseInt(el.dataset.si)}; } 
+  function startMove(booking, e){ if(!dragModeEnabled) return; e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let rows=$("dtBody").rows; let durationCells=slots.findIndex(s=>s.key===booking.end)-slots.findIndex(s=>s.key===booking.start); let startIdxOrig=slots.findIndex(s=>s.key===booking.start); let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); let currentLane=booking.lane, currentStartIdx=startIdxOrig; function getTargetFromCoords(clientX,clientY){ const el=document.elementsFromPoint(clientX,clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane),idx:parseInt(el.dataset.si)}; } function updateGhost(lane,startIdx){ const row=rows[lane]; if(!row) return; const startCell=row.cells[startIdx+1], endCell=row.cells[startIdx+durationCells+1]; if(startCell&&endCell){ ghost.style.left=(startCell.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(endCell.offsetLeft+endCell.offsetWidth-startCell.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function onDragMove(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let newLane=target.lane, newStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); if(newLane!==currentLane||newStartIdx!==currentStartIdx){ currentLane=newLane; currentStartIdx=newStartIdx; updateGhost(currentLane,currentStartIdx); } } } function onDragEnd(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let finalLane=target.lane, finalStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); const newStart=slots[finalStartIdx].key, newEnd=slots[finalStartIdx+durationCells].key; let conflict=bookings.some(b=>b.id!==booking.id&&b.lane===finalLane&&!(b.end<=newStart||b.start>=newEnd)); if(!conflict){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт"); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhost(currentLane,currentStartIdx); }
+  function startMoveForTemp(temp,e){ if(!dragModeEnabled) return; e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let rows=$("dtBody").rows; let durationCells=slots.findIndex(s=>s.key===temp.end)-slots.findIndex(s=>s.key===temp.start); let startIdxOrig=slots.findIndex(s=>s.key===temp.start); let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); let currentLane=temp.lane, currentStartIdx=startIdxOrig; function getTargetFromCoords(clientX,clientY){ const el=document.elementsFromPoint(clientX,clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane),idx:parseInt(el.dataset.si)}; } function updateGhost(lane,startIdx){ const row=rows[lane]; if(!row) return; const startCell=row.cells[startIdx+1], endCell=row.cells[startIdx+durationCells+1]; if(startCell&&endCell){ ghost.style.left=(startCell.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(endCell.offsetLeft+endCell.offsetWidth-startCell.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function onDragMove(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let newLane=target.lane, newStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); if(newLane!==currentLane||newStartIdx!==currentStartIdx){ currentLane=newLane; currentStartIdx=newStartIdx; updateGhost(currentLane,currentStartIdx); } } } function onDragEnd(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let finalLane=target.lane, finalStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); const newStart=slots[finalStartIdx].key, newEnd=slots[finalStartIdx+durationCells].key; let conflict=bookings.some(b=>b.lane===finalLane&&!(b.end<=newStart||b.start>=newEnd)); if(!conflict){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт"); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhost(currentLane,currentStartIdx); }
+  
+  function renderAllSliders(){
+    let container = $("slidersLayer"); if(!container) return; container.innerHTML = "";
+    if(!$("tableDesktop") || !$("dtBody")) return;
+    let rows = Array.from($("dtBody").querySelectorAll("tr"));
+    if(rows.length === 0) return;
+    bookings.forEach(booking => {
+      let startIdx = slots.findIndex(s => s.key === booking.start), endIdx = slots.findIndex(s => s.key === booking.end);
+      if(startIdx === -1 || endIdx === -1) return;
+      let row = rows[booking.lane]; if(!row) return;
+      let sc = row.cells[startIdx+1], ec = row.cells[endIdx+1]; if(!sc || !ec) return;
+      let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2;
+      let status = booking.confirmed === true ? "confirmed" : (booking.confirmed === false ? "rejected" : "pending");
+      let laneType = LANE_TYPE_MAP[LANE_GROUPS[booking.lane]];
+      let slider = document.createElement("div"); slider.className = `slider ${status}`; if(dragModeEnabled) slider.classList.add("drag-mode-enabled");
+      slider.setAttribute("data-lane-type", laneType); slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+      slider.innerHTML = `<div class="sl-name">${booking.name || "Бронь"}</div><div class="sl-time">${fmt(booking.start)} – ${fmt(booking.end)}</div>`;
+      let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
+      if(dragModeEnabled) dragHandle.addEventListener("mousedown", (e) => startMove(booking, e));
+      slider.appendChild(dragHandle); slider.addEventListener("click", (e) => { if(e.target !== dragHandle) showInfoModal(booking); });
+      container.appendChild(slider);
+    });
+    tempBookings.forEach(temp => {
+      let startIdx = slots.findIndex(s => s.key === temp.start), endIdx = slots.findIndex(s => s.key === temp.end);
+      if(startIdx === -1 || endIdx === -1) return;
+      let row = rows[temp.lane]; if(!row) return;
+      let sc = row.cells[startIdx+1], ec = row.cells[endIdx+1]; if(!sc || !ec) return;
+      let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2;
+      let slider = document.createElement("div"); slider.className = "slider temp"; if(dragModeEnabled) slider.classList.add("drag-mode-enabled");
+      let laneType = LANE_TYPE_MAP[LANE_GROUPS[temp.lane]];
+      slider.setAttribute("data-lane-type", laneType); slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+      slider.innerHTML = `<div class="sl-name">📌 Бронь (ожидает)</div><div class="sl-time">${fmt(temp.start)} – ${fmt(temp.end)}</div>`;
+      let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
+      if(dragModeEnabled) dragHandle.addEventListener("mousedown", (e) => startMoveForTemp(temp, e));
+      slider.appendChild(dragHandle);
+      if(dragModeEnabled){
+        let leftHandle = document.createElement("div"); leftHandle.className = "resize-handle handle-left"; leftHandle.addEventListener("mousedown", (e) => { e.stopPropagation(); alert("Изменение размера черновика (демо)"); });
+        let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right"; rightHandle.addEventListener("mousedown", (e) => { e.stopPropagation(); alert("Изменение размера черновика (демо)"); });
+        slider.appendChild(leftHandle); slider.appendChild(rightHandle);
+      }
+      container.appendChild(slider);
+    });
   }
   
-  /* Вспомогательные функции-заглушки для предотвращения ошибок инициализации */
-  function showLoad() { $("loader").style.display = "flex"; }
-  function hideLoad() { $("loader").style.display = "none"; }
-  function openInfoModal() { $("infoModal").classList.add("open"); }
-  function closeInfoModal() { $("infoModal").classList.remove("open"); }
-  function openImg() { $("imgPopup").classList.add("open"); }
-  function closeImg() { $("imgPopup").classList.remove("open"); }
-  function renderAllSliders() {}
+  let currentBooking = null;
+  function showInfoModal(b){ currentBooking = b; $("i-table").textContent = "№ "+(b.lane+1); $("i-time").textContent = `${fmt(b.start)} – ${fmt(b.end)}`; $("i-name").textContent = b.name; $("i-phone").textContent = b.phone || "—"; $("i-comment").textContent = b.comment || "—"; $("infoModal").classList.add("open"); }
+  function closeInfoModal(){ $("infoModal").classList.remove("open"); currentBooking=null; }
+  async function confirmBooking(yes){ if(!currentBooking) return; showLoad(); await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"confirm", id:currentBooking.id, confirmed:yes }) }); closeInfoModal(); await loadFromServer(); hideLoad(); }
+  async function deleteBooking(){ if(!currentBooking||!confirm("Удалить бронь?")) return; showLoad(); await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"delete", id:currentBooking.id }) }); closeInfoModal(); await loadFromServer(); hideLoad(); }
+  function showLoad(){ $("loader").style.display="flex"; }
+  function hideLoad(){ $("loader").style.display="none"; }
+  function openImg(){ $("imgPopup").classList.add("open"); }
+  function closeImg(){ $("imgPopup").classList.remove("open"); }
+  
+  $("tableDesktop").addEventListener("mousedown", onMouseDown);
+  document.body.addEventListener("mousemove", onMouseMove);
+  document.body.addEventListener("mouseup", onMouseUp);
+  ["bookModal","infoModal","imgPopup"].forEach(id=>{ $(id)?.addEventListener("click",e=>{ if(e.target=== $(id)) $(id).classList.remove("open"); }); });
 </script>
 </body>
 </html>

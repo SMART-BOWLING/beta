@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <title>Бильярд Клуб · Бронирование столов</title>
-  <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png"/>
+  <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     * {
@@ -462,7 +462,9 @@
 </div>
 <div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">🎯 Режим перетяжки АКТИВЕН</div>
 
-<div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Подтверждение брони</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div class="f-group"><label class="f-label">Имя *</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+7 123 456-78-90"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания / особые условия"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitTempBookings()">Сохранить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
+<!-- МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ с информацией о времени брони -->
+<div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Подтверждение брони</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div id="bookingTimePreview" style="background:#f0f2f5; border-radius:20px; padding:12px 16px; margin-bottom:20px; font-size:15px; font-weight:500; color:#1c1c1e;"><span>🕒 Выбранное время: </span><span id="previewTimes">—</span></div><div class="f-group"><label class="f-label">Имя *</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+7 123 456-78-90"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания / особые условия"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitTempBookings()">Сохранить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
+
 <div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали брони</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><strong id="i-table"></strong></div><div class="info-row"><span>Время</span><strong id="i-time"></strong></div><div class="info-row"><span>Имя</span><strong id="i-name"></strong></div><div class="info-row"><span>Телефон</span><strong id="i-phone"></strong></div><div class="info-row"><span>Комментарий</span><strong id="i-comment" style="font-weight:normal;"></strong></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Пришла бронь</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">🗑 Удалить бронь</button></div></div></div>
 <div id="imgPopup" class="overlay"><div class="sheet" style="max-width:90vw; background:transparent; box-shadow:none;"><img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width:100%; border-radius:32px;" onclick="closeImg()"/></div></div>
 <div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
@@ -528,12 +530,25 @@
     for(let t of tempBookings){ let startIdx=slots.findIndex(s=>s.key===t.start), endIdx=slots.findIndex(s=>s.key===t.end); if(startIdx!==-1 && endIdx!==-1) for(let i=startIdx;i<=endIdx;i++){ let cell=getSlotCell(t.lane,i); if(cell) cell.classList.add("temp-highlight"); } }
   }
   function clearTempSelections(){ tempBookings = []; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); }
-  function renderInlineTempCards(){ const container=$("inlineTempContainer"); if(!container) return; if(tempBookings.length===0){ container.innerHTML=""; return; } container.innerHTML=`<div class="temp-badge">✏️ Черновики <span>${tempBookings.length}</span></div>`; tempBookings.forEach((tb,idx)=>{ let card=document.createElement("div"); card.className="temp-card-inline"; card.innerHTML=`<strong>Стол ${tb.lane+1}</strong><span class="temp-time">${fmt(tb.start)}–${fmt(tb.end)}</span><button class="temp-rm" data-idx="${idx}">✕</button>`; card.querySelector(".temp-rm").onclick=(e)=>{ e.stopPropagation(); tempBookings.splice(idx,1); renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); }; container.appendChild(card); }); }
+  function renderInlineTempCards(){ const container=$("inlineTempContainer"); if(!container) return; if(tempBookings.length===0){ container.innerHTML=""; return; } container.innerHTML=`<div class="temp-badge">📋 Выделено броней <span>${tempBookings.length}</span></div>`; tempBookings.forEach((tb,idx)=>{ let card=document.createElement("div"); card.className="temp-card-inline"; card.innerHTML=`<strong>Стол ${tb.lane+1}</strong><span class="temp-time">${fmt(tb.start)}–${fmt(tb.end)}</span><button class="temp-rm" data-idx="${idx}">✕</button>`; card.querySelector(".temp-rm").onclick=(e)=>{ e.stopPropagation(); tempBookings.splice(idx,1); renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); updatePreviewTimes(); }; container.appendChild(card); }); updatePreviewTimes(); }
+  
+  function updatePreviewTimes() {
+    const previewSpan = document.getElementById("previewTimes");
+    if(previewSpan) {
+      if(tempBookings.length === 0) previewSpan.innerText = "—";
+      else {
+        const timesStr = tempBookings.map(tb => `Стол ${tb.lane+1} (${fmt(tb.start)}–${fmt(tb.end)})`).join("; ");
+        previewSpan.innerText = timesStr;
+      }
+    }
+  }
+  
   function onMouseDown(e){ if(dragModeEnabled) return; let target=e.target; if(target.classList?.contains("slot")){ e.preventDefault(); let lane=parseInt(target.dataset.lane), startIdx=parseInt(target.dataset.si); isDragging=true; dragStartCell={lane,startIdx}; dragInterval={lane,startIdx,endIdx:startIdx}; highlightDragInterval(lane,startIdx,startIdx); } }
   function onMouseMove(e){ if(!dragModeEnabled && isDragging && dragStartCell){ let hoverEl=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); if(hoverEl){ let lane=parseInt(hoverEl.dataset.lane), idx=parseInt(hoverEl.dataset.si); if(lane===dragStartCell.lane){ let newStart=Math.min(dragStartCell.startIdx,idx), newEnd=Math.max(dragStartCell.startIdx,idx); if(dragInterval.startIdx!==newStart||dragInterval.endIdx!==newEnd) dragInterval={lane,startIdx:newStart,endIdx:newEnd}; highlightDragInterval(lane,newStart,newEnd); } } } }
   function highlightDragInterval(lane,startIdx,endIdx){ document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); for(let i=startIdx;i<=endIdx;i++){ let cell=getSlotCell(lane,i); if(cell) cell.classList.add("drag-over"); } }
   function onMouseUp(){ if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx!==dragInterval.endIdx){ let {lane,startIdx,endIdx}=dragInterval; let start=slots[startIdx].key, end=slots[endIdx].key; let hasConflict=bookings.some(b=>b.lane===lane && !(b.end<=start || b.start>=end)); if(hasConflict) alert("Это время уже занято существующей бронью."); else tempBookings.push({id:nextTempId++,lane,start:Math.min(start,end),end:Math.max(start,end)}); renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } isDragging=false; dragInterval=null; dragStartCell=null; document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); }
-  function openBookModal(){ if(tempBookings.length===0){ alert("Сначала выделите брони: зажмите левую кнопку и протяните по ячейкам стола."); return; } $("nameInput").value="";$("phoneInput").value="";$("commentInput").value=""; $("bookModal").classList.add("open"); }
+  
+  function openBookModal(){ if(tempBookings.length===0){ alert("Сначала выделите брони: зажмите левую кнопку и протяните по ячейкам стола."); return; } $("nameInput").value="";$("phoneInput").value="";$("commentInput").value=""; updatePreviewTimes(); $("bookModal").classList.add("open"); }
   function closeBookModal(){ $("bookModal").classList.remove("open"); }
   async function submitTempBookings(){ let name=$("nameInput").value.trim(); if(!name){alert("Введите имя");return;} if(tempBookings.length===0){closeBookModal();return;} showLoad(); const date=$("dateInput").value; try{ const payload={bookings:tempBookings.map(tb=>({date,tableNumber:tb.lane+1,start:tb.start,end:tb.end,name,phone:$("phoneInput").value.trim(),comment:$("commentInput").value.trim()}))}; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify(payload)}); clearTempSelections(); await loadFromServer(); closeBookModal(); } catch(e){console.error(e);alert("Ошибка сохранения");} hideLoad(); }
   async function loadFromServer(){ showLoad(); try{ let res=await fetch(GAS_URL+"?action=get&date="+$("dateInput").value); let data=await res.json(); bookings=data.bookings?data.bookings.map(b=>({id:b.id,lane:b.table-1,start:parseFloat(b.start),end:parseFloat(b.end),name:b.name,phone:b.phone,comment:b.comment,confirmed:b.confirmed==="Да"?true:(b.confirmed==="Нет"?false:null)})):[]; renderAllSliders(); updateCellsHighlight(); } catch(e){console.error(e);} hideLoad(); }
@@ -572,7 +587,8 @@
       let slider = document.createElement("div"); slider.className = "slider temp"; if(dragModeEnabled) slider.classList.add("drag-mode-enabled");
       let laneType = LANE_TYPE_MAP[LANE_GROUPS[temp.lane]];
       slider.setAttribute("data-lane-type", laneType); slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
-      slider.innerHTML = `<div class="sl-name">Черновик</div><div class="sl-time">${fmt(temp.start)} – ${fmt(temp.end)}</div>`;
+      // Убрали надпись "Черновик", теперь отображаем только время и стол
+      slider.innerHTML = `<div class="sl-name">📌 Бронь (ожидает)</div><div class="sl-time">${fmt(temp.start)} – ${fmt(temp.end)}</div>`;
       let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
       if(dragModeEnabled) dragHandle.addEventListener("mousedown", (e) => startMoveForTemp(temp, e));
       slider.appendChild(dragHandle);

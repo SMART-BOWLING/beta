@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>Бильярд Клуб · Бронирование столов</title>
+  <title>Бильярд Клуб · Элегантное бронирование</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
@@ -15,33 +15,37 @@
     }
 
     :root {
-      --bg: #f2f0eb;
-      --surface: rgba(255, 255, 245, 0.98);
-      --surface-glass: rgba(250, 248, 240, 0.82);
-      --surface2: #f8f6ef;
-      --border: rgba(100, 80, 60, 0.12);
-      --border2: rgba(100, 80, 60, 0.18);
-      --ink: #2c2418;
-      --ink2: #5a4a38;
-      --ink3: #9b8a74;
-      --ink4: #7e6b54;
-      --accent: #c47a3a;
-      --accent-h: #a8642a;
-      --accent-dim: rgba(196, 122, 58, 0.12);
-      --green: #4a7c59;
-      --green-dim: rgba(74, 124, 89, 0.12);
-      --red: #bc6c5c;
-      --gold: #d4a373;
-      --r: 24px;
-      --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Georgia", "Times New Roman", serif;
-      --cell-h: 60px;
-      --cell-w: 74px;
-      --lane-w: 108px;
+      --bg: #f5f5f7;
+      --surface: rgba(255, 255, 255, 0.98);
+      --surface-glass: rgba(255, 255, 255, 0.72);
+      --surface2: #f9f9fb;
+      --border: rgba(60, 60, 67, 0.08);
+      --border2: rgba(60, 60, 67, 0.12);
+      --ink: #1c1c1e;
+      --ink2: #3a3a3c;
+      --ink3: #8e8e93;
+      --ink4: #6c6c70;
+      --blue: #0066cc;
+      --blue-h: #0055b3;
+      --blue-dim: rgba(0, 102, 204, 0.12);
+      --green: #2c6e2f;
+      --green-dim: rgba(44, 110, 47, 0.12);
+      --red: #d70015;
+      --amber: #c93400;
+      --r: 20px;
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+      --cell-h: 58px;
+      --cell-w: 72px;
+      --lane-w: 104px;
+      /* Apple-inspired gradients & elevated neutrals */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+      --shadow-md: 0 8px 28px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+      --shadow-lg: 0 18px 40px rgba(0, 0, 0, 0.08);
     }
 
     body {
       font-family: var(--font);
-      background: linear-gradient(145deg, #ede8df 0%, #f5f2ec 100%);
+      background: var(--bg);
       color: var(--ink);
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
@@ -49,68 +53,66 @@
     }
 
     #login {
-      position: fixed; inset: 0; background: linear-gradient(135deg, #e8e2d8 0%, #f0ebe3 100%);
+      position: fixed; inset: 0; background: var(--bg);
       display: flex; flex-direction: column; align-items: center;
-      justify-content: center; gap: 28px; z-index: 9999; padding: 32px;
-      backdrop-filter: blur(4px);
+      justify-content: center; gap: 20px; z-index: 9999; padding: 32px;
+      backdrop-filter: blur(12px);
     }
-    .login-glyph { font-size: 72px; filter: drop-shadow(0 8px 20px rgba(0,0,0,0.15)); animation: float 3s ease-in-out infinite; }
-    @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
-    .login-title { font-size: 42px; font-weight: 620; letter-spacing: -0.8px; background: linear-gradient(135deg, #3a2c1c 0%, #7a5a3a 100%); background-clip: text; -webkit-background-clip: text; color: transparent; font-family: var(--font); }
-    .login-sub { font-size: 17px; color: #8a765a; margin-top: -8px; font-weight: 480; letter-spacing: 0.2px; }
-    .login-sep { width: 60px; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 8px 0; }
+    .login-glyph { font-size: 58px; filter: drop-shadow(0 2px 12px rgba(0,0,0,0.08)); }
+    .login-title { font-size: 32px; font-weight: 590; letter-spacing: -0.5px; background: linear-gradient(135deg, #1c1c1e 0%, #4a4a4e 100%); background-clip: text; -webkit-background-clip: text; color: transparent; }
+    .login-sub { font-size: 16px; color: var(--ink3); margin-top: -6px; font-weight: 470; }
+    .login-sep { width: 1px; height: 28px; background: var(--border2); }
 
     #content { display: none; min-height: 100vh; }
 
     .nav {
       position: sticky; top: 0; z-index: 100;
       background: var(--surface-glass);
-      backdrop-filter: saturate(180%) blur(28px);
+      backdrop-filter: saturate(180%) blur(24px);
       border-bottom: 0.5px solid var(--border2);
-      height: 70px; display: flex; align-items: center;
-      justify-content: space-between; padding: 0 40px;
+      height: 64px; display: flex; align-items: center;
+      justify-content: space-between; padding: 0 32px;
     }
-    .nav-title { font-size: 24px; font-weight: 590; letter-spacing: -0.3px; background: linear-gradient(135deg, #3a2c1c 0%, #7a5a3a 100%); background-clip: text; -webkit-background-clip: text; color: transparent; display: flex; align-items: center; gap: 12px; }
-    .nav-title::before { content: "🎱"; font-size: 26px; }
+    .nav-title { font-size: 21px; font-weight: 590; letter-spacing: -0.3px; background: linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%); background-clip: text; -webkit-background-clip: text; color: transparent; }
     .nav-btn {
-      display: flex; align-items: center; gap: 10px;
+      display: flex; align-items: center; gap: 8px;
       background: var(--surface); border: 0.5px solid var(--border2);
-      border-radius: 980px; padding: 10px 26px;
-      font-family: var(--font); font-size: 15px; font-weight: 520; color: var(--accent);
-      cursor: pointer; transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      border-radius: 980px; padding: 8px 22px;
+      font-family: var(--font); font-size: 14px; font-weight: 510; color: var(--blue);
+      cursor: pointer; transition: all 0.2s ease;
       backdrop-filter: blur(4px);
     }
-    .nav-btn:hover { background: var(--accent-dim); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .nav-btn:hover { background: var(--blue-dim); transform: scale(0.97); }
 
     .page {
       width: 100%;
       margin: 0;
-      padding: 32px 40px 80px;
+      padding: 28px 32px 80px;
       display: flex;
       flex-direction: column;
-      gap: 32px;
+      gap: 28px;
     }
 
     .ctrl {
       display: flex;
-      gap: 20px;
+      gap: 18px;
       align-items: center;
       flex-wrap: wrap;
       background: var(--surface);
       border-radius: 32px;
-      padding: 20px 28px;
-      box-shadow: 0 8px 28px rgba(60, 40, 20, 0.04), 0 2px 4px rgba(0,0,0,0.02);
+      padding: 18px 26px;
+      box-shadow: var(--shadow-sm);
       border: 0.5px solid var(--border);
       backdrop-filter: blur(2px);
     }
     .date-field {
-      flex: 1; min-width: 240px; max-width: 320px;
-      display: flex; align-items: center; gap: 14px;
-      background: var(--surface2); border-radius: 20px;
-      padding: 0 22px; height: 54px; border: 1px solid var(--border2);
-      transition: all 0.2s;
+      flex: 1; min-width: 220px; max-width: 300px;
+      display: flex; align-items: center; gap: 12px;
+      background: var(--surface2); border-radius: 22px;
+      padding: 0 20px; height: 52px; border: 0.5px solid var(--border2);
+      transition: all 0.1s;
     }
-    .date-field:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-dim); background: white; }
+    .date-field:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-dim); }
     #dateInput {
       flex: 1; border: none; background: transparent;
       font-family: var(--font); font-size: 17px; font-weight: 500; color: var(--ink);
@@ -118,35 +120,33 @@
       user-select: text;
     }
     .btn-book {
-      height: 54px; padding: 0 44px;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-h) 100%);
-      color: white; border: none; border-radius: 980px;
+      height: 52px; padding: 0 36px;
+      background: var(--blue); color: white; border: none; border-radius: 980px;
       font-family: var(--font); font-size: 17px; font-weight: 590;
-      cursor: pointer; transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-      box-shadow: 0 4px 12px rgba(196, 122, 58, 0.2);
+      cursor: pointer; transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
       white-space: nowrap;
     }
-    .btn-book:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(196, 122, 58, 0.3); }
+    .btn-book:hover { background: var(--blue-h); transform: scale(0.97); }
     
     .btn-drag-toggle {
-      height: 54px; padding: 0 32px;
+      height: 52px; padding: 0 28px;
       background: var(--surface2); color: var(--ink); border: 1px solid var(--border2);
-      border-radius: 980px; font-family: var(--font); font-size: 15px; font-weight: 520;
+      border-radius: 980px; font-family: var(--font); font-size: 16px; font-weight: 500;
       cursor: pointer; transition: all 0.2s; white-space: nowrap;
-      display: inline-flex; align-items: center; gap: 10px;
+      display: inline-flex; align-items: center; gap: 8px;
     }
     .btn-drag-toggle.active {
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-h) 100%);
-      color: white; border-color: transparent;
-      box-shadow: 0 4px 16px rgba(196, 122, 58, 0.25);
+      background: var(--blue); color: white; border-color: var(--blue);
+      box-shadow: 0 2px 12px rgba(0,102,204,0.25);
     }
-    .btn-drag-toggle.active:hover { transform: translateY(-2px); }
-    .btn-drag-toggle:hover:not(.active) { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+    .btn-drag-toggle.active:hover { background: var(--blue-h); transform: scale(0.97); }
+    .btn-drag-toggle:hover:not(.active) { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
 
     .inline-temp-cards {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       flex-wrap: wrap;
       margin-left: auto;
     }
@@ -154,53 +154,52 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      background: rgba(196, 122, 58, 0.1);
-      border-radius: 48px;
-      padding: 6px 16px 6px 24px;
+      background: rgba(0,102,204,0.1);
+      border-radius: 40px;
+      padding: 4px 12px 4px 20px;
       font-size: 13px;
-      font-weight: 540;
-      color: var(--accent);
-      border: 0.5px solid rgba(196, 122, 58, 0.25);
+      font-weight: 510;
+      color: var(--blue);
+      border: 0.5px solid rgba(0,102,204,0.2);
       white-space: nowrap;
     }
     .temp-card-inline {
       display: flex;
       align-items: center;
-      gap: 14px;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 48px;
-      padding: 8px 20px 8px 24px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-      font-size: 14px;
-      transition: all 0.2s;
+      gap: 12px;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 40px;
+      padding: 6px 16px 6px 20px;
+      box-shadow: var(--shadow-sm);
+      font-size: 13px;
+      backdrop-filter: blur(2px);
     }
-    .temp-card-inline:hover { box-shadow: 0 6px 16px rgba(0,0,0,0.06); transform: translateY(-1px); }
-    .temp-card-inline strong { font-size: 15px; font-weight: 620; margin-right: 4px; color: var(--ink); }
+    .temp-card-inline strong { font-size: 14px; font-weight: 590; margin-right: 4px; color: var(--ink); }
     .temp-card-inline .temp-time {
       font-family: monospace;
-      font-size: 13px;
-      font-weight: 540;
-      background: #f0ece4;
-      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      background: #f0f0f2;
+      padding: 4px 10px;
       border-radius: 32px;
-      color: var(--accent);
+      color: var(--ink2);
     }
     .temp-card-inline .temp-rm {
-      width: 32px; height: 32px; border-radius: 30px;
-      background: #faf0ea; border: none; cursor: pointer;
-      font-size: 16px; font-weight: 600; color: #bc6c5c;
-      transition: all 0.15s;
+      width: 28px; height: 28px; border-radius: 30px;
+      background: #fef1ef; border: none; cursor: pointer;
+      font-size: 14px; font-weight: 600; color: #b81c00;
+      transition: all 0.1s;
     }
-    .temp-card-inline .temp-rm:hover { background: #f5e0d8; transform: rotate(90deg); }
+    .temp-card-inline .temp-rm:hover { background: #ffe1db; transform: scale(0.94); }
 
     .grid-card {
       background: var(--surface);
       border-radius: 36px;
-      box-shadow: 0 16px 40px rgba(40, 30, 20, 0.06), 0 2px 6px rgba(0,0,0,0.02);
+      box-shadow: var(--shadow-md);
       overflow: hidden;
       border: 0.5px solid var(--border);
-      transition: all 0.25s;
+      transition: all 0.2s;
     }
     .grid-scroll {
       overflow-x: auto;
@@ -209,31 +208,27 @@
       position: relative;
       width: 100%;
       scrollbar-width: thin;
-      scrollbar-color: var(--gold) var(--surface2);
     }
-    .grid-scroll::-webkit-scrollbar { height: 8px; }
-    .grid-scroll::-webkit-scrollbar-track { background: var(--surface2); border-radius: 10px; }
-    .grid-scroll::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
 
     #tableDesktop {
       display: table;
       border-collapse: collapse;
       table-layout: fixed;
       width: 100%;
-      min-width: 1180px;
+      min-width: 1120px;
       font-size: 14px;
     }
     #tableDesktop thead th {
       height: var(--cell-h);
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 590;
-      letter-spacing: 0.2px;
+      letter-spacing: -0.2px;
       color: var(--ink4);
-      border-bottom: 1px solid var(--border2);
-      border-right: 1px solid var(--border);
+      border-bottom: 0.5px solid var(--border2);
+      border-right: 0.5px solid var(--border);
       text-align: center;
       vertical-align: middle;
-      background: linear-gradient(135deg, #fefcf8 0%, #faf7f0 100%);
+      background: var(--surface2);
       position: sticky;
       top: 0;
       z-index: 3;
@@ -241,69 +236,67 @@
     #tableDesktop thead th.corner {
       width: var(--lane-w);
       min-width: var(--lane-w);
-      background: linear-gradient(135deg, #e8e0d4 0%, #dfd5c7 100%);
+      background: #f2f2f5;
       position: sticky;
       left: 0;
       z-index: 5;
-      font-size: 17px;
-      font-weight: 650;
-      color: #3a2c1c;
-      border-right: 1px solid var(--border2);
-      letter-spacing: 1px;
+      font-size: 15px;
+      font-weight: 620;
+      color: #1c1c1e;
+      border-right: 0.5px solid var(--border2);
     }
     #tableDesktop thead th.th-time {
       cursor: pointer;
       width: var(--cell-w);
       min-width: var(--cell-w);
-      transition: all 0.15s;
+      transition: all 0.12s;
     }
-    #tableDesktop thead th.th-time:hover { background: #fef3e8; color: var(--accent); }
+    #tableDesktop thead th.th-time:hover { background: #fff2e0; color: var(--amber); }
 
-    #tableDesktop tbody tr { height: var(--cell-h); transition: background 0.2s; }
+    #tableDesktop tbody tr { height: var(--cell-h); }
     #tableDesktop tbody td.lane-hdr {
       width: var(--lane-w);
       min-width: var(--lane-w);
-      font-size: 20px;
-      font-weight: 650;
-      border-bottom: 1px solid var(--border2);
-      border-right: 1px solid var(--border2);
+      font-size: 18px;
+      font-weight: 620;
+      border-bottom: 0.5px solid var(--border2);
+      border-right: 0.5px solid var(--border2);
       text-align: center;
       position: sticky;
       left: 0;
       z-index: 2;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.2px;
     }
-    .lane-hdr.grp-navy { background: linear-gradient(135deg, #2c3e3f 0%, #1e2e2f 100%) !important; color: #e8e0d4; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-    .lane-hdr.grp-sage { background: linear-gradient(135deg, #4a6b5a 0%, #3a5546 100%) !important; color: #fef7e8; }
-    .lane-hdr.grp-rust { background: linear-gradient(135deg, #b56a4a 0%, #9a5538 100%) !important; color: #fff4ea; }
+    /* Apple refined groups — гармоничные глубокие оттенки */
+    .lane-hdr.grp-navy { background: #2c2e3f !important; color: white; }
+    .lane-hdr.grp-sage { background: #2d5a47 !important; color: white; }
+    .lane-hdr.grp-rust { background: #9b4a3a !important; color: white; }
 
-    #tableDesktop tbody tr.row-navy td.slot { background: #fefcf9; }
-    #tableDesktop tbody tr.row-sage td.slot { background: #fefdfa; }
-    #tableDesktop tbody tr.row-rust td.slot { background: #fffbf7; }
+    #tableDesktop tbody tr.row-navy td.slot { background: #f8f9fe; }
+    #tableDesktop tbody tr.row-sage td.slot { background: #f6fbf7; }
+    #tableDesktop tbody tr.row-rust td.slot { background: #fef7f2; }
     
-    #tableDesktop tbody tr.row-navy:hover td.slot { background: #f6f0e8; }
-    #tableDesktop tbody tr.row-sage:hover td.slot { background: #f4ede3; }
-    #tableDesktop tbody tr.row-rust:hover td.slot { background: #f5eadd; }
+    #tableDesktop tbody tr.row-navy:hover td.slot { background: #eff2fc; }
+    #tableDesktop tbody tr.row-sage:hover td.slot { background: #ecf5ef; }
+    #tableDesktop tbody tr.row-rust:hover td.slot { background: #fceae1; }
 
     #tableDesktop tbody td.slot {
       cursor: crosshair;
-      border-bottom: 1px solid var(--border);
-      border-right: 1px solid var(--border);
+      border-bottom: 0.5px solid var(--border);
+      border-right: 0.5px solid var(--border);
       transition: background 0.12s ease;
     }
-    #tableDesktop tbody td.slot.booking-pending { background: rgba(196, 122, 58, 0.15) !important; position: relative; }
-    #tableDesktop tbody td.slot.booking-pending::after { content: "◌"; position: absolute; font-size: 12px; color: var(--accent); opacity: 0.5; }
-    #tableDesktop tbody td.slot.booking-confirmed { background: rgba(74, 124, 89, 0.18) !important; }
-    #tableDesktop tbody td.slot.booking-rejected { background: rgba(188, 108, 92, 0.12) !important; }
-    #tableDesktop tbody td.slot.temp-highlight { background: rgba(212, 163, 115, 0.24) !important; border: 1px solid #d4a373 !important; }
-    #tableDesktop tbody td.slot.drag-over { background: #f0e4d0 !important; }
+    #tableDesktop tbody td.slot.booking-pending { background: rgba(255, 149, 0, 0.22) !important; }
+    #tableDesktop tbody td.slot.booking-confirmed { background: rgba(50, 150, 70, 0.16) !important; }
+    #tableDesktop tbody td.slot.booking-rejected { background: rgba(215, 0, 21, 0.12) !important; }
+    #tableDesktop tbody td.slot.temp-highlight { background: rgba(0, 102, 204, 0.22) !important; border: 1px solid #0066cc !important; }
+    #tableDesktop tbody td.slot.drag-over { background: #ffe6b3 !important; }
 
     @media (max-width: 780px) {
-      .page { padding: 20px 16px 70px; gap: 20px; }
+      .page { padding: 18px 16px 70px; gap: 18px; }
       .ctrl { flex-direction: column; align-items: stretch; }
       .inline-temp-cards { margin-left: 0; justify-content: flex-start; }
       .btn-book, .btn-drag-toggle { width: 100%; }
-      .nav { padding: 0 20px; }
     }
 
     #slidersLayer {
@@ -318,76 +311,76 @@
     
     .slider {
       position: absolute;
-      border-radius: 40px;
+      border-radius: 34px;
       pointer-events: auto;
       cursor: default;
-      padding: 8px 18px;
+      padding: 6px 14px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       gap: 4px;
-      box-shadow: 0 6px 24px rgba(40, 30, 20, 0.2);
-      backdrop-filter: blur(16px);
-      border: 0.5px solid rgba(255,245,230,0.4);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+      backdrop-filter: blur(14px);
+      border: 0.5px solid rgba(255,255,255,0.3);
       will-change: left, top;
-      transition: all 0.15s cubic-bezier(0.2, 0.9, 0.4, 1.2);
-      font-weight: 520;
-      letter-spacing: -0.1px;
+      transition: all 0.12s ease;
+      font-weight: 510;
+      letter-spacing: -0.2px;
       font-family: var(--font);
       overflow: hidden;
       white-space: nowrap;
     }
     
-    .slider[data-lane-type="navy"] { background: rgba(34, 50, 48, 0.92); color: #f5ede0; }
-    .slider[data-lane-type="sage"] { background: rgba(58, 85, 70, 0.92); color: #fef5e8; }
-    .slider[data-lane-type="rust"] { background: rgba(155, 70, 45, 0.92); color: #fff0e4; }
+    .slider[data-lane-type="navy"] { background: rgba(44, 46, 63, 0.92); color: white; }
+    .slider[data-lane-type="sage"] { background: rgba(45, 90, 71, 0.92); color: white; }
+    .slider[data-lane-type="rust"] { background: rgba(155, 74, 58, 0.92); color: white; }
     
-    .slider.pending[data-lane-type="navy"] { background: rgba(34, 50, 48, 0.94); border-left: 4px solid var(--gold); }
-    .slider.pending[data-lane-type="sage"] { background: rgba(58, 85, 70, 0.94); border-left: 4px solid var(--gold); }
-    .slider.pending[data-lane-type="rust"] { background: rgba(155, 70, 45, 0.94); border-left: 4px solid var(--gold); }
+    .slider.pending[data-lane-type="navy"] { background: rgba(44, 46, 63, 0.94); }
+    .slider.pending[data-lane-type="sage"] { background: rgba(45, 90, 71, 0.94); }
+    .slider.pending[data-lane-type="rust"] { background: rgba(155, 74, 58, 0.94); }
     
-    .slider.confirmed[data-lane-type="navy"] { background: #2c4040; box-shadow: 0 8px 28px rgba(0,0,0,0.2); border-left: 4px solid var(--green); }
-    .slider.confirmed[data-lane-type="sage"] { background: #4a6b5a; border-left: 4px solid var(--green); }
-    .slider.confirmed[data-lane-type="rust"] { background: #b56a4a; border-left: 4px solid var(--green); }
+    .slider.confirmed[data-lane-type="navy"] { background: #2c2e3f; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+    .slider.confirmed[data-lane-type="sage"] { background: #2d5a47; }
+    .slider.confirmed[data-lane-type="rust"] { background: #9b4a3a; }
     
-    .slider.rejected[data-lane-type="navy"] { background: rgba(34, 50, 48, 0.65); opacity: 0.7; border-left: 4px solid var(--red); }
-    .slider.rejected[data-lane-type="sage"] { background: rgba(58, 85, 70, 0.65); border-left: 4px solid var(--red); }
-    .slider.rejected[data-lane-type="rust"] { background: rgba(155, 70, 45, 0.65); border-left: 4px solid var(--red); }
+    .slider.rejected[data-lane-type="navy"] { background: rgba(44, 46, 63, 0.65); opacity: 0.85; }
+    .slider.rejected[data-lane-type="sage"] { background: rgba(45, 90, 71, 0.65); }
+    .slider.rejected[data-lane-type="rust"] { background: rgba(155, 74, 58, 0.65); }
     
-    .slider.temp[data-lane-type="navy"] { background: rgba(34, 50, 48, 0.82); border: 1.5px dashed var(--gold); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
-    .slider.temp[data-lane-type="sage"] { background: rgba(58, 85, 70, 0.82); border: 1.5px dashed var(--gold); }
-    .slider.temp[data-lane-type="rust"] { background: rgba(155, 70, 45, 0.82); border: 1.5px dashed var(--gold); }
+    .slider.temp[data-lane-type="navy"] { background: rgba(44, 46, 63, 0.82); border: 1px solid #ffcd3c; box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+    .slider.temp[data-lane-type="sage"] { background: rgba(45, 90, 71, 0.82); border: 1px solid #ffcd3c; }
+    .slider.temp[data-lane-type="rust"] { background: rgba(155, 74, 58, 0.82); border: 1px solid #ffcd3c; }
     
     .slider:not(.drag-mode-enabled) { pointer-events: auto; cursor: pointer; }
     .slider.drag-mode-enabled { cursor: grab; transition: transform 0.05s, box-shadow 0.1s; }
     .slider.drag-mode-enabled:active { cursor: grabbing; }
     
-    .slider:hover { transform: translateY(-2px) scale(1.01); filter: brightness(1.03); z-index: 30; box-shadow: 0 12px 32px rgba(0,0,0,0.25); }
-    .slider.dragging { opacity: 0.85 !important; z-index: 100 !important; box-shadow: 0 16px 40px rgba(0,0,0,0.3) !important; pointer-events: none !important; transition: none !important; }
+    .slider:hover { transform: scale(1.01); filter: brightness(1.02); z-index: 30; box-shadow: 0 12px 28px rgba(0,0,0,0.22); }
+    .slider.dragging { opacity: 0.75 !important; z-index: 100 !important; box-shadow: 0 16px 32px rgba(0,0,0,0.25) !important; pointer-events: none !important; transition: none !important; }
     
-    .sl-name { font-size: 13px; font-weight: 620; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.2px; }
-    .sl-time { font-size: 11px; opacity: 0.92; white-space: nowrap; font-weight: 540; font-family: monospace; }
+    .sl-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.1px; }
+    .sl-time { font-size: 10px; opacity: 0.9; white-space: nowrap; font-weight: 500; }
     
     .resize-handle {
       position: absolute;
       width: 14px;
       height: 60%;
       top: 20%;
-      background: rgba(255,235,210,0.8);
+      background: rgba(255,255,240,0.7);
       border-radius: 20px;
       cursor: ew-resize;
-      transition: all 0.15s;
+      transition: all 0.1s;
       z-index: 5;
       pointer-events: auto;
     }
-    .resize-handle:hover { background: var(--gold); width: 18px; }
-    .handle-left { left: 6px; }
-    .handle-right { right: 6px; }
+    .resize-handle:hover { background: rgba(255,215,0,0.9); width: 16px; }
+    .handle-left { left: 5px; }
+    .handle-right { right: 5px; }
     .drag-handle {
       position: absolute;
       top: 0;
-      left: 24px;
-      right: 24px;
+      left: 20px;
+      right: 20px;
       height: 100%;
       cursor: default;
       background: transparent;
@@ -396,66 +389,49 @@
     }
     .slider:not(.temp) .resize-handle { display: none !important; }
 
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(40, 30, 20, 0.6); backdrop-filter: blur(18px); z-index: 2000; justify-content: center; align-items: center; }
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(18px); z-index: 2000; justify-content: center; align-items: center; }
     .overlay.open { display: flex; }
-    .sheet { background: rgba(255, 252, 245, 0.98); border-radius: 56px; width: 100%; max-width: 560px; box-shadow: 0 40px 70px rgba(0,0,0,0.25); backdrop-filter: blur(2px); border: 0.5px solid rgba(255,245,230,0.6); }
-    .sheet-head { padding: 28px 32px 16px; display: flex; justify-content: space-between; align-items: center; }
-    .sheet-title { font-size: 28px; font-weight: 630; letter-spacing: -0.8px; background: linear-gradient(135deg, #3a2c1c 0%, #7a5a3a 100%); background-clip: text; -webkit-background-clip: text; color: transparent; }
-    .sheet-x { width: 44px; height: 44px; border-radius: 50%; background: #f0e8de; border: none; font-size: 24px; cursor: pointer; transition: 0.2s; color: #5a4a38; }
-    .sheet-x:hover { background: #e5d8ca; transform: rotate(90deg); }
-    .sheet-body { padding: 20px 32px 36px; }
-    .f-group { margin-bottom: 28px; }
-    .f-label { font-size: 14px; font-weight: 590; color: var(--ink3); margin-bottom: 10px; display: block; letter-spacing: -0.1px; }
-    .f-input { width: 100%; background: white; border: 1px solid var(--border2); border-radius: 24px; font-size: 16px; padding: 14px 20px; user-select: text; font-family: var(--font); transition: all 0.2s; }
-    .f-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-dim); }
-    .f-actions { display: flex; gap: 16px; margin-top: 32px; }
-    .f-btn-ok { flex:1; height: 56px; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-h) 100%); color: white; border: none; border-radius: 980px; font-weight: 600; cursor: pointer; font-size: 16px; transition: all 0.2s; }
-    .f-btn-ok:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(196,122,58,0.3); }
-    .f-btn-cancel { flex:1; height: 56px; background: #f0e8de; border: none; border-radius: 980px; font-weight: 550; cursor: pointer; transition: 0.2s; }
-    .f-btn-cancel:hover { background: #e5d8ca; }
-    .info-row { display: flex; justify-content: space-between; padding: 16px 0; border-bottom: 0.5px solid var(--border); font-size: 16px; }
-    .del-btn { width:100%; height: 54px; background: #faf0ea; border: none; border-radius: 980px; margin-top: 28px; cursor: pointer; font-weight: 600; color: #bc6c5c; transition: 0.15s; font-size: 15px; }
-    .del-btn:hover { background: #f5e0d8; color: #a05040; }
-    .confirm-btns { display: flex; gap: 16px; margin: 20px 0 12px; }
-    .cb-yes, .cb-no { flex:1; height: 54px; border-radius: 980px; font-weight: 600; border: none; cursor: pointer; font-size: 15px; transition: 0.2s; }
-    .cb-yes { background: rgba(74, 124, 89, 0.15); color: #4a7c59; }
-    .cb-yes:hover { background: rgba(74, 124, 89, 0.25); transform: translateY(-1px); }
-    .cb-no { background: rgba(188, 108, 92, 0.12); color: #bc6c5c; }
-    .cb-no:hover { background: rgba(188, 108, 92, 0.22); transform: translateY(-1px); }
-    #loader { display:none; position:fixed; inset:0; background: rgba(40,30,20,0.5); backdrop-filter: blur(20px); z-index:5000; align-items:center; justify-content:center; }
-    .loader-box { background: rgba(255,252,245,0.98); border-radius: 56px; padding: 40px 56px; text-align: center; box-shadow: 0 30px 50px rgba(0,0,0,0.2); }
-    .spin { width: 48px; height: 48px; border: 3px solid #e5d8ca; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+    .sheet { background: rgba(255,255,255,0.96); border-radius: 48px; width: 100%; max-width: 520px; box-shadow: var(--shadow-lg); backdrop-filter: blur(2px); border: 0.5px solid rgba(255,255,255,0.5); }
+    .sheet-head { padding: 24px 28px 12px; display: flex; justify-content: space-between; align-items: center; }
+    .sheet-title { font-size: 26px; font-weight: 620; letter-spacing: -0.6px; }
+    .sheet-x { width: 40px; height: 40px; border-radius: 50%; background: #f2f2f5; border: none; font-size: 22px; cursor: pointer; transition: 0.1s; }
+    .sheet-x:hover { background: #e5e5ea; }
+    .sheet-body { padding: 16px 28px 32px; }
+    .f-group { margin-bottom: 24px; }
+    .f-label { font-size: 13px; font-weight: 590; color: var(--ink3); margin-bottom: 8px; display: block; letter-spacing: -0.2px; }
+    .f-input { width: 100%; background: var(--surface2); border: 0.5px solid var(--border2); border-radius: 22px; font-size: 16px; padding: 14px 18px; user-select: text; font-family: var(--font); }
+    .f-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-dim); }
+    .f-actions { display: flex; gap: 14px; margin-top: 28px; }
+    .f-btn-ok { flex:1; height: 54px; background: var(--blue); color: white; border: none; border-radius: 980px; font-weight: 600; cursor: pointer; }
+    .f-btn-cancel { flex:1; height: 54px; background: #f2f2f5; border: none; border-radius: 980px; font-weight: 500; cursor: pointer; }
+    .info-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 0.5px solid var(--border); font-size: 16px; }
+    .del-btn { width:100%; height: 52px; background: #fef1ef; border: none; border-radius: 980px; margin-top: 24px; cursor: pointer; font-weight: 600; color: #b81c00; transition: 0.1s; }
+    .confirm-btns { display: flex; gap: 14px; margin: 16px 0 8px; }
+    .cb-yes, .cb-no { flex:1; height: 52px; border-radius: 980px; font-weight: 600; border: none; cursor: pointer; }
+    .cb-yes { background: rgba(44,110,47,0.12); color: #1e4a23; }
+    .cb-no { background: rgba(215,0,21,0.1); color: #a31a20; }
+    #loader { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.3); backdrop-filter: blur(16px); z-index:5000; align-items:center; justify-content:center; }
+    .loader-box { background: rgba(255,255,255,0.96); border-radius: 48px; padding: 32px 48px; text-align: center; }
+    .spin { width: 40px; height: 40px; border: 3px solid #e9e9ef; border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 16px; }
     @keyframes spin { to { transform: rotate(360deg); } }
     
-    .ghost-slider { position: absolute; border-radius: 40px; pointer-events: none; z-index: 25; opacity: 0.5; background: rgba(196, 122, 58, 0.4); border: 2px dashed var(--accent); box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+    .ghost-slider { position: absolute; border-radius: 34px; pointer-events: none; z-index: 25; opacity: 0.55; background: rgba(0,102,204,0.35); border: 1.5px solid #0066cc; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
     .drag-mode-indicator {
       position: fixed;
-      bottom: 28px;
-      right: 28px;
-      background: #2c2418dd;
+      bottom: 24px;
+      right: 24px;
+      background: #1c1c1ecc;
       backdrop-filter: blur(20px);
-      color: #f5ede0;
-      padding: 12px 28px;
+      color: white;
+      padding: 10px 22px;
       border-radius: 60px;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 590;
       z-index: 1000;
-      box-shadow: 0 10px 28px rgba(0,0,0,0.2);
-      border: 0.5px solid rgba(255,245,230,0.3);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      border: 0.5px solid rgba(255,255,255,0.2);
       pointer-events: none;
       letter-spacing: -0.2px;
-      font-family: var(--font);
-    }
-    
-    #bookingTimePreview {
-      background: linear-gradient(135deg, #fef3e8 0%, #faede0 100%);
-      border-radius: 28px;
-      padding: 16px 20px;
-      margin-bottom: 28px;
-      font-size: 15px;
-      font-weight: 530;
-      color: var(--accent);
-      border: 0.5px solid rgba(196,122,58,0.2);
     }
   </style>
 </head>
@@ -463,8 +439,8 @@
 
 <div id="login">
   <div class="login-glyph">🎱</div>
-  <div class="login-title">LUCKY STRIKE</div>
-  <div class="login-sub">Бильярдный клуб · Изысканная игра</div>
+  <div class="login-title">Бильярд Клуб</div>
+  <div class="login-sub">Элегантное бронирование</div>
   <div class="login-sep"></div>
   <div id="g_id_onload"
     data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com"
@@ -475,26 +451,27 @@
 
 <div id="content">
   <nav class="nav">
-    <span class="nav-title">LUCKY STRIKE · Бильярдный клуб</span>
-    <button class="nav-btn" onclick="openImg()">📐 Карта зала</button>
+    <span class="nav-title">🎱 LUCKY STRIKE · Бильярд</span>
+    <button class="nav-btn" onclick="openImg()">📐 Схема зала</button>
   </nav>
   <div class="page">
     <div class="ctrl">
-      <div class="date-field"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><input type="date" id="dateInput"/></div>
-      <button class="btn-book" onclick="openBookModal()">✨ Новая бронь</button>
-      <button id="dragToggleBtn" class="btn-drag-toggle">↗️ Режим перемещения: ВЫКЛ</button>
+      <div class="date-field"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><input type="date" id="dateInput"/></div>
+      <button class="btn-book" onclick="openBookModal()">➕ Новая бронь</button>
+      <button id="dragToggleBtn" class="btn-drag-toggle">🎯 Режим перетяжки: ВЫКЛ</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
-    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
+    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></table></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
   </div>
 </div>
-<div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">🎯 Режим перемещения АКТИВЕН</div>
+<div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">🎯 Режим перетяжки АКТИВЕН</div>
 
-<div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Подтверждение бронирования</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div id="bookingTimePreview"><span>🕒 Выбранное время: </span><span id="previewTimes">—</span></div><div class="f-group"><label class="f-label">Имя гостя *</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Контактный телефон</label><input class="f-input" id="phoneInput" placeholder="+7 123 456-78-90"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания, особые условия"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitTempBookings()">Подтвердить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
+<!-- МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ -->
+<div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Подтверждение брони</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div id="bookingTimePreview" style="background:#f0f2f5; border-radius:20px; padding:12px 16px; margin-bottom:20px; font-size:15px; font-weight:500; color:#1c1c1e;"><span>🕒 Выбранное время: </span><span id="previewTimes">—</span></div><div class="f-group"><label class="f-label">Имя *</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+7 123 456-78-90"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания / особые условия"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitTempBookings()">Сохранить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
 
-<div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали бронирования</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><strong id="i-table"></strong></div><div class="info-row"><span>Время</span><strong id="i-time"></strong></div><div class="info-row"><span>Имя</span><strong id="i-name"></strong></div><div class="info-row"><span>Телефон</span><strong id="i-phone"></strong></div><div class="info-row"><span>Комментарий</span><strong id="i-comment" style="font-weight:normal;"></strong></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Гости прибыли</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">🗑 Удалить бронь</button></div></div></div>
-<div id="imgPopup" class="overlay"><div class="sheet" style="max-width:90vw; background:transparent; box-shadow:none;"><img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width:100%; border-radius:48px; border:2px solid rgba(255,245,230,0.6);" onclick="closeImg()"/></div></div>
-<div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка данных...</div></div></div>
+<div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали брони</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><strong id="i-table"></strong></div><div class="info-row"><span>Время</span><strong id="i-time"></strong></div><div class="info-row"><span>Имя</span><strong id="i-name"></strong></div><div class="info-row"><span>Телефон</span><strong id="i-phone"></strong></div><div class="info-row"><span>Комментарий</span><strong id="i-comment" style="font-weight:normal;"></strong></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Пришла бронь</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">🗑 Удалить бронь</button></div></div></div>
+<div id="imgPopup" class="overlay"><div class="sheet" style="max-width:90vw; background:transparent; box-shadow:none;"><img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width:100%; border-radius:32px;" onclick="closeImg()"/></div></div>
+<div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
 
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLxSrpcGOIm34gLlFZS-EYZmG8liMLcUST3MRMoAp56y6XDC2ClapCDB18yiYmdrHZ/exec";
@@ -532,8 +509,8 @@
     const toggleBtn = $("dragToggleBtn");
     toggleBtn.addEventListener("click", () => {
       dragModeEnabled = !dragModeEnabled;
-      if(dragModeEnabled) { toggleBtn.textContent = "↘️ Режим перемещения: ВКЛ"; toggleBtn.classList.add("active"); $("dragModeIndicator").style.display = "block"; } 
-      else { toggleBtn.textContent = "↗️ Режим перемещения: ВЫКЛ"; toggleBtn.classList.remove("active"); $("dragModeIndicator").style.display = "none"; }
+      if(dragModeEnabled) { toggleBtn.textContent = "🎯 Режим перетяжки: ВКЛ"; toggleBtn.classList.add("active"); $("dragModeIndicator").style.display = "block"; } 
+      else { toggleBtn.textContent = "🎯 Режим перетяжки: ВЫКЛ"; toggleBtn.classList.remove("active"); $("dragModeIndicator").style.display = "none"; }
       renderAllSliders();
     });
   }
@@ -559,16 +536,7 @@
   function clearTempSelections(){ tempBookings = []; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); }
   function renderInlineTempCards(){ const container=$("inlineTempContainer"); if(!container) return; if(tempBookings.length===0){ container.innerHTML=""; return; } container.innerHTML=`<div class="temp-badge">📋 Выделено броней <span>${tempBookings.length}</span></div>`; tempBookings.forEach((tb,idx)=>{ let card=document.createElement("div"); card.className="temp-card-inline"; card.innerHTML=`<strong>Стол ${tb.lane+1}</strong><span class="temp-time">${fmt(tb.start)}–${fmt(tb.end)}</span><button class="temp-rm" data-idx="${idx}">✕</button>`; card.querySelector(".temp-rm").onclick=(e)=>{ e.stopPropagation(); tempBookings.splice(idx,1); renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); updatePreviewTimes(); }; container.appendChild(card); }); updatePreviewTimes(); }
   
-  function updatePreviewTimes() {
-    const previewSpan = document.getElementById("previewTimes");
-    if(previewSpan) {
-      if(tempBookings.length === 0) previewSpan.innerText = "—";
-      else {
-        const timesStr = tempBookings.map(tb => `Стол ${tb.lane+1} (${fmt(tb.start)}–${fmt(tb.end)})`).join("; ");
-        previewSpan.innerText = timesStr;
-      }
-    }
-  }
+  function updatePreviewTimes() { const previewSpan = document.getElementById("previewTimes"); if(previewSpan) { if(tempBookings.length === 0) previewSpan.innerText = "—"; else { const timesStr = tempBookings.map(tb => `Стол ${tb.lane+1} (${fmt(tb.start)}–${fmt(tb.end)})`).join("; "); previewSpan.innerText = timesStr; } } }
   
   function onMouseDown(e){ if(dragModeEnabled) return; let target=e.target; if(target.classList?.contains("slot")){ e.preventDefault(); let lane=parseInt(target.dataset.lane), startIdx=parseInt(target.dataset.si); isDragging=true; dragStartCell={lane,startIdx}; dragInterval={lane,startIdx,endIdx:startIdx}; highlightDragInterval(lane,startIdx,startIdx); } }
   function onMouseMove(e){ if(!dragModeEnabled && isDragging && dragStartCell){ let hoverEl=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); if(hoverEl){ let lane=parseInt(hoverEl.dataset.lane), idx=parseInt(hoverEl.dataset.si); if(lane===dragStartCell.lane){ let newStart=Math.min(dragStartCell.startIdx,idx), newEnd=Math.max(dragStartCell.startIdx,idx); if(dragInterval.startIdx!==newStart||dragInterval.endIdx!==newEnd) dragInterval={lane,startIdx:newStart,endIdx:newEnd}; highlightDragInterval(lane,newStart,newEnd); } } } }
@@ -577,12 +545,12 @@
   
   function openBookModal(){ if(tempBookings.length===0){ alert("Сначала выделите брони: зажмите левую кнопку и протяните по ячейкам стола."); return; } $("nameInput").value="";$("phoneInput").value="";$("commentInput").value=""; updatePreviewTimes(); $("bookModal").classList.add("open"); }
   function closeBookModal(){ $("bookModal").classList.remove("open"); }
-  async function submitTempBookings(){ let name=$("nameInput").value.trim(); if(!name){alert("Введите имя гостя");return;} if(tempBookings.length===0){closeBookModal();return;} showLoad(); const date=$("dateInput").value; try{ const payload={bookings:tempBookings.map(tb=>({date,tableNumber:tb.lane+1,start:tb.start,end:tb.end,name,phone:$("phoneInput").value.trim(),comment:$("commentInput").value.trim()}))}; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify(payload)}); clearTempSelections(); await loadFromServer(); closeBookModal(); } catch(e){console.error(e);alert("Ошибка сохранения");} hideLoad(); }
+  async function submitTempBookings(){ let name=$("nameInput").value.trim(); if(!name){alert("Введите имя");return;} if(tempBookings.length===0){closeBookModal();return;} showLoad(); const date=$("dateInput").value; try{ const payload={bookings:tempBookings.map(tb=>({date,tableNumber:tb.lane+1,start:tb.start,end:tb.end,name,phone:$("phoneInput").value.trim(),comment:$("commentInput").value.trim()}))}; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify(payload)}); clearTempSelections(); await loadFromServer(); closeBookModal(); } catch(e){console.error(e);alert("Ошибка сохранения");} hideLoad(); }
   async function loadFromServer(){ showLoad(); try{ let res=await fetch(GAS_URL+"?action=get&date="+$("dateInput").value); let data=await res.json(); bookings=data.bookings?data.bookings.map(b=>({id:b.id,lane:b.table-1,start:parseFloat(b.start),end:parseFloat(b.end),name:b.name,phone:b.phone,comment:b.comment,confirmed:b.confirmed==="Да"?true:(b.confirmed==="Нет"?false:null)})):[]; renderAllSliders(); updateCellsHighlight(); } catch(e){console.error(e);} hideLoad(); }
   async function saveToServer(booking){ if(!booking.id) return; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"update",id:booking.id,date:$("dateInput").value,tableNumber:booking.lane+1,start:booking.start,end:booking.end,name:booking.name,phone:booking.phone,comment:booking.comment})}); }
   
-  function startMove(booking, e){ if(!dragModeEnabled) return; e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let rows=$("dtBody").rows; let durationCells=slots.findIndex(s=>s.key===booking.end)-slots.findIndex(s=>s.key===booking.start); let startIdxOrig=slots.findIndex(s=>s.key===booking.start); let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); let currentLane=booking.lane, currentStartIdx=startIdxOrig; function getTargetFromCoords(clientX,clientY){ const el=document.elementsFromPoint(clientX,clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane),idx:parseInt(el.dataset.si)}; } function updateGhost(lane,startIdx){ const row=rows[lane]; if(!row) return; const startCell=row.cells[startIdx+1], endCell=row.cells[startIdx+durationCells+1]; if(startCell&&endCell){ ghost.style.left=(startCell.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(endCell.offsetLeft+endCell.offsetWidth-startCell.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function onDragMove(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let newLane=target.lane, newStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); if(newLane!==currentLane||newStartIdx!==currentStartIdx){ currentLane=newLane; currentStartIdx=newStartIdx; updateGhost(currentLane,currentStartIdx); } } } function onDragEnd(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let finalLane=target.lane, finalStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); const newStart=slots[finalStartIdx].key, newEnd=slots[finalStartIdx+durationCells].key; let conflict=bookings.some(b=>b.id!==booking.id&&b.lane===finalLane&&!(b.end<=newStart||b.start>=newEnd)); if(!conflict){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с существующей бронью"); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhost(currentLane,currentStartIdx); }
-  function startMoveForTemp(temp,e){ if(!dragModeEnabled) return; e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let rows=$("dtBody").rows; let durationCells=slots.findIndex(s=>s.key===temp.end)-slots.findIndex(s=>s.key===temp.start); let startIdxOrig=slots.findIndex(s=>s.key===temp.start); let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); let currentLane=temp.lane, currentStartIdx=startIdxOrig; function getTargetFromCoords(clientX,clientY){ const el=document.elementsFromPoint(clientX,clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane),idx:parseInt(el.dataset.si)}; } function updateGhost(lane,startIdx){ const row=rows[lane]; if(!row) return; const startCell=row.cells[startIdx+1], endCell=row.cells[startIdx+durationCells+1]; if(startCell&&endCell){ ghost.style.left=(startCell.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(endCell.offsetLeft+endCell.offsetWidth-startCell.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function onDragMove(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let newLane=target.lane, newStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); if(newLane!==currentLane||newStartIdx!==currentStartIdx){ currentLane=newLane; currentStartIdx=newStartIdx; updateGhost(currentLane,currentStartIdx); } } } function onDragEnd(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let finalLane=target.lane, finalStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); const newStart=slots[finalStartIdx].key, newEnd=slots[finalStartIdx+durationCells].key; let conflict=bookings.some(b=>b.lane===finalLane&&!(b.end<=newStart||b.start>=newEnd)); if(!conflict){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с существующей бронью"); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhost(currentLane,currentStartIdx); }
+  function startMove(booking, e){ if(!dragModeEnabled) return; e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let rows=$("dtBody").rows; let durationCells=slots.findIndex(s=>s.key===booking.end)-slots.findIndex(s=>s.key===booking.start); let startIdxOrig=slots.findIndex(s=>s.key===booking.start); let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); let currentLane=booking.lane, currentStartIdx=startIdxOrig; function getTargetFromCoords(clientX,clientY){ const el=document.elementsFromPoint(clientX,clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane),idx:parseInt(el.dataset.si)}; } function updateGhost(lane,startIdx){ const row=rows[lane]; if(!row) return; const startCell=row.cells[startIdx+1], endCell=row.cells[startIdx+durationCells+1]; if(startCell&&endCell){ ghost.style.left=(startCell.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(endCell.offsetLeft+endCell.offsetWidth-startCell.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function onDragMove(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let newLane=target.lane, newStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); if(newLane!==currentLane||newStartIdx!==currentStartIdx){ currentLane=newLane; currentStartIdx=newStartIdx; updateGhost(currentLane,currentStartIdx); } } } function onDragEnd(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let finalLane=target.lane, finalStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); const newStart=slots[finalStartIdx].key, newEnd=slots[finalStartIdx+durationCells].key; let conflict=bookings.some(b=>b.id!==booking.id&&b.lane===finalLane&&!(b.end<=newStart||b.start>=newEnd)); if(!conflict){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт"); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhost(currentLane,currentStartIdx); }
+  function startMoveForTemp(temp,e){ if(!dragModeEnabled) return; e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let rows=$("dtBody").rows; let durationCells=slots.findIndex(s=>s.key===temp.end)-slots.findIndex(s=>s.key===temp.start); let startIdxOrig=slots.findIndex(s=>s.key===temp.start); let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); let currentLane=temp.lane, currentStartIdx=startIdxOrig; function getTargetFromCoords(clientX,clientY){ const el=document.elementsFromPoint(clientX,clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane),idx:parseInt(el.dataset.si)}; } function updateGhost(lane,startIdx){ const row=rows[lane]; if(!row) return; const startCell=row.cells[startIdx+1], endCell=row.cells[startIdx+durationCells+1]; if(startCell&&endCell){ ghost.style.left=(startCell.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(endCell.offsetLeft+endCell.offsetWidth-startCell.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function onDragMove(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let newLane=target.lane, newStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); if(newLane!==currentLane||newStartIdx!==currentStartIdx){ currentLane=newLane; currentStartIdx=newStartIdx; updateGhost(currentLane,currentStartIdx); } } } function onDragEnd(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let finalLane=target.lane, finalStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); const newStart=slots[finalStartIdx].key, newEnd=slots[finalStartIdx+durationCells].key; let conflict=bookings.some(b=>b.lane===finalLane&&!(b.end<=newStart||b.start>=newEnd)); if(!conflict){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт"); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhost(currentLane,currentStartIdx); }
   
   function renderAllSliders(){
     let container = $("slidersLayer"); if(!container) return; container.innerHTML = "";
@@ -614,13 +582,13 @@
       let slider = document.createElement("div"); slider.className = "slider temp"; if(dragModeEnabled) slider.classList.add("drag-mode-enabled");
       let laneType = LANE_TYPE_MAP[LANE_GROUPS[temp.lane]];
       slider.setAttribute("data-lane-type", laneType); slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
-      slider.innerHTML = `<div class="sl-name">📋 Ожидает бронь</div><div class="sl-time">${fmt(temp.start)} – ${fmt(temp.end)}</div>`;
+      slider.innerHTML = `<div class="sl-name">📌 Бронь (ожидает)</div><div class="sl-time">${fmt(temp.start)} – ${fmt(temp.end)}</div>`;
       let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
       if(dragModeEnabled) dragHandle.addEventListener("mousedown", (e) => startMoveForTemp(temp, e));
       slider.appendChild(dragHandle);
       if(dragModeEnabled){
-        let leftHandle = document.createElement("div"); leftHandle.className = "resize-handle handle-left"; leftHandle.addEventListener("mousedown", (e) => { e.stopPropagation(); alert("Изменение времени (демо)"); });
-        let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right"; rightHandle.addEventListener("mousedown", (e) => { e.stopPropagation(); alert("Изменение времени (демо)"); });
+        let leftHandle = document.createElement("div"); leftHandle.className = "resize-handle handle-left"; leftHandle.addEventListener("mousedown", (e) => { e.stopPropagation(); alert("Изменение размера черновика (демо)"); });
+        let rightHandle = document.createElement("div"); rightHandle.className = "resize-handle handle-right"; rightHandle.addEventListener("mousedown", (e) => { e.stopPropagation(); alert("Изменение размера черновика (демо)"); });
         slider.appendChild(leftHandle); slider.appendChild(rightHandle);
       }
       container.appendChild(slider);

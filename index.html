@@ -15,7 +15,7 @@
     }
 
     :root {
-      /* Нейтральная, минималистичная палитра — серые тона + сдержанный акцент */
+      /* Нейтральная, минималистичная палитра — серые тона + акцент */
       --bg: #f2f2f2;
       --surface-primary: #ffffff;
       --surface-glass: rgba(255, 255, 255, 0.85);
@@ -96,7 +96,7 @@
       min-height: 100vh;
     }
 
-    /* Навигация — матовое стекло, нейтраль */
+    /* Навигация — матовое стекло */
     .nav {
       position: sticky;
       top: 0;
@@ -369,25 +369,26 @@
       z-index: 2;
       letter-spacing: -0.3px;
     }
-    /* Нейтральные группы столов: тёмно-серый, серо-зелёный, серо-коричневый (минимальные оттенки) */
-    .lane-hdr.grp-navy { background: #3a3e4a; color: white; }
-    .lane-hdr.grp-sage { background: #4e6052; color: white; }
-    .lane-hdr.grp-rust { background: #7d6153; color: white; }
-
-    #tableDesktop tbody tr.row-navy td.slot { background: #fcfcfc; }
-    #tableDesktop tbody tr.row-sage td.slot { background: #fcfcfc; }
-    #tableDesktop tbody tr.row-rust td.slot { background: #fcfcfc; }
     
-    #tableDesktop tbody tr.row-navy:hover td.slot { background: #f5f5f5; }
-    #tableDesktop tbody tr.row-sage:hover td.slot { background: #f5f5f5; }
-    #tableDesktop tbody tr.row-rust:hover td.slot { background: #f5f5f5; }
-
+    /* Цвета заголовков столов в соответствии с новыми группами:
+       1-3 синий, 4 зеленый, 5-6 синий, 7-12 красный */
+    .lane-hdr.group-blue { background: #2c5f7a; color: white; }
+    .lane-hdr.group-green { background: #4f6b4e; color: white; }
+    .lane-hdr.group-red { background: #9b4b4b; color: white; }
+    
+    /* Фоны строк (ячейки) — нейтральные, только при наведении легкий оттенок */
     #tableDesktop tbody td.slot {
-      cursor: crosshair;
+      background: #ffffff;
       border-bottom: 0.5px solid var(--border-subtle);
       border-right: 0.5px solid var(--border-subtle);
       transition: background 0.1s ease;
     }
+    
+    /* Легкий оттенок при наведении, чтобы подчеркнуть интерактивность, но без ярких цветов */
+    #tableDesktop tbody tr:hover td.slot {
+      background: #f6f6f6;
+    }
+
     #tableDesktop tbody td.slot.booking-pending { background: #faf2e0 !important; }
     #tableDesktop tbody td.slot.booking-confirmed { background: #e3efe2 !important; }
     #tableDesktop tbody td.slot.booking-rejected { background: #f2e0e0 !important; }
@@ -433,25 +434,26 @@
       white-space: nowrap;
     }
     
-    .slider[data-lane-type="navy"] { background: rgba(58, 62, 74, 0.92); color: white; }
-    .slider[data-lane-type="sage"] { background: rgba(78, 96, 82, 0.92); color: white; }
-    .slider[data-lane-type="rust"] { background: rgba(125, 97, 83, 0.92); color: white; }
+    /* Цвета слайдеров по группам (синхронизированы с группами столов) */
+    .slider[data-lane-type="blue"] { background: rgba(44, 95, 122, 0.92); color: white; }
+    .slider[data-lane-type="green"] { background: rgba(79, 107, 78, 0.92); color: white; }
+    .slider[data-lane-type="red"] { background: rgba(155, 75, 75, 0.92); color: white; }
     
-    .slider.pending[data-lane-type="navy"] { background: rgba(58, 62, 74, 0.92); }
-    .slider.pending[data-lane-type="sage"] { background: rgba(78, 96, 82, 0.92); }
-    .slider.pending[data-lane-type="rust"] { background: rgba(125, 97, 83, 0.92); }
+    .slider.pending[data-lane-type="blue"] { background: rgba(44, 95, 122, 0.92); }
+    .slider.pending[data-lane-type="green"] { background: rgba(79, 107, 78, 0.92); }
+    .slider.pending[data-lane-type="red"] { background: rgba(155, 75, 75, 0.92); }
     
-    .slider.confirmed[data-lane-type="navy"] { background: #3a3e4a; }
-    .slider.confirmed[data-lane-type="sage"] { background: #4e6052; }
-    .slider.confirmed[data-lane-type="rust"] { background: #7d6153; }
+    .slider.confirmed[data-lane-type="blue"] { background: #2c5f7a; }
+    .slider.confirmed[data-lane-type="green"] { background: #4f6b4e; }
+    .slider.confirmed[data-lane-type="red"] { background: #9b4b4b; }
     
-    .slider.rejected[data-lane-type="navy"] { background: rgba(58, 62, 74, 0.55); opacity: 0.85; }
-    .slider.rejected[data-lane-type="sage"] { background: rgba(78, 96, 82, 0.55); }
-    .slider.rejected[data-lane-type="rust"] { background: rgba(125, 97, 83, 0.55); }
+    .slider.rejected[data-lane-type="blue"] { background: rgba(44, 95, 122, 0.55); opacity: 0.85; }
+    .slider.rejected[data-lane-type="green"] { background: rgba(79, 107, 78, 0.55); }
+    .slider.rejected[data-lane-type="red"] { background: rgba(155, 75, 75, 0.55); }
     
-    .slider.temp[data-lane-type="navy"] { background: rgba(58, 62, 74, 0.75); border: 1px solid #c9b16b; }
-    .slider.temp[data-lane-type="sage"] { background: rgba(78, 96, 82, 0.75); border: 1px solid #c9b16b; }
-    .slider.temp[data-lane-type="rust"] { background: rgba(125, 97, 83, 0.75); border: 1px solid #c9b16b; }
+    .slider.temp[data-lane-type="blue"] { background: rgba(44, 95, 122, 0.75); border: 1px solid #c9b16b; }
+    .slider.temp[data-lane-type="green"] { background: rgba(79, 107, 78, 0.75); border: 1px solid #c9b16b; }
+    .slider.temp[data-lane-type="red"] { background: rgba(155, 75, 75, 0.75); border: 1px solid #c9b16b; }
     
     .slider:not(.drag-mode-enabled) { pointer-events: auto; cursor: pointer; }
     .slider.drag-mode-enabled { cursor: grab; }
@@ -577,10 +579,18 @@
   const ALLOWED = ["vadiksss900@gmail.com","sergey99belov@gmail.com","popadinecvasil3@gmail.com","veronicadiakova04@gmail.com","info.luckystrike.kh@gmail.com","sashavolobuev123890@gmail.com","egorgorbushko@gmail.com","shatrava.o@gmail.com","Craftmax30@gmail.com","bowlingblock.b@gmail.com","lana.arnaut@gmail.com","polosinnikita1224@gmail.com","sofialat1506@gmail.com","ll3991940@gmail.com","ken040888@gmail.com"];
   const LANES = 12, SH = 11, EH = 22;
   const slots = []; for(let h=SH; h<=EH; h++) { slots.push({ label: `${h}:00`, key: h }); if(h<EH) slots.push({ label: `${h}:30`, key: h+0.5 }); }
-  const LANE_GROUPS = [0,0,0,1,1,1,2,2,2,2,2,2];
-  const GRP_CLASS = ['grp-navy','grp-sage','grp-rust'];
-  const ROW_CLASS = ['row-navy','row-sage','row-rust'];
-  const LANE_TYPE_MAP = ['navy','sage','rust'];
+  
+  // Новая группировка: 1-3 -> синий, 4 -> зеленый, 5-6 -> синий, 7-12 -> красный
+  function getGroupIndex(lane) {
+    const num = lane + 1;
+    if (num >= 1 && num <= 3) return 0;      // синий
+    if (num === 4) return 1;                 // зеленый
+    if (num >= 5 && num <= 6) return 0;      // синий
+    return 2;                                 // красный (7-12)
+  }
+  
+  const GRP_CLASS = ['group-blue', 'group-green', 'group-red'];
+  const LANE_TYPE_MAP = ['blue', 'green', 'red'];
   
   let bookings = [], tempBookings = [], nextTempId = 1;
   let isDragging = false, dragStartCell = null, dragInterval = null;
@@ -619,12 +629,25 @@
     slots.forEach((sl,i)=>{ let th=document.createElement("th"); th.className="th-time"; th.dataset.si=i; th.dataset.key=sl.key; th.textContent=sl.label; headRow.appendChild(th); });
     let body=$("dtBody");
     for(let lane=0; lane<LANES; lane++){
-      let tr=document.createElement("tr"); tr.className=ROW_CLASS[LANE_GROUPS[lane]]; tr.dataset.lane=lane;
-      let lhdr=document.createElement("td"); lhdr.className=`lane-hdr ${GRP_CLASS[LANE_GROUPS[lane]]}`; lhdr.textContent=`№ ${lane+1}`; tr.appendChild(lhdr);
-      slots.forEach((sl,si)=>{ let td=document.createElement("td"); td.className="slot"; td.dataset.lane=lane; td.dataset.time=sl.key; td.dataset.si=si; tr.appendChild(td); });
+      let tr=document.createElement("tr");
+      let group = getGroupIndex(lane);
+      tr.dataset.lane=lane;
+      let lhdr=document.createElement("td"); 
+      lhdr.className=`lane-hdr ${GRP_CLASS[group]}`; 
+      lhdr.textContent=`№ ${lane+1}`; 
+      tr.appendChild(lhdr);
+      slots.forEach((sl,si)=>{ 
+        let td=document.createElement("td"); 
+        td.className="slot"; 
+        td.dataset.lane=lane; 
+        td.dataset.time=sl.key; 
+        td.dataset.si=si; 
+        tr.appendChild(td); 
+      });
       body.appendChild(tr);
     }
   }
+  
   function getSlotCell(lane, slotIdx){ return $("dtBody")?.rows[lane]?.cells[slotIdx+1]; }
   function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
   function updateCellsHighlight(){
@@ -633,7 +656,20 @@
     for(let t of tempBookings){ let startIdx=slots.findIndex(s=>s.key===t.start), endIdx=slots.findIndex(s=>s.key===t.end); if(startIdx!==-1 && endIdx!==-1) for(let i=startIdx;i<=endIdx;i++){ let cell=getSlotCell(t.lane,i); if(cell) cell.classList.add("temp-highlight"); } }
   }
   function clearTempSelections(){ tempBookings = []; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); }
-  function renderInlineTempCards(){ const container=$("inlineTempContainer"); if(!container) return; if(tempBookings.length===0){ container.innerHTML=""; return; } container.innerHTML=`<div class="temp-badge">Выделено броней <span>${tempBookings.length}</span></div>`; tempBookings.forEach((tb,idx)=>{ let card=document.createElement("div"); card.className="temp-card-inline"; card.innerHTML=`<strong>Стол ${tb.lane+1}</strong><span class="temp-time">${fmt(tb.start)}–${fmt(tb.end)}</span><button class="temp-rm" data-idx="${idx}">✕</button>`; card.querySelector(".temp-rm").onclick=(e)=>{ e.stopPropagation(); tempBookings.splice(idx,1); renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); updatePreviewTimes(); }; container.appendChild(card); }); updatePreviewTimes(); }
+  function renderInlineTempCards(){ 
+    const container=$("inlineTempContainer"); 
+    if(!container) return; 
+    if(tempBookings.length===0){ container.innerHTML=""; return; } 
+    container.innerHTML = ""; 
+    tempBookings.forEach((tb,idx)=>{ 
+      let card=document.createElement("div"); 
+      card.className="temp-card-inline"; 
+      card.innerHTML=`<strong>Стол ${tb.lane+1}</strong><span class="temp-time">${fmt(tb.start)}–${fmt(tb.end)}</span><button class="temp-rm" data-idx="${idx}">✕</button>`; 
+      card.querySelector(".temp-rm").onclick=(e)=>{ e.stopPropagation(); tempBookings.splice(idx,1); renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); updatePreviewTimes(); }; 
+      container.appendChild(card); 
+    }); 
+    updatePreviewTimes(); 
+  }
   function updatePreviewTimes() { const span=document.getElementById("previewTimes"); if(span) { if(tempBookings.length===0) span.innerText = "—"; else { const timesStr = tempBookings.map(tb => `Стол ${tb.lane+1} (${fmt(tb.start)}–${fmt(tb.end)})`).join("; "); span.innerText = timesStr; } } }
   function onMouseDown(e){ if(dragModeEnabled) return; let target=e.target; if(target.classList?.contains("slot")){ e.preventDefault(); let lane=parseInt(target.dataset.lane), startIdx=parseInt(target.dataset.si); isDragging=true; dragStartCell={lane,startIdx}; dragInterval={lane,startIdx,endIdx:startIdx}; highlightDragInterval(lane,startIdx,startIdx); } }
   function onMouseMove(e){ if(!dragModeEnabled && isDragging && dragStartCell){ let hoverEl=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); if(hoverEl){ let lane=parseInt(hoverEl.dataset.lane), idx=parseInt(hoverEl.dataset.si); if(lane===dragStartCell.lane){ let newStart=Math.min(dragStartCell.startIdx,idx), newEnd=Math.max(dragStartCell.startIdx,idx); if(dragInterval.startIdx!==newStart||dragInterval.endIdx!==newEnd) dragInterval={lane,startIdx:newStart,endIdx:newEnd}; highlightDragInterval(lane,newStart,newEnd); } } } }
@@ -647,9 +683,56 @@
   function startMove(booking, e){ if(!dragModeEnabled) return; e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let rows=$("dtBody").rows; let durationCells=slots.findIndex(s=>s.key===booking.end)-slots.findIndex(s=>s.key===booking.start); let startIdxOrig=slots.findIndex(s=>s.key===booking.start); let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); let currentLane=booking.lane, currentStartIdx=startIdxOrig; function getTargetFromCoords(clientX,clientY){ const el=document.elementsFromPoint(clientX,clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane),idx:parseInt(el.dataset.si)}; } function updateGhost(lane,startIdx){ const row=rows[lane]; if(!row) return; const startCell=row.cells[startIdx+1], endCell=row.cells[startIdx+durationCells+1]; if(startCell&&endCell){ ghost.style.left=(startCell.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(endCell.offsetLeft+endCell.offsetWidth-startCell.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function onDragMove(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let newLane=target.lane, newStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); if(newLane!==currentLane||newStartIdx!==currentStartIdx){ currentLane=newLane; currentStartIdx=newStartIdx; updateGhost(currentLane,currentStartIdx); } } } function onDragEnd(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let finalLane=target.lane, finalStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); const newStart=slots[finalStartIdx].key, newEnd=slots[finalStartIdx+durationCells].key; let conflict=bookings.some(b=>b.id!==booking.id&&b.lane===finalLane&&!(b.end<=newStart||b.start>=newEnd)); if(!conflict){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт"); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhost(currentLane,currentStartIdx); }
   function startMoveForTemp(temp,e){ if(!dragModeEnabled) return; e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let rows=$("dtBody").rows; let durationCells=slots.findIndex(s=>s.key===temp.end)-slots.findIndex(s=>s.key===temp.start); let startIdxOrig=slots.findIndex(s=>s.key===temp.start); let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); let currentLane=temp.lane, currentStartIdx=startIdxOrig; function getTargetFromCoords(clientX,clientY){ const el=document.elementsFromPoint(clientX,clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane),idx:parseInt(el.dataset.si)}; } function updateGhost(lane,startIdx){ const row=rows[lane]; if(!row) return; const startCell=row.cells[startIdx+1], endCell=row.cells[startIdx+durationCells+1]; if(startCell&&endCell){ ghost.style.left=(startCell.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(endCell.offsetLeft+endCell.offsetWidth-startCell.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function onDragMove(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let newLane=target.lane, newStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); if(newLane!==currentLane||newStartIdx!==currentStartIdx){ currentLane=newLane; currentStartIdx=newStartIdx; updateGhost(currentLane,currentStartIdx); } } } function onDragEnd(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let finalLane=target.lane, finalStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); const newStart=slots[finalStartIdx].key, newEnd=slots[finalStartIdx+durationCells].key; let conflict=bookings.some(b=>b.lane===finalLane&&!(b.end<=newStart||b.start>=newEnd)); if(!conflict){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт"); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhost(currentLane,currentStartIdx); }
   
-  function renderAllSliders(){ let container = $("slidersLayer"); if(!container) return; container.innerHTML = ""; let rows = Array.from($("dtBody")?.querySelectorAll("tr") || []); if(rows.length === 0) return;
-    bookings.forEach(booking => { let startIdx = slots.findIndex(s => s.key === booking.start), endIdx = slots.findIndex(s => s.key === booking.end); if(startIdx === -1 || endIdx === -1) return; let row = rows[booking.lane]; if(!row) return; let sc = row.cells[startIdx+1], ec = row.cells[endIdx+1]; if(!sc || !ec) return; let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2; let status = booking.confirmed === true ? "confirmed" : (booking.confirmed === false ? "rejected" : "pending"); let laneType = LANE_TYPE_MAP[LANE_GROUPS[booking.lane]]; let slider = document.createElement("div"); slider.className = `slider ${status}`; if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); slider.setAttribute("data-lane-type", laneType); slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; slider.innerHTML = `<div class="sl-name">${booking.name || "Бронь"}</div><div class="sl-time">${fmt(booking.start)} – ${fmt(booking.end)}</div>`; let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle"; if(dragModeEnabled) dragHandle.addEventListener("mousedown", (e) => startMove(booking, e)); slider.appendChild(dragHandle); slider.addEventListener("click", (e) => { if(e.target !== dragHandle) showInfoModal(booking); }); container.appendChild(slider); });
-    tempBookings.forEach(temp => { let startIdx = slots.findIndex(s => s.key === temp.start), endIdx = slots.findIndex(s => s.key === temp.end); if(startIdx === -1 || endIdx === -1) return; let row = rows[temp.lane]; if(!row) return; let sc = row.cells[startIdx+1], ec = row.cells[endIdx+1]; if(!sc || !ec) return; let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2; let slider = document.createElement("div"); slider.className = "slider temp"; if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); let laneType = LANE_TYPE_MAP[LANE_GROUPS[temp.lane]]; slider.setAttribute("data-lane-type", laneType); slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; slider.innerHTML = `<div class="sl-name">Бронь (ожидает)</div><div class="sl-time">${fmt(temp.start)} – ${fmt(temp.end)}</div>`; let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle"; if(dragModeEnabled) dragHandle.addEventListener("mousedown", (e) => startMoveForTemp(temp, e)); slider.appendChild(dragHandle); container.appendChild(slider); });
+  function renderAllSliders(){ 
+    let container = $("slidersLayer"); 
+    if(!container) return; 
+    container.innerHTML = ""; 
+    let rows = Array.from($("dtBody")?.querySelectorAll("tr") || []); 
+    if(rows.length === 0) return;
+    bookings.forEach(booking => { 
+      let startIdx = slots.findIndex(s => s.key === booking.start), endIdx = slots.findIndex(s => s.key === booking.end); 
+      if(startIdx === -1 || endIdx === -1) return; 
+      let row = rows[booking.lane]; 
+      if(!row) return; 
+      let sc = row.cells[startIdx+1], ec = row.cells[endIdx+1]; 
+      if(!sc || !ec) return; 
+      let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2; 
+      let status = booking.confirmed === true ? "confirmed" : (booking.confirmed === false ? "rejected" : "pending"); 
+      let laneType = LANE_TYPE_MAP[getGroupIndex(booking.lane)]; 
+      let slider = document.createElement("div"); 
+      slider.className = `slider ${status}`; 
+      if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); 
+      slider.setAttribute("data-lane-type", laneType); 
+      slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; 
+      slider.innerHTML = `<div class="sl-name">${booking.name || "Бронь"}</div><div class="sl-time">${fmt(booking.start)} – ${fmt(booking.end)}</div>`; 
+      let dragHandle = document.createElement("div"); 
+      dragHandle.className = "drag-handle"; 
+      if(dragModeEnabled) dragHandle.addEventListener("mousedown", (e) => startMove(booking, e)); 
+      slider.appendChild(dragHandle); 
+      slider.addEventListener("click", (e) => { if(e.target !== dragHandle) showInfoModal(booking); }); 
+      container.appendChild(slider); 
+    });
+    tempBookings.forEach(temp => { 
+      let startIdx = slots.findIndex(s => s.key === temp.start), endIdx = slots.findIndex(s => s.key === temp.end); 
+      if(startIdx === -1 || endIdx === -1) return; 
+      let row = rows[temp.lane]; 
+      if(!row) return; 
+      let sc = row.cells[startIdx+1], ec = row.cells[endIdx+1]; 
+      if(!sc || !ec) return; 
+      let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2; 
+      let slider = document.createElement("div"); 
+      slider.className = "slider temp"; 
+      if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); 
+      let laneType = LANE_TYPE_MAP[getGroupIndex(temp.lane)]; 
+      slider.setAttribute("data-lane-type", laneType); 
+      slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; 
+      slider.innerHTML = `<div class="sl-name">Бронь (ожидает)</div><div class="sl-time">${fmt(temp.start)} – ${fmt(temp.end)}</div>`; 
+      let dragHandle = document.createElement("div"); 
+      dragHandle.className = "drag-handle"; 
+      if(dragModeEnabled) dragHandle.addEventListener("mousedown", (e) => startMoveForTemp(temp, e)); 
+      slider.appendChild(dragHandle); 
+      container.appendChild(slider); 
+    });
   }
   let currentBooking = null;
   function showInfoModal(b){ currentBooking = b; $("i-table").textContent = "№ "+(b.lane+1); $("i-time").textContent = `${fmt(b.start)} – ${fmt(b.end)}`; $("i-name").textContent = b.name; $("i-phone").textContent = b.phone || "—"; $("i-comment").textContent = b.comment || "—"; $("infoModal").classList.add("open"); }

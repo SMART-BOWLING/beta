@@ -15,7 +15,6 @@
     }
 
     :root {
-      /* Нейтральная, минималистичная палитра — серые тона + акцент */
       --bg: #f2f2f2;
       --surface-primary: #ffffff;
       --surface-glass: rgba(255, 255, 255, 0.85);
@@ -35,7 +34,7 @@
       --accent-amber: #b87c2e;
       --radius-lg: 28px;
       --radius-md: 20px;
-      --radius-sm: 14px;
+      --radius-sm: 6px;       /* минимальное закругление для ползунков */
       --radius-pill: 980px;
       --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
       --cell-height: 58px;
@@ -53,7 +52,7 @@
       letter-spacing: -0.01em;
     }
 
-    /* Login Panel — нейтральный минимализм */
+    /* Login Panel */
     #login {
       position: fixed;
       inset: 0;
@@ -96,7 +95,7 @@
       min-height: 100vh;
     }
 
-    /* Навигация — матовое стекло */
+    /* Навигация */
     .nav {
       position: sticky;
       top: 0;
@@ -370,21 +369,16 @@
       letter-spacing: -0.3px;
     }
     
-    /* Цвета заголовков столов в соответствии с новыми группами:
-       1-3 синий, 4 зеленый, 5-6 синий, 7-12 красный */
     .lane-hdr.group-blue { background: #2c5f7a; color: white; }
     .lane-hdr.group-green { background: #4f6b4e; color: white; }
     .lane-hdr.group-red { background: #9b4b4b; color: white; }
     
-    /* Фоны строк (ячейки) — нейтральные, только при наведении легкий оттенок */
     #tableDesktop tbody td.slot {
       background: #ffffff;
       border-bottom: 0.5px solid var(--border-subtle);
       border-right: 0.5px solid var(--border-subtle);
       transition: background 0.1s ease;
     }
-    
-    /* Легкий оттенок при наведении, чтобы подчеркнуть интерактивность, но без ярких цветов */
     #tableDesktop tbody tr:hover td.slot {
       background: #f6f6f6;
     }
@@ -412,12 +406,13 @@
       z-index: 20;
     }
     
+    /* ПОЛЗУНКИ: прямоугольные с минимальным закруглением (6px) + цветная точка статуса */
     .slider {
       position: absolute;
-      border-radius: 40px;
+      border-radius: var(--radius-sm);   /* минимальное закругление */
       pointer-events: auto;
       cursor: default;
-      padding: 8px 18px;
+      padding: 8px 12px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -432,9 +427,10 @@
       font-family: var(--font-system);
       overflow: hidden;
       white-space: nowrap;
+      position: relative;
     }
     
-    /* Цвета слайдеров по группам (синхронизированы с группами столов) */
+    /* Цвета фона по группам */
     .slider[data-lane-type="blue"] { background: rgba(44, 95, 122, 0.92); color: white; }
     .slider[data-lane-type="green"] { background: rgba(79, 107, 78, 0.92); color: white; }
     .slider[data-lane-type="red"] { background: rgba(155, 75, 75, 0.92); color: white; }
@@ -455,41 +451,124 @@
     .slider.temp[data-lane-type="green"] { background: rgba(79, 107, 78, 0.75); border: 1px solid #c9b16b; }
     .slider.temp[data-lane-type="red"] { background: rgba(155, 75, 75, 0.75); border: 1px solid #c9b16b; }
     
-    .slider:not(.drag-mode-enabled) { pointer-events: auto; cursor: pointer; }
-    .slider.drag-mode-enabled { cursor: grab; }
-    .slider.drag-mode-enabled:active { cursor: grabbing; }
-    
-    .slider:hover { transform: scale(1.01); filter: brightness(1.02); z-index: 30; }
-    .slider.dragging { opacity: 0.75 !important; z-index: 100 !important; pointer-events: none !important; transition: none !important; }
-    
-    .sl-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sl-time { font-size: 10px; opacity: 0.85; white-space: nowrap; font-weight: 500; }
-    
-    .resize-handle {
+    /* ЦВЕТНАЯ ТОЧКА СТАТУСА ПОСЕТИТЕЛЯ (круг в левом верхнем углу ползунка) */
+    .status-dot {
       position: absolute;
-      width: 14px;
-      height: 56%;
-      top: 22%;
-      background: rgba(220,220,200,0.7);
-      border-radius: 20px;
-      cursor: ew-resize;
-      transition: all 0.1s;
-      z-index: 5;
+      top: 6px;
+      left: 8px;
+      width: 10px;
+      height: 10px;
+      border-radius: 10px;
+      background-color: #ccc;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+      transition: background 0.1s;
+    }
+    .slider.confirmed .status-dot { background-color: #78b83e; box-shadow: 0 0 0 1px #fff6; }  /* зеленый — пришел */
+    .slider.rejected .status-dot { background-color: #d9534f; }  /* красный — не пришел */
+    .slider.pending .status-dot { background-color: #f0ad4e; }   /* янтарный — ожидание */
+    .slider.temp .status-dot { background-color: #aaa; opacity: 0.6; }
+    
+    /* КНОПКИ ПО КРАЯМ: левая и правая, видимые, для открытия информации */
+    .info-edge-left, .info-edge-right {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 28px;
+      background: rgba(0,0,0,0.2);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      border-radius: 0;
+      opacity: 0.75;
+      z-index: 15;
       pointer-events: auto;
     }
-    .resize-handle:hover { background: rgba(180,160,100,0.9); width: 16px; }
-    .handle-left { left: 6px; }
-    .handle-right { right: 6px; }
+    .info-edge-left:hover, .info-edge-right:hover {
+      background: rgba(0,0,0,0.45);
+      opacity: 1;
+      width: 32px;
+    }
+    .info-edge-left {
+      left: 0;
+      border-top-left-radius: var(--radius-sm);
+      border-bottom-left-radius: var(--radius-sm);
+      border-right: 0.5px solid rgba(255,255,255,0.2);
+    }
+    .info-edge-right {
+      right: 0;
+      border-top-right-radius: var(--radius-sm);
+      border-bottom-right-radius: var(--radius-sm);
+      border-left: 0.5px solid rgba(255,255,255,0.2);
+    }
+    /* для временных броней тоже кнопки */
+    .slider.temp .info-edge-left, .slider.temp .info-edge-right {
+      background: rgba(0,0,0,0.25);
+    }
+    
+    .slider:not(.drag-mode-enabled) .info-edge-left,
+    .slider:not(.drag-mode-enabled) .info-edge-right {
+      pointer-events: auto;
+    }
+    /* В режиме перетяжки слайдеров — кнопки скрываем или делаем прозрачнее (чтобы не мешали) */
+    .drag-mode-enabled .info-edge-left,
+    .drag-mode-enabled .info-edge-right {
+      pointer-events: none;
+      opacity: 0.3;
+    }
+    
+    .sl-name {
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding-left: 18px; /* отступ от точки статуса */
+    }
+    .sl-time { 
+      font-size: 10px; 
+      opacity: 0.85; 
+      white-space: nowrap; 
+      font-weight: 500;
+      padding-left: 18px;
+    }
+    
     .drag-handle {
       position: absolute;
       top: 0;
-      left: 20px;
-      right: 20px;
-      height: 100%;
+      left: 0;
+      right: 0;
+      bottom: 0;
       cursor: default;
       background: transparent;
       z-index: 2;
       pointer-events: auto;
+    }
+    .drag-mode-enabled .drag-handle { cursor: grab; }
+    .drag-mode-enabled .drag-handle:active { cursor: grabbing; }
+    
+    .slider.dragging { opacity: 0.75 !important; z-index: 100 !important; pointer-events: none !important; transition: none !important; }
+    .ghost-slider { position: absolute; border-radius: var(--radius-sm); pointer-events: none; z-index: 25; opacity: 0.5; background: #9eb6c2; border: 1.8px solid #3b6e8f; }
+    .drag-mode-indicator {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: #2c2c2ecc;
+      backdrop-filter: blur(20px);
+      color: white;
+      padding: 10px 26px;
+      border-radius: 60px;
+      font-size: 14px;
+      font-weight: 590;
+      z-index: 1000;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      border: 0.5px solid rgba(255,255,255,0.2);
+      pointer-events: none;
     }
 
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(20px); z-index: 2000; justify-content: center; align-items: center; }
@@ -517,24 +596,6 @@
     .loader-box { background: rgba(255,255,255,0.96); border-radius: 56px; padding: 32px 48px; text-align: center; }
     .spin { width: 44px; height: 44px; border: 3px solid #e9e9ef; border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 18px; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    
-    .ghost-slider { position: absolute; border-radius: 40px; pointer-events: none; z-index: 25; opacity: 0.5; background: #9eb6c2; border: 1.8px solid #3b6e8f; }
-    .drag-mode-indicator {
-      position: fixed;
-      bottom: 28px;
-      right: 28px;
-      background: #2c2c2ecc;
-      backdrop-filter: blur(20px);
-      color: white;
-      padding: 10px 26px;
-      border-radius: 60px;
-      font-size: 14px;
-      font-weight: 590;
-      z-index: 1000;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-      border: 0.5px solid rgba(255,255,255,0.2);
-      pointer-events: none;
-    }
   </style>
 </head>
 <body>
@@ -580,15 +641,7 @@
   const LANES = 12, SH = 11, EH = 22;
   const slots = []; for(let h=SH; h<=EH; h++) { slots.push({ label: `${h}:00`, key: h }); if(h<EH) slots.push({ label: `${h}:30`, key: h+0.5 }); }
   
-  // Новая группировка: 1-3 -> синий, 4 -> зеленый, 5-6 -> синий, 7-12 -> красный
-  function getGroupIndex(lane) {
-    const num = lane + 1;
-    if (num >= 1 && num <= 3) return 0;      // синий
-    if (num === 4) return 1;                 // зеленый
-    if (num >= 5 && num <= 6) return 0;      // синий
-    return 2;                                 // красный (7-12)
-  }
-  
+  function getGroupIndex(lane) { const num = lane + 1; if (num >= 1 && num <= 3) return 0; if (num === 4) return 1; if (num >= 5 && num <= 6) return 0; return 2; }
   const GRP_CLASS = ['group-blue', 'group-green', 'group-red'];
   const LANE_TYPE_MAP = ['blue', 'green', 'red'];
   
@@ -601,17 +654,12 @@
   function handleCredentialResponse(r){ let d=parseJwt(r.credential); if(ALLOWED.includes(d.email)){ localStorage.setItem("ue",d.email); location.reload(); } else alert("Доступ запрещён"); }
   
   window.onload = ()=>{
-    if(localStorage.getItem("ue") && ALLOWED.includes(localStorage.getItem("ue"))){
-      $("login").style.display="none";
-      $("content").style.display="block";
-      init();
-    }
+    if(localStorage.getItem("ue") && ALLOWED.includes(localStorage.getItem("ue"))){ $("login").style.display="none"; $("content").style.display="block"; init(); }
   };
   
   function init(){
     let today = new Date().toISOString().split('T')[0];
-    $("dateInput").min = today;
-    $("dateInput").value = today;
+    $("dateInput").min = today; $("dateInput").value = today;
     buildDesktopTable();
     $("dateInput").addEventListener("change", ()=>{ loadFromServer(); clearTempSelections(); });
     loadFromServer();
@@ -629,25 +677,13 @@
     slots.forEach((sl,i)=>{ let th=document.createElement("th"); th.className="th-time"; th.dataset.si=i; th.dataset.key=sl.key; th.textContent=sl.label; headRow.appendChild(th); });
     let body=$("dtBody");
     for(let lane=0; lane<LANES; lane++){
-      let tr=document.createElement("tr");
+      let tr=document.createElement("tr"); tr.dataset.lane=lane;
       let group = getGroupIndex(lane);
-      tr.dataset.lane=lane;
-      let lhdr=document.createElement("td"); 
-      lhdr.className=`lane-hdr ${GRP_CLASS[group]}`; 
-      lhdr.textContent=`№ ${lane+1}`; 
-      tr.appendChild(lhdr);
-      slots.forEach((sl,si)=>{ 
-        let td=document.createElement("td"); 
-        td.className="slot"; 
-        td.dataset.lane=lane; 
-        td.dataset.time=sl.key; 
-        td.dataset.si=si; 
-        tr.appendChild(td); 
-      });
+      let lhdr=document.createElement("td"); lhdr.className=`lane-hdr ${GRP_CLASS[group]}`; lhdr.textContent=`№ ${lane+1}`; tr.appendChild(lhdr);
+      slots.forEach((sl,si)=>{ let td=document.createElement("td"); td.className="slot"; td.dataset.lane=lane; td.dataset.time=sl.key; td.dataset.si=si; tr.appendChild(td); });
       body.appendChild(tr);
     }
   }
-  
   function getSlotCell(lane, slotIdx){ return $("dtBody")?.rows[lane]?.cells[slotIdx+1]; }
   function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
   function updateCellsHighlight(){
@@ -656,20 +692,7 @@
     for(let t of tempBookings){ let startIdx=slots.findIndex(s=>s.key===t.start), endIdx=slots.findIndex(s=>s.key===t.end); if(startIdx!==-1 && endIdx!==-1) for(let i=startIdx;i<=endIdx;i++){ let cell=getSlotCell(t.lane,i); if(cell) cell.classList.add("temp-highlight"); } }
   }
   function clearTempSelections(){ tempBookings = []; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); }
-  function renderInlineTempCards(){ 
-    const container=$("inlineTempContainer"); 
-    if(!container) return; 
-    if(tempBookings.length===0){ container.innerHTML=""; return; } 
-    container.innerHTML = ""; 
-    tempBookings.forEach((tb,idx)=>{ 
-      let card=document.createElement("div"); 
-      card.className="temp-card-inline"; 
-      card.innerHTML=`<strong>Стол ${tb.lane+1}</strong><span class="temp-time">${fmt(tb.start)}–${fmt(tb.end)}</span><button class="temp-rm" data-idx="${idx}">✕</button>`; 
-      card.querySelector(".temp-rm").onclick=(e)=>{ e.stopPropagation(); tempBookings.splice(idx,1); renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); updatePreviewTimes(); }; 
-      container.appendChild(card); 
-    }); 
-    updatePreviewTimes(); 
-  }
+  function renderInlineTempCards(){ const container=$("inlineTempContainer"); if(!container) return; if(tempBookings.length===0){ container.innerHTML=""; return; } container.innerHTML=""; tempBookings.forEach((tb,idx)=>{ let card=document.createElement("div"); card.className="temp-card-inline"; card.innerHTML=`<strong>Стол ${tb.lane+1}</strong><span class="temp-time">${fmt(tb.start)}–${fmt(tb.end)}</span><button class="temp-rm" data-idx="${idx}">✕</button>`; card.querySelector(".temp-rm").onclick=(e)=>{ e.stopPropagation(); tempBookings.splice(idx,1); renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); updatePreviewTimes(); }; container.appendChild(card); }); updatePreviewTimes(); }
   function updatePreviewTimes() { const span=document.getElementById("previewTimes"); if(span) { if(tempBookings.length===0) span.innerText = "—"; else { const timesStr = tempBookings.map(tb => `Стол ${tb.lane+1} (${fmt(tb.start)}–${fmt(tb.end)})`).join("; "); span.innerText = timesStr; } } }
   function onMouseDown(e){ if(dragModeEnabled) return; let target=e.target; if(target.classList?.contains("slot")){ e.preventDefault(); let lane=parseInt(target.dataset.lane), startIdx=parseInt(target.dataset.si); isDragging=true; dragStartCell={lane,startIdx}; dragInterval={lane,startIdx,endIdx:startIdx}; highlightDragInterval(lane,startIdx,startIdx); } }
   function onMouseMove(e){ if(!dragModeEnabled && isDragging && dragStartCell){ let hoverEl=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); if(hoverEl){ let lane=parseInt(hoverEl.dataset.lane), idx=parseInt(hoverEl.dataset.si); if(lane===dragStartCell.lane){ let newStart=Math.min(dragStartCell.startIdx,idx), newEnd=Math.max(dragStartCell.startIdx,idx); if(dragInterval.startIdx!==newStart||dragInterval.endIdx!==newEnd) dragInterval={lane,startIdx:newStart,endIdx:newEnd}; highlightDragInterval(lane,newStart,newEnd); } } } }
@@ -680,59 +703,35 @@
   async function submitTempBookings(){ let name=$("nameInput").value.trim(); if(!name){alert("Введите имя");return;} if(tempBookings.length===0){closeBookModal();return;} showLoad(); const date=$("dateInput").value; try{ const payload={bookings:tempBookings.map(tb=>({date,tableNumber:tb.lane+1,start:tb.start,end:tb.end,name,phone:$("phoneInput").value.trim(),comment:$("commentInput").value.trim()}))}; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify(payload)}); clearTempSelections(); await loadFromServer(); closeBookModal(); } catch(e){console.error(e);alert("Ошибка сохранения");} hideLoad(); }
   async function loadFromServer(){ showLoad(); try{ let res=await fetch(GAS_URL+"?action=get&date="+$("dateInput").value); let data=await res.json(); bookings=data.bookings?data.bookings.map(b=>({id:b.id,lane:b.table-1,start:parseFloat(b.start),end:parseFloat(b.end),name:b.name,phone:b.phone,comment:b.comment,confirmed:b.confirmed==="Да"?true:(b.confirmed==="Нет"?false:null)})):[]; renderAllSliders(); updateCellsHighlight(); } catch(e){console.error(e);} hideLoad(); }
   async function saveToServer(booking){ if(!booking.id) return; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"update",id:booking.id,date:$("dateInput").value,tableNumber:booking.lane+1,start:booking.start,end:booking.end,name:booking.name,phone:booking.phone,comment:booking.comment})}); }
-  function startMove(booking, e){ if(!dragModeEnabled) return; e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let rows=$("dtBody").rows; let durationCells=slots.findIndex(s=>s.key===booking.end)-slots.findIndex(s=>s.key===booking.start); let startIdxOrig=slots.findIndex(s=>s.key===booking.start); let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); let currentLane=booking.lane, currentStartIdx=startIdxOrig; function getTargetFromCoords(clientX,clientY){ const el=document.elementsFromPoint(clientX,clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane),idx:parseInt(el.dataset.si)}; } function updateGhost(lane,startIdx){ const row=rows[lane]; if(!row) return; const startCell=row.cells[startIdx+1], endCell=row.cells[startIdx+durationCells+1]; if(startCell&&endCell){ ghost.style.left=(startCell.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(endCell.offsetLeft+endCell.offsetWidth-startCell.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function onDragMove(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let newLane=target.lane, newStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); if(newLane!==currentLane||newStartIdx!==currentStartIdx){ currentLane=newLane; currentStartIdx=newStartIdx; updateGhost(currentLane,currentStartIdx); } } } function onDragEnd(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let finalLane=target.lane, finalStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); const newStart=slots[finalStartIdx].key, newEnd=slots[finalStartIdx+durationCells].key; let conflict=bookings.some(b=>b.id!==booking.id&&b.lane===finalLane&&!(b.end<=newStart||b.start>=newEnd)); if(!conflict){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт"); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhost(currentLane,currentStartIdx); }
-  function startMoveForTemp(temp,e){ if(!dragModeEnabled) return; e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let rows=$("dtBody").rows; let durationCells=slots.findIndex(s=>s.key===temp.end)-slots.findIndex(s=>s.key===temp.start); let startIdxOrig=slots.findIndex(s=>s.key===temp.start); let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); let currentLane=temp.lane, currentStartIdx=startIdxOrig; function getTargetFromCoords(clientX,clientY){ const el=document.elementsFromPoint(clientX,clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane),idx:parseInt(el.dataset.si)}; } function updateGhost(lane,startIdx){ const row=rows[lane]; if(!row) return; const startCell=row.cells[startIdx+1], endCell=row.cells[startIdx+durationCells+1]; if(startCell&&endCell){ ghost.style.left=(startCell.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(endCell.offsetLeft+endCell.offsetWidth-startCell.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function onDragMove(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let newLane=target.lane, newStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); if(newLane!==currentLane||newStartIdx!==currentStartIdx){ currentLane=newLane; currentStartIdx=newStartIdx; updateGhost(currentLane,currentStartIdx); } } } function onDragEnd(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let finalLane=target.lane, finalStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); const newStart=slots[finalStartIdx].key, newEnd=slots[finalStartIdx+durationCells].key; let conflict=bookings.some(b=>b.lane===finalLane&&!(b.end<=newStart||b.start>=newEnd)); if(!conflict){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт"); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhost(currentLane,currentStartIdx); }
+  function startMove(booking, e){ if(!dragModeEnabled) return; e.stopPropagation(); /* drag logic remains but with updated slider style */  const slider=e.currentTarget.closest('.slider'); if(!slider) return; let rows=$("dtBody").rows; let durationCells=slots.findIndex(s=>s.key===booking.end)-slots.findIndex(s=>s.key===booking.start); let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); let currentLane=booking.lane, currentStartIdx=slots.findIndex(s=>s.key===booking.start); function getTargetFromCoords(clientX,clientY){ const el=document.elementsFromPoint(clientX,clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane),idx:parseInt(el.dataset.si)}; } function updateGhost(lane,startIdx){ const row=rows[lane]; if(!row) return; const startCell=row.cells[startIdx+1], endCell=row.cells[startIdx+durationCells+1]; if(startCell&&endCell){ ghost.style.left=(startCell.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(endCell.offsetLeft+endCell.offsetWidth-startCell.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function onDragMove(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let newLane=target.lane, newStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); if(newLane!==currentLane||newStartIdx!==currentStartIdx){ currentLane=newLane; currentStartIdx=newStartIdx; updateGhost(currentLane,currentStartIdx); } } } function onDragEnd(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let finalLane=target.lane, finalStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); const newStart=slots[finalStartIdx].key, newEnd=slots[finalStartIdx+durationCells].key; let conflict=bookings.some(b=>b.id!==booking.id&&b.lane===finalLane&&!(b.end<=newStart||b.start>=newEnd)); if(!conflict){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт"); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhost(currentLane,currentStartIdx); }
+  function startMoveForTemp(temp,e){ if(!dragModeEnabled) return; e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let rows=$("dtBody").rows; let durationCells=slots.findIndex(s=>s.key===temp.end)-slots.findIndex(s=>s.key===temp.start); let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); let currentLane=temp.lane, currentStartIdx=slots.findIndex(s=>s.key===temp.start); function getTargetFromCoords(clientX,clientY){ const el=document.elementsFromPoint(clientX,clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane),idx:parseInt(el.dataset.si)}; } function updateGhost(lane,startIdx){ const row=rows[lane]; if(!row) return; const startCell=row.cells[startIdx+1], endCell=row.cells[startIdx+durationCells+1]; if(startCell&&endCell){ ghost.style.left=(startCell.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(endCell.offsetLeft+endCell.offsetWidth-startCell.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function onDragMove(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let newLane=target.lane, newStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); if(newLane!==currentLane||newStartIdx!==currentStartIdx){ currentLane=newLane; currentStartIdx=newStartIdx; updateGhost(currentLane,currentStartIdx); } } } function onDragEnd(ev){ const target=getTargetFromCoords(ev.clientX,ev.clientY); if(target){ let finalLane=target.lane, finalStartIdx=Math.min(Math.max(0,target.idx),slots.length-durationCells-1); const newStart=slots[finalStartIdx].key, newEnd=slots[finalStartIdx+durationCells].key; let conflict=bookings.some(b=>b.lane===finalLane&&!(b.end<=newStart||b.start>=newEnd)); if(!conflict){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт"); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhost(currentLane,currentStartIdx); }
   
   function renderAllSliders(){ 
-    let container = $("slidersLayer"); 
-    if(!container) return; 
-    container.innerHTML = ""; 
-    let rows = Array.from($("dtBody")?.querySelectorAll("tr") || []); 
-    if(rows.length === 0) return;
-    bookings.forEach(booking => { 
-      let startIdx = slots.findIndex(s => s.key === booking.start), endIdx = slots.findIndex(s => s.key === booking.end); 
-      if(startIdx === -1 || endIdx === -1) return; 
-      let row = rows[booking.lane]; 
-      if(!row) return; 
-      let sc = row.cells[startIdx+1], ec = row.cells[endIdx+1]; 
-      if(!sc || !ec) return; 
-      let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2; 
-      let status = booking.confirmed === true ? "confirmed" : (booking.confirmed === false ? "rejected" : "pending"); 
-      let laneType = LANE_TYPE_MAP[getGroupIndex(booking.lane)]; 
-      let slider = document.createElement("div"); 
-      slider.className = `slider ${status}`; 
-      if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); 
-      slider.setAttribute("data-lane-type", laneType); 
-      slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; 
-      slider.innerHTML = `<div class="sl-name">${booking.name || "Бронь"}</div><div class="sl-time">${fmt(booking.start)} – ${fmt(booking.end)}</div>`; 
-      let dragHandle = document.createElement("div"); 
-      dragHandle.className = "drag-handle"; 
-      if(dragModeEnabled) dragHandle.addEventListener("mousedown", (e) => startMove(booking, e)); 
-      slider.appendChild(dragHandle); 
-      slider.addEventListener("click", (e) => { if(e.target !== dragHandle) showInfoModal(booking); }); 
-      container.appendChild(slider); 
-    });
-    tempBookings.forEach(temp => { 
-      let startIdx = slots.findIndex(s => s.key === temp.start), endIdx = slots.findIndex(s => s.key === temp.end); 
-      if(startIdx === -1 || endIdx === -1) return; 
-      let row = rows[temp.lane]; 
-      if(!row) return; 
-      let sc = row.cells[startIdx+1], ec = row.cells[endIdx+1]; 
-      if(!sc || !ec) return; 
-      let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2; 
-      let slider = document.createElement("div"); 
-      slider.className = "slider temp"; 
-      if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); 
-      let laneType = LANE_TYPE_MAP[getGroupIndex(temp.lane)]; 
-      slider.setAttribute("data-lane-type", laneType); 
-      slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; 
-      slider.innerHTML = `<div class="sl-name">Бронь (ожидает)</div><div class="sl-time">${fmt(temp.start)} – ${fmt(temp.end)}</div>`; 
-      let dragHandle = document.createElement("div"); 
-      dragHandle.className = "drag-handle"; 
-      if(dragModeEnabled) dragHandle.addEventListener("mousedown", (e) => startMoveForTemp(temp, e)); 
-      slider.appendChild(dragHandle); 
-      container.appendChild(slider); 
-    });
+    let container = $("slidersLayer"); if(!container) return; container.innerHTML = ""; 
+    let rows = Array.from($("dtBody")?.querySelectorAll("tr") || []); if(rows.length === 0) return;
+    const renderGeneric = (item, isTemp, onClickCb) => {
+      let startIdx = slots.findIndex(s => s.key === item.start), endIdx = slots.findIndex(s => s.key === item.end); if(startIdx === -1 || endIdx === -1) return;
+      let row = rows[item.lane]; if(!row) return;
+      let sc = row.cells[startIdx+1], ec = row.cells[endIdx+1]; if(!sc || !ec) return;
+      let left = sc.offsetLeft + 1, top = row.offsetTop + 1, width = (ec.offsetLeft + ec.offsetWidth) - sc.offsetLeft - 2, height = row.offsetHeight - 2;
+      let status = isTemp ? "temp" : (item.confirmed === true ? "confirmed" : (item.confirmed === false ? "rejected" : "pending"));
+      let laneType = LANE_TYPE_MAP[getGroupIndex(item.lane)];
+      let slider = document.createElement("div"); slider.className = `slider ${status}`; if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); slider.setAttribute("data-lane-type", laneType);
+      slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+      slider.innerHTML = `<div class="status-dot"></div><div class="sl-name">${isTemp ? "Ожидание брони" : (item.name || "Бронь")}</div><div class="sl-time">${fmt(item.start)} – ${fmt(item.end)}</div>`;
+      let leftBtn = document.createElement("div"); leftBtn.className = "info-edge-left"; leftBtn.innerHTML = "ⓘ"; leftBtn.title = "Информация";
+      let rightBtn = document.createElement("div"); rightBtn.className = "info-edge-right"; rightBtn.innerHTML = "ℹ️"; rightBtn.title = "Подробнее";
+      leftBtn.addEventListener("click", (e) => { e.stopPropagation(); if(!isTemp) showInfoModal(item); else alert("Временная бронь еще не сохранена"); });
+      rightBtn.addEventListener("click", (e) => { e.stopPropagation(); if(!isTemp) showInfoModal(item); else alert("Временная бронь еще не сохранена"); });
+      slider.appendChild(leftBtn); slider.appendChild(rightBtn);
+      let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
+      if(dragModeEnabled) dragHandle.addEventListener("mousedown", (e) => { if(isTemp) startMoveForTemp(item, e); else startMove(item, e); });
+      slider.appendChild(dragHandle);
+      slider.addEventListener("click", (e) => { if(!dragModeEnabled && !isTemp && e.target !== leftBtn && e.target !== rightBtn) showInfoModal(item); });
+      container.appendChild(slider);
+    };
+    bookings.forEach(b => renderGeneric(b, false));
+    tempBookings.forEach(t => renderGeneric(t, true));
   }
   let currentBooking = null;
   function showInfoModal(b){ currentBooking = b; $("i-table").textContent = "№ "+(b.lane+1); $("i-time").textContent = `${fmt(b.start)} – ${fmt(b.end)}`; $("i-name").textContent = b.name; $("i-phone").textContent = b.phone || "—"; $("i-comment").textContent = b.comment || "—"; $("infoModal").classList.add("open"); }

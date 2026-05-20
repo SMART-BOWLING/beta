@@ -52,6 +52,7 @@
       letter-spacing: -0.01em;
     }
 
+    /* Login Panel */
     #login {
       position: fixed;
       inset: 0;
@@ -94,6 +95,7 @@
       min-height: 100vh;
     }
 
+    /* Navigation */
     .nav {
       position: sticky;
       top: 0;
@@ -240,19 +242,6 @@
       flex-wrap: wrap;
       margin-left: auto;
     }
-    .temp-badge {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: rgba(59, 110, 143, 0.08);
-      border-radius: 40px;
-      padding: 4px 14px 4px 20px;
-      font-size: 13px;
-      font-weight: 510;
-      color: var(--accent-blue);
-      border: 0.5px solid rgba(59, 110, 143, 0.2);
-      white-space: nowrap;
-    }
     .temp-card-inline {
       display: flex;
       align-items: center;
@@ -367,7 +356,6 @@
       letter-spacing: -0.3px;
     }
     
-    /* Цвета заголовков столов */
     .lane-hdr.group-blue { background: #2c5f7a; color: white; }
     .lane-hdr.group-green { background: #4f6b4e; color: white; }
     .lane-hdr.group-red { background: #9b4b4b; color: white; }
@@ -394,7 +382,7 @@
       .btn-book, .btn-drag-toggle { width: 100%; }
     }
 
-    /* Слой слайдеров поверх таблицы */
+    /* Слой слайдеров */
     #slidersLayer {
       position: absolute;
       top: 0;
@@ -405,10 +393,10 @@
       z-index: 20;
     }
     
-    /* ПОЛЗУНКИ — строго прямоугольные, минимальное закругление (border-radius: 6px) */
+    /* ПОЛЗУНКИ — прямоугольные с минимальным закруглением (3px) */
     .slider {
       position: absolute;
-      border-radius: 6px;         /* минимальное закругление */
+      border-radius: 3px;
       pointer-events: auto;
       cursor: default;
       padding: 6px 12px;
@@ -456,7 +444,7 @@
     .slider:hover { transform: scale(1.01); filter: brightness(1.02); z-index: 30; }
     .slider.dragging { opacity: 0.75 !important; z-index: 100 !important; pointer-events: none !important; transition: none !important; }
     
-    /* ЦВЕТНАЯ ТОЧКА (индикация пришёл/не пришёл) на ползунке */
+    /* ЦВЕТНАЯ ТОЧКА — индикация пришёл/не пришёл */
     .guest-status-dot {
       position: absolute;
       top: 6px;
@@ -468,7 +456,7 @@
       box-shadow: 0 0 0 1px rgba(255,255,255,0.6);
     }
     .guest-status-dot.arrived {
-      background-color: #4caf50; /* зелёный — гость пришёл */
+      background-color: #4caf50; /* зелёный — пришёл */
     }
     .guest-status-dot.not-arrived {
       background-color: #f44336; /* красный — не пришёл */
@@ -480,14 +468,14 @@
     .sl-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 20px; }
     .sl-time { font-size: 10px; opacity: 0.85; white-space: nowrap; font-weight: 500; }
     
-    /* КНОПКИ ПО КРАЯМ ПОЛЗУНКА для открытия информации о брони */
+    /* ВИДИМЫЕ КНОПКИ ПО КРАЯМ ПОЛЗУНКА */
     .info-btn-left, .info-btn-right {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
       width: 22px;
       height: 22px;
-      background: rgba(255,255,240,0.85);
+      background: rgba(255,255,240,0.9);
       backdrop-filter: blur(4px);
       border-radius: 20px;
       display: flex;
@@ -498,7 +486,7 @@
       color: #2c2e2f;
       cursor: pointer;
       transition: 0.1s;
-      z-index: 10;
+      z-index: 15;
       font-family: monospace;
       border: 0.5px solid rgba(0,0,0,0.2);
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -506,6 +494,7 @@
     .info-btn-left { left: 6px; }
     .info-btn-right { right: 6px; }
     .info-btn-left:hover, .info-btn-right:hover { background: #ffffff; transform: translateY(-50%) scale(1.05); }
+    
     .drag-handle {
       position: absolute;
       top: 0;
@@ -517,21 +506,6 @@
       z-index: 2;
       pointer-events: auto;
     }
-    .resize-handle {
-      position: absolute;
-      width: 12px;
-      height: 56%;
-      top: 22%;
-      background: rgba(220,220,200,0.6);
-      border-radius: 4px;
-      cursor: ew-resize;
-      transition: all 0.1s;
-      z-index: 5;
-      pointer-events: auto;
-    }
-    .resize-handle:hover { background: rgba(180,160,100,0.9); width: 14px; }
-    .handle-left { left: 4px; }
-    .handle-right { right: 4px; }
 
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(20px); z-index: 2000; justify-content: center; align-items: center; }
     .overlay.open { display: flex; }
@@ -559,7 +533,7 @@
     .spin { width: 44px; height: 44px; border: 3px solid #e9e9ef; border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 18px; }
     @keyframes spin { to { transform: rotate(360deg); } }
     
-    .ghost-slider { position: absolute; border-radius: 6px; pointer-events: none; z-index: 25; opacity: 0.5; background: #9eb6c2; border: 1.8px solid #3b6e8f; }
+    .ghost-slider { position: absolute; border-radius: 3px; pointer-events: none; z-index: 25; opacity: 0.5; background: #9eb6c2; border: 1.8px solid #3b6e8f; }
     .drag-mode-indicator {
       position: fixed;
       bottom: 28px;
@@ -649,8 +623,11 @@
   async function submitTempBookings(){ let name=$("nameInput").value.trim(); if(!name){alert("Введите имя");return;} if(tempBookings.length===0){closeBookModal();return;} showLoad(); const date=$("dateInput").value; try{ const payload={bookings:tempBookings.map(tb=>({date,tableNumber:tb.lane+1,start:tb.start,end:tb.end,name,phone:$("phoneInput").value.trim(),comment:$("commentInput").value.trim()}))}; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify(payload)}); clearTempSelections(); await loadFromServer(); closeBookModal(); } catch(e){console.error(e);alert("Ошибка сохранения");} hideLoad(); }
   async function loadFromServer(){ showLoad(); try{ let res=await fetch(GAS_URL+"?action=get&date="+$("dateInput").value); let data=await res.json(); bookings=data.bookings?data.bookings.map(b=>({id:b.id,lane:b.table-1,start:parseFloat(b.start),end:parseFloat(b.end),name:b.name,phone:b.phone,comment:b.comment,confirmed:b.confirmed==="Да"?true:(b.confirmed==="Нет"?false:null)})):[]; renderAllSliders(); updateCellsHighlight(); } catch(e){console.error(e);} hideLoad(); }
   async function saveToServer(booking){ if(!booking.id) return; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"update",id:booking.id,date:$("dateInput").value,tableNumber:booking.lane+1,start:booking.start,end:booking.end,name:booking.name,phone:booking.phone,comment:booking.comment})}); }
-  function startMove(booking, e){ if(!dragModeEnabled) return; e.stopPropagation(); // упрощённый drag (логика сохранена) }
-  function startMoveForTemp(temp,e){ if(!dragModeEnabled) return; e.stopPropagation(); }
+  
+  // Функции перетяжки (упрощённые заглушки, чтобы не ломали логику)
+  function startMove(booking, e){ if(!dragModeEnabled) return; e.stopPropagation(); alert("Функция перетяжки в демо-режиме. Полная реализация требует доработки."); }
+  function startMoveForTemp(temp,e){ if(!dragModeEnabled) return; e.stopPropagation(); alert("Функция перетяжки в демо-режиме."); }
+  
   function renderAllSliders(){ 
     let container = $("slidersLayer"); if(!container) return; container.innerHTML = ""; 
     let rows = Array.from($("dtBody")?.querySelectorAll("tr") || []); if(rows.length === 0) return;
@@ -667,14 +644,13 @@
       if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); 
       slider.setAttribute("data-lane-type", laneType); 
       slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; 
-      // точка статуса гостя
       let dotClass = booking.confirmed === true ? "arrived" : (booking.confirmed === false ? "not-arrived" : "pending-dot");
       slider.innerHTML = `<div class="sl-name">${booking.name || "Бронь"}</div><div class="sl-time">${fmt(booking.start)} – ${fmt(booking.end)}</div><div class="guest-status-dot ${dotClass}"></div>`;
-      // кнопки по краям
       let leftBtn = document.createElement("div"); leftBtn.className = "info-btn-left"; leftBtn.innerHTML = "ⓘ"; leftBtn.title = "Информация"; leftBtn.onclick = (e) => { e.stopPropagation(); showInfoModal(booking); };
       let rightBtn = document.createElement("div"); rightBtn.className = "info-btn-right"; rightBtn.innerHTML = "ⓘ"; rightBtn.title = "Информация"; rightBtn.onclick = (e) => { e.stopPropagation(); showInfoModal(booking); };
       slider.appendChild(leftBtn); slider.appendChild(rightBtn);
       slider.addEventListener("click", (e) => { if(!e.target.closest('.info-btn-left') && !e.target.closest('.info-btn-right')) showInfoModal(booking); });
+      if(dragModeEnabled) { let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle"; dragHandle.addEventListener("mousedown", (e) => startMove(booking, e)); slider.appendChild(dragHandle); }
       container.appendChild(slider); 
     });
     tempBookings.forEach(temp => { 
@@ -690,6 +666,7 @@
       let leftBtn = document.createElement("div"); leftBtn.className = "info-btn-left"; leftBtn.innerHTML = "ⓘ"; leftBtn.onclick = (e) => { e.stopPropagation(); alert("Временная бронь. Сохраните через «Новая бронь»."); };
       let rightBtn = document.createElement("div"); rightBtn.className = "info-btn-right"; rightBtn.innerHTML = "ⓘ"; rightBtn.onclick = (e) => { e.stopPropagation(); alert("Временная бронь. Сохраните через «Новая бронь»."); };
       slider.appendChild(leftBtn); slider.appendChild(rightBtn);
+      if(dragModeEnabled) { let dragHandle = document.createElement("div"); dragHandle.className = "drag-handle"; dragHandle.addEventListener("mousedown", (e) => startMoveForTemp(temp, e)); slider.appendChild(dragHandle); }
       container.appendChild(slider); 
     });
   }

@@ -257,19 +257,20 @@
       z-index: 20;
     }
     
+    /* Стили для ползунка (слайдера) брони */
     .slider {
       position: absolute;
-      border-radius: 6px;
+      border-radius: 10px;
       pointer-events: auto;
       cursor: default;
-      padding: 6px 12px 6px 38px;
+      padding: 6px 12px 6px 48px; /* увеличен отступ слева для вертикального переключателя */
       display: flex;
       flex-direction: column;
       justify-content: center;
       gap: 4px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
       backdrop-filter: blur(8px);
-      border: 0.5px solid rgba(255,255,255,0.25);
+      border: 0.5px solid rgba(255,255,255,0.3);
       will-change: left, top;
       transition: all 0.12s ease;
       font-weight: 510;
@@ -293,28 +294,62 @@
     .slider.temp[data-lane-type="blue"] { background: rgba(44, 95, 122, 0.75); border: 1px solid #c9b16b; }
     .slider.temp[data-lane-type="green"] { background: rgba(79, 107, 78, 0.75); border: 1px solid #c9b16b; }
     .slider.temp[data-lane-type="red"] { background: rgba(155, 75, 75, 0.75); border: 1px solid #c9b16b; }
-    
-    .guest-status-dot {
+
+    /* ВЕРТИКАЛЬНЫЙ ПЕРЕКЛЮЧАТЕЛЬ НА 3 ПОЗИЦИИ внутри слайдера */
+    .vertical-switch {
       position: absolute;
-      left: 12px;
+      left: 8px;
       top: 50%;
       transform: translateY(-50%);
-      width: 12px;
-      height: 12px;
-      border-radius: 12px;
-      background-color: #d4d4d4;
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.6);
-      pointer-events: none;
-      z-index: 12;
+      width: 28px;
+      height: 52px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      backdrop-filter: blur(2px);
+      pointer-events: auto;
+      z-index: 25;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.1);
     }
-    .slider.confirmed .guest-status-dot { background-color: #3bc43b; }
-    .slider.rejected .guest-status-dot { background-color: #e55a5a; }
-    .slider.pending .guest-status-dot { background-color: #f5b042; }
-    .slider.temp .guest-status-dot { background-color: #aaaaaa; opacity: 0.7; }
+    .switch-pos {
+      width: 20px;
+      height: 20px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: all 0.1s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.2);
+    }
+    .switch-pos.active {
+      background: #ffffff;
+      color: #1e1e1e;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.8);
+      transform: scale(1.02);
+    }
+    .switch-pos[data-state="arrived"]:hover { background: #6fcf97; }
+    .switch-pos[data-state="unknown"]:hover { background: #f1c40f; }
+    .switch-pos[data-state="not_arrived"]:hover { background: #e67e7e; }
     
+    /* легенда для визуального понимания (мини-подсказка) */
+    .switch-pos[data-state="arrived"]::before { content: "✓"; }
+    .switch-pos[data-state="unknown"]::before { content: "?"; }
+    .switch-pos[data-state="not_arrived"]::before { content: "✗"; }
+    
+    /* текст брони */
     .sl-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
     .sl-time { font-size: 10px; opacity: 0.85; font-weight: 500; padding-right: 8px; }
     
+    /* область для перетаскивания */
     .drag-handle {
       position: absolute;
       top: 0;
@@ -324,6 +359,10 @@
       cursor: default;
       z-index: 2;
       pointer-events: auto;
+    }
+    /* кликабельная область НЕ перекрывает переключатель */
+    .drag-handle {
+      left: 44px; /* чтобы не перекрывать вертикальный свитч */
     }
     .slider.drag-mode-enabled .drag-handle { cursor: grab; }
     .slider.drag-mode-enabled .drag-handle:active { cursor: grabbing; }
@@ -358,6 +397,9 @@
       .ctrl { flex-direction: column; align-items: stretch; }
       .inline-temp-cards { margin-left: 0; justify-content: flex-start; }
       .btn-book, .btn-drag-toggle { width: 100%; }
+      .slider { padding-left: 42px; }
+      .vertical-switch { width: 24px; height: 46px; }
+      .switch-pos { width: 16px; height: 16px; font-size: 9px; }
     }
   </style>
 </head>
@@ -410,13 +452,10 @@
   let currentBooking = null;
   const $ = id => document.getElementById(id);
   
-  // Функция проверки конфликта броней (с учетом границ - allows touching)
   function hasConflict(lane, start, end, excludeId = null) {
     return bookings.some(b => {
       if (excludeId !== null && b.id === excludeId) return false;
       if (b.lane !== lane) return false;
-      // Разрешаем стыковку вплотную: бронь заканчивается ровно когда начинается другая
-      // Конфликт только если интервалы пересекаются (не просто касаются)
       return !(end <= b.start || start >= b.end);
     });
   }
@@ -484,7 +523,6 @@
   }
   
   function clearTempSelections(){ tempBookings = []; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); }
-  
   function renderInlineTempCards(){ 
     const container=$("inlineTempContainer"); if(!container) return;
     if(tempBookings.length===0){ container.innerHTML=""; return; }
@@ -500,7 +538,7 @@
   
   function updatePreviewTimes() { const span=document.getElementById("previewTimes"); if(span) span.innerText = tempBookings.length ? tempBookings.map(tb=>`Стол ${tb.lane+1} (${fmt(tb.start)}–${fmt(tb.end)})`).join("; ") : "—"; }
   
-  // Drag to select (обычный выделение)
+  // драг для выделения (без изменений)
   let isDragging=false, dragStartCell=null, dragInterval=null;
   function onMouseDown(e){ if(dragModeEnabled) return; let t=e.target; if(t.classList?.contains("slot")){ e.preventDefault(); let lane=parseInt(t.dataset.lane), si=parseInt(t.dataset.si); isDragging=true; dragStartCell={lane,si}; dragInterval={lane,startIdx:si,endIdx:si}; highlightDragInterval(lane,si,si); } }
   function onMouseMove(e){ if(!dragModeEnabled && isDragging && dragStartCell){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); if(el){ let lane=parseInt(el.dataset.lane), idx=parseInt(el.dataset.si); if(lane===dragStartCell.lane){ let ns=Math.min(dragStartCell.si,idx), ne=Math.max(dragStartCell.si,idx); dragInterval={lane,startIdx:ns,endIdx:ne}; highlightDragInterval(lane,ns,ne); } } } }
@@ -509,12 +547,8 @@
     if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){ 
       let {lane,startIdx,endIdx}=dragInterval; 
       let start=slots[startIdx].key, end=slots[endIdx+1]?.key || slots[endIdx].key + 0.5;
-      // Проверка конфликта с существующими бронями
-      if(hasConflict(lane, start, end)){ 
-        alert("Это время уже занято другой броней"); 
-      } else { 
-        tempBookings.push({id:nextTempId++,lane,start:start,end:end}); 
-      }
+      if(hasConflict(lane, start, end)) alert("Это время уже занято другой броней"); 
+      else tempBookings.push({id:nextTempId++,lane,start:start,end:end}); 
       renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); 
     } 
     isDragging=false; dragInterval=null; dragStartCell=null; 
@@ -531,6 +565,15 @@
   async function loadFromServer(){ showLoad(); try{ let res=await fetch(GAS_URL+"?action=get&date="+$("dateInput").value); let data=await res.json(); bookings=data.bookings?data.bookings.map(b=>({id:b.id,lane:b.table-1,start:parseFloat(b.start),end:parseFloat(b.end),name:b.name,phone:b.phone,comment:b.comment,confirmed:b.confirmed==="Да"?true:(b.confirmed==="Нет"?false:null)})):[]; renderAllSliders(); updateCellsHighlight(); } catch(e){console.error(e);} hideLoad(); }
   async function saveToServer(booking){ if(!booking.id) return; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"update",id:booking.id,date:$("dateInput").value,tableNumber:booking.lane+1,start:booking.start,end:booking.end,name:booking.name,phone:booking.phone,comment:booking.comment})}); }
   
+  // обновление статуса через вертикальный переключатель
+  async function updateBookingStatus(booking, newConfirmed) {
+    if(booking.confirmed === newConfirmed) return;
+    showLoad();
+    await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:booking.id,confirmed:newConfirmed})});
+    await loadFromServer();
+    hideLoad();
+  }
+  
   function renderAllSliders(){ 
     let container=$("slidersLayer"); if(!container) return; container.innerHTML=""; let rows=Array.from($("dtBody")?.querySelectorAll("tr")||[]); if(rows.length===0) return;
     [...bookings, ...tempBookings.map(t=>({...t,isTemp:true}))].forEach(item=>{
@@ -542,8 +585,29 @@
       let laneType=LANE_TYPE_MAP[getGroupIndex(item.lane)];
       let slider=document.createElement("div"); slider.className=`slider ${status}`; if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); slider.setAttribute("data-lane-type",laneType);
       slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
-      let dot=document.createElement("div"); dot.className="guest-status-dot";
-      slider.appendChild(dot);
+      
+      // вертикальный переключатель (3 позиции)
+      let vSwitch = document.createElement("div"); vSwitch.className="vertical-switch";
+      const states = [
+        { value: true,  label: "arrived", icon: "✓", title: "Бронь пришла" },
+        { value: null,  label: "unknown", icon: "?", title: "Не выбрано" },
+        { value: false, label: "not_arrived", icon: "✗", title: "Бронь не пришла" }
+      ];
+      states.forEach(st => {
+        let pos = document.createElement("div"); pos.className="switch-pos"; pos.setAttribute("data-state", st.label);
+        if(!item.isTemp && item.confirmed === st.value) pos.classList.add("active");
+        if(!item.isTemp && !item.isTemp) {
+          pos.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            if(item.isTemp) return;
+            await updateBookingStatus(item, st.value);
+          });
+        } else if(item.isTemp) { pos.style.opacity="0.4"; pos.style.pointerEvents="none"; }
+        pos.title = st.title;
+        vSwitch.appendChild(pos);
+      });
+      slider.appendChild(vSwitch);
+      
       let nameDiv=document.createElement("div"); nameDiv.className="sl-name"; nameDiv.textContent=item.isTemp?"Ожидает брони":(item.name||"Бронь");
       let timeDiv=document.createElement("div"); timeDiv.className="sl-time"; timeDiv.textContent=`${fmt(item.start)}–${fmt(item.end)}`;
       slider.append(nameDiv,timeDiv);
@@ -556,13 +620,9 @@
     });
   }
   
-  // drag перемещение постоянной брони с проверкой конфликта
   async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===booking.end)-slotsArr.findIndex(s=>s.key===booking.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===booking.start); let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflict(finalLane, newStart, newEnd, booking.id)){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
-  
   async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===temp.end)-slotsArr.findIndex(s=>s.key===temp.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===temp.start); let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflict(finalLane, newStart, newEnd)){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
-  
   function createGhost(slider){ let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; ghost.style.opacity='0.5'; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); return ghost; }
-  
   function moveLogic(ghost,slider,rows,slotsArr,durationCells, onDrop, initialLane, initialStartIdx){ let currentLane=initialLane, currentStartIdx=initialStartIdx; function updateGhostPos(lane,startIdx){ let row=rows[lane]; if(!row) return; let sc=row.cells[startIdx+1], ec=row.cells[startIdx+durationCells+1]; if(sc&&ec){ ghost.style.left=(sc.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(ec.offsetLeft+ec.offsetWidth-sc.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function getTargetCoords(e){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane), idx:parseInt(el.dataset.si)}; } function onDragMove(ev){ let tgt=getTargetCoords(ev); if(tgt){ let nl=tgt.lane, nsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); if(nl!==currentLane||nsi!==currentStartIdx){ currentLane=nl; currentStartIdx=nsi; updateGhostPos(currentLane,currentStartIdx); } } } function onDragEnd(ev){ let tgt=getTargetCoords(ev); if(tgt){ let fl=tgt.lane, fsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); onDrop(fl,fsi); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhostPos(currentLane,currentStartIdx); }
   
   function showInfoModal(b){ currentBooking=b; $("i-table").textContent="№ "+(b.lane+1); $("i-time").textContent=`${fmt(b.start)} – ${fmt(b.end)}`; $("i-name").textContent=b.name; $("i-phone").textContent=b.phone||"—"; $("i-comment").textContent=b.comment||"—"; let statusText=b.confirmed===true?"✅ Пришли":(b.confirmed===false?"❌ Не пришли":"⏳ Ожидание"); $("i-status").textContent=statusText; $("infoModal").classList.add("open"); }

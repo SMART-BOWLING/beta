@@ -50,7 +50,6 @@
       font-weight: 450;
     }
 
-    /* Панель входа */
     #login {
       position: fixed;
       inset: 0;
@@ -70,7 +69,6 @@
 
     #content { display: none; min-height: 100vh; }
 
-    /* Навигация */
     .nav {
       position: sticky;
       top: 0;
@@ -107,7 +105,6 @@
       gap: 32px;
     }
 
-    /* Панель управления */
     .ctrl {
       display: flex;
       gap: 20px;
@@ -185,7 +182,6 @@
     .temp-card-inline .temp-time { font-family: monospace; font-size: 12px; background: #efefef; padding: 4px 12px; border-radius: 34px; }
     .temp-card-inline .temp-rm { width: 28px; height: 28px; border-radius: 30px; background: #f2eaea; border: none; cursor: pointer; font-weight: 600; color: #b33f3f; }
 
-    /* Таблица */
     .grid-card {
       background: var(--surface-primary);
       border-radius: var(--radius-card);
@@ -234,7 +230,6 @@
       left: 0;
       z-index: 2;
     }
-    /* Группы столов: 1-3 синий, 4 зеленый, 5-6 синий, 7-12 красный */
     .lane-hdr.group-blue { background: #2c5f7a; color: white; }
     .lane-hdr.group-green { background: #4f6b4e; color: white; }
     .lane-hdr.group-red { background: #9b4b4b; color: white; }
@@ -252,7 +247,6 @@
     #tableDesktop tbody td.slot.temp-highlight { background: #dde9f0 !important; border: 1px solid #3b6e8f !important; }
     #tableDesktop tbody td.slot.drag-over { background: #e2dfcf !important; }
 
-    /* Слой слайдеров */
     #slidersLayer {
       position: absolute;
       top: 0;
@@ -263,7 +257,6 @@
       z-index: 20;
     }
     
-    /* ПОЛЗУНКИ — прямоугольные с минимальным закруглением */
     .slider {
       position: absolute;
       border-radius: 6px;
@@ -285,7 +278,6 @@
       white-space: nowrap;
     }
     
-    /* Цвета слайдеров по группам */
     .slider[data-lane-type="blue"] { background: rgba(44, 95, 122, 0.92); color: white; }
     .slider[data-lane-type="green"] { background: rgba(79, 107, 78, 0.92); color: white; }
     .slider[data-lane-type="red"] { background: rgba(155, 75, 75, 0.92); color: white; }
@@ -302,7 +294,6 @@
     .slider.temp[data-lane-type="green"] { background: rgba(79, 107, 78, 0.75); border: 1px solid #c9b16b; }
     .slider.temp[data-lane-type="red"] { background: rgba(155, 75, 75, 0.75); border: 1px solid #c9b16b; }
     
-    /* Индикатор статуса гостя — цветная точка слева */
     .guest-status-dot {
       position: absolute;
       left: 12px;
@@ -316,8 +307,7 @@
       pointer-events: none;
       z-index: 12;
     }
-    /* Статусы: пришёл (confirmed) — зелёная точка, не пришли (rejected) — красная, ожидание (pending) — жёлтая */
-    .slider.confirmed .guest-status-dot { background-color: #3bc43b; box-shadow: 0 0 0 1px #ffffff; }
+    .slider.confirmed .guest-status-dot { background-color: #3bc43b; }
     .slider.rejected .guest-status-dot { background-color: #e55a5a; }
     .slider.pending .guest-status-dot { background-color: #f5b042; }
     .slider.temp .guest-status-dot { background-color: #aaaaaa; opacity: 0.7; }
@@ -325,7 +315,6 @@
     .sl-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
     .sl-time { font-size: 10px; opacity: 0.85; font-weight: 500; padding-right: 8px; }
     
-    /* Область для перетаскивания и клика */
     .drag-handle {
       position: absolute;
       top: 0;
@@ -340,7 +329,6 @@
     .slider.drag-mode-enabled .drag-handle:active { cursor: grabbing; }
     .slider:not(.drag-mode-enabled) .drag-handle { cursor: pointer; }
     
-    /* Модальные окна */
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(20px); z-index: 2000; justify-content: center; align-items: center; }
     .overlay.open { display: flex; }
     .sheet { background: rgba(255,255,255,0.98); border-radius: 52px; width: 100%; max-width: 540px; box-shadow: 0 32px 56px rgba(0,0,0,0.2); }
@@ -422,6 +410,17 @@
   let currentBooking = null;
   const $ = id => document.getElementById(id);
   
+  // Функция проверки конфликта броней (с учетом границ - allows touching)
+  function hasConflict(lane, start, end, excludeId = null) {
+    return bookings.some(b => {
+      if (excludeId !== null && b.id === excludeId) return false;
+      if (b.lane !== lane) return false;
+      // Разрешаем стыковку вплотную: бронь заканчивается ровно когда начинается другая
+      // Конфликт только если интервалы пересекаются (не просто касаются)
+      return !(end <= b.start || start >= b.end);
+    });
+  }
+  
   function parseJwt(t){ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
   function handleCredentialResponse(r){ let d=parseJwt(r.credential); if(ALLOWED.includes(d.email)){ localStorage.setItem("ue",d.email); location.reload(); } else alert("Доступ запрещён"); }
   
@@ -468,11 +467,24 @@
   
   function updateCellsHighlight(){
     for(let row of $("dtBody").rows) for(let i=1;i<row.cells.length;i++) row.cells[i].classList.remove("booking-pending","booking-confirmed","booking-rejected","temp-highlight");
-    for(let b of bookings){ let si=slots.findIndex(s=>s.key===b.start), ei=slots.findIndex(s=>s.key===b.end); if(si!==-1 && ei!==-1) for(let i=si;i<=ei;i++){ let cell=getSlotCell(b.lane,i); if(cell) cell.classList.add(b.confirmed===true?"booking-confirmed":(b.confirmed===false?"booking-rejected":"booking-pending")); } }
-    for(let t of tempBookings){ let si=slots.findIndex(s=>s.key===t.start), ei=slots.findIndex(s=>s.key===t.end); if(si!==-1 && ei!==-1) for(let i=si;i<=ei;i++){ let cell=getSlotCell(t.lane,i); if(cell) cell.classList.add("temp-highlight"); } }
+    for(let b of bookings){ 
+      let si=slots.findIndex(s=>s.key===b.start), ei=slots.findIndex(s=>s.key===b.end); 
+      if(si!==-1 && ei!==-1) for(let i=si;i<ei;i++){ 
+        let cell=getSlotCell(b.lane,i); 
+        if(cell) cell.classList.add(b.confirmed===true?"booking-confirmed":(b.confirmed===false?"booking-rejected":"booking-pending")); 
+      } 
+    }
+    for(let t of tempBookings){ 
+      let si=slots.findIndex(s=>s.key===t.start), ei=slots.findIndex(s=>s.key===t.end); 
+      if(si!==-1 && ei!==-1) for(let i=si;i<ei;i++){ 
+        let cell=getSlotCell(t.lane,i); 
+        if(cell) cell.classList.add("temp-highlight"); 
+      } 
+    }
   }
   
   function clearTempSelections(){ tempBookings = []; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); }
+  
   function renderInlineTempCards(){ 
     const container=$("inlineTempContainer"); if(!container) return;
     if(tempBookings.length===0){ container.innerHTML=""; return; }
@@ -485,6 +497,7 @@
     });
     updatePreviewTimes();
   }
+  
   function updatePreviewTimes() { const span=document.getElementById("previewTimes"); if(span) span.innerText = tempBookings.length ? tempBookings.map(tb=>`Стол ${tb.lane+1} (${fmt(tb.start)}–${fmt(tb.end)})`).join("; ") : "—"; }
   
   // Drag to select (обычный выделение)
@@ -492,7 +505,21 @@
   function onMouseDown(e){ if(dragModeEnabled) return; let t=e.target; if(t.classList?.contains("slot")){ e.preventDefault(); let lane=parseInt(t.dataset.lane), si=parseInt(t.dataset.si); isDragging=true; dragStartCell={lane,si}; dragInterval={lane,startIdx:si,endIdx:si}; highlightDragInterval(lane,si,si); } }
   function onMouseMove(e){ if(!dragModeEnabled && isDragging && dragStartCell){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); if(el){ let lane=parseInt(el.dataset.lane), idx=parseInt(el.dataset.si); if(lane===dragStartCell.lane){ let ns=Math.min(dragStartCell.si,idx), ne=Math.max(dragStartCell.si,idx); dragInterval={lane,startIdx:ns,endIdx:ne}; highlightDragInterval(lane,ns,ne); } } } }
   function highlightDragInterval(lane,si,ei){ document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); for(let i=si;i<=ei;i++){ let cell=getSlotCell(lane,i); if(cell) cell.classList.add("drag-over"); } }
-  function onMouseUp(){ if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx!==dragInterval.endIdx){ let {lane,startIdx,endIdx}=dragInterval; let start=slots[startIdx].key, end=slots[endIdx].key; if(bookings.some(b=>b.lane===lane && !(b.end<=start || b.start>=end))) alert("Время занято"); else tempBookings.push({id:nextTempId++,lane,start:Math.min(start,end),end:Math.max(start,end)}); renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } isDragging=false; dragInterval=null; dragStartCell=null; document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); }
+  function onMouseUp(){ 
+    if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){ 
+      let {lane,startIdx,endIdx}=dragInterval; 
+      let start=slots[startIdx].key, end=slots[endIdx+1]?.key || slots[endIdx].key + 0.5;
+      // Проверка конфликта с существующими бронями
+      if(hasConflict(lane, start, end)){ 
+        alert("Это время уже занято другой броней"); 
+      } else { 
+        tempBookings.push({id:nextTempId++,lane,start:start,end:end}); 
+      }
+      renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); 
+    } 
+    isDragging=false; dragInterval=null; dragStartCell=null; 
+    document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); 
+  }
   $("tableDesktop").addEventListener("mousedown", onMouseDown);
   document.body.addEventListener("mousemove", onMouseMove);
   document.body.addEventListener("mouseup", onMouseUp);
@@ -528,10 +555,14 @@
       container.appendChild(slider);
     });
   }
-  // drag перемещение постоянной брони
-  async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===booking.end)-slotsArr.findIndex(s=>s.key===booking.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===booking.start); let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!bookings.some(b=>b.id!==booking.id && b.lane===finalLane && !(b.end<=newStart || b.start>=newEnd))){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт"); }, currentLane,currentStartIdx); }
-  async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===temp.end)-slotsArr.findIndex(s=>s.key===temp.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===temp.start); let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!bookings.some(b=>b.lane===finalLane && !(b.end<=newStart || b.start>=newEnd))){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт"); }, currentLane,currentStartIdx); }
+  
+  // drag перемещение постоянной брони с проверкой конфликта
+  async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===booking.end)-slotsArr.findIndex(s=>s.key===booking.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===booking.start); let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflict(finalLane, newStart, newEnd, booking.id)){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
+  
+  async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===temp.end)-slotsArr.findIndex(s=>s.key===temp.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===temp.start); let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflict(finalLane, newStart, newEnd)){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
+  
   function createGhost(slider){ let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; ghost.style.opacity='0.5'; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); return ghost; }
+  
   function moveLogic(ghost,slider,rows,slotsArr,durationCells, onDrop, initialLane, initialStartIdx){ let currentLane=initialLane, currentStartIdx=initialStartIdx; function updateGhostPos(lane,startIdx){ let row=rows[lane]; if(!row) return; let sc=row.cells[startIdx+1], ec=row.cells[startIdx+durationCells+1]; if(sc&&ec){ ghost.style.left=(sc.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(ec.offsetLeft+ec.offsetWidth-sc.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function getTargetCoords(e){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane), idx:parseInt(el.dataset.si)}; } function onDragMove(ev){ let tgt=getTargetCoords(ev); if(tgt){ let nl=tgt.lane, nsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); if(nl!==currentLane||nsi!==currentStartIdx){ currentLane=nl; currentStartIdx=nsi; updateGhostPos(currentLane,currentStartIdx); } } } function onDragEnd(ev){ let tgt=getTargetCoords(ev); if(tgt){ let fl=tgt.lane, fsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); onDrop(fl,fsi); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhostPos(currentLane,currentStartIdx); }
   
   function showInfoModal(b){ currentBooking=b; $("i-table").textContent="№ "+(b.lane+1); $("i-time").textContent=`${fmt(b.start)} – ${fmt(b.end)}`; $("i-name").textContent=b.name; $("i-phone").textContent=b.phone||"—"; $("i-comment").textContent=b.comment||"—"; let statusText=b.confirmed===true?"✅ Пришли":(b.confirmed===false?"❌ Не пришли":"⏳ Ожидание"); $("i-status").textContent=statusText; $("infoModal").classList.add("open"); }

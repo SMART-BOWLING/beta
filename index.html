@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+сделай на ползунке имя чуть больше и время. еще, кнопку открыть меню брони сделай без анимации просто серой  ! вот код : <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -86,16 +86,17 @@
     }
     .nav-title { font-size: 22px; font-weight: 600; letter-spacing: -0.4px; color: var(--label-dark); }
     .nav-btn {
-      background: #9e9e9e; /* серая кнопка, без градиента */
-      border: none;
+      background: rgba(255,255,255,0.92);
+      border: 0.5px solid var(--border-strong);
       border-radius: 980px;
       padding: 7px 24px;
       font-size: 14px;
       font-weight: 510;
-      color: white;
+      color: var(--accent-blue);
       cursor: pointer;
-      /* АНИМАЦИЯ УДАЛЕНА — нет transition, нет hover-эффекта */
+      transition: all 0.2s ease;
     }
+    .nav-btn:hover { background: var(--accent-blue-dim); transform: scale(0.97); }
 
     .page {
       width: 100%;
@@ -262,17 +263,17 @@
       z-index: 20;
     }
     
-    /* ПОЛЗУНКИ — прямоугольные, имя и время увеличены */
+    /* ПОЛЗУНКИ — прямоугольные с минимальным закруглением (border-radius: 6px) */
     .slider {
       position: absolute;
-      border-radius: 6px;
+      border-radius: 6px;     /* минимальное закругление, почти прямоугольные */
       pointer-events: auto;
       cursor: default;
-      padding: 6px 12px 6px 38px;
+      padding: 6px 12px 6px 38px;  /* отступ слева для цветной точки */
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 6px;          /* чуть больше отступ между строками */
+      gap: 4px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       backdrop-filter: blur(8px);
       border: 0.5px solid rgba(255,255,255,0.25);
@@ -282,23 +283,6 @@
       font-family: var(--font-system);
       overflow: hidden;
       white-space: nowrap;
-    }
-    
-    /* Увеличенные шрифты для имени и времени */
-    .sl-name { 
-      font-size: 15px;      /* было 12px */
-      font-weight: 640; 
-      white-space: nowrap; 
-      overflow: hidden; 
-      text-overflow: ellipsis; 
-      padding-right: 32px;
-      letter-spacing: -0.2px;
-    }
-    .sl-time { 
-      font-size: 12px;      /* было 10px */
-      opacity: 0.85; 
-      font-weight: 530; 
-      padding-right: 32px;
     }
     
     /* Цвета слайдеров по группам */
@@ -352,7 +336,7 @@
       width: 12px;
       height: 12px;
       border-radius: 12px;
-      background-color: #d4d4d4;
+      background-color: #d4d4d4; /* нейтральный по умолчанию */
       box-shadow: 0 0 0 1px rgba(255,255,255,0.6);
       pointer-events: none;
       z-index: 12;
@@ -362,6 +346,9 @@
     .slider.rejected .guest-status-dot { background-color: #e55a5a; }
     .slider.pending .guest-status-dot { background-color: #f5b042; }
     .slider.temp .guest-status-dot { background-color: #aaaaaa; opacity: 0.7; }
+    
+    .sl-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 32px; }
+    .sl-time { font-size: 10px; opacity: 0.85; font-weight: 500; padding-right: 32px; }
     
     .drag-handle {
       position: absolute;
@@ -377,7 +364,7 @@
     .slider.drag-mode-enabled .drag-handle:active { cursor: grabbing; }
     .slider:not(.drag-mode-enabled) .drag-handle { cursor: pointer; }
     
-    .resize-handle { display: none; }
+    .resize-handle { display: none; } /* без ресайза, оставляем чистый вид */
     
     /* Модальные окна */
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(20px); z-index: 2000; justify-content: center; align-items: center; }
@@ -526,6 +513,7 @@
   }
   function updatePreviewTimes() { const span=document.getElementById("previewTimes"); if(span) span.innerText = tempBookings.length ? tempBookings.map(tb=>`Стол ${tb.lane+1} (${fmt(tb.start)}–${fmt(tb.end)})`).join("; ") : "—"; }
   
+  // Drag to select (обычный выделение)
   let isDragging=false, dragStartCell=null, dragInterval=null;
   function onMouseDown(e){ if(dragModeEnabled) return; let t=e.target; if(t.classList?.contains("slot")){ e.preventDefault(); let lane=parseInt(t.dataset.lane), si=parseInt(t.dataset.si); isDragging=true; dragStartCell={lane,si}; dragInterval={lane,startIdx:si,endIdx:si}; highlightDragInterval(lane,si,si); } }
   function onMouseMove(e){ if(!dragModeEnabled && isDragging && dragStartCell){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); if(el){ let lane=parseInt(el.dataset.lane), idx=parseInt(el.dataset.si); if(lane===dragStartCell.lane){ let ns=Math.min(dragStartCell.si,idx), ne=Math.max(dragStartCell.si,idx); dragInterval={lane,startIdx:ns,endIdx:ne}; highlightDragInterval(lane,ns,ne); } } } }
@@ -569,6 +557,7 @@
       container.appendChild(slider);
     });
   }
+  // drag перемещение постоянной брони
   async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===booking.end)-slotsArr.findIndex(s=>s.key===booking.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===booking.start); let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!bookings.some(b=>b.id!==booking.id && b.lane===finalLane && !(b.end<=newStart || b.start>=newEnd))){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт"); }, currentLane,currentStartIdx); }
   async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===temp.end)-slotsArr.findIndex(s=>s.key===temp.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===temp.start); let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!bookings.some(b=>b.lane===finalLane && !(b.end<=newStart || b.start>=newEnd))){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт"); }, currentLane,currentStartIdx); }
   function createGhost(slider){ let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; ghost.style.opacity='0.5'; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); return ghost; }

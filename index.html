@@ -1,4 +1,4 @@
-сделай на ползунке имя чуть больше и время. еще, кнопку открыть меню брони сделай без анимации просто серой  ! вот код : <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -263,13 +263,13 @@
       z-index: 20;
     }
     
-    /* ПОЛЗУНКИ — прямоугольные с минимальным закруглением (border-radius: 6px) */
+    /* ПОЛЗУНКИ — прямоугольные с минимальным закруглением */
     .slider {
       position: absolute;
-      border-radius: 6px;     /* минимальное закругление, почти прямоугольные */
+      border-radius: 6px;
       pointer-events: auto;
       cursor: default;
-      padding: 6px 12px 6px 38px;  /* отступ слева для цветной точки */
+      padding: 6px 12px 6px 38px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -302,31 +302,6 @@
     .slider.temp[data-lane-type="green"] { background: rgba(79, 107, 78, 0.75); border: 1px solid #c9b16b; }
     .slider.temp[data-lane-type="red"] { background: rgba(155, 75, 75, 0.75); border: 1px solid #c9b16b; }
     
-    /* Кнопка информации СПРАВА от ползунка — видимая, круглая иконка */
-    .info-btn-slider {
-      position: absolute;
-      right: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 28px;
-      height: 28px;
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(4px);
-      border-radius: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      font-weight: bold;
-      color: white;
-      cursor: pointer;
-      border: none;
-      transition: 0.1s;
-      z-index: 15;
-      pointer-events: auto;
-    }
-    .info-btn-slider:hover { background: rgba(0,0,0,0.7); transform: translateY(-50%) scale(1.05); }
-    
     /* Индикатор статуса гостя — цветная точка слева */
     .guest-status-dot {
       position: absolute;
@@ -336,7 +311,7 @@
       width: 12px;
       height: 12px;
       border-radius: 12px;
-      background-color: #d4d4d4; /* нейтральный по умолчанию */
+      background-color: #d4d4d4;
       box-shadow: 0 0 0 1px rgba(255,255,255,0.6);
       pointer-events: none;
       z-index: 12;
@@ -347,14 +322,15 @@
     .slider.pending .guest-status-dot { background-color: #f5b042; }
     .slider.temp .guest-status-dot { background-color: #aaaaaa; opacity: 0.7; }
     
-    .sl-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 32px; }
-    .sl-time { font-size: 10px; opacity: 0.85; font-weight: 500; padding-right: 32px; }
+    .sl-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
+    .sl-time { font-size: 10px; opacity: 0.85; font-weight: 500; padding-right: 8px; }
     
+    /* Область для перетаскивания и клика */
     .drag-handle {
       position: absolute;
       top: 0;
-      left: 28px;
-      right: 36px;
+      left: 0;
+      right: 0;
       height: 100%;
       cursor: default;
       z-index: 2;
@@ -363,8 +339,6 @@
     .slider.drag-mode-enabled .drag-handle { cursor: grab; }
     .slider.drag-mode-enabled .drag-handle:active { cursor: grabbing; }
     .slider:not(.drag-mode-enabled) .drag-handle { cursor: pointer; }
-    
-    .resize-handle { display: none; } /* без ресайза, оставляем чистый вид */
     
     /* Модальные окна */
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(20px); z-index: 2000; justify-content: center; align-items: center; }
@@ -543,16 +517,13 @@
       slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
       let dot=document.createElement("div"); dot.className="guest-status-dot";
       slider.appendChild(dot);
-      let infoBtn=document.createElement("div"); infoBtn.className="info-btn-slider"; infoBtn.innerHTML="ⓘ"; infoBtn.title="Информация о брони";
-      infoBtn.addEventListener("click",(e)=>{ e.stopPropagation(); if(!item.isTemp && item.id) showInfoModal(item); else alert("Временная бронь — сохраните для просмотра."); });
-      slider.appendChild(infoBtn);
       let nameDiv=document.createElement("div"); nameDiv.className="sl-name"; nameDiv.textContent=item.isTemp?"Ожидает брони":(item.name||"Бронь");
       let timeDiv=document.createElement("div"); timeDiv.className="sl-time"; timeDiv.textContent=`${fmt(item.start)}–${fmt(item.end)}`;
       slider.append(nameDiv,timeDiv);
       let dragHandle=document.createElement("div"); dragHandle.className="drag-handle";
       if(dragModeEnabled && !item.isTemp) dragHandle.addEventListener("mousedown",(e)=>{ e.stopPropagation(); startMoveDrag(item, e, rows, slots); });
       else if(dragModeEnabled && item.isTemp) dragHandle.addEventListener("mousedown",(e)=>{ e.stopPropagation(); startMoveTempDrag(item, e, rows, slots); });
-      else dragHandle.addEventListener("click",(e)=>{ e.stopPropagation(); if(!item.isTemp && item.id) showInfoModal(item); });
+      else dragHandle.addEventListener("click",(e)=>{ e.stopPropagation(); if(!item.isTemp && item.id) showInfoModal(item); else if(!item.isTemp && !item.id) alert("Загрузка данных..."); else alert("Временная бронь — сохраните для просмотра."); });
       slider.appendChild(dragHandle);
       container.appendChild(slider);
     });

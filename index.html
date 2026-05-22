@@ -410,32 +410,20 @@
   let currentBooking = null;
   const $ = id => document.getElementById(id);
   
-  // ========== ИСПРАВЛЕННЫЕ ФУНКЦИИ ПРОВЕРКИ КОНФЛИКТОВ ==========
-  // Проверка конфликта только с постоянными бронями (разрешает стыковку)
-  function hasConflictWithBookings(lane, start, end, excludeId = null) {
-    return bookings.some(b => {
-      if (excludeId !== null && b.id === excludeId) return false;
-      if (b.lane !== lane) return false;
-      // Разрешаем стыковку вплотную: конфликт только если интервалы пересекаются
-      return !(end <= b.start || start >= b.end);
-    });
+  // ИСПРАВЛЕННАЯ проверка конфликта: разрешаем стыковку (бронь заканчивается ровно когда начинается другая)
+  // Конфликт только если интервалы имеют ненулевое пересечение (start < other.end && end > other.start)
+  function hasConflict(lane, start, end, excludeId = null) {
+    for (let b of bookings) {
+      if (excludeId !== null && b.id === excludeId) continue;
+      if (b.lane !== lane) continue;
+      // Проверяем строгое пересечение: интервалы пересекаются, если один начинается до окончания другого И заканчивается после начала другого.
+      // То есть разрешаем start === other.end или end === other.start (примыкание)
+      if (start < b.end && end > b.start) {
+        return true;
+      }
+    }
+    return false;
   }
-  
-  // Проверка конфликта с временными бронями (разрешает стыковку)
-  function hasConflictWithTemp(lane, start, end, excludeTempId = null) {
-    return tempBookings.some(t => {
-      if (excludeTempId !== null && t.id === excludeTempId) return false;
-      if (t.lane !== lane) return false;
-      return !(end <= t.start || start >= t.end);
-    });
-  }
-  
-  // Общая проверка (для обратной совместимости)
-  function hasConflict(lane, start, end, excludeId = null, excludeTempId = null) {
-    return hasConflictWithBookings(lane, start, end, excludeId) || 
-           hasConflictWithTemp(lane, start, end, excludeTempId);
-  }
-  // =============================================================
   
   function parseJwt(t){ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
   function handleCredentialResponse(r){ let d=parseJwt(r.credential); if(ALLOWED.includes(d.email)){ localStorage.setItem("ue",d.email); location.reload(); } else alert("Доступ запрещён"); }
@@ -522,12 +510,12 @@
   function onMouseMove(e){ if(!dragModeEnabled && isDragging && dragStartCell){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); if(el){ let lane=parseInt(el.dataset.lane), idx=parseInt(el.dataset.si); if(lane===dragStartCell.lane){ let ns=Math.min(dragStartCell.si,idx), ne=Math.max(dragStartCell.si,idx); dragInterval={lane,startIdx:ns,endIdx:ne}; highlightDragInterval(lane,ns,ne); } } } }
   function highlightDragInterval(lane,si,ei){ document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); for(let i=si;i<=ei;i++){ let cell=getSlotCell(lane,i); if(cell) cell.classList.add("drag-over"); } }
   function onMouseUp(){ 
-    if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){ 
+    if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== undefined){ 
       let {lane,startIdx,endIdx}=dragInterval; 
       let start=slots[startIdx].key, end=slots[endIdx+1]?.key || slots[endIdx].key + 0.5;
-      // ИСПРАВЛЕНО: проверяем конфликт с постоянными И временными бронями
-      if(hasConflictWithBookings(lane, start, end) || hasConflictWithTemp(lane, start, end)){ 
-        alert("Это время уже занято другой броней (постоянной или временной)"); 
+      // Используем исправленную hasConflict (стыковка разрешена)
+      if(hasConflict(lane, start, end)){ 
+        alert("Это время уже занято другой броней (включая примыкание разрешено, но пересечение недопустимо)"); 
       } else { 
         tempBookings.push({id:nextTempId++,lane,start:start,end:end}); 
       }
@@ -572,11 +560,10 @@
     });
   }
   
-  // drag перемещение постоянной брони с проверкой конфликта (ИСПРАВЛЕНО)
-  async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===booking.end)-slotsArr.findIndex(s=>s.key===booking.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===booking.start); let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflictWithBookings(finalLane, newStart, newEnd, booking.id) && !hasConflictWithTemp(finalLane, newStart, newEnd)){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
+  // drag перемещение с проверкой на конфликт (учитывающей стыковку)
+  async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===booking.end)-slotsArr.findIndex(s=>s.key===booking.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===booking.start); let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflict(finalLane, newStart, newEnd, booking.id)){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
   
-  // drag перемещение временной брони с проверкой конфликта (ИСПРАВЛЕНО)
-  async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===temp.end)-slotsArr.findIndex(s=>s.key===temp.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===temp.start); let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflictWithBookings(finalLane, newStart, newEnd) && !hasConflictWithTemp(finalLane, newStart, newEnd, temp.id)){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
+  async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===temp.end)-slotsArr.findIndex(s=>s.key===temp.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===temp.start); let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflict(finalLane, newStart, newEnd)){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
   
   function createGhost(slider){ let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; ghost.style.opacity='0.5'; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); return ghost; }
   

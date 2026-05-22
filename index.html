@@ -28,10 +28,6 @@
       --accent-blue: #3b6e8f;
       --accent-blue-hover: #2c5a77;
       --accent-blue-dim: rgba(59, 110, 143, 0.12);
-      --accent-green: #4f6b4e;
-      --accent-green-dim: rgba(79, 107, 78, 0.12);
-      --accent-red: #b33f3f;
-      --accent-amber: #b87c2e;
       --radius-card: 24px;
       --radius-sm: 12px;
       --radius-pill: 980px;
@@ -259,10 +255,10 @@
     
     .slider {
       position: absolute;
-      border-radius: 6px;
+      border-radius: 8px;
       pointer-events: auto;
       cursor: default;
-      padding: 6px 12px 6px 38px;
+      padding: 6px 12px 6px 42px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -294,45 +290,54 @@
     .slider.temp[data-lane-type="green"] { background: rgba(79, 107, 78, 0.75); border: 1px solid #c9b16b; }
     .slider.temp[data-lane-type="red"] { background: rgba(155, 75, 75, 0.75); border: 1px solid #c9b16b; }
     
-    /* Новый вертикальный трехпозиционный переключатель */
-    .vertical-toggle-3 {
+    /* ВЕРТИКАЛЬНЫЙ ПОЛЗУНОК НА 3 ПОЗИЦИИ (как переключатель на iPhone) */
+    .vertical-thumb-switch {
       position: absolute;
       left: 6px;
       top: 50%;
       transform: translateY(-50%);
-      width: 22px;
-      height: 54px;
-      background: rgba(0,0,0,0.2);
-      border-radius: 28px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      padding: 4px 0;
-      backdrop-filter: blur(2px);
+      width: 28px;
+      height: 56px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 30px;
+      backdrop-filter: blur(4px);
       pointer-events: auto;
-      z-index: 25;
-      cursor: pointer;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.2);
+      cursor: grab;
+      z-index: 26;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.2), 0 1px 2px rgba(255,255,255,0.3);
+      transition: top 0.08s linear;
     }
-    .vertical-toggle-3 .toggle-segment {
-      flex: 1;
-      width: 100%;
+    .vertical-thumb-switch:active { cursor: grabbing; }
+    .vertical-thumb-switch .thumb-knob {
+      position: absolute;
+      left: 2px;
+      width: 24px;
+      height: 18px;
+      background: white;
       border-radius: 20px;
-      margin: 2px 0;
-      transition: all 0.1s ease;
-      background: rgba(255,255,255,0.2);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      transition: top 0.05s ease;
+      pointer-events: none;
     }
-    .vertical-toggle-3 .toggle-segment.active {
-      background: #ffffff;
-      box-shadow: 0 0 4px rgba(0,0,0,0.3);
+    /* подсказки позиций */
+    .vertical-thumb-switch::before {
+      content: "▲";
+      position: absolute;
+      top: -14px;
+      left: 6px;
+      font-size: 10px;
+      color: rgba(255,255,240,0.8);
+      pointer-events: none;
     }
-    .vertical-toggle-3 .toggle-segment[data-state="arrived"] { background: #3bc43b; }
-    .vertical-toggle-3 .toggle-segment[data-state="arrived"].active { background: #2eae2e; box-shadow: 0 0 4px rgba(0,0,0,0.4); }
-    .vertical-toggle-3 .toggle-segment[data-state="unknown"] { background: rgba(255,255,255,0.4); }
-    .vertical-toggle-3 .toggle-segment[data-state="unknown"].active { background: #ffffff; }
-    .vertical-toggle-3 .toggle-segment[data-state="not_arrived"] { background: #e55a5a; }
-    .vertical-toggle-3 .toggle-segment[data-state="not_arrived"].active { background: #c94444; }
+    .vertical-thumb-switch::after {
+      content: "▼";
+      position: absolute;
+      bottom: -14px;
+      left: 6px;
+      font-size: 10px;
+      color: rgba(255,255,240,0.8);
+      pointer-events: none;
+    }
     
     .drag-handle {
       position: absolute;
@@ -551,6 +556,57 @@
     hideLoad();
   }
   
+  // Функция создания ползунка на 3 позиции
+  function attachVerticalThumbSwitch(sliderElement, bookingItem) {
+    if(bookingItem.isTemp) return; // временные брони не меняем
+    let switchDiv = document.createElement("div");
+    switchDiv.className = "vertical-thumb-switch";
+    let knob = document.createElement("div");
+    knob.className = "thumb-knob";
+    switchDiv.appendChild(knob);
+    
+    // текущее состояние: true->верх, null->середина, false->низ
+    let stateIdx = bookingItem.confirmed === true ? 0 : (bookingItem.confirmed === false ? 2 : 1);
+    const trackHeight = 56;
+    const knobHeight = 18;
+    const step = (trackHeight - knobHeight) / 2; // расстояние между позициями
+    const positions = [2, 2 + step, 2 + step*2]; // верх, центр, низ
+    
+    function updateKnobPosition() {
+      let yPos = positions[stateIdx];
+      knob.style.top = yPos + "px";
+    }
+    updateKnobPosition();
+    
+    let dragging = false;
+    function onMouseMoveThumb(e) {
+      if(!dragging) return;
+      e.preventDefault();
+      let rect = switchDiv.getBoundingClientRect();
+      let yRel = e.clientY - rect.top;
+      let newY = Math.min(Math.max(2, yRel - knobHeight/2), trackHeight - knobHeight);
+      let newIdx = 1;
+      let mid1 = positions[0] + (positions[1]-positions[0])/2;
+      let mid2 = positions[1] + (positions[2]-positions[1])/2;
+      if(newY < mid1) newIdx = 0;
+      else if(newY > mid2) newIdx = 2;
+      else newIdx = 1;
+      if(newIdx !== stateIdx) {
+        stateIdx = newIdx;
+        let newConfirmed = stateIdx === 0 ? true : (stateIdx === 2 ? false : null);
+        if(bookingItem.confirmed !== newConfirmed) {
+          updateConfirmStatus(bookingItem, newConfirmed);
+        }
+      }
+      let targetY = positions[stateIdx];
+      knob.style.top = targetY + "px";
+    }
+    function onMouseUpThumb() { dragging = false; document.removeEventListener("mousemove", onMouseMoveThumb); document.removeEventListener("mouseup", onMouseUpThumb); }
+    function onMouseDownThumb(e) { e.stopPropagation(); dragging = true; document.addEventListener("mousemove", onMouseMoveThumb); document.addEventListener("mouseup", onMouseUpThumb); }
+    switchDiv.addEventListener("mousedown", onMouseDownThumb);
+    sliderElement.appendChild(switchDiv);
+  }
+  
   function renderAllSliders(){ 
     let container=$("slidersLayer"); if(!container) return; container.innerHTML=""; let rows=Array.from($("dtBody")?.querySelectorAll("tr")||[]); if(rows.length===0) return;
     [...bookings, ...tempBookings.map(t=>({...t,isTemp:true}))].forEach(item=>{
@@ -563,46 +619,17 @@
       let slider=document.createElement("div"); slider.className=`slider ${status}`; if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); slider.setAttribute("data-lane-type",laneType);
       slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
       
-      // ВЕРТИКАЛЬНЫЙ ПЕРЕКЛЮЧАТЕЛЬ на 3 позиции (вместо кружка)
-      let toggleContainer = document.createElement("div");
-      toggleContainer.className = "vertical-toggle-3";
-      // состояния: arrived (пришла), unknown (не выбрано), not_arrived (не пришла)
-      let currentConfirmState = (item.isTemp ? null : item.confirmed);
-      let stateMap = {true: "arrived", false: "not_arrived", null: "unknown"};
-      let activeState = stateMap[currentConfirmState] || "unknown";
-      const segments = [
-        { state: "arrived", title: "Бронь пришла" },
-        { state: "unknown", title: "Не выбрано" },
-        { state: "not_arrived", title: "Бронь не пришла" }
-      ];
-      segments.forEach(seg => {
-        let segDiv = document.createElement("div");
-        segDiv.className = "toggle-segment";
-        if(activeState === seg.state) segDiv.classList.add("active");
-        segDiv.setAttribute("data-state", seg.state);
-        segDiv.style.cursor = "pointer";
-        segDiv.title = seg.title;
-        if(!item.isTemp && item.id) {
-          segDiv.addEventListener("click", async (e) => {
-            e.stopPropagation();
-            let newConfirmValue = null;
-            if(seg.state === "arrived") newConfirmValue = true;
-            else if(seg.state === "not_arrived") newConfirmValue = false;
-            else newConfirmValue = null;
-            if(item.confirmed === newConfirmValue) return;
-            await updateConfirmStatus(item, newConfirmValue);
-          });
-        } else {
-          segDiv.style.opacity = "0.5";
-          segDiv.style.cursor = "default";
-        }
-        toggleContainer.appendChild(segDiv);
-      });
-      slider.appendChild(toggleContainer);
-      
       let nameDiv=document.createElement("div"); nameDiv.className="sl-name"; nameDiv.textContent=item.isTemp?"Ожидает брони":(item.name||"Бронь");
       let timeDiv=document.createElement("div"); timeDiv.className="sl-time"; timeDiv.textContent=`${fmt(item.start)}–${fmt(item.end)}`;
       slider.append(nameDiv,timeDiv);
+      
+      // добавляем ползунок вместо точки
+      if(!item.isTemp && item.id) attachVerticalThumbSwitch(slider, item);
+      else {
+        // для временных — заглушка
+        let fakeDot = document.createElement("div"); fakeDot.style.position="absolute"; fakeDot.style.left="8px"; fakeDot.style.top="50%"; fakeDot.style.transform="translateY(-50%)"; fakeDot.style.width="24px"; fakeDot.style.height="24px"; fakeDot.style.borderRadius="24px"; fakeDot.style.background="#aaa"; fakeDot.style.opacity="0.5"; fakeDot.style.pointerEvents="none"; slider.appendChild(fakeDot);
+      }
+      
       let dragHandle=document.createElement("div"); dragHandle.className="drag-handle";
       if(dragModeEnabled && !item.isTemp) dragHandle.addEventListener("mousedown",(e)=>{ e.stopPropagation(); startMoveDrag(item, e, rows, slots); });
       else if(dragModeEnabled && item.isTemp) dragHandle.addEventListener("mousedown",(e)=>{ e.stopPropagation(); startMoveTempDrag(item, e, rows, slots); });

@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -410,16 +410,32 @@
   let currentBooking = null;
   const $ = id => document.getElementById(id);
   
-  // Функция проверки конфликта броней (с учетом границ - allows touching)
-  function hasConflict(lane, start, end, excludeId = null) {
+  // ========== ИСПРАВЛЕННЫЕ ФУНКЦИИ ПРОВЕРКИ КОНФЛИКТОВ ==========
+  // Проверка конфликта только с постоянными бронями (разрешает стыковку)
+  function hasConflictWithBookings(lane, start, end, excludeId = null) {
     return bookings.some(b => {
       if (excludeId !== null && b.id === excludeId) return false;
       if (b.lane !== lane) return false;
-      // Разрешаем стыковку вплотную: бронь заканчивается ровно когда начинается другая
-      // Конфликт только если интервалы пересекаются (не просто касаются)
+      // Разрешаем стыковку вплотную: конфликт только если интервалы пересекаются
       return !(end <= b.start || start >= b.end);
     });
   }
+  
+  // Проверка конфликта с временными бронями (разрешает стыковку)
+  function hasConflictWithTemp(lane, start, end, excludeTempId = null) {
+    return tempBookings.some(t => {
+      if (excludeTempId !== null && t.id === excludeTempId) return false;
+      if (t.lane !== lane) return false;
+      return !(end <= t.start || start >= t.end);
+    });
+  }
+  
+  // Общая проверка (для обратной совместимости)
+  function hasConflict(lane, start, end, excludeId = null, excludeTempId = null) {
+    return hasConflictWithBookings(lane, start, end, excludeId) || 
+           hasConflictWithTemp(lane, start, end, excludeTempId);
+  }
+  // =============================================================
   
   function parseJwt(t){ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
   function handleCredentialResponse(r){ let d=parseJwt(r.credential); if(ALLOWED.includes(d.email)){ localStorage.setItem("ue",d.email); location.reload(); } else alert("Доступ запрещён"); }
@@ -509,9 +525,9 @@
     if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){ 
       let {lane,startIdx,endIdx}=dragInterval; 
       let start=slots[startIdx].key, end=slots[endIdx+1]?.key || slots[endIdx].key + 0.5;
-      // Проверка конфликта с существующими бронями
-      if(hasConflict(lane, start, end)){ 
-        alert("Это время уже занято другой броней"); 
+      // ИСПРАВЛЕНО: проверяем конфликт с постоянными И временными бронями
+      if(hasConflictWithBookings(lane, start, end) || hasConflictWithTemp(lane, start, end)){ 
+        alert("Это время уже занято другой броней (постоянной или временной)"); 
       } else { 
         tempBookings.push({id:nextTempId++,lane,start:start,end:end}); 
       }
@@ -556,10 +572,11 @@
     });
   }
   
-  // drag перемещение постоянной брони с проверкой конфликта
-  async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===booking.end)-slotsArr.findIndex(s=>s.key===booking.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===booking.start); let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflict(finalLane, newStart, newEnd, booking.id)){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
+  // drag перемещение постоянной брони с проверкой конфликта (ИСПРАВЛЕНО)
+  async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===booking.end)-slotsArr.findIndex(s=>s.key===booking.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===booking.start); let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflictWithBookings(finalLane, newStart, newEnd, booking.id) && !hasConflictWithTemp(finalLane, newStart, newEnd)){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
   
-  async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===temp.end)-slotsArr.findIndex(s=>s.key===temp.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===temp.start); let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflict(finalLane, newStart, newEnd)){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
+  // drag перемещение временной брони с проверкой конфликта (ИСПРАВЛЕНО)
+  async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===temp.end)-slotsArr.findIndex(s=>s.key===temp.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===temp.start); let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflictWithBookings(finalLane, newStart, newEnd) && !hasConflictWithTemp(finalLane, newStart, newEnd, temp.id)){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
   
   function createGhost(slider){ let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; ghost.style.opacity='0.5'; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); return ghost; }
   

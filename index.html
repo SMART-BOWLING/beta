@@ -257,20 +257,19 @@
       z-index: 20;
     }
     
-    /* Стили для ползунка (слайдера) брони */
     .slider {
       position: absolute;
-      border-radius: 10px;
+      border-radius: 8px;
       pointer-events: auto;
       cursor: default;
-      padding: 6px 12px 6px 58px; /* отступ под переключатель в стиле iPhone */
+      padding: 6px 12px 6px 12px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 4px;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+      gap: 2px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       backdrop-filter: blur(8px);
-      border: 0.5px solid rgba(255,255,255,0.3);
+      border: 0.5px solid rgba(255,255,255,0.25);
       will-change: left, top;
       transition: all 0.12s ease;
       font-weight: 510;
@@ -278,6 +277,50 @@
       overflow: hidden;
       white-space: nowrap;
     }
+    
+    /* вертикальный переключатель вместо кружка */
+    .status-toggle {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 56px;
+      background: rgba(0,0,0,0.35);
+      border-radius: 28px;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+      pointer-events: auto;
+      cursor: pointer;
+      z-index: 25;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      transition: all 0.1s;
+    }
+    .toggle-option {
+      width: 20px;
+      height: 20px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.3);
+      transition: all 0.08s linear;
+      margin: 2px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+      color: transparent;
+    }
+    .toggle-option.active {
+      background: #fff;
+      box-shadow: 0 0 0 1.5px rgba(0,0,0,0.2);
+      transform: scale(1.02);
+    }
+    .toggle-option[data-val="confirmed"].active { background: #2b8c4a; }
+    .toggle-option[data-val="pending"].active { background: #f5b042; }
+    .toggle-option[data-val="rejected"].active { background: #e55a5a; }
     
     .slider[data-lane-type="blue"] { background: rgba(44, 95, 122, 0.92); color: white; }
     .slider[data-lane-type="green"] { background: rgba(79, 107, 78, 0.92); color: white; }
@@ -294,80 +337,14 @@
     .slider.temp[data-lane-type="blue"] { background: rgba(44, 95, 122, 0.75); border: 1px solid #c9b16b; }
     .slider.temp[data-lane-type="green"] { background: rgba(79, 107, 78, 0.75); border: 1px solid #c9b16b; }
     .slider.temp[data-lane-type="red"] { background: rgba(155, 75, 75, 0.75); border: 1px solid #c9b16b; }
-
-    /* iPhone-style segmented switch (3 позиции как ползунок) */
-    .iphone-segmented {
-      position: absolute;
-      left: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 44px;
-      height: 44px;
-      background: rgba(0,0,0,0.25);
-      border-radius: 30px;
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      pointer-events: auto;
-      z-index: 30;
-      transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-      border: 0.5px solid rgba(255,255,255,0.3);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-    .iphone-segmented:hover { transform: translateY(-50%) scale(1.02); background: rgba(0,0,0,0.35); }
-    .segmented-track {
-      width: 100%;
-      height: 100%;
-      border-radius: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 6px;
-      position: relative;
-    }
-    .seg-option {
-      flex: 1;
-      text-align: center;
-      font-size: 14px;
-      font-weight: 600;
-      z-index: 2;
-      color: rgba(255,255,255,0.7);
-      transition: color 0.15s;
-      cursor: pointer;
-      line-height: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 2px;
-    }
-    .seg-option.active {
-      color: white;
-      text-shadow: 0 1px 1px rgba(0,0,0,0.2);
-    }
-    .seg-slider {
-      position: absolute;
-      top: 3px;
-      bottom: 3px;
-      width: 28px;
-      background: white;
-      border-radius: 28px;
-      transition: left 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-      z-index: 1;
-      pointer-events: none;
-    }
-    /* иконки внутри */
-    .seg-option[data-val="arrived"]::before { content: "✓"; margin-right: 2px; font-size: 12px; }
-    .seg-option[data-val="unknown"]::before { content: "?"; margin-right: 2px; font-size: 12px; font-weight: 700; }
-    .seg-option[data-val="not_arrived"]::before { content: "✗"; margin-right: 2px; font-size: 11px; }
     
-    /* текст брони */
+    /* сдвинем текст чтобы не наезжал на переключатель */
+    .slider .sl-name, .slider .sl-time {
+      margin-left: 38px;
+    }
     .sl-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
     .sl-time { font-size: 10px; opacity: 0.85; font-weight: 500; padding-right: 8px; }
     
-    /* область для перетаскивания */
     .drag-handle {
       position: absolute;
       top: 0;
@@ -377,9 +354,6 @@
       cursor: default;
       z-index: 2;
       pointer-events: auto;
-    }
-    .drag-handle {
-      left: 56px; /* чтобы не перекрывать сегментированный свитч */
     }
     .slider.drag-mode-enabled .drag-handle { cursor: grab; }
     .slider.drag-mode-enabled .drag-handle:active { cursor: grabbing; }
@@ -414,10 +388,9 @@
       .ctrl { flex-direction: column; align-items: stretch; }
       .inline-temp-cards { margin-left: 0; justify-content: flex-start; }
       .btn-book, .btn-drag-toggle { width: 100%; }
-      .slider { padding-left: 52px; }
-      .iphone-segmented { width: 40px; height: 40px; }
-      .seg-option { font-size: 12px; }
-      .drag-handle { left: 50px; }
+      .status-toggle { width: 24px; height: 48px; }
+      .toggle-option { width: 16px; height: 16px; }
+      .slider .sl-name, .slider .sl-time { margin-left: 32px; }
     }
   </style>
 </head>
@@ -451,7 +424,7 @@
 
 <div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Подтверждение брони</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div id="bookingTimePreview" style="background:#f0f2f5; border-radius:24px; padding:14px 18px; margin-bottom:24px;"><span>Выбранное время: </span><span id="previewTimes">—</span></div><div class="f-group"><label class="f-label">Имя *</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+7 123 456-78-90"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitTempBookings()">Сохранить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
 
-<div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали брони</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><strong id="i-table"></strong></div><div class="info-row"><span>Время</span><strong id="i-time"></strong></div><div class="info-row"><span>Имя</span><strong id="i-name"></strong></div><div class="info-row"><span>Телефон</span><strong id="i-phone"></strong></div><div class="info-row"><span>Комментарий</span><strong id="i-comment" style="font-weight:normal;"></strong></div><div class="info-row"><span>Статус гостя</span><strong id="i-status"></strong></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Пришла бронь</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">Удалить бронь</button></div></div></div>
+<div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали брони</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><strong id="i-table"></strong></div><div class="info-row"><span>Время</span><strong id="i-time"></strong></div><div class="info-row"><span>Имя</span><strong id="i-name"></strong></div><div class="info-row"><span>Телефон</span><strong id="i-phone"></strong></div><div class="info-row"><span>Комментарий</span><strong id="i-comment" style="font-weight:normal;"></strong></div></div><div class="confirm-btns"><button class="cb-yes" onclick="quickSetStatus(true)">✅ Бронь пришла</button><button class="cb-no" onclick="quickSetStatus(false)">❌ Бронь не пришла</button></div><button class="del-btn" onclick="deleteBooking()">Удалить бронь</button></div></div></div>
 <div id="imgPopup" class="overlay"><div class="sheet" style="max-width:90vw; background:transparent;"><img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width:100%; border-radius:48px;" onclick="closeImg()"/></div></div>
 <div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
 
@@ -471,11 +444,7 @@
   const $ = id => document.getElementById(id);
   
   function hasConflict(lane, start, end, excludeId = null) {
-    return bookings.some(b => {
-      if (excludeId !== null && b.id === excludeId) return false;
-      if (b.lane !== lane) return false;
-      return !(end <= b.start || start >= b.end);
-    });
+    return bookings.some(b => { if (excludeId !== null && b.id === excludeId) return false; if (b.lane !== lane) return false; return !(end <= b.start || start >= b.end); });
   }
   
   function parseJwt(t){ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
@@ -526,52 +495,24 @@
     for(let row of $("dtBody").rows) for(let i=1;i<row.cells.length;i++) row.cells[i].classList.remove("booking-pending","booking-confirmed","booking-rejected","temp-highlight");
     for(let b of bookings){ 
       let si=slots.findIndex(s=>s.key===b.start), ei=slots.findIndex(s=>s.key===b.end); 
-      if(si!==-1 && ei!==-1) for(let i=si;i<ei;i++){ 
-        let cell=getSlotCell(b.lane,i); 
-        if(cell) cell.classList.add(b.confirmed===true?"booking-confirmed":(b.confirmed===false?"booking-rejected":"booking-pending")); 
-      } 
+      if(si!==-1 && ei!==-1) for(let i=si;i<ei;i++){ let cell=getSlotCell(b.lane,i); if(cell) cell.classList.add(b.confirmed===true?"booking-confirmed":(b.confirmed===false?"booking-rejected":"booking-pending")); } 
     }
     for(let t of tempBookings){ 
       let si=slots.findIndex(s=>s.key===t.start), ei=slots.findIndex(s=>s.key===t.end); 
-      if(si!==-1 && ei!==-1) for(let i=si;i<ei;i++){ 
-        let cell=getSlotCell(t.lane,i); 
-        if(cell) cell.classList.add("temp-highlight"); 
-      } 
+      if(si!==-1 && ei!==-1) for(let i=si;i<ei;i++){ let cell=getSlotCell(t.lane,i); if(cell) cell.classList.add("temp-highlight"); } 
     }
   }
   
   function clearTempSelections(){ tempBookings = []; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); }
-  function renderInlineTempCards(){ 
-    const container=$("inlineTempContainer"); if(!container) return;
-    if(tempBookings.length===0){ container.innerHTML=""; return; }
-    container.innerHTML = ""; 
-    tempBookings.forEach((tb,idx)=>{ 
-      let card=document.createElement("div"); card.className="temp-card-inline"; 
-      card.innerHTML=`<strong>Стол ${tb.lane+1}</strong><span class="temp-time">${fmt(tb.start)}–${fmt(tb.end)}</span><button class="temp-rm" data-idx="${idx}">✕</button>`; 
-      card.querySelector(".temp-rm").onclick=()=>{ tempBookings.splice(idx,1); renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); updatePreviewTimes(); };
-      container.appendChild(card);
-    });
-    updatePreviewTimes();
-  }
-  
+  function renderInlineTempCards(){ const container=$("inlineTempContainer"); if(!container) return; if(tempBookings.length===0){ container.innerHTML=""; return; } container.innerHTML=""; tempBookings.forEach((tb,idx)=>{ let card=document.createElement("div"); card.className="temp-card-inline"; card.innerHTML=`<strong>Стол ${tb.lane+1}</strong><span class="temp-time">${fmt(tb.start)}–${fmt(tb.end)}</span><button class="temp-rm" data-idx="${idx}">✕</button>`; card.querySelector(".temp-rm").onclick=()=>{ tempBookings.splice(idx,1); renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); updatePreviewTimes(); }; container.appendChild(card); }); updatePreviewTimes(); }
   function updatePreviewTimes() { const span=document.getElementById("previewTimes"); if(span) span.innerText = tempBookings.length ? tempBookings.map(tb=>`Стол ${tb.lane+1} (${fmt(tb.start)}–${fmt(tb.end)})`).join("; ") : "—"; }
   
-  // драг выделение
+  // drag select logic (старый)
   let isDragging=false, dragStartCell=null, dragInterval=null;
   function onMouseDown(e){ if(dragModeEnabled) return; let t=e.target; if(t.classList?.contains("slot")){ e.preventDefault(); let lane=parseInt(t.dataset.lane), si=parseInt(t.dataset.si); isDragging=true; dragStartCell={lane,si}; dragInterval={lane,startIdx:si,endIdx:si}; highlightDragInterval(lane,si,si); } }
   function onMouseMove(e){ if(!dragModeEnabled && isDragging && dragStartCell){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); if(el){ let lane=parseInt(el.dataset.lane), idx=parseInt(el.dataset.si); if(lane===dragStartCell.lane){ let ns=Math.min(dragStartCell.si,idx), ne=Math.max(dragStartCell.si,idx); dragInterval={lane,startIdx:ns,endIdx:ne}; highlightDragInterval(lane,ns,ne); } } } }
   function highlightDragInterval(lane,si,ei){ document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); for(let i=si;i<=ei;i++){ let cell=getSlotCell(lane,i); if(cell) cell.classList.add("drag-over"); } }
-  function onMouseUp(){ 
-    if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){ 
-      let {lane,startIdx,endIdx}=dragInterval; 
-      let start=slots[startIdx].key, end=slots[endIdx+1]?.key || slots[endIdx].key + 0.5;
-      if(hasConflict(lane, start, end)) alert("Это время уже занято другой броней"); 
-      else tempBookings.push({id:nextTempId++,lane,start:start,end:end}); 
-      renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); 
-    } 
-    isDragging=false; dragInterval=null; dragStartCell=null; 
-    document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); 
-  }
+  function onMouseUp(){ if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){ let {lane,startIdx,endIdx}=dragInterval; let start=slots[startIdx].key, end=slots[endIdx+1]?.key || slots[endIdx].key + 0.5; if(hasConflict(lane, start, end)){ alert("Это время уже занято другой броней"); } else { tempBookings.push({id:nextTempId++,lane,start:start,end:end}); } renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } isDragging=false; dragInterval=null; dragStartCell=null; document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); }
   $("tableDesktop").addEventListener("mousedown", onMouseDown);
   document.body.addEventListener("mousemove", onMouseMove);
   document.body.addEventListener("mouseup", onMouseUp);
@@ -582,7 +523,9 @@
   
   async function loadFromServer(){ showLoad(); try{ let res=await fetch(GAS_URL+"?action=get&date="+$("dateInput").value); let data=await res.json(); bookings=data.bookings?data.bookings.map(b=>({id:b.id,lane:b.table-1,start:parseFloat(b.start),end:parseFloat(b.end),name:b.name,phone:b.phone,comment:b.comment,confirmed:b.confirmed==="Да"?true:(b.confirmed==="Нет"?false:null)})):[]; renderAllSliders(); updateCellsHighlight(); } catch(e){console.error(e);} hideLoad(); }
   async function saveToServer(booking){ if(!booking.id) return; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"update",id:booking.id,date:$("dateInput").value,tableNumber:booking.lane+1,start:booking.start,end:booking.end,name:booking.name,phone:booking.phone,comment:booking.comment})}); }
-  async function updateBookingStatus(booking, newConfirmed) { if(booking.confirmed === newConfirmed) return; showLoad(); await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:booking.id,confirmed:newConfirmed})}); await loadFromServer(); hideLoad(); }
+  async function updateStatusOnServer(bookingId, confirmed){ await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:bookingId,confirmed:confirmed})}); }
+  
+  async function setBookingStatus(booking, newStatusBool){ if(booking.confirmed === newStatusBool) return; showLoad(); await updateStatusOnServer(booking.id, newStatusBool); await loadFromServer(); hideLoad(); }
   
   function renderAllSliders(){ 
     let container=$("slidersLayer"); if(!container) return; container.innerHTML=""; let rows=Array.from($("dtBody")?.querySelectorAll("tr")||[]); if(rows.length===0) return;
@@ -596,29 +539,21 @@
       let slider=document.createElement("div"); slider.className=`slider ${status}`; if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); slider.setAttribute("data-lane-type",laneType);
       slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
       
-      // iPhone style segmented switch 
+      // Вертикальный переключатель (3 позиции)
       if(!item.isTemp && item.id){
-        let segContainer = document.createElement("div"); segContainer.className="iphone-segmented";
-        let track = document.createElement("div"); track.className="segmented-track";
-        let segSlider = document.createElement("div"); segSlider.className="seg-slider";
-        track.appendChild(segSlider);
-        const states = [
-          { value: true,  key: "arrived", label: "", pos: 0 },
-          { value: null,  key: "unknown", label: "", pos: 1 },
-          { value: false, key: "not_arrived", label: "", pos: 2 }
+        let toggleDiv = document.createElement("div"); toggleDiv.className="status-toggle";
+        let states = [
+          {val:"confirmed", title:"Бронь пришла", bool:true},
+          {val:"pending", title:"Не выбрано", bool:null},
+          {val:"rejected", title:"Бронь не пришла", bool:false}
         ];
-        let currentPos = item.confirmed === true ? 0 : (item.confirmed === false ? 2 : 1);
-        segSlider.style.left = `calc(${currentPos * 33}% + 3px)`;
-        states.forEach((st, idx) => {
-          let opt = document.createElement("div"); opt.className="seg-option"; opt.setAttribute("data-val", st.key);
-          if(currentPos === idx) opt.classList.add("active");
-          opt.addEventListener("click", async (e) => { e.stopPropagation(); await updateBookingStatus(item, st.value); });
-          track.appendChild(opt);
+        states.forEach(st=>{
+          let opt=document.createElement("div"); opt.className="toggle-option"; opt.setAttribute("data-val",st.val); opt.title=st.title;
+          if((st.bool===true && item.confirmed===true) || (st.bool===false && item.confirmed===false) || (st.bool===null && item.confirmed===null)) opt.classList.add("active");
+          opt.addEventListener("click", async (e)=>{ e.stopPropagation(); if(item.confirmed === st.bool) return; await setBookingStatus(item, st.bool); });
+          toggleDiv.appendChild(opt);
         });
-        segContainer.appendChild(track);
-        slider.appendChild(segContainer);
-      } else if(item.isTemp){
-        let placeholder = document.createElement("div"); placeholder.style.width="44px"; placeholder.style.height="44px"; placeholder.style.position="absolute"; placeholder.style.left="8px"; placeholder.style.top="50%"; placeholder.style.transform="translateY(-50%)"; placeholder.style.borderRadius="30px"; placeholder.style.background="rgba(0,0,0,0.2)"; placeholder.style.display="flex"; placeholder.style.alignItems="center"; placeholder.style.justifyContent="center"; placeholder.style.fontSize="16px"; placeholder.style.color="white"; placeholder.innerText="⚡"; slider.appendChild(placeholder);
+        slider.appendChild(toggleDiv);
       }
       let nameDiv=document.createElement("div"); nameDiv.className="sl-name"; nameDiv.textContent=item.isTemp?"Ожидает брони":(item.name||"Бронь");
       let timeDiv=document.createElement("div"); timeDiv.className="sl-time"; timeDiv.textContent=`${fmt(item.start)}–${fmt(item.end)}`;
@@ -626,21 +561,21 @@
       let dragHandle=document.createElement("div"); dragHandle.className="drag-handle";
       if(dragModeEnabled && !item.isTemp) dragHandle.addEventListener("mousedown",(e)=>{ e.stopPropagation(); startMoveDrag(item, e, rows, slots); });
       else if(dragModeEnabled && item.isTemp) dragHandle.addEventListener("mousedown",(e)=>{ e.stopPropagation(); startMoveTempDrag(item, e, rows, slots); });
-      else dragHandle.addEventListener("click",(e)=>{ e.stopPropagation(); if(!item.isTemp && item.id) showInfoModal(item); else if(!item.isTemp && !item.id) alert("Загрузка данных..."); else alert("Временная бронь — сохраните."); });
+      else dragHandle.addEventListener("click",(e)=>{ e.stopPropagation(); if(!item.isTemp && item.id) showInfoModal(item); else if(!item.isTemp && !item.id) alert("Загрузка данных..."); else alert("Временная бронь — сохраните для просмотра."); });
       slider.appendChild(dragHandle);
       container.appendChild(slider);
     });
   }
   
-  // drag logic (без изменений)
-  async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===booking.end)-slotsArr.findIndex(s=>s.key===booking.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===booking.start); let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflict(finalLane, newStart, newEnd, booking.id)){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
+  async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===booking.end)-slotsArr.findIndex(s=>s.key===booking.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===booking.start); let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, async (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflict(finalLane, newStart, newEnd, booking.id)){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; await saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
   async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===temp.end)-slotsArr.findIndex(s=>s.key===temp.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===temp.start); let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflict(finalLane, newStart, newEnd)){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
+  
   function createGhost(slider){ let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; ghost.style.opacity='0.5'; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); return ghost; }
   function moveLogic(ghost,slider,rows,slotsArr,durationCells, onDrop, initialLane, initialStartIdx){ let currentLane=initialLane, currentStartIdx=initialStartIdx; function updateGhostPos(lane,startIdx){ let row=rows[lane]; if(!row) return; let sc=row.cells[startIdx+1], ec=row.cells[startIdx+durationCells+1]; if(sc&&ec){ ghost.style.left=(sc.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(ec.offsetLeft+ec.offsetWidth-sc.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function getTargetCoords(e){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane), idx:parseInt(el.dataset.si)}; } function onDragMove(ev){ let tgt=getTargetCoords(ev); if(tgt){ let nl=tgt.lane, nsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); if(nl!==currentLane||nsi!==currentStartIdx){ currentLane=nl; currentStartIdx=nsi; updateGhostPos(currentLane,currentStartIdx); } } } function onDragEnd(ev){ let tgt=getTargetCoords(ev); if(tgt){ let fl=tgt.lane, fsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); onDrop(fl,fsi); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhostPos(currentLane,currentStartIdx); }
   
-  function showInfoModal(b){ currentBooking=b; $("i-table").textContent="№ "+(b.lane+1); $("i-time").textContent=`${fmt(b.start)} – ${fmt(b.end)}`; $("i-name").textContent=b.name; $("i-phone").textContent=b.phone||"—"; $("i-comment").textContent=b.comment||"—"; let statusText=b.confirmed===true?"✅ Пришли":(b.confirmed===false?"❌ Не пришли":"⏳ Ожидание"); $("i-status").textContent=statusText; $("infoModal").classList.add("open"); }
+  function showInfoModal(b){ currentBooking=b; $("i-table").textContent="№ "+(b.lane+1); $("i-time").textContent=`${fmt(b.start)} – ${fmt(b.end)}`; $("i-name").textContent=b.name; $("i-phone").textContent=b.phone||"—"; $("i-comment").textContent=b.comment||"—"; $("infoModal").classList.add("open"); }
   function closeInfoModal(){ $("infoModal").classList.remove("open"); currentBooking=null; }
-  async function confirmBooking(yes){ if(!currentBooking) return; showLoad(); await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:currentBooking.id,confirmed:yes})}); closeInfoModal(); await loadFromServer(); hideLoad(); }
+  async function quickSetStatus(yes){ if(!currentBooking) return; await setBookingStatus(currentBooking, yes); closeInfoModal(); }
   async function deleteBooking(){ if(!currentBooking||!confirm("Удалить?")) return; showLoad(); await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:currentBooking.id})}); closeInfoModal(); await loadFromServer(); hideLoad(); }
   function showLoad(){ $("loader").style.display="flex"; }
   function hideLoad(){ $("loader").style.display="none"; }

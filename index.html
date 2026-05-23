@@ -187,6 +187,7 @@
       border-radius: var(--radius-card);
       overflow: hidden;
       border: 0.5px solid var(--border-subtle);
+      position: relative;
     }
     .grid-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; position: relative; }
     #tableDesktop {
@@ -270,8 +271,6 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       backdrop-filter: blur(8px);
       border: 0.5px solid rgba(255,255,255,0.25);
-      will-change: left, top;
-      transition: all 0.12s ease;
       font-weight: 510;
       font-family: var(--font-system);
       overflow: hidden;
@@ -293,6 +292,15 @@
     .slider.temp[data-lane-type="blue"] { background: rgba(44, 95, 122, 0.75); border: 1px solid #c9b16b; }
     .slider.temp[data-lane-type="green"] { background: rgba(79, 107, 78, 0.75); border: 1px solid #c9b16b; }
     .slider.temp[data-lane-type="red"] { background: rgba(155, 75, 75, 0.75); border: 1px solid #c9b16b; }
+    .slider.dragging { opacity: 0.5; cursor: grabbing !important; }
+    .ghost-slider {
+      position: absolute;
+      border-radius: 6px;
+      background: rgba(100,100,100,0.3);
+      border: 1px dashed #fff;
+      pointer-events: none;
+      z-index: 25;
+    }
     
     .guest-status-dot {
       position: absolute;
@@ -410,13 +418,10 @@
   let currentBooking = null;
   const $ = id => document.getElementById(id);
   
-  // Функция проверки конфликта броней - разрешает стыковку вплотную
   function hasConflict(lane, start, end, excludeId = null) {
     return bookings.some(b => {
       if (excludeId !== null && b.id === excludeId) return false;
       if (b.lane !== lane) return false;
-      // Разрешаем стыковку вплотную: бронь заканчивается ровно когда начинается другая
-      // Конфликт только если интервалы пересекаются (не просто касаются)
       return !(end <= b.start || start >= b.end);
     });
   }
@@ -500,7 +505,7 @@
   
   function updatePreviewTimes() { const span=document.getElementById("previewTimes"); if(span) span.innerText = tempBookings.length ? tempBookings.map(tb=>`Стол ${tb.lane+1} (${fmt(tb.start)}–${fmt(tb.end)})`).join("; ") : "—"; }
   
-  // Drag to select (обычное выделение) - БЕЗ ОГРАНИЧЕНИЙ ПО ВРЕМЕНИ
+  // Выделение интервала мышью
   let isDragging=false, dragStartCell=null, dragInterval=null;
   function onMouseDown(e){ if(dragModeEnabled) return; let t=e.target; if(t.classList?.contains("slot")){ e.preventDefault(); let lane=parseInt(t.dataset.lane), si=parseInt(t.dataset.si); isDragging=true; dragStartCell={lane,si}; dragInterval={lane,startIdx:si,endIdx:si}; highlightDragInterval(lane,si,si); } }
   function onMouseMove(e){ if(!dragModeEnabled && isDragging && dragStartCell){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); if(el){ let lane=parseInt(el.dataset.lane), idx=parseInt(el.dataset.si); if(lane===dragStartCell.lane){ let ns=Math.min(dragStartCell.si,idx), ne=Math.max(dragStartCell.si,idx); dragInterval={lane,startIdx:ns,endIdx:ne}; highlightDragInterval(lane,ns,ne); } } } }
@@ -509,7 +514,6 @@
     if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){ 
       let {lane,startIdx,endIdx}=dragInterval; 
       let start=slots[startIdx].key, end=slots[endIdx+1]?.key || slots[endIdx].key + 0.5;
-      // Проверка конфликта с существующими бронями
       if(hasConflict(lane, start, end)){ 
         alert("Это время уже занято другой броней. Обратите внимание: брони могут стоять вплотную друг к другу (без промежутка), но не пересекаться."); 
       } else { 
@@ -531,39 +535,253 @@
   async function loadFromServer(){ showLoad(); try{ let res=await fetch(GAS_URL+"?action=get&date="+$("dateInput").value); let data=await res.json(); bookings=data.bookings?data.bookings.map(b=>({id:b.id,lane:b.table-1,start:parseFloat(b.start),end:parseFloat(b.end),name:b.name,phone:b.phone,comment:b.comment,confirmed:b.confirmed==="Да"?true:(b.confirmed==="Нет"?false:null)})):[]; renderAllSliders(); updateCellsHighlight(); } catch(e){console.error(e);} hideLoad(); }
   async function saveToServer(booking){ if(!booking.id) return; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"update",id:booking.id,date:$("dateInput").value,tableNumber:booking.lane+1,start:booking.start,end:booking.end,name:booking.name,phone:booking.phone,comment:booking.comment})}); }
   
+  // ИСПРАВЛЕНА ФУНКЦИЯ ПЕРЕМЕЩЕНИЯ - теперь ползунок не съезжает на 30 минут
   function renderAllSliders(){ 
-    let container=$("slidersLayer"); if(!container) return; container.innerHTML=""; let rows=Array.from($("dtBody")?.querySelectorAll("tr")||[]); if(rows.length===0) return;
+    let container=$("slidersLayer"); if(!container) return; container.innerHTML=""; 
+    let rows=Array.from($("dtBody")?.querySelectorAll("tr")||[]); 
+    if(rows.length===0) return;
+    
     [...bookings, ...tempBookings.map(t=>({...t,isTemp:true}))].forEach(item=>{
-      let startIdx=slots.findIndex(s=>s.key===item.start), endIdx=slots.findIndex(s=>s.key===item.end); if(startIdx===-1||endIdx===-1) return;
-      let row=rows[item.lane]; if(!row) return;
-      let sc=row.cells[startIdx+1], ec=row.cells[endIdx+1]; if(!sc||!ec) return;
-      let left=sc.offsetLeft+1, top=row.offsetTop+1, width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2, height=row.offsetHeight-2;
+      let startIdx=slots.findIndex(s=>s.key===item.start);
+      let endIdx=slots.findIndex(s=>s.key===item.end);
+      if(startIdx===-1||endIdx===-1) return;
+      
+      let row=rows[item.lane];
+      if(!row) return;
+      
+      let sc=row.cells[startIdx+1];
+      let ec=row.cells[endIdx+1];
+      if(!sc||!ec) return;
+      
+      let left=sc.offsetLeft+1;
+      let top=row.offsetTop+1;
+      let width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2;
+      let height=row.offsetHeight-2;
       let status=item.isTemp?"temp":(item.confirmed===true?"confirmed":(item.confirmed===false?"rejected":"pending"));
       let laneType=LANE_TYPE_MAP[getGroupIndex(item.lane)];
-      let slider=document.createElement("div"); slider.className=`slider ${status}`; if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); slider.setAttribute("data-lane-type",laneType);
+      
+      let slider=document.createElement("div"); 
+      slider.className=`slider ${status}`; 
+      if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); 
+      slider.setAttribute("data-lane-type",laneType);
       slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+      slider.dataset.lane=item.lane;
+      slider.dataset.startIdx=startIdx;
+      slider.dataset.endIdx=endIdx;
+      slider.dataset.durationCells=endIdx-startIdx;
+      
       let dot=document.createElement("div"); dot.className="guest-status-dot";
       slider.appendChild(dot);
       let nameDiv=document.createElement("div"); nameDiv.className="sl-name"; nameDiv.textContent=item.isTemp?"Ожидает брони":(item.name||"Бронь");
       let timeDiv=document.createElement("div"); timeDiv.className="sl-time"; timeDiv.textContent=`${fmt(item.start)}–${fmt(item.end)}`;
       slider.append(nameDiv,timeDiv);
+      
       let dragHandle=document.createElement("div"); dragHandle.className="drag-handle";
-      if(dragModeEnabled && !item.isTemp) dragHandle.addEventListener("mousedown",(e)=>{ e.stopPropagation(); startMoveDrag(item, e, rows, slots); });
-      else if(dragModeEnabled && item.isTemp) dragHandle.addEventListener("mousedown",(e)=>{ e.stopPropagation(); startMoveTempDrag(item, e, rows, slots); });
-      else dragHandle.addEventListener("click",(e)=>{ e.stopPropagation(); if(!item.isTemp && item.id) showInfoModal(item); else if(!item.isTemp && !item.id) alert("Загрузка данных..."); else alert("Временная бронь — сохраните для просмотра."); });
+      if(dragModeEnabled && !item.isTemp) {
+        dragHandle.addEventListener("mousedown",(e)=>{ 
+          e.stopPropagation(); 
+          startMoveDrag(item, e, rows); 
+        });
+      } else if(dragModeEnabled && item.isTemp) {
+        dragHandle.addEventListener("mousedown",(e)=>{ 
+          e.stopPropagation(); 
+          startMoveTempDrag(item, e, rows); 
+        });
+      } else {
+        dragHandle.addEventListener("click",(e)=>{ 
+          e.stopPropagation(); 
+          if(!item.isTemp && item.id) showInfoModal(item); 
+          else if(!item.isTemp && !item.id) alert("Загрузка данных..."); 
+          else alert("Временная бронь — сохраните для просмотра."); 
+        });
+      }
       slider.appendChild(dragHandle);
       container.appendChild(slider);
     });
   }
   
-  // drag перемещение постоянной брони с проверкой конфликта
-  async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===booking.end)-slotsArr.findIndex(s=>s.key===booking.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===booking.start); let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflict(finalLane, newStart, newEnd, booking.id)){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
+  // ИСПРАВЛЕНА ЛОГИКА ПЕРЕМЕЩЕНИЯ - точное позиционирование
+  async function startMoveDrag(booking, e, rows) { 
+    e.stopPropagation(); 
+    const slider=e.currentTarget.closest('.slider'); 
+    if(!slider) return; 
+    
+    let durationCells = parseInt(slider.dataset.durationCells);
+    let startIdxOrig = slots.findIndex(s=>s.key===booking.start);
+    let currentLane=booking.lane;
+    let currentStartIdx=startIdxOrig;
+    
+    let ghost=createGhost(slider);
+    
+    function updateGhostPos(lane,startIdx){
+      let row=rows[lane];
+      if(!row) return;
+      let sc=row.cells[startIdx+1];
+      let ec=row.cells[startIdx+durationCells+1];
+      if(sc && ec){
+        ghost.style.left=sc.offsetLeft+1+'px';
+        ghost.style.top=row.offsetTop+1+'px';
+        ghost.style.width=(ec.offsetLeft+ec.offsetWidth-sc.offsetLeft-2)+'px';
+        ghost.style.height=row.offsetHeight-2+'px';
+      }
+    }
+    
+    function getTargetCoords(e){
+      let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains('slot'));
+      if(!el) return null;
+      return {lane:parseInt(el.dataset.lane), idx:parseInt(el.dataset.si)};
+    }
+    
+    let rafId = null;
+    function onDragMove(ev){
+      if(rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        let tgt=getTargetCoords(ev);
+        if(tgt){
+          let maxStart = slots.length - durationCells - 1;
+          let nl = tgt.lane;
+          let nsi = Math.min(Math.max(0, tgt.idx), maxStart);
+          if(nl !== currentLane || nsi !== currentStartIdx){
+            currentLane = nl;
+            currentStartIdx = nsi;
+            updateGhostPos(currentLane, currentStartIdx);
+          }
+        }
+        rafId = null;
+      });
+    }
+    
+    function onDragEnd(ev){
+      if(rafId) cancelAnimationFrame(rafId);
+      let tgt=getTargetCoords(ev);
+      if(tgt){
+        let maxStart = slots.length - durationCells - 1;
+        let fl = tgt.lane;
+        let fsi = Math.min(Math.max(0, tgt.idx), maxStart);
+        let newStart = slots[fsi].key;
+        let newEnd = slots[fsi + durationCells].key;
+        if(!hasConflict(fl, newStart, newEnd, booking.id)){
+          booking.lane = fl;
+          booking.start = newStart;
+          booking.end = newEnd;
+          saveToServer(booking);
+          renderAllSliders();
+          updateCellsHighlight();
+        } else {
+          alert("Конфликт с другой броней");
+          renderAllSliders();
+        }
+      } else {
+        renderAllSliders();
+      }
+      ghost.remove();
+      slider.classList.remove('dragging');
+      document.body.style.cursor='';
+      document.removeEventListener('mousemove', onDragMove);
+      document.removeEventListener('mouseup', onDragEnd);
+    }
+    
+    document.body.style.cursor='grabbing';
+    document.addEventListener('mousemove', onDragMove);
+    document.addEventListener('mouseup', onDragEnd);
+    updateGhostPos(currentLane, currentStartIdx);
+  }
   
-  async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===temp.end)-slotsArr.findIndex(s=>s.key===temp.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===temp.start); let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflict(finalLane, newStart, newEnd)){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
+  async function startMoveTempDrag(temp, e, rows) { 
+    e.stopPropagation(); 
+    const slider=e.currentTarget.closest('.slider'); 
+    if(!slider) return; 
+    
+    let durationCells = parseInt(slider.dataset.durationCells);
+    let startIdxOrig = slots.findIndex(s=>s.key===temp.start);
+    let currentLane=temp.lane;
+    let currentStartIdx=startIdxOrig;
+    
+    let ghost=createGhost(slider);
+    
+    function updateGhostPos(lane,startIdx){
+      let row=rows[lane];
+      if(!row) return;
+      let sc=row.cells[startIdx+1];
+      let ec=row.cells[startIdx+durationCells+1];
+      if(sc && ec){
+        ghost.style.left=sc.offsetLeft+1+'px';
+        ghost.style.top=row.offsetTop+1+'px';
+        ghost.style.width=(ec.offsetLeft+ec.offsetWidth-sc.offsetLeft-2)+'px';
+        ghost.style.height=row.offsetHeight-2+'px';
+      }
+    }
+    
+    function getTargetCoords(e){
+      let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains('slot'));
+      if(!el) return null;
+      return {lane:parseInt(el.dataset.lane), idx:parseInt(el.dataset.si)};
+    }
+    
+    let rafId = null;
+    function onDragMove(ev){
+      if(rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        let tgt=getTargetCoords(ev);
+        if(tgt){
+          let maxStart = slots.length - durationCells - 1;
+          let nl = tgt.lane;
+          let nsi = Math.min(Math.max(0, tgt.idx), maxStart);
+          if(nl !== currentLane || nsi !== currentStartIdx){
+            currentLane = nl;
+            currentStartIdx = nsi;
+            updateGhostPos(currentLane, currentStartIdx);
+          }
+        }
+        rafId = null;
+      });
+    }
+    
+    function onDragEnd(ev){
+      if(rafId) cancelAnimationFrame(rafId);
+      let tgt=getTargetCoords(ev);
+      if(tgt){
+        let maxStart = slots.length - durationCells - 1;
+        let fl = tgt.lane;
+        let fsi = Math.min(Math.max(0, tgt.idx), maxStart);
+        let newStart = slots[fsi].key;
+        let newEnd = slots[fsi + durationCells].key;
+        if(!hasConflict(fl, newStart, newEnd)){
+          temp.lane = fl;
+          temp.start = newStart;
+          temp.end = newEnd;
+          renderInlineTempCards();
+          renderAllSliders();
+          updateCellsHighlight();
+        } else {
+          alert("Конфликт с другой броней");
+          renderAllSliders();
+        }
+      } else {
+        renderAllSliders();
+      }
+      ghost.remove();
+      slider.classList.remove('dragging');
+      document.body.style.cursor='';
+      document.removeEventListener('mousemove', onDragMove);
+      document.removeEventListener('mouseup', onDragEnd);
+    }
+    
+    document.body.style.cursor='grabbing';
+    document.addEventListener('mousemove', onDragMove);
+    document.addEventListener('mouseup', onDragEnd);
+    updateGhostPos(currentLane, currentStartIdx);
+  }
   
-  function createGhost(slider){ let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; ghost.style.opacity='0.5'; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); return ghost; }
-  
-  function moveLogic(ghost,slider,rows,slotsArr,durationCells, onDrop, initialLane, initialStartIdx){ let currentLane=initialLane, currentStartIdx=initialStartIdx; function updateGhostPos(lane,startIdx){ let row=rows[lane]; if(!row) return; let sc=row.cells[startIdx+1], ec=row.cells[startIdx+durationCells+1]; if(sc&&ec){ ghost.style.left=(sc.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(ec.offsetLeft+ec.offsetWidth-sc.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function getTargetCoords(e){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane), idx:parseInt(el.dataset.si)}; } function onDragMove(ev){ let tgt=getTargetCoords(ev); if(tgt){ let nl=tgt.lane, nsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); if(nl!==currentLane||nsi!==currentStartIdx){ currentLane=nl; currentStartIdx=nsi; updateGhostPos(currentLane,currentStartIdx); } } } function onDragEnd(ev){ let tgt=getTargetCoords(ev); if(tgt){ let fl=tgt.lane, fsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); onDrop(fl,fsi); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhostPos(currentLane,currentStartIdx); }
+  function createGhost(slider){ 
+    let ghost=document.createElement('div'); 
+    ghost.className='ghost-slider'; 
+    ghost.style.cssText=slider.style.cssText; 
+    ghost.style.opacity='0.5'; 
+    $('slidersLayer').appendChild(ghost); 
+    slider.classList.add('dragging'); 
+    return ghost; 
+  }
   
   function showInfoModal(b){ currentBooking=b; $("i-table").textContent="№ "+(b.lane+1); $("i-time").textContent=`${fmt(b.start)} – ${fmt(b.end)}`; $("i-name").textContent=b.name; $("i-phone").textContent=b.phone||"—"; $("i-comment").textContent=b.comment||"—"; let statusText=b.confirmed===true?"✅ Пришли":(b.confirmed===false?"❌ Не пришли":"⏳ Ожидание"); $("i-status").textContent=statusText; $("infoModal").classList.add("open"); }
   function closeInfoModal(){ $("infoModal").classList.remove("open"); currentBooking=null; }

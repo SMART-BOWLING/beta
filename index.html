@@ -384,7 +384,7 @@
       <button id="dragToggleBtn" class="btn-drag-toggle">Режим перетяжки: ВЫКЛ</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
-    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
+    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"></tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
   </div>
 </div>
 <div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">Режим перетяжки АКТИВЕН</div>
@@ -410,14 +410,23 @@
   let currentBooking = null;
   const $ = id => document.getElementById(id);
   
-  // Функция проверки конфликта броней (разрешает стыковку вплотную)
+  // ГЛАВНОЕ ИСПРАВЛЕНИЕ: проверка конфликта разрешает стыковку вплотную (end === start)
   function hasConflict(lane, start, end, excludeId = null) {
+    // Нормализуем входные значения (на случай погрешностей)
+    const normStart = Math.round(start * 2) / 2;
+    const normEnd = Math.round(end * 2) / 2;
+    
     return bookings.some(b => {
       if (excludeId !== null && b.id === excludeId) return false;
       if (b.lane !== lane) return false;
-      // Разрешаем стыковку вплотную: бронь заканчивается ровно когда начинается другая
-      // Конфликт только если интервалы пересекаются (не просто касаются)
-      return !(end <= b.start || start >= b.end);
+      
+      const bStart = Math.round(b.start * 2) / 2;
+      const bEnd = Math.round(b.end * 2) / 2;
+      
+      // Разрешаем стыковку вплотную (end === bStart ИЛИ start === bEnd)
+      // Конфликт только если интервалы реально пересекаются
+      const hasRealOverlap = !(normEnd <= bStart || normStart >= bEnd);
+      return hasRealOverlap;
     });
   }
   
@@ -463,7 +472,11 @@
   }
   
   function getSlotCell(lane, slotIdx){ return $("dtBody")?.rows[lane]?.cells[slotIdx+1]; }
-  function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
+  function fmt(v){ 
+    const hours = Math.floor(v);
+    const minutes = (v % 1 === 0.5) ? 30 : 0;
+    return `${hours}:${minutes === 0 ? '00' : '30'}`;
+  }
   
   function updateCellsHighlight(){
     for(let row of $("dtBody").rows) for(let i=1;i<row.cells.length;i++) row.cells[i].classList.remove("booking-pending","booking-confirmed","booking-rejected","temp-highlight");
@@ -509,9 +522,9 @@
     if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){ 
       let {lane,startIdx,endIdx}=dragInterval; 
       let start=slots[startIdx].key, end=slots[endIdx+1]?.key || slots[endIdx].key + 0.5;
-      // Проверка конфликта с существующими бронями
+      // Проверка конфликта с существующими бронями (разрешены стыковки)
       if(hasConflict(lane, start, end)){ 
-        alert("Это время уже занято другой броней"); 
+        alert("Это время уже занято другой броней (стыковка вплотную разрешена, но здесь реальное пересечение)"); 
       } else { 
         tempBookings.push({id:nextTempId++,lane,start:start,end:end}); 
       }

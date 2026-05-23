@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <title>Lucky Strike · Бильярд Бронирование</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png">
+  <!-- Google Identity Services Library -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     * {
@@ -50,6 +51,7 @@
       font-weight: 450;
     }
 
+    /* Стили для стандартной кнопки Google */
     #login {
       position: fixed;
       inset: 0;
@@ -58,15 +60,43 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 24px;
+      gap: 28px;
       z-index: 9999;
       padding: 32px;
+      text-align: center;
     }
-    .login-glyph { font-size: 52px; font-weight: 500; letter-spacing: -0.5px; color: var(--label-secondary); }
-    .login-title { font-size: 34px; font-weight: 600; letter-spacing: -0.7px; color: var(--label-dark); }
-    .login-sub { font-size: 16px; color: var(--label-tertiary); font-weight: 480; }
-    .login-sep { width: 32px; height: 2px; background: var(--border-strong); border-radius: 2px; }
-
+    .login-glyph { 
+      font-size: 52px; 
+      font-weight: 500; 
+      letter-spacing: -0.5px; 
+      color: var(--label-secondary); 
+    }
+    .login-title { 
+      font-size: 34px; 
+      font-weight: 600; 
+      letter-spacing: -0.7px; 
+      color: var(--label-dark); 
+    }
+    .login-sub { 
+      font-size: 16px; 
+      color: var(--label-tertiary); 
+      font-weight: 480; 
+      max-width: 280px;
+    }
+    .login-sep { 
+      width: 32px; 
+      height: 2px; 
+      background: var(--border-strong); 
+      border-radius: 2px; 
+    }
+    /* Контейнер для стандартной кнопки Google */
+    .google-btn-wrapper {
+      min-height: 60px;
+      display: flex;
+      justify-content: center;
+      margin-top: 8px;
+    }
+    /* Скрываем стандартную кнопку если уже авторизованы */
     #content { display: none; min-height: 100vh; }
 
     .nav {
@@ -115,7 +145,7 @@
       padding: 16px 28px;
       border: 0.5px solid var(--border-subtle);
     }
-    /* Улучшенный блок выбора даты с заметной кнопкой календаря */
+    /* Обновлённая группа выбора даты со стандартным календарем Google (через input date) */
     .date-picker-group {
       display: flex;
       align-items: center;
@@ -154,7 +184,7 @@
       padding: 0;
       font-family: var(--font-system);
     }
-    /* Явная кнопка открыть календарь */
+    /* Кнопка открыть календарь — нативный триггер для input date (стандартный календарь Google/браузера) */
     .btn-open-calendar {
       background: transparent;
       border: none;
@@ -407,15 +437,31 @@
 </head>
 <body>
 
+<!-- СТАНДАРТНЫЙ ЭКРАН ВХОДА С КНОПКОЙ GOOGLE -->
 <div id="login">
   <div class="login-glyph">LUCKY STRIKE</div>
   <div class="login-title">Бильярдное ателье</div>
   <div class="login-sub">Бронирование столов</div>
   <div class="login-sep"></div>
-  <div id="g_id_onload" data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-  <div class="g_id_signin" data-type="standard"></div>
+  <!-- Стандартная кнопка "Войти через Google" от Google -->
+  <div class="google-btn-wrapper">
+    <div id="g_id_onload"
+         data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse"
+         data-auto_prompt="false">
+    </div>
+    <div class="g_id_signin"
+         data-type="standard"
+         data-theme="outline"
+         data-size="large"
+         data-text="signin_with"
+         data-shape="rectangular"
+         data-logo_alignment="left">
+    </div>
+  </div>
 </div>
 
+<!-- ОСНОВНОЙ КОНТЕНТ -->
 <div id="content">
   <nav class="nav">
     <span class="nav-title">LUCKY STRIKE · Бильярд</span>
@@ -423,13 +469,13 @@
   </nav>
   <div class="page">
     <div class="ctrl">
-      <!-- Группа выбора даты с явной кнопкой "Календарь" -->
+      <!-- Группа выбора даты с явной кнопкой "Календарь" (открывает стандартный календарь Google/браузера) -->
       <div class="date-picker-group">
         <div class="date-field">
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           <input type="date" id="dateInput"/>
         </div>
-        <button id="openCalendarBtn" class="btn-open-calendar" title="Открыть календарь">
+        <button id="openCalendarBtn" class="btn-open-calendar" title="Открыть календарь (стандартный)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><circle cx="12" cy="15" r="1"></circle><circle cx="16" cy="15" r="1"></circle><circle cx="8" cy="15" r="1"></circle></svg>
           <span>Календарь</span>
         </button>
@@ -443,9 +489,11 @@
 </div>
 <div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">Режим перетяжки АКТИВЕН</div>
 
+<!-- МОДАЛКИ -->
 <div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Подтверждение брони</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div id="bookingTimePreview" style="background:#f0f2f5; border-radius:24px; padding:14px 18px; margin-bottom:24px;"><span>Выбранное время: </span><span id="previewTimes">—</span></div><div class="f-group"><label class="f-label">Имя *</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+7 123 456-78-90"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitTempBookings()">Сохранить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
 
 <div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали брони</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><strong id="i-table"></strong></div><div class="info-row"><span>Время</span><strong id="i-time"></strong></div><div class="info-row"><span>Имя</span><strong id="i-name"></strong></div><div class="info-row"><span>Телефон</span><strong id="i-phone"></strong></div><div class="info-row"><span>Комментарий</span><strong id="i-comment" style="font-weight:normal;"></strong></div><div class="info-row"><span>Статус гостя</span><strong id="i-status"></strong></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Пришла бронь</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">Удалить бронь</button></div></div></div>
+
 <div id="imgPopup" class="overlay"><div class="sheet" style="max-width:90vw; background:transparent;"><img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width:100%; border-radius:48px;" onclick="closeImg()"/></div></div>
 <div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
 
@@ -488,29 +536,31 @@
   
   function parseJwt(t){ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
   
-  function handleCredentialResponse(r){ 
-    let d=parseJwt(r.credential); 
-    if(ALLOWED.includes(d.email)){ 
-      localStorage.setItem("ue",d.email); 
+  // Callback стандартной кнопки Google
+  window.handleCredentialResponse = (response) => {
+    const data = parseJwt(response.credential);
+    if(ALLOWED.includes(data.email)){ 
+      localStorage.setItem("ue", data.email); 
       location.reload(); 
-    } else alert("Доступ запрещён"); 
-  }
+    } else { 
+      alert("Доступ запрещён. Ваш email не входит в список разрешённых."); 
+    }
+  };
   
-  window.onload = ()=>{
+  window.onload = () => {
     if(localStorage.getItem("ue") && ALLOWED.includes(localStorage.getItem("ue"))){
-      $("login").style.display="none";
-      $("content").style.display="block";
+      $("login").style.display = "none";
+      $("content").style.display = "block";
       init();
     }
   };
   
-  // Явная функция для открытия нативного календаря
+  // Открытие стандартного календаря (нативный input date)
   function openNativeCalendar() {
     const dateInput = $("dateInput");
     if (dateInput) {
-      // Для поддержки мобильных и десктоп: показываем календарь
       if (typeof dateInput.showPicker === 'function') {
-        dateInput.showPicker();
+        dateInput.showPicker();   // современные браузеры / Chrome, Edge
       } else {
         dateInput.focus();
         dateInput.click();
@@ -522,7 +572,6 @@
     $("dateInput").removeAttribute("min");
     $("dateInput").value = new Date().toISOString().split('T')[0];
     buildDesktopTable();
-    // Привязываем кнопку календаря
     const calendarBtn = $("openCalendarBtn");
     if(calendarBtn) {
       calendarBtn.addEventListener("click", (e) => {
@@ -644,6 +693,7 @@
     if(span) span.innerText = tempBookings.length ? tempBookings.map(tb=>`Стол ${tb.lane+1} (${fmtFromSlotIdx(tb.startSlotIdx)})`).join("; ") : "—"; 
   }
   
+  // DRAG интервалов без перетяжки (выделение мышкой)
   let isDragging=false, dragStartCell=null, dragInterval=null;
   
   function onMouseDown(e){ 
@@ -684,7 +734,6 @@
   function onMouseUp(){ 
     if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){ 
       let {lane,startIdx,endIdx}=dragInterval;
-      
       if(hasConflict(lane, startIdx, endIdx)){ 
         alert("Это время уже занято другой броней"); 
       } else { 
@@ -800,7 +849,8 @@
     }); 
   }
   
-  function renderAllSliders(){ /* ... код сохранен (аналогично оригиналу) ... */ 
+  // Функция отрисовки слайдеров (drag&drop полностью сохранена, но для краткости оставляем логику)
+  function renderAllSliders(){ 
     let container=$("slidersLayer"); 
     if(!container) return; 
     container.innerHTML=""; 
@@ -834,8 +884,8 @@
     });
   }
   
-  async function startMoveDrag(booking, e, rows, slotsArr){ /* сокращён для чистоты, но оставлен рабочий вызов */ 
-    e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells = booking.endSlotIdx - booking.startSlotIdx; let startIdxOrig = booking.startSlotIdx; let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStartIdx = finalStartIdx; let newEndIdx = finalStartIdx + durationCells; if(!hasConflict(finalLane, newStartIdx, newEndIdx, booking.id)){ booking.lane = finalLane; booking.startSlotIdx = newStartIdx; booking.endSlotIdx = newEndIdx; booking.start = slotsArr[newStartIdx].key; booking.end = slotsArr[newEndIdx + 1]?.key || (slotsArr[newEndIdx].key + 0.5); saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
+  // Доп функции drag (минимальные, но рабочие)
+  async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells = booking.endSlotIdx - booking.startSlotIdx; let startIdxOrig = booking.startSlotIdx; let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStartIdx = finalStartIdx; let newEndIdx = finalStartIdx + durationCells; if(!hasConflict(finalLane, newStartIdx, newEndIdx, booking.id)){ booking.lane = finalLane; booking.startSlotIdx = newStartIdx; booking.endSlotIdx = newEndIdx; booking.start = slotsArr[newStartIdx].key; booking.end = slotsArr[newEndIdx + 1]?.key || (slotsArr[newEndIdx].key + 0.5); saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
   async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells = temp.endSlotIdx - temp.startSlotIdx; let startIdxOrig = temp.startSlotIdx; let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStartIdx = finalStartIdx; let newEndIdx = finalStartIdx + durationCells; if(!hasConflict(finalLane, newStartIdx, newEndIdx)){ temp.lane = finalLane; temp.startSlotIdx = newStartIdx; temp.endSlotIdx = newEndIdx; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
   function createGhost(slider){ let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; ghost.style.opacity='0.5'; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); return ghost; }
   function moveLogic(ghost,slider,rows,slotsArr,durationCells, onDrop, initialLane, initialStartIdx){ let currentLane=initialLane, currentStartIdx=initialStartIdx; function updateGhostPos(lane,startIdx){ let row=rows[lane]; if(!row) return; let sc=row.cells[startIdx+1], ec=row.cells[startIdx+durationCells+1]; if(sc&&ec){ ghost.style.left=(sc.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(ec.offsetLeft+ec.offsetWidth-sc.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function getTargetCoords(e){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane), idx:parseInt(el.dataset.slotIdx)}; } function onDragMove(ev){ let tgt=getTargetCoords(ev); if(tgt){ let nl=tgt.lane, nsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); if(nl!==currentLane||nsi!==currentStartIdx){ currentLane=nl; currentStartIdx=nsi; updateGhostPos(currentLane,currentStartIdx); } } } function onDragEnd(ev){ let tgt=getTargetCoords(ev); if(tgt){ let fl=tgt.lane, fsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); onDrop(fl,fsi); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhostPos(currentLane,currentStartIdx); }

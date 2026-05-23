@@ -384,7 +384,7 @@
       <button id="dragToggleBtn" class="btn-drag-toggle">Режим перетяжки: ВЫКЛ</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
-    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody>}</table><div id="slidersLayer"></div></div></div>
+    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
   </div>
 </div>
 <div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">Режим перетяжки АКТИВЕН</div>
@@ -410,7 +410,7 @@
   let currentBooking = null;
   const $ = id => document.getElementById(id);
   
-  // Функция проверки конфликта броней (разрешает стыковку вплотную)
+  // Функция проверки конфликта броней - разрешает стыковку вплотную
   function hasConflict(lane, start, end, excludeId = null) {
     return bookings.some(b => {
       if (excludeId !== null && b.id === excludeId) return false;
@@ -500,7 +500,7 @@
   
   function updatePreviewTimes() { const span=document.getElementById("previewTimes"); if(span) span.innerText = tempBookings.length ? tempBookings.map(tb=>`Стол ${tb.lane+1} (${fmt(tb.start)}–${fmt(tb.end)})`).join("; ") : "—"; }
   
-  // Drag to select (обычный выделение)
+  // Drag to select (обычное выделение) - БЕЗ ОГРАНИЧЕНИЙ ПО ВРЕМЕНИ
   let isDragging=false, dragStartCell=null, dragInterval=null;
   function onMouseDown(e){ if(dragModeEnabled) return; let t=e.target; if(t.classList?.contains("slot")){ e.preventDefault(); let lane=parseInt(t.dataset.lane), si=parseInt(t.dataset.si); isDragging=true; dragStartCell={lane,si}; dragInterval={lane,startIdx:si,endIdx:si}; highlightDragInterval(lane,si,si); } }
   function onMouseMove(e){ if(!dragModeEnabled && isDragging && dragStartCell){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); if(el){ let lane=parseInt(el.dataset.lane), idx=parseInt(el.dataset.si); if(lane===dragStartCell.lane){ let ns=Math.min(dragStartCell.si,idx), ne=Math.max(dragStartCell.si,idx); dragInterval={lane,startIdx:ns,endIdx:ne}; highlightDragInterval(lane,ns,ne); } } } }
@@ -511,7 +511,7 @@
       let start=slots[startIdx].key, end=slots[endIdx+1]?.key || slots[endIdx].key + 0.5;
       // Проверка конфликта с существующими бронями
       if(hasConflict(lane, start, end)){ 
-        alert("Это время уже занято другой броней"); 
+        alert("Это время уже занято другой броней. Обратите внимание: брони могут стоять вплотную друг к другу (без промежутка), но не пересекаться."); 
       } else { 
         tempBookings.push({id:nextTempId++,lane,start:start,end:end}); 
       }
@@ -524,7 +524,7 @@
   document.body.addEventListener("mousemove", onMouseMove);
   document.body.addEventListener("mouseup", onMouseUp);
   
-  function openBookModal(){ if(tempBookings.length===0){ alert("Сначала выделите интервал на столе"); return; } $("nameInput").value="";$("phoneInput").value="";$("commentInput").value=""; updatePreviewTimes(); $("bookModal").classList.add("open"); }
+  function openBookModal(){ if(tempBookings.length===0){ alert("Сначала выделите интервал на столе (зажмите левую кнопку мыши и протяните). Можно выделить любой интервал — хоть 15 минут, хоть 3 часа."); return; } $("nameInput").value="";$("phoneInput").value="";$("commentInput").value=""; updatePreviewTimes(); $("bookModal").classList.add("open"); }
   function closeBookModal(){ $("bookModal").classList.remove("open"); }
   async function submitTempBookings(){ let name=$("nameInput").value.trim(); if(!name) return alert("Введите имя"); if(tempBookings.length===0) return; showLoad(); try{ await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({bookings:tempBookings.map(tb=>({date:$("dateInput").value,tableNumber:tb.lane+1,start:tb.start,end:tb.end,name,phone:$("phoneInput").value.trim(),comment:$("commentInput").value.trim()}))})}); clearTempSelections(); await loadFromServer(); closeBookModal(); } catch(e){alert("Ошибка");} hideLoad(); }
   

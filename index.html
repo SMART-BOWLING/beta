@@ -13,6 +13,31 @@
       padding: 0;
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
+      /* Отключаем выделение текста для всех элементов интерфейса, где оно может мешать drag&drop */
+      user-select: none; 
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+    
+    /* Но для полей ввода и текстовых областей выделение должно работать нормально */
+    input, textarea, .f-input, .sheet-body .f-input, .info-list strong, .info-list span, .temp-card-inline .temp-time {
+      user-select: text;
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+    }
+    
+    /* Для улучшения читаемости деталей брони */
+    .info-row strong, .info-row span {
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    
+    /* Заголовки и статические тексты можно копировать (но они не мешают drag) */
+    .nav-title, .login-title, .login-sub, .sheet-title, .f-label, .ctrl button span, .calendar-date-text {
+      user-select: text;
+      -webkit-user-select: text;
     }
 
     :root {
@@ -403,30 +428,18 @@
   </nav>
   <div class="page">
     <div class="ctrl">
-      <!-- КНОПКА КАЛЕНДАРЯ С ОТОБРАЖЕНИЕМ ДАТЫ, ПРИ КЛИКЕ ОТКРЫВАЕТСЯ NATIVE DATE PICKER (СТАНДАРТНЫЙ КАЛЕНДАРЬ) -->
       <button id="calendarButton" class="google-calendar-btn" type="button">
-        <span class="calendar-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-            <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"></path>
-          </svg>
-        </span>
+        <span class="calendar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"></path></svg></span>
         <span id="displayDateText" class="calendar-date-text">Сегодня</span>
-        <span class="chevron-icon">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </span>
+        <span class="chevron-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
       </button>
-      <!-- Скрытый нативный input[type=date] который будет вызываться при клике на кнопку -->
       <input type="date" id="hiddenDatePicker" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;" />
       
       <button class="btn-book" onclick="openBookModal()">Новая бронь</button>
       <button id="dragToggleBtn" class="btn-drag-toggle">Режим перетяжки: ВЫКЛ</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
-    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
+    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th><tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
   </div>
 </div>
 <div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">Режим перетяжки АКТИВЕН</div>
@@ -438,7 +451,15 @@
 <div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
 
 <script>
-  // ---- ОСНОВНАЯ ЛОГИКА БРОНИРОВАНИЯ (без изменений, только добавлена интеграция кнопки календаря)
+  // Отключаем системное перетаскивание изображений и текста для зон перетяжки
+  document.addEventListener('dragstart', (e) => {
+    if (e.target.closest('.drag-handle') || e.target.closest('.slider')) {
+      e.preventDefault();
+      return false;
+    }
+  });
+  
+  // Глобальные переменные и логика бронирования (большая часть без изменений)
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLxSrpcGOIm34gLlFZS-EYZmG8liMLcUST3MRMoAp56y6XDC2ClapCDB18yiYmdrHZ/exec";
   const ALLOWED = ["vadiksss900@gmail.com","sergey99belov@gmail.com","popadinecvasil3@gmail.com","veronicadiakova04@gmail.com","info.luckystrike.kh@gmail.com","sashavolobuev123890@gmail.com","egorgorbushko@gmail.com","shatrava.o@gmail.com","Craftmax30@gmail.com","bowlingblock.b@gmail.com","lana.arnaut@gmail.com","polosinnikita1224@gmail.com","sofialat1506@gmail.com","ll3991940@gmail.com","ken040888@gmail.com"];
   const LANES = 12, SH = 11, EH = 22;
@@ -490,7 +511,6 @@
     }
   };
   
-  // Функция форматирования даты для красивого отображения (день недели, число месяц)
   function formatDateForDisplay(dateStr) {
     if (!dateStr) return "Выбрать дату";
     const date = new Date(dateStr);
@@ -506,43 +526,28 @@
   }
   
   function init(){
-    // Инициализация календарной кнопки
     const calendarBtn = document.getElementById("calendarButton");
     const hiddenPicker = document.getElementById("hiddenDatePicker");
     const displaySpan = document.getElementById("displayDateText");
-    
-    // Устанавливаем сегодняшнюю дату по умолчанию
     const todayStr = new Date().toISOString().split('T')[0];
     let currentDate = todayStr;
-    
     if (hiddenPicker) {
       hiddenPicker.value = currentDate;
       displaySpan.innerText = formatDateForDisplay(currentDate);
     }
-    
-    // При клике на красивую кнопку — открываем нативный календарь (стандартный системный date picker)
     if (calendarBtn && hiddenPicker) {
       calendarBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        // Вызываем showPicker если поддерживается, иначе пробуем click + фокус
-        if (hiddenPicker.showPicker) {
-          hiddenPicker.showPicker();
-        } else {
-          hiddenPicker.click();
-          hiddenPicker.focus();
-        }
+        if (hiddenPicker.showPicker) hiddenPicker.showPicker();
+        else { hiddenPicker.click(); hiddenPicker.focus(); }
       });
-      
-      // При изменении даты через пикер — обновляем отображение и грузим данные
       hiddenPicker.addEventListener("change", (e) => {
         const newDate = e.target.value;
         if (newDate) {
           currentDate = newDate;
           displaySpan.innerText = formatDateForDisplay(newDate);
-          // Синхронизируем с основной системой бронирования
           if (window.dateInputForSync) {
             window.dateInputForSync.value = newDate;
-            // Триггерим событие change чтобы загрузить брони
             const changeEvent = new Event('change');
             window.dateInputForSync.dispatchEvent(changeEvent);
           }
@@ -551,8 +556,6 @@
         }
       });
     }
-    
-    // Создаем скрытый инпут для совместимости со старой логикой (loadFromServer использует #dateInput)
     let legacyDateInput = document.createElement("input");
     legacyDateInput.type = "date";
     legacyDateInput.id = "dateInput";
@@ -560,16 +563,13 @@
     document.body.appendChild(legacyDateInput);
     window.dateInputForSync = legacyDateInput;
     legacyDateInput.value = currentDate;
-    
     buildDesktopTable();
-    // Добавляем прослушку изменения на легаси инпут (для загрузки данных)
     legacyDateInput.addEventListener("change", () => { 
       if (hiddenPicker) hiddenPicker.value = legacyDateInput.value;
       if (displaySpan) displaySpan.innerText = formatDateForDisplay(legacyDateInput.value);
       loadFromServer(); 
       clearTempSelections(); 
     });
-    
     loadFromServer();
     const toggleBtn = $("dragToggleBtn");
     toggleBtn.addEventListener("click", () => {
@@ -581,7 +581,6 @@
     });
   }
   
-  // Все остальные функции бронирования (buildDesktopTable, getSlotCell, updateCellsHighlight и т.д.) остаются без изменений
   function buildDesktopTable(){
     let headRow = document.querySelector("#dtHead tr");
     slots.forEach(sl=>{ let th=document.createElement("th"); th.className="th-time"; th.textContent=sl.label; headRow.appendChild(th); });

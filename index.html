@@ -1,4 +1,4 @@
-ПРОБЛЕМА , Я МОГУ БРОНИ СТАВИТЬ ТОЛЬКО С ИНТЕРВАЛОМ В 30 МИН ДУРГ ОТ ДУРГА , ЭТО НЕ ПРАВИЛЬНО, ХОТЕЛОСЬ БЫ В ПЛОТНУЮ  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -410,13 +410,10 @@
   let currentBooking = null;
   const $ = id => document.getElementById(id);
   
-  // Функция проверки конфликта броней (с учетом границ - allows touching)
   function hasConflict(lane, start, end, excludeId = null) {
     return bookings.some(b => {
       if (excludeId !== null && b.id === excludeId) return false;
       if (b.lane !== lane) return false;
-      // Разрешаем стыковку вплотную: бронь заканчивается ровно когда начинается другая
-      // Конфликт только если интервалы пересекаются (не просто касаются)
       return !(end <= b.start || start >= b.end);
     });
   }
@@ -433,9 +430,9 @@
   };
   
   function init(){
-    let today = new Date().toISOString().split('T')[0];
-    $("dateInput").min = today;
-    $("dateInput").value = today;
+    // Убираем ограничение на выбор даты — теперь можно выбирать любые даты, включая предыдущие
+    $("dateInput").removeAttribute("min");
+    $("dateInput").value = new Date().toISOString().split('T')[0];
     buildDesktopTable();
     $("dateInput").addEventListener("change", ()=>{ loadFromServer(); clearTempSelections(); });
     loadFromServer();
@@ -500,7 +497,6 @@
   
   function updatePreviewTimes() { const span=document.getElementById("previewTimes"); if(span) span.innerText = tempBookings.length ? tempBookings.map(tb=>`Стол ${tb.lane+1} (${fmt(tb.start)}–${fmt(tb.end)})`).join("; ") : "—"; }
   
-  // Drag to select (обычный выделение)
   let isDragging=false, dragStartCell=null, dragInterval=null;
   function onMouseDown(e){ if(dragModeEnabled) return; let t=e.target; if(t.classList?.contains("slot")){ e.preventDefault(); let lane=parseInt(t.dataset.lane), si=parseInt(t.dataset.si); isDragging=true; dragStartCell={lane,si}; dragInterval={lane,startIdx:si,endIdx:si}; highlightDragInterval(lane,si,si); } }
   function onMouseMove(e){ if(!dragModeEnabled && isDragging && dragStartCell){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); if(el){ let lane=parseInt(el.dataset.lane), idx=parseInt(el.dataset.si); if(lane===dragStartCell.lane){ let ns=Math.min(dragStartCell.si,idx), ne=Math.max(dragStartCell.si,idx); dragInterval={lane,startIdx:ns,endIdx:ne}; highlightDragInterval(lane,ns,ne); } } } }
@@ -509,7 +505,6 @@
     if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){ 
       let {lane,startIdx,endIdx}=dragInterval; 
       let start=slots[startIdx].key, end=slots[endIdx+1]?.key || slots[endIdx].key + 0.5;
-      // Проверка конфликта с существующими бронями
       if(hasConflict(lane, start, end)){ 
         alert("Это время уже занято другой броней"); 
       } else { 
@@ -556,7 +551,6 @@
     });
   }
   
-  // drag перемещение постоянной брони с проверкой конфликта
   async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===booking.end)-slotsArr.findIndex(s=>s.key===booking.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===booking.start); let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflict(finalLane, newStart, newEnd, booking.id)){ booking.lane=finalLane; booking.start=newStart; booking.end=newEnd; saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
   
   async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===temp.end)-slotsArr.findIndex(s=>s.key===temp.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===temp.start); let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflict(finalLane, newStart, newEnd)){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }

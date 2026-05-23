@@ -187,8 +187,13 @@
       border-radius: var(--radius-card);
       overflow: hidden;
       border: 0.5px solid var(--border-subtle);
+      position: relative;
     }
-    .grid-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; position: relative; }
+    .grid-scroll { 
+      overflow-x: auto; 
+      -webkit-overflow-scrolling: touch; 
+      position: relative;
+    }
     #tableDesktop {
       display: table;
       border-collapse: collapse;
@@ -276,8 +281,10 @@
       font-family: var(--font-system);
       overflow: hidden;
       white-space: nowrap;
+      background: rgba(44, 95, 122, 0.92); /* fallback, но будет переопределён через data-атрибут */
     }
     
+    /* Убрали подложку — теперь фон задаётся только через data-lane-type, без лишних слоёв */
     .slider[data-lane-type="blue"] { background: rgba(44, 95, 122, 0.92); color: white; }
     .slider[data-lane-type="green"] { background: rgba(79, 107, 78, 0.92); color: white; }
     .slider[data-lane-type="red"] { background: rgba(155, 75, 75, 0.92); color: white; }
@@ -359,6 +366,19 @@
       .inline-temp-cards { margin-left: 0; justify-content: flex-start; }
       .btn-book, .btn-drag-toggle { width: 100%; }
     }
+    /* Ghost slider для перетаскивания (визуальный клон без лишней подложки) */
+    .ghost-slider {
+      position: absolute;
+      border-radius: 6px;
+      background: rgba(44, 95, 122, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px dashed rgba(255,215,0,0.7);
+      opacity: 0.65;
+      pointer-events: none;
+      z-index: 1000;
+      transition: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
   </style>
 </head>
 <body>
@@ -430,7 +450,6 @@
   };
   
   function init(){
-    // Убираем ограничение на выбор даты — теперь можно выбирать любые даты, включая предыдущие
     $("dateInput").removeAttribute("min");
     $("dateInput").value = new Date().toISOString().split('T')[0];
     buildDesktopTable();
@@ -555,9 +574,9 @@
   
   async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells=slotsArr.findIndex(s=>s.key===temp.end)-slotsArr.findIndex(s=>s.key===temp.start); let startIdxOrig=slotsArr.findIndex(s=>s.key===temp.start); let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStart=slotsArr[finalStartIdx].key, newEnd=slotsArr[finalStartIdx+durationCells].key; if(!hasConflict(finalLane, newStart, newEnd)){ temp.lane=finalLane; temp.start=newStart; temp.end=newEnd; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
   
-  function createGhost(slider){ let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; ghost.style.opacity='0.5'; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); return ghost; }
+  function createGhost(slider){ let ghost=document.createElement('div'); ghost.className='ghost-slider'; let rect=slider.getBoundingClientRect(); let parentRect=$("gridScroll").getBoundingClientRect(); ghost.style.position='absolute'; ghost.style.left=(rect.left-parentRect.left)+'px'; ghost.style.top=(rect.top-parentRect.top)+'px'; ghost.style.width=rect.width+'px'; ghost.style.height=rect.height+'px'; $("gridScroll").style.position='relative'; $("gridScroll").appendChild(ghost); slider.classList.add('dragging'); return ghost; }
   
-  function moveLogic(ghost,slider,rows,slotsArr,durationCells, onDrop, initialLane, initialStartIdx){ let currentLane=initialLane, currentStartIdx=initialStartIdx; function updateGhostPos(lane,startIdx){ let row=rows[lane]; if(!row) return; let sc=row.cells[startIdx+1], ec=row.cells[startIdx+durationCells+1]; if(sc&&ec){ ghost.style.left=(sc.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(ec.offsetLeft+ec.offsetWidth-sc.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function getTargetCoords(e){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane), idx:parseInt(el.dataset.si)}; } function onDragMove(ev){ let tgt=getTargetCoords(ev); if(tgt){ let nl=tgt.lane, nsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); if(nl!==currentLane||nsi!==currentStartIdx){ currentLane=nl; currentStartIdx=nsi; updateGhostPos(currentLane,currentStartIdx); } } } function onDragEnd(ev){ let tgt=getTargetCoords(ev); if(tgt){ let fl=tgt.lane, fsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); onDrop(fl,fsi); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhostPos(currentLane,currentStartIdx); }
+  function moveLogic(ghost,slider,rows,slotsArr,durationCells, onDrop, initialLane, initialStartIdx){ let currentLane=initialLane, currentStartIdx=initialStartIdx; function updateGhostPos(lane,startIdx){ let row=rows[lane]; if(!row) return; let sc=row.cells[startIdx+1], ec=row.cells[startIdx+durationCells+1]; if(sc&&ec){ let parentRect=$("gridScroll").getBoundingClientRect(); ghost.style.left=(sc.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(ec.offsetLeft+ec.offsetWidth-sc.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function getTargetCoords(e){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane), idx:parseInt(el.dataset.si)}; } function onDragMove(ev){ let tgt=getTargetCoords(ev); if(tgt){ let nl=tgt.lane, nsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); if(nl!==currentLane||nsi!==currentStartIdx){ currentLane=nl; currentStartIdx=nsi; updateGhostPos(currentLane,currentStartIdx); } } } function onDragEnd(ev){ let tgt=getTargetCoords(ev); if(tgt){ let fl=tgt.lane, fsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); onDrop(fl,fsi); } if(ghost&&ghost.remove) ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhostPos(currentLane,currentStartIdx); }
   
   function showInfoModal(b){ currentBooking=b; $("i-table").textContent="№ "+(b.lane+1); $("i-time").textContent=`${fmt(b.start)} – ${fmt(b.end)}`; $("i-name").textContent=b.name; $("i-phone").textContent=b.phone||"—"; $("i-comment").textContent=b.comment||"—"; let statusText=b.confirmed===true?"✅ Пришли":(b.confirmed===false?"❌ Не пришли":"⏳ Ожидание"); $("i-status").textContent=statusText; $("infoModal").classList.add("open"); }
   function closeInfoModal(){ $("infoModal").classList.remove("open"); currentBooking=null; }

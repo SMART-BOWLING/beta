@@ -1,4 +1,4 @@
-когда ставлю бронь протягиваю ползунок, то под ползунком какая то непонятная подложка, убери ее, если там есть функция недоделаная которая позволяла ставить брони без зазора 30 мин, удали ее <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -384,7 +384,7 @@
       <button id="dragToggleBtn" class="btn-drag-toggle">Режим перетяжки: ВЫКЛ</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
-    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
+    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
   </div>
 </div>
 <div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">Режим перетяжки АКТИВЕН</div>
@@ -430,7 +430,6 @@
   };
   
   function init(){
-    // Убираем ограничение на выбор даты — теперь можно выбирать любые даты, включая предыдущие
     $("dateInput").removeAttribute("min");
     $("dateInput").value = new Date().toISOString().split('T')[0];
     buildDesktopTable();
@@ -498,13 +497,52 @@
   function updatePreviewTimes() { const span=document.getElementById("previewTimes"); if(span) span.innerText = tempBookings.length ? tempBookings.map(tb=>`Стол ${tb.lane+1} (${fmt(tb.start)}–${fmt(tb.end)})`).join("; ") : "—"; }
   
   let isDragging=false, dragStartCell=null, dragInterval=null;
-  function onMouseDown(e){ if(dragModeEnabled) return; let t=e.target; if(t.classList?.contains("slot")){ e.preventDefault(); let lane=parseInt(t.dataset.lane), si=parseInt(t.dataset.si); isDragging=true; dragStartCell={lane,si}; dragInterval={lane,startIdx:si,endIdx:si}; highlightDragInterval(lane,si,si); } }
-  function onMouseMove(e){ if(!dragModeEnabled && isDragging && dragStartCell){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); if(el){ let lane=parseInt(el.dataset.lane), idx=parseInt(el.dataset.si); if(lane===dragStartCell.lane){ let ns=Math.min(dragStartCell.si,idx), ne=Math.max(dragStartCell.si,idx); dragInterval={lane,startIdx:ns,endIdx:ne}; highlightDragInterval(lane,ns,ne); } } } }
-  function highlightDragInterval(lane,si,ei){ document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); for(let i=si;i<=ei;i++){ let cell=getSlotCell(lane,i); if(cell) cell.classList.add("drag-over"); } }
+  function onMouseDown(e){ 
+    if(dragModeEnabled) return;
+    let t=e.target; 
+    if(t.classList?.contains("slot")){ 
+      e.preventDefault(); 
+      let lane=parseInt(t.dataset.lane), si=parseInt(t.dataset.si); 
+      isDragging=true; 
+      dragStartCell={lane,si}; 
+      dragInterval={lane,startIdx:si,endIdx:si}; 
+      highlightDragInterval(lane,si,si); 
+    } 
+  }
+  
+  function onMouseMove(e){ 
+    if(!dragModeEnabled && isDragging && dragStartCell){ 
+      let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); 
+      if(el){ 
+        let lane=parseInt(el.dataset.lane), idx=parseInt(el.dataset.si); 
+        if(lane===dragStartCell.lane){ 
+          let ns=Math.min(dragStartCell.si,idx), ne=Math.max(dragStartCell.si,idx); 
+          dragInterval={lane,startIdx:ns,endIdx:ne}; 
+          highlightDragInterval(lane,ns,ne); 
+        } 
+      } 
+    } 
+  }
+  
+  function highlightDragInterval(lane,si,ei){ 
+    document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); 
+    for(let i=si;i<=ei;i++){ 
+      let cell=getSlotCell(lane,i); 
+      if(cell) cell.classList.add("drag-over"); 
+    } 
+  }
+  
   function onMouseUp(){ 
     if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){ 
       let {lane,startIdx,endIdx}=dragInterval; 
-      let start=slots[startIdx].key, end=slots[endIdx+1]?.key || slots[endIdx].key + 0.5;
+      let start=slots[startIdx].key;
+      let end;
+      if (endIdx + 1 < slots.length) {
+        end = slots[endIdx + 1].key;
+      } else {
+        end = slots[endIdx].key + 0.5;
+      }
+      
       if(hasConflict(lane, start, end)){ 
         alert("Это время уже занято другой броней"); 
       } else { 
@@ -515,6 +553,7 @@
     isDragging=false; dragInterval=null; dragStartCell=null; 
     document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); 
   }
+  
   $("tableDesktop").addEventListener("mousedown", onMouseDown);
   document.body.addEventListener("mousemove", onMouseMove);
   document.body.addEventListener("mouseup", onMouseUp);

@@ -115,20 +115,34 @@
       padding: 16px 28px;
       border: 0.5px solid var(--border-subtle);
     }
-    .date-field {
-      flex: 1;
-      min-width: 240px;
-      max-width: 320px;
+    /* Улучшенный блок выбора даты с заметной кнопкой календаря */
+    .date-picker-group {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
+      flex: 1;
+      min-width: 280px;
       background: var(--surface-secondary);
       border-radius: var(--radius-sm);
-      padding: 0 20px;
-      height: 54px;
       border: 0.5px solid var(--border-strong);
+      transition: all 0.2s;
     }
-    .date-field:focus-within { border-color: var(--accent-blue); box-shadow: 0 0 0 3px var(--accent-blue-dim); }
+    .date-picker-group:focus-within {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px var(--accent-blue-dim);
+    }
+    .date-field {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 0 0 20px;
+      height: 54px;
+    }
+    .date-field svg {
+      flex-shrink: 0;
+      color: var(--label-secondary);
+    }
     #dateInput {
       flex: 1;
       border: none;
@@ -137,6 +151,34 @@
       font-weight: 500;
       color: var(--label-dark);
       cursor: pointer;
+      padding: 0;
+      font-family: var(--font-system);
+    }
+    /* Явная кнопка открыть календарь */
+    .btn-open-calendar {
+      background: transparent;
+      border: none;
+      border-left: 1px solid var(--border-strong);
+      padding: 0 20px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 510;
+      color: var(--accent-blue);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-open-calendar svg {
+      width: 20px;
+      height: 20px;
+    }
+    .btn-open-calendar:hover {
+      background: var(--accent-blue-dim);
+      color: var(--accent-blue-hover);
     }
     .btn-book {
       height: 54px;
@@ -356,8 +398,10 @@
     @media (max-width: 780px) {
       .page { padding: 18px 16px 70px; }
       .ctrl { flex-direction: column; align-items: stretch; }
+      .date-picker-group { min-width: auto; width: 100%; }
       .inline-temp-cards { margin-left: 0; justify-content: flex-start; }
       .btn-book, .btn-drag-toggle { width: 100%; }
+      .btn-open-calendar { padding: 0 16px; }
     }
   </style>
 </head>
@@ -379,12 +423,22 @@
   </nav>
   <div class="page">
     <div class="ctrl">
-      <div class="date-field"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><input type="date" id="dateInput"/></div>
+      <!-- Группа выбора даты с явной кнопкой "Календарь" -->
+      <div class="date-picker-group">
+        <div class="date-field">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <input type="date" id="dateInput"/>
+        </div>
+        <button id="openCalendarBtn" class="btn-open-calendar" title="Открыть календарь">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><circle cx="12" cy="15" r="1"></circle><circle cx="16" cy="15" r="1"></circle><circle cx="8" cy="15" r="1"></circle></svg>
+          <span>Календарь</span>
+        </button>
+      </div>
       <button class="btn-book" onclick="openBookModal()">Новая бронь</button>
       <button id="dragToggleBtn" class="btn-drag-toggle">Режим перетяжки: ВЫКЛ</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
-    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
+    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
   </div>
 </div>
 <div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">Режим перетяжки АКТИВЕН</div>
@@ -450,10 +504,32 @@
     }
   };
   
+  // Явная функция для открытия нативного календаря
+  function openNativeCalendar() {
+    const dateInput = $("dateInput");
+    if (dateInput) {
+      // Для поддержки мобильных и десктоп: показываем календарь
+      if (typeof dateInput.showPicker === 'function') {
+        dateInput.showPicker();
+      } else {
+        dateInput.focus();
+        dateInput.click();
+      }
+    }
+  }
+  
   function init(){
     $("dateInput").removeAttribute("min");
     $("dateInput").value = new Date().toISOString().split('T')[0];
     buildDesktopTable();
+    // Привязываем кнопку календаря
+    const calendarBtn = $("openCalendarBtn");
+    if(calendarBtn) {
+      calendarBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        openNativeCalendar();
+      });
+    }
     $("dateInput").addEventListener("change", ()=>{ loadFromServer(); clearTempSelections(); });
     loadFromServer();
     const toggleBtn = $("dragToggleBtn");
@@ -607,7 +683,7 @@
   
   function onMouseUp(){ 
     if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){ 
-      let {lane,startIdx,endIdx}=dragInterval; 
+      let {lane,startIdx,endIdx}=dragInterval;
       
       if(hasConflict(lane, startIdx, endIdx)){ 
         alert("Это время уже занято другой броней"); 
@@ -724,13 +800,12 @@
     }); 
   }
   
-  function renderAllSliders(){ 
+  function renderAllSliders(){ /* ... код сохранен (аналогично оригиналу) ... */ 
     let container=$("slidersLayer"); 
     if(!container) return; 
     container.innerHTML=""; 
     let rows=Array.from($("dtBody")?.querySelectorAll("tr")||[]); 
     if(rows.length===0) return;
-    
     [...bookings, ...tempBookings.map(t=>({...t,isTemp:true}))].forEach(item=>{
       let startIdx=item.startSlotIdx, endIdx=item.endSlotIdx;
       if(startIdx===undefined || endIdx===undefined) return;
@@ -746,18 +821,11 @@
       if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); 
       slider.setAttribute("data-lane-type",laneType);
       slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
-      let dot=document.createElement("div"); 
-      dot.className="guest-status-dot";
-      slider.appendChild(dot);
-      let nameDiv=document.createElement("div"); 
-      nameDiv.className="sl-name"; 
-      nameDiv.textContent=item.isTemp?"Ожидает брони":(item.name||"Бронь");
-      let timeDiv=document.createElement("div"); 
-      timeDiv.className="sl-time"; 
-      timeDiv.textContent=fmtFromSlotIdx(startIdx);
+      let dot=document.createElement("div"); dot.className="guest-status-dot"; slider.appendChild(dot);
+      let nameDiv=document.createElement("div"); nameDiv.className="sl-name"; nameDiv.textContent=item.isTemp?"Ожидает брони":(item.name||"Бронь");
+      let timeDiv=document.createElement("div"); timeDiv.className="sl-time"; timeDiv.textContent=fmtFromSlotIdx(startIdx);
       slider.append(nameDiv,timeDiv);
-      let dragHandle=document.createElement("div"); 
-      dragHandle.className="drag-handle";
+      let dragHandle=document.createElement("div"); dragHandle.className="drag-handle";
       if(dragModeEnabled && !item.isTemp) dragHandle.addEventListener("mousedown",(e)=>{ e.stopPropagation(); startMoveDrag(item, e, rows, slots); });
       else if(dragModeEnabled && item.isTemp) dragHandle.addEventListener("mousedown",(e)=>{ e.stopPropagation(); startMoveTempDrag(item, e, rows, slots); });
       else dragHandle.addEventListener("click",(e)=>{ e.stopPropagation(); if(!item.isTemp && item.id) showInfoModal(item); else if(!item.isTemp && !item.id) alert("Загрузка данных..."); else alert("Временная бронь — сохраните для просмотра."); });
@@ -766,172 +834,22 @@
     });
   }
   
-  async function startMoveDrag(booking, e, rows, slotsArr){ 
-    e.stopPropagation(); 
-    const slider=e.currentTarget.closest('.slider'); 
-    if(!slider) return; 
-    let durationCells = booking.endSlotIdx - booking.startSlotIdx;
-    let startIdxOrig = booking.startSlotIdx;
-    let ghost=createGhost(slider); 
-    let currentLane=booking.lane, currentStartIdx=startIdxOrig; 
-    moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ 
-      let newStartIdx = finalStartIdx;
-      let newEndIdx = finalStartIdx + durationCells;
-      if(!hasConflict(finalLane, newStartIdx, newEndIdx, booking.id)){
-        booking.lane = finalLane;
-        booking.startSlotIdx = newStartIdx;
-        booking.endSlotIdx = newEndIdx;
-        booking.start = slotsArr[newStartIdx].key;
-        booking.end = slotsArr[newEndIdx + 1]?.key || (slotsArr[newEndIdx].key + 0.5);
-        saveToServer(booking); 
-        renderAllSliders(); 
-        updateCellsHighlight(); 
-      } else alert("Конфликт с другой броней"); 
-    }, currentLane,currentStartIdx); 
-  }
+  async function startMoveDrag(booking, e, rows, slotsArr){ /* сокращён для чистоты, но оставлен рабочий вызов */ 
+    e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells = booking.endSlotIdx - booking.startSlotIdx; let startIdxOrig = booking.startSlotIdx; let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStartIdx = finalStartIdx; let newEndIdx = finalStartIdx + durationCells; if(!hasConflict(finalLane, newStartIdx, newEndIdx, booking.id)){ booking.lane = finalLane; booking.startSlotIdx = newStartIdx; booking.endSlotIdx = newEndIdx; booking.start = slotsArr[newStartIdx].key; booking.end = slotsArr[newEndIdx + 1]?.key || (slotsArr[newEndIdx].key + 0.5); saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
+  async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells = temp.endSlotIdx - temp.startSlotIdx; let startIdxOrig = temp.startSlotIdx; let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStartIdx = finalStartIdx; let newEndIdx = finalStartIdx + durationCells; if(!hasConflict(finalLane, newStartIdx, newEndIdx)){ temp.lane = finalLane; temp.startSlotIdx = newStartIdx; temp.endSlotIdx = newEndIdx; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
+  function createGhost(slider){ let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; ghost.style.opacity='0.5'; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); return ghost; }
+  function moveLogic(ghost,slider,rows,slotsArr,durationCells, onDrop, initialLane, initialStartIdx){ let currentLane=initialLane, currentStartIdx=initialStartIdx; function updateGhostPos(lane,startIdx){ let row=rows[lane]; if(!row) return; let sc=row.cells[startIdx+1], ec=row.cells[startIdx+durationCells+1]; if(sc&&ec){ ghost.style.left=(sc.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(ec.offsetLeft+ec.offsetWidth-sc.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function getTargetCoords(e){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane), idx:parseInt(el.dataset.slotIdx)}; } function onDragMove(ev){ let tgt=getTargetCoords(ev); if(tgt){ let nl=tgt.lane, nsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); if(nl!==currentLane||nsi!==currentStartIdx){ currentLane=nl; currentStartIdx=nsi; updateGhostPos(currentLane,currentStartIdx); } } } function onDragEnd(ev){ let tgt=getTargetCoords(ev); if(tgt){ let fl=tgt.lane, fsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); onDrop(fl,fsi); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhostPos(currentLane,currentStartIdx); }
   
-  async function startMoveTempDrag(temp, e, rows, slotsArr){ 
-    e.stopPropagation(); 
-    const slider=e.currentTarget.closest('.slider'); 
-    if(!slider) return; 
-    let durationCells = temp.endSlotIdx - temp.startSlotIdx;
-    let startIdxOrig = temp.startSlotIdx;
-    let ghost=createGhost(slider); 
-    let currentLane=temp.lane, currentStartIdx=startIdxOrig; 
-    moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ 
-      let newStartIdx = finalStartIdx;
-      let newEndIdx = finalStartIdx + durationCells;
-      if(!hasConflict(finalLane, newStartIdx, newEndIdx)){
-        temp.lane = finalLane;
-        temp.startSlotIdx = newStartIdx;
-        temp.endSlotIdx = newEndIdx;
-        renderInlineTempCards(); 
-        renderAllSliders(); 
-        updateCellsHighlight(); 
-      } else alert("Конфликт с другой броней"); 
-    }, currentLane,currentStartIdx); 
-  }
-  
-  function createGhost(slider){ 
-    let ghost=document.createElement('div'); 
-    ghost.className='ghost-slider'; 
-    ghost.style.cssText=slider.style.cssText; 
-    ghost.style.opacity='0.5'; 
-    $('slidersLayer').appendChild(ghost); 
-    slider.classList.add('dragging'); 
-    return ghost; 
-  }
-  
-  function moveLogic(ghost,slider,rows,slotsArr,durationCells, onDrop, initialLane, initialStartIdx){ 
-    let currentLane=initialLane, currentStartIdx=initialStartIdx; 
-    
-    function updateGhostPos(lane,startIdx){ 
-      let row=rows[lane]; 
-      if(!row) return; 
-      let sc=row.cells[startIdx+1], ec=row.cells[startIdx+durationCells+1]; 
-      if(sc&&ec){ 
-        ghost.style.left=(sc.offsetLeft+1)+'px'; 
-        ghost.style.top=(row.offsetTop+1)+'px'; 
-        ghost.style.width=(ec.offsetLeft+ec.offsetWidth-sc.offsetLeft-2)+'px'; 
-        ghost.style.height=(row.offsetHeight-2)+'px'; 
-      } 
-    } 
-    
-    function getTargetCoords(e){ 
-      let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains('slot')); 
-      if(!el) return null; 
-      return {lane:parseInt(el.dataset.lane), idx:parseInt(el.dataset.slotIdx)}; 
-    } 
-    
-    function onDragMove(ev){ 
-      let tgt=getTargetCoords(ev); 
-      if(tgt){ 
-        let nl=tgt.lane, nsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); 
-        if(nl!==currentLane||nsi!==currentStartIdx){ 
-          currentLane=nl; 
-          currentStartIdx=nsi; 
-          updateGhostPos(currentLane,currentStartIdx); 
-        } 
-      } 
-    } 
-    
-    function onDragEnd(ev){ 
-      let tgt=getTargetCoords(ev); 
-      if(tgt){ 
-        let fl=tgt.lane, fsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); 
-        onDrop(fl,fsi); 
-      } 
-      ghost.remove(); 
-      slider.classList.remove('dragging'); 
-      document.body.style.cursor=''; 
-      document.removeEventListener('mousemove',onDragMove); 
-      document.removeEventListener('mouseup',onDragEnd); 
-      renderAllSliders(); 
-    } 
-    
-    document.body.style.cursor='grabbing'; 
-    document.addEventListener('mousemove',onDragMove); 
-    document.addEventListener('mouseup',onDragEnd); 
-    updateGhostPos(currentLane,currentStartIdx); 
-  }
-  
-  function showInfoModal(b){ 
-    currentBooking=b; 
-    $("i-table").textContent="№ "+(b.lane+1); 
-    $("i-time").textContent=fmtFromSlotIdx(b.startSlotIdx); 
-    $("i-name").textContent=b.name; 
-    $("i-phone").textContent=b.phone||"—"; 
-    $("i-comment").textContent=b.comment||"—"; 
-    let statusText=b.confirmed===true?"✅ Пришли":(b.confirmed===false?"❌ Не пришли":"⏳ Ожидание"); 
-    $("i-status").textContent=statusText; 
-    $("infoModal").classList.add("open"); 
-  }
-  
+  function showInfoModal(b){ currentBooking=b; $("i-table").textContent="№ "+(b.lane+1); $("i-time").textContent=fmtFromSlotIdx(b.startSlotIdx); $("i-name").textContent=b.name; $("i-phone").textContent=b.phone||"—"; $("i-comment").textContent=b.comment||"—"; let statusText=b.confirmed===true?"✅ Пришли":(b.confirmed===false?"❌ Не пришли":"⏳ Ожидание"); $("i-status").textContent=statusText; $("infoModal").classList.add("open"); }
   function closeInfoModal(){ $("infoModal").classList.remove("open"); currentBooking=null; }
-  
-  async function confirmBooking(yes){ 
-    if(!currentBooking) return; 
-    showLoad(); 
-    await fetch(GAS_URL,{
-      method:"POST",
-      mode:"no-cors",
-      body:JSON.stringify({
-        action:"confirm",
-        id:currentBooking.id,
-        confirmed:yes
-      })
-    }); 
-    closeInfoModal(); 
-    await loadFromServer(); 
-    hideLoad(); 
-  }
-  
-  async function deleteBooking(){ 
-    if(!currentBooking||!confirm("Удалить?")) return; 
-    showLoad(); 
-    await fetch(GAS_URL,{
-      method:"POST",
-      mode:"no-cors",
-      body:JSON.stringify({
-        action:"delete",
-        id:currentBooking.id
-      })
-    }); 
-    closeInfoModal(); 
-    await loadFromServer(); 
-    hideLoad(); 
-  }
-  
+  async function confirmBooking(yes){ if(!currentBooking) return; showLoad(); await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"confirm", id:currentBooking.id, confirmed:yes }) }); closeInfoModal(); await loadFromServer(); hideLoad(); }
+  async function deleteBooking(){ if(!currentBooking||!confirm("Удалить?")) return; showLoad(); await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"delete", id:currentBooking.id }) }); closeInfoModal(); await loadFromServer(); hideLoad(); }
   function showLoad(){ $("loader").style.display="flex"; }
   function hideLoad(){ $("loader").style.display="none"; }
   function openImg(){ $("imgPopup").classList.add("open"); }
   function closeImg(){ $("imgPopup").classList.remove("open"); }
   
-  ["bookModal","infoModal","imgPopup"].forEach(id=>{ 
-    $(id)?.addEventListener("click",e=>{ 
-      if(e.target=== $(id)) $(id).classList.remove("open"); 
-    }); 
-  });
+  ["bookModal","infoModal","imgPopup"].forEach(id=>{ $(id)?.addEventListener("click",e=>{ if(e.target=== $(id)) $(id).classList.remove("open"); }); });
 </script>
 </body>
 </html>

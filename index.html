@@ -106,7 +106,7 @@
       gap: 32px;
     }
 
-    /* БЛОК УПРАВЛЕНИЯ ДАТОЙ — СТАНДАРТНЫЙ GOOGLE-КАЛЕНДАРЬ + КНОПКА */
+    /* БЛОК УПРАВЛЕНИЯ — КНОПКА КАЛЕНДАРЯ С ОТОБРАЖЕНИЕМ ДАТЫ */
     .ctrl {
       display: flex;
       gap: 20px;
@@ -117,70 +117,48 @@
       padding: 16px 28px;
       border: 0.5px solid var(--border-subtle);
     }
-    /* Кастомная обёртка для имитации "Google-стиля" + нативный date picker */
-    .google-date-wrapper {
+    
+    /* Кнопка-календарь в стиле Google Material */
+    .google-calendar-btn {
       display: flex;
       align-items: center;
       gap: 12px;
       background: var(--surface-secondary);
-      border-radius: 40px;
       border: 1px solid var(--border-strong);
-      padding: 0 8px 0 20px;
-      transition: all 0.2s;
+      border-radius: 48px;
+      padding: 0 20px 0 16px;
+      height: 54px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: var(--font-system);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
     }
-    .google-date-wrapper:focus-within {
+    .google-calendar-btn:hover {
+      background: #ffffff;
       border-color: var(--accent-blue);
-      box-shadow: 0 0 0 2px var(--accent-blue-dim);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transform: scale(0.98);
     }
-    .google-calendar-icon {
+    .calendar-icon {
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--accent-blue);
-      pointer-events: none;
     }
-    #dateInput {
-      border: none;
-      background: transparent;
+    .calendar-date-text {
       font-size: 16px;
-      font-weight: 500;
-      font-family: var(--font-system);
-      color: var(--label-dark);
-      padding: 12px 0;
-      cursor: pointer;
-      width: 140px;
-      letter-spacing: -0.2px;
-    }
-    #dateInput::-webkit-calendar-picker-indicator {
-      opacity: 0;
-      width: 0;
-      cursor: pointer;
-    }
-    .btn-open-calendar {
-      background: transparent;
-      border: none;
-      border-left: 1px solid var(--border-strong);
-      padding: 12px 20px;
-      font-size: 14px;
       font-weight: 550;
-      color: var(--accent-blue);
-      cursor: pointer;
-      transition: 0.15s;
-      border-radius: 0 40px 40px 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      color: var(--label-dark);
+      letter-spacing: -0.2px;
       white-space: nowrap;
     }
-    .btn-open-calendar:hover {
-      background: var(--accent-blue-dim);
+    .chevron-icon {
+      margin-left: 4px;
+      opacity: 0.6;
+      transition: transform 0.2s;
     }
-    .btn-open-calendar svg {
-      width: 18px;
-      height: 18px;
-      stroke: currentColor;
-      stroke-width: 2;
-      fill: none;
+    .google-calendar-btn:hover .chevron-icon {
+      transform: translateY(2px);
     }
 
     .btn-book {
@@ -403,8 +381,7 @@
       .ctrl { flex-direction: column; align-items: stretch; }
       .inline-temp-cards { margin-left: 0; justify-content: flex-start; }
       .btn-book, .btn-drag-toggle { width: 100%; }
-      .google-date-wrapper { width: 100%; justify-content: space-between; }
-      #dateInput { width: auto; flex:1; }
+      .google-calendar-btn { justify-content: center; width: 100%; }
     }
   </style>
 </head>
@@ -426,10 +403,10 @@
   </nav>
   <div class="page">
     <div class="ctrl">
-      <!-- СТАНДАРТНЫЙ КАЛЕНДАРЬ GOOGLE + КНОПКА ОТКРЫТИЯ -->
-      <div class="google-date-wrapper">
-        <span class="google-calendar-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <!-- КНОПКА КАЛЕНДАРЯ С ОТОБРАЖЕНИЕМ ДАТЫ, ПРИ КЛИКЕ ОТКРЫВАЕТСЯ NATIVE DATE PICKER (СТАНДАРТНЫЙ КАЛЕНДАРЬ) -->
+      <button id="calendarButton" class="google-calendar-btn" type="button">
+        <span class="calendar-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
             <line x1="16" y1="2" x2="16" y2="6"></line>
             <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -437,12 +414,14 @@
             <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"></path>
           </svg>
         </span>
-        <input type="date" id="dateInput" />
-        <button id="openCalendarBtn" class="btn-open-calendar" type="button">
-          <svg viewBox="0 0 24 24" width="16" height="16"><polygon points="6 9 12 15 18 9" fill="currentColor"/></svg>
-          Календарь
-        </button>
-      </div>
+        <span id="displayDateText" class="calendar-date-text">Сегодня</span>
+        <span class="chevron-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </span>
+      </button>
+      <!-- Скрытый нативный input[type=date] который будет вызываться при клике на кнопку -->
+      <input type="date" id="hiddenDatePicker" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;" />
+      
       <button class="btn-book" onclick="openBookModal()">Новая бронь</button>
       <button id="dragToggleBtn" class="btn-drag-toggle">Режим перетяжки: ВЫКЛ</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
@@ -459,7 +438,7 @@
 <div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
 
 <script>
-  // ---- КОНСТАНТЫ / НАСТРОЙКИ (полностью сохранены из исходника)
+  // ---- ОСНОВНАЯ ЛОГИКА БРОНИРОВАНИЯ (без изменений, только добавлена интеграция кнопки календаря)
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLxSrpcGOIm34gLlFZS-EYZmG8liMLcUST3MRMoAp56y6XDC2ClapCDB18yiYmdrHZ/exec";
   const ALLOWED = ["vadiksss900@gmail.com","sergey99belov@gmail.com","popadinecvasil3@gmail.com","veronicadiakova04@gmail.com","info.luckystrike.kh@gmail.com","sashavolobuev123890@gmail.com","egorgorbushko@gmail.com","shatrava.o@gmail.com","Craftmax30@gmail.com","bowlingblock.b@gmail.com","lana.arnaut@gmail.com","polosinnikita1224@gmail.com","sofialat1506@gmail.com","ll3991940@gmail.com","ken040888@gmail.com"];
   const LANES = 12, SH = 11, EH = 22;
@@ -502,6 +481,7 @@
       location.reload(); 
     } else alert("Доступ запрещён"); 
   }
+  
   window.onload = ()=>{
     if(localStorage.getItem("ue") && ALLOWED.includes(localStorage.getItem("ue"))){
       $("login").style.display="none";
@@ -510,32 +490,86 @@
     }
   };
   
-  // Расширенная инициализация с кнопкой открытия календаря
+  // Функция форматирования даты для красивого отображения (день недели, число месяц)
+  function formatDateForDisplay(dateStr) {
+    if (!dateStr) return "Выбрать дату";
+    const date = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    if (date.getTime() === today.getTime()) return "Сегодня";
+    if (date.getTime() === tomorrow.getTime()) return "Завтра";
+    const months = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+    const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+    return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]}`;
+  }
+  
   function init(){
-    const datePicker = $("dateInput");
-    const today = new Date().toISOString().split('T')[0];
-    datePicker.value = today;
+    // Инициализация календарной кнопки
+    const calendarBtn = document.getElementById("calendarButton");
+    const hiddenPicker = document.getElementById("hiddenDatePicker");
+    const displaySpan = document.getElementById("displayDateText");
     
-    // Добавляем программное открытие календаря через кнопку "Календарь"
-    const openCalendarBtn = $("openCalendarBtn");
-    if (openCalendarBtn && datePicker) {
-      openCalendarBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        // Запускаем нативный datepicker через showPicker (поддержка всех современных браузеров)
-        if (datePicker.showPicker) {
-          datePicker.showPicker();
-        } else {
-          // fallback: фокус и вызов клика (не всегда открывает календарь, но помогает)
-          datePicker.click();
-          datePicker.focus();
-        }
-      });
-      // Также при клике на саму обёртку с иконкой можно тоже открывать (по желанию)
-      datePicker.addEventListener("click", () => { /* ничего не делаем, пусть обычный клик работает */ });
+    // Устанавливаем сегодняшнюю дату по умолчанию
+    const todayStr = new Date().toISOString().split('T')[0];
+    let currentDate = todayStr;
+    
+    if (hiddenPicker) {
+      hiddenPicker.value = currentDate;
+      displaySpan.innerText = formatDateForDisplay(currentDate);
     }
     
+    // При клике на красивую кнопку — открываем нативный календарь (стандартный системный date picker)
+    if (calendarBtn && hiddenPicker) {
+      calendarBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        // Вызываем showPicker если поддерживается, иначе пробуем click + фокус
+        if (hiddenPicker.showPicker) {
+          hiddenPicker.showPicker();
+        } else {
+          hiddenPicker.click();
+          hiddenPicker.focus();
+        }
+      });
+      
+      // При изменении даты через пикер — обновляем отображение и грузим данные
+      hiddenPicker.addEventListener("change", (e) => {
+        const newDate = e.target.value;
+        if (newDate) {
+          currentDate = newDate;
+          displaySpan.innerText = formatDateForDisplay(newDate);
+          // Синхронизируем с основной системой бронирования
+          if (window.dateInputForSync) {
+            window.dateInputForSync.value = newDate;
+            // Триггерим событие change чтобы загрузить брони
+            const changeEvent = new Event('change');
+            window.dateInputForSync.dispatchEvent(changeEvent);
+          }
+          loadFromServer();
+          clearTempSelections();
+        }
+      });
+    }
+    
+    // Создаем скрытый инпут для совместимости со старой логикой (loadFromServer использует #dateInput)
+    let legacyDateInput = document.createElement("input");
+    legacyDateInput.type = "date";
+    legacyDateInput.id = "dateInput";
+    legacyDateInput.style.display = "none";
+    document.body.appendChild(legacyDateInput);
+    window.dateInputForSync = legacyDateInput;
+    legacyDateInput.value = currentDate;
+    
     buildDesktopTable();
-    datePicker.addEventListener("change", ()=>{ loadFromServer(); clearTempSelections(); });
+    // Добавляем прослушку изменения на легаси инпут (для загрузки данных)
+    legacyDateInput.addEventListener("change", () => { 
+      if (hiddenPicker) hiddenPicker.value = legacyDateInput.value;
+      if (displaySpan) displaySpan.innerText = formatDateForDisplay(legacyDateInput.value);
+      loadFromServer(); 
+      clearTempSelections(); 
+    });
+    
     loadFromServer();
     const toggleBtn = $("dragToggleBtn");
     toggleBtn.addEventListener("click", () => {
@@ -547,7 +581,7 @@
     });
   }
   
-  // остальные функции полностью из оригинального кода (без изменений)
+  // Все остальные функции бронирования (buildDesktopTable, getSlotCell, updateCellsHighlight и т.д.) остаются без изменений
   function buildDesktopTable(){
     let headRow = document.querySelector("#dtHead tr");
     slots.forEach(sl=>{ let th=document.createElement("th"); th.className="th-time"; th.textContent=sl.label; headRow.appendChild(th); });
@@ -580,11 +614,11 @@
   document.body.addEventListener("mouseup", onMouseUp);
   function openBookModal(){ if(tempBookings.length===0){ alert("Сначала выделите интервал на столе"); return; } $("nameInput").value=""; $("phoneInput").value=""; $("commentInput").value=""; updatePreviewTimes(); $("bookModal").classList.add("open"); }
   function closeBookModal(){ $("bookModal").classList.remove("open"); }
-  async function submitTempBookings(){ let name=$("nameInput").value.trim(); if(!name) return alert("Введите имя"); if(tempBookings.length===0) return; showLoad(); try{ await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ bookings:tempBookings.map(tb=>({ date:$("dateInput").value, tableNumber:tb.lane+1, start:slots[tb.startSlotIdx].key, end:slots[tb.endSlotIdx+1]?.key || (slots[tb.endSlotIdx].key+0.5), name, phone:$("phoneInput").value.trim(), comment:$("commentInput").value.trim() })) }) }); clearTempSelections(); await loadFromServer(); closeBookModal(); } catch(e){alert("Ошибка при сохранении");} hideLoad(); }
-  async function loadFromServer(){ showLoad(); try{ let res=await fetch(GAS_URL+"?action=get&date="+$("dateInput").value); let data=await res.json(); bookings=data.bookings?data.bookings.map(b=>{ let startKey=parseFloat(b.start); let endKey=parseFloat(b.end); let startSlotIdx=slots.findIndex(s=>s.key===startKey); let endSlotIdx=slots.findIndex(s=>s.key===endKey)-1; if(endSlotIdx<0) endSlotIdx=slots.length-1; return { id:b.id, lane:b.table-1, start:startKey, end:endKey, startSlotIdx, endSlotIdx, name:b.name, phone:b.phone, comment:b.comment, confirmed:b.confirmed==="Да"?true:(b.confirmed==="Нет"?false:null) }; }):[]; renderAllSliders(); updateCellsHighlight(); } catch(e){console.error(e);} hideLoad(); }
-  async function saveToServer(booking){ if(!booking.id) return; await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id:booking.id, date:$("dateInput").value, tableNumber:booking.lane+1, start:booking.start, end:booking.end, name:booking.name, phone:booking.phone, comment:booking.comment }) }); }
+  async function submitTempBookings(){ let name=$("nameInput").value.trim(); if(!name) return alert("Введите имя"); if(tempBookings.length===0) return; showLoad(); try{ await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ bookings:tempBookings.map(tb=>({ date:window.dateInputForSync?.value || new Date().toISOString().split('T')[0], tableNumber:tb.lane+1, start:slots[tb.startSlotIdx].key, end:slots[tb.endSlotIdx+1]?.key || (slots[tb.endSlotIdx].key+0.5), name, phone:$("phoneInput").value.trim(), comment:$("commentInput").value.trim() })) }) }); clearTempSelections(); await loadFromServer(); closeBookModal(); } catch(e){alert("Ошибка при сохранении");} hideLoad(); }
+  async function loadFromServer(){ showLoad(); try{ let dateVal = window.dateInputForSync?.value || new Date().toISOString().split('T')[0]; let res=await fetch(GAS_URL+"?action=get&date="+dateVal); let data=await res.json(); bookings=data.bookings?data.bookings.map(b=>{ let startKey=parseFloat(b.start); let endKey=parseFloat(b.end); let startSlotIdx=slots.findIndex(s=>s.key===startKey); let endSlotIdx=slots.findIndex(s=>s.key===endKey)-1; if(endSlotIdx<0) endSlotIdx=slots.length-1; return { id:b.id, lane:b.table-1, start:startKey, end:endKey, startSlotIdx, endSlotIdx, name:b.name, phone:b.phone, comment:b.comment, confirmed:b.confirmed==="Да"?true:(b.confirmed==="Нет"?false:null) }; }):[]; renderAllSliders(); updateCellsHighlight(); } catch(e){console.error(e);} hideLoad(); }
+  async function saveToServer(booking){ if(!booking.id) return; await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id:booking.id, date:window.dateInputForSync?.value, tableNumber:booking.lane+1, start:booking.start, end:booking.end, name:booking.name, phone:booking.phone, comment:booking.comment }) }); }
   function renderAllSliders(){ let container=$("slidersLayer"); if(!container) return; container.innerHTML=""; let rows=Array.from($("dtBody")?.querySelectorAll("tr")||[]); if(rows.length===0) return; [...bookings, ...tempBookings.map(t=>({...t,isTemp:true}))].forEach(item=>{ let startIdx=item.startSlotIdx, endIdx=item.endSlotIdx; if(startIdx===undefined || endIdx===undefined) return; let row=rows[item.lane]; if(!row) return; let sc=row.cells[startIdx+1], ec=row.cells[endIdx+1]; if(!sc||!ec) return; let left=sc.offsetLeft+1, top=row.offsetTop+1, width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2, height=row.offsetHeight-2; let status=item.isTemp?"temp":(item.confirmed===true?"confirmed":(item.confirmed===false?"rejected":"pending")); let laneType=LANE_TYPE_MAP[getGroupIndex(item.lane)]; let slider=document.createElement("div"); slider.className=`slider ${status}`; if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); slider.setAttribute("data-lane-type",laneType); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; let dot=document.createElement("div"); dot.className="guest-status-dot"; slider.appendChild(dot); let nameDiv=document.createElement("div"); nameDiv.className="sl-name"; nameDiv.textContent=item.isTemp?"Ожидает брони":(item.name||"Бронь"); let timeDiv=document.createElement("div"); timeDiv.className="sl-time"; timeDiv.textContent=fmtFromSlotIdx(startIdx); slider.append(nameDiv,timeDiv); let dragHandle=document.createElement("div"); dragHandle.className="drag-handle"; if(dragModeEnabled && !item.isTemp) dragHandle.addEventListener("mousedown",(e)=>{ e.stopPropagation(); startMoveDrag(item, e, rows, slots); }); else if(dragModeEnabled && item.isTemp) dragHandle.addEventListener("mousedown",(e)=>{ e.stopPropagation(); startMoveTempDrag(item, e, rows, slots); }); else dragHandle.addEventListener("click",(e)=>{ e.stopPropagation(); if(!item.isTemp && item.id) showInfoModal(item); else if(!item.isTemp && !item.id) alert("Загрузка данных..."); else alert("Временная бронь — сохраните для просмотра."); }); slider.appendChild(dragHandle); container.appendChild(slider); }); }
-  async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells = booking.endSlotIdx - booking.startSlotIdx; let startIdxOrig = booking.startSlotIdx; let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=startIdxOrig; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStartIdx = finalStartIdx; let newEndIdx = finalStartIdx + durationCells; if(!hasConflict(finalLane, newStartIdx, newEndIdx, booking.id)){ booking.lane = finalLane; booking.startSlotIdx = newStartIdx; booking.endSlotIdx = newEndIdx; booking.start = slotsArr[newStartIdx].key; booking.end = slotsArr[newEndIdx+1]?.key || (slotsArr[newEndIdx].key+0.5); saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
+  async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells = booking.endSlotIdx - booking.startSlotIdx; let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=booking.startSlotIdx; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStartIdx = finalStartIdx; let newEndIdx = finalStartIdx + durationCells; if(!hasConflict(finalLane, newStartIdx, newEndIdx, booking.id)){ booking.lane = finalLane; booking.startSlotIdx = newStartIdx; booking.endSlotIdx = newEndIdx; booking.start = slotsArr[newStartIdx].key; booking.end = slotsArr[newEndIdx+1]?.key || (slotsArr[newEndIdx].key+0.5); saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
   async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells = temp.endSlotIdx - temp.startSlotIdx; let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=temp.startSlotIdx; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStartIdx=finalStartIdx, newEndIdx=finalStartIdx+durationCells; if(!hasConflict(finalLane, newStartIdx, newEndIdx)){ temp.lane=finalLane; temp.startSlotIdx=newStartIdx; temp.endSlotIdx=newEndIdx; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
   function createGhost(slider){ let ghost=document.createElement('div'); ghost.className='ghost-slider'; ghost.style.cssText=slider.style.cssText; ghost.style.opacity='0.5'; $('slidersLayer').appendChild(ghost); slider.classList.add('dragging'); return ghost; }
   function moveLogic(ghost,slider,rows,slotsArr,durationCells, onDrop, initialLane, initialStartIdx){ let currentLane=initialLane, currentStartIdx=initialStartIdx; function updateGhostPos(lane,startIdx){ let row=rows[lane]; if(!row) return; let sc=row.cells[startIdx+1], ec=row.cells[startIdx+durationCells+1]; if(sc&&ec){ ghost.style.left=(sc.offsetLeft+1)+'px'; ghost.style.top=(row.offsetTop+1)+'px'; ghost.style.width=(ec.offsetLeft+ec.offsetWidth-sc.offsetLeft-2)+'px'; ghost.style.height=(row.offsetHeight-2)+'px'; } } function getTargetCoords(e){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains('slot')); if(!el) return null; return {lane:parseInt(el.dataset.lane), idx:parseInt(el.dataset.slotIdx)}; } function onDragMove(ev){ let tgt=getTargetCoords(ev); if(tgt){ let nl=tgt.lane, nsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); if(nl!==currentLane||nsi!==currentStartIdx){ currentLane=nl; currentStartIdx=nsi; updateGhostPos(currentLane,currentStartIdx); } } } function onDragEnd(ev){ let tgt=getTargetCoords(ev); if(tgt){ let fl=tgt.lane, fsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1); onDrop(fl,fsi); } ghost.remove(); slider.classList.remove('dragging'); document.body.style.cursor=''; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); renderAllSliders(); } document.body.style.cursor='grabbing'; document.addEventListener('mousemove',onDragMove); document.addEventListener('mouseup',onDragEnd); updateGhostPos(currentLane,currentStartIdx); }

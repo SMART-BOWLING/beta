@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ПРОБЛЕМА , Я МОГУ БРОНИ СТАВИТЬ ТОЛЬКО С ИНТЕРВАЛОМ В 30 МИН ДУРГ ОТ ДУРГА , ЭТО НЕ ПРАВИЛЬНО, ХОТЕЛОСЬ БЫ В ПЛОТНУЮ  <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -384,7 +384,7 @@
       <button id="dragToggleBtn" class="btn-drag-toggle">Режим перетяжки: ВЫКЛ</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
-    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"></tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
+    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
   </div>
 </div>
 <div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">Режим перетяжки АКТИВЕН</div>
@@ -410,23 +410,14 @@
   let currentBooking = null;
   const $ = id => document.getElementById(id);
   
-  // ГЛАВНОЕ ИСПРАВЛЕНИЕ: проверка конфликта разрешает стыковку вплотную (end === start)
+  // Функция проверки конфликта броней (с учетом границ - allows touching)
   function hasConflict(lane, start, end, excludeId = null) {
-    // Нормализуем входные значения (на случай погрешностей)
-    const normStart = Math.round(start * 2) / 2;
-    const normEnd = Math.round(end * 2) / 2;
-    
     return bookings.some(b => {
       if (excludeId !== null && b.id === excludeId) return false;
       if (b.lane !== lane) return false;
-      
-      const bStart = Math.round(b.start * 2) / 2;
-      const bEnd = Math.round(b.end * 2) / 2;
-      
-      // Разрешаем стыковку вплотную (end === bStart ИЛИ start === bEnd)
-      // Конфликт только если интервалы реально пересекаются
-      const hasRealOverlap = !(normEnd <= bStart || normStart >= bEnd);
-      return hasRealOverlap;
+      // Разрешаем стыковку вплотную: бронь заканчивается ровно когда начинается другая
+      // Конфликт только если интервалы пересекаются (не просто касаются)
+      return !(end <= b.start || start >= b.end);
     });
   }
   
@@ -472,11 +463,7 @@
   }
   
   function getSlotCell(lane, slotIdx){ return $("dtBody")?.rows[lane]?.cells[slotIdx+1]; }
-  function fmt(v){ 
-    const hours = Math.floor(v);
-    const minutes = (v % 1 === 0.5) ? 30 : 0;
-    return `${hours}:${minutes === 0 ? '00' : '30'}`;
-  }
+  function fmt(v){ return `${Math.floor(v)}:${v%1===0.5?'30':'00'}`; }
   
   function updateCellsHighlight(){
     for(let row of $("dtBody").rows) for(let i=1;i<row.cells.length;i++) row.cells[i].classList.remove("booking-pending","booking-confirmed","booking-rejected","temp-highlight");
@@ -522,9 +509,9 @@
     if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){ 
       let {lane,startIdx,endIdx}=dragInterval; 
       let start=slots[startIdx].key, end=slots[endIdx+1]?.key || slots[endIdx].key + 0.5;
-      // Проверка конфликта с существующими бронями (разрешены стыковки)
+      // Проверка конфликта с существующими бронями
       if(hasConflict(lane, start, end)){ 
-        alert("Это время уже занято другой броней (стыковка вплотную разрешена, но здесь реальное пересечение)"); 
+        alert("Это время уже занято другой броней"); 
       } else { 
         tempBookings.push({id:nextTempId++,lane,start:start,end:end}); 
       }
@@ -539,78 +526,10 @@
   
   function openBookModal(){ if(tempBookings.length===0){ alert("Сначала выделите интервал на столе"); return; } $("nameInput").value="";$("phoneInput").value="";$("commentInput").value=""; updatePreviewTimes(); $("bookModal").classList.add("open"); }
   function closeBookModal(){ $("bookModal").classList.remove("open"); }
+  async function submitTempBookings(){ let name=$("nameInput").value.trim(); if(!name) return alert("Введите имя"); if(tempBookings.length===0) return; showLoad(); try{ await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({bookings:tempBookings.map(tb=>({date:$("dateInput").value,tableNumber:tb.lane+1,start:tb.start,end:tb.end,name,phone:$("phoneInput").value.trim(),comment:$("commentInput").value.trim()}))})}); clearTempSelections(); await loadFromServer(); closeBookModal(); } catch(e){alert("Ошибка");} hideLoad(); }
   
-  async function submitTempBookings(){ 
-    let name=$("nameInput").value.trim(); 
-    if(!name) return alert("Введите имя"); 
-    if(tempBookings.length===0) return; 
-    showLoad(); 
-    try{ 
-      let response = await fetch(GAS_URL,{
-        method:"POST",
-        headers: {"Content-Type": "application/json"},
-        body:JSON.stringify({
-          bookings:tempBookings.map(tb=>({
-            date:$("dateInput").value,
-            tableNumber:tb.lane+1,
-            start:tb.start,
-            end:tb.end,
-            name,
-            phone:$("phoneInput").value.trim(),
-            comment:$("commentInput").value.trim()
-          }))
-        })
-      });
-      if (response.ok) {
-        clearTempSelections(); 
-        await loadFromServer(); 
-        closeBookModal();
-      } else {
-        alert("Ошибка при сохранении");
-      }
-    } catch(e){alert("Ошибка: "+e.message);} 
-    hideLoad(); 
-  }
-  
-  async function loadFromServer(){ 
-    showLoad(); 
-    try{ 
-      let res=await fetch(GAS_URL+"?action=get&date="+$("dateInput").value); 
-      let data=await res.json(); 
-      bookings=data.bookings?data.bookings.map(b=>({
-        id:b.id,
-        lane:b.table-1,
-        start:Math.round(parseFloat(b.start) * 2) / 2,
-        end:Math.round(parseFloat(b.end) * 2) / 2,
-        name:b.name,
-        phone:b.phone,
-        comment:b.comment,
-        confirmed:b.confirmed==="Да"?true:(b.confirmed==="Нет"?false:null)
-      })):[]; 
-      renderAllSliders(); 
-      updateCellsHighlight(); 
-    } catch(e){console.error(e);} 
-    hideLoad(); 
-  }
-  
-  async function saveToServer(booking){ 
-    if(!booking.id) return; 
-    await fetch(GAS_URL,{
-      method:"POST",
-      headers: {"Content-Type": "application/json"},
-      body:JSON.stringify({
-        action:"update",
-        id:booking.id,
-        date:$("dateInput").value,
-        tableNumber:booking.lane+1,
-        start:booking.start,
-        end:booking.end,
-        name:booking.name,
-        phone:booking.phone,
-        comment:booking.comment
-      })
-    }); 
-  }
+  async function loadFromServer(){ showLoad(); try{ let res=await fetch(GAS_URL+"?action=get&date="+$("dateInput").value); let data=await res.json(); bookings=data.bookings?data.bookings.map(b=>({id:b.id,lane:b.table-1,start:parseFloat(b.start),end:parseFloat(b.end),name:b.name,phone:b.phone,comment:b.comment,confirmed:b.confirmed==="Да"?true:(b.confirmed==="Нет"?false:null)})):[]; renderAllSliders(); updateCellsHighlight(); } catch(e){console.error(e);} hideLoad(); }
+  async function saveToServer(booking){ if(!booking.id) return; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"update",id:booking.id,date:$("dateInput").value,tableNumber:booking.lane+1,start:booking.start,end:booking.end,name:booking.name,phone:booking.phone,comment:booking.comment})}); }
   
   function renderAllSliders(){ 
     let container=$("slidersLayer"); if(!container) return; container.innerHTML=""; let rows=Array.from($("dtBody")?.querySelectorAll("tr")||[]); if(rows.length===0) return;
@@ -648,8 +567,8 @@
   
   function showInfoModal(b){ currentBooking=b; $("i-table").textContent="№ "+(b.lane+1); $("i-time").textContent=`${fmt(b.start)} – ${fmt(b.end)}`; $("i-name").textContent=b.name; $("i-phone").textContent=b.phone||"—"; $("i-comment").textContent=b.comment||"—"; let statusText=b.confirmed===true?"✅ Пришли":(b.confirmed===false?"❌ Не пришли":"⏳ Ожидание"); $("i-status").textContent=statusText; $("infoModal").classList.add("open"); }
   function closeInfoModal(){ $("infoModal").classList.remove("open"); currentBooking=null; }
-  async function confirmBooking(yes){ if(!currentBooking) return; showLoad(); await fetch(GAS_URL,{method:"POST",headers: {"Content-Type": "application/json"},body:JSON.stringify({action:"confirm",id:currentBooking.id,confirmed:yes})}); closeInfoModal(); await loadFromServer(); hideLoad(); }
-  async function deleteBooking(){ if(!currentBooking||!confirm("Удалить?")) return; showLoad(); await fetch(GAS_URL,{method:"POST",headers: {"Content-Type": "application/json"},body:JSON.stringify({action:"delete",id:currentBooking.id})}); closeInfoModal(); await loadFromServer(); hideLoad(); }
+  async function confirmBooking(yes){ if(!currentBooking) return; showLoad(); await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:currentBooking.id,confirmed:yes})}); closeInfoModal(); await loadFromServer(); hideLoad(); }
+  async function deleteBooking(){ if(!currentBooking||!confirm("Удалить?")) return; showLoad(); await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:currentBooking.id})}); closeInfoModal(); await loadFromServer(); hideLoad(); }
   function showLoad(){ $("loader").style.display="flex"; }
   function hideLoad(){ $("loader").style.display="none"; }
   function openImg(){ $("imgPopup").classList.add("open"); }

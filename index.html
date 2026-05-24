@@ -320,6 +320,7 @@
       white-space: nowrap;
     }
     
+    /* ghost preview style — полупрозрачная тень для предпросмотра перемещения */
     .ghost-slider {
       position: absolute;
       border-radius: 6px;
@@ -467,7 +468,7 @@
       <button id="dragToggleBtn" class="btn-drag-toggle">Режим перетяжки: ВЫКЛ</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
-    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
+    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><table><th class="corner">СТОЛ</th></td></thead><tbody id="dtBody"></tbody>\\</div><div id="slidersLayer"></div></div>
   </div>
 </div>
 <div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">Режим перетяжки АКТИВЕН</div>
@@ -632,70 +633,10 @@
   function updatePreviewTimes() { const span=document.getElementById("previewTimes"); if(span) span.innerText = tempBookings.length ? tempBookings.map(tb=>`Стол ${tb.lane+1} (${fmtFromSlotIdx(tb.startSlotIdx)})`).join("; ") : "—"; }
   
   let isDragging=false, dragStartCell=null, dragInterval=null;
-  
-  // ИСПРАВЛЕНА ЛОГИКА ВЫДЕЛЕНИЯ — теперь корректно обрабатывает выделение 2 и 3 ячеек (одинаковый результат)
-  function onMouseDown(e){ 
-    if(dragModeEnabled) return; 
-    let t=e.target; 
-    if(t.classList?.contains("slot")){ 
-      e.preventDefault(); 
-      let lane=parseInt(t.dataset.lane), si=parseInt(t.dataset.slotIdx); 
-      isDragging=true; 
-      dragStartCell={lane,si}; 
-      dragInterval={lane,startIdx:si,endIdx:si}; 
-      // Сброс предыдущих подсветок перед новым выделением
-      document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over"));
-      highlightDragInterval(lane,si,si); 
-    } 
-  }
-  
-  function onMouseMove(e){ 
-    if(!dragModeEnabled && isDragging && dragStartCell){ 
-      let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); 
-      if(el){ 
-        let lane=parseInt(el.dataset.lane), idx=parseInt(el.dataset.slotIdx); 
-        if(lane===dragStartCell.lane){ 
-          let ns=Math.min(dragStartCell.si,idx), ne=Math.max(dragStartCell.si,idx); 
-          dragInterval={lane,startIdx:ns,endIdx:ne}; 
-          highlightDragInterval(lane,ns,ne); 
-        } 
-      } 
-    } 
-  }
-  
-  function highlightDragInterval(lane,si,ei){ 
-    document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); 
-    for(let i=si;i<=ei;i++){ 
-      let cell=getSlotCell(lane,i); 
-      if(cell) cell.classList.add("drag-over"); 
-    } 
-  }
-  
-  // ИСПРАВЛЕНА ЛОГИКА ЗАВЕРШЕНИЯ ВЫДЕЛЕНИЯ
-  function onMouseUp(){ 
-    if(!dragModeEnabled && isDragging && dragInterval){ 
-      let {lane,startIdx,endIdx}=dragInterval; 
-      // ВАЖНО: проверяем, что выделение не нулевое (startIdx !== endIdx) ИЛИ если это выделение одной ячейки, но длительностью в 30 минут
-      // Но для бронирования нужен интервал хотя бы 30 минут (одна ячейка = 30 мин). Пользователь может выделить 1 ячейку.
-      // Раньше баг был в том, что при повторном выделении того же интервала startIdx === endIdx условие пропускало создание брони.
-      // Теперь создаём бронь для любого выделения, даже если startIdx === endIdx (один слот = 30 минут)
-      if(startIdx !== undefined && endIdx !== undefined){
-        if(hasConflict(lane, startIdx, endIdx)){ 
-          alert("Это время уже занято другой броней"); 
-        } else { 
-          tempBookings.push({ id:nextTempId++, lane, startSlotIdx: startIdx, endSlotIdx: endIdx }); 
-          renderInlineTempCards(); 
-          renderAllSliders(); 
-          updateCellsHighlight(); 
-        } 
-      } 
-    } 
-    isDragging=false; 
-    dragInterval=null; 
-    dragStartCell=null; 
-    document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); 
-  }
-  
+  function onMouseDown(e){ if(dragModeEnabled) return; let t=e.target; if(t.classList?.contains("slot")){ e.preventDefault(); let lane=parseInt(t.dataset.lane), si=parseInt(t.dataset.slotIdx); isDragging=true; dragStartCell={lane,si}; dragInterval={lane,startIdx:si,endIdx:si}; highlightDragInterval(lane,si,si); } }
+  function onMouseMove(e){ if(!dragModeEnabled && isDragging && dragStartCell){ let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); if(el){ let lane=parseInt(el.dataset.lane), idx=parseInt(el.dataset.slotIdx); if(lane===dragStartCell.lane){ let ns=Math.min(dragStartCell.si,idx), ne=Math.max(dragStartCell.si,idx); dragInterval={lane,startIdx:ns,endIdx:ne}; highlightDragInterval(lane,ns,ne); } } } }
+  function highlightDragInterval(lane,si,ei){ document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); for(let i=si;i<=ei;i++){ let cell=getSlotCell(lane,i); if(cell) cell.classList.add("drag-over"); } }
+  function onMouseUp(){ if(!dragModeEnabled && isDragging && dragInterval && dragInterval.startIdx !== dragInterval.endIdx){ let {lane,startIdx,endIdx}=dragInterval; if(hasConflict(lane, startIdx, endIdx)){ alert("Это время уже занято другой броней"); } else { tempBookings.push({ id:nextTempId++, lane, startSlotIdx: startIdx, endSlotIdx: endIdx }); } renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } isDragging=false; dragInterval=null; dragStartCell=null; document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); }
   $("tableDesktop").addEventListener("mousedown", onMouseDown);
   document.body.addEventListener("mousemove", onMouseMove);
   document.body.addEventListener("mouseup", onMouseUp);
@@ -708,10 +649,57 @@
   
   function renderAllSliders(){ let container=$("slidersLayer"); if(!container) return; container.innerHTML=""; let rows=Array.from($("dtBody")?.querySelectorAll("tr")||[]); if(rows.length===0) return; [...bookings, ...tempBookings.map(t=>({...t,isTemp:true}))].forEach(item=>{ let startIdx=item.startSlotIdx, endIdx=item.endSlotIdx; if(startIdx===undefined || endIdx===undefined) return; let row=rows[item.lane]; if(!row) return; let sc=row.cells[startIdx+1], ec=row.cells[endIdx+1]; if(!sc||!ec) return; let left=sc.offsetLeft+1, top=row.offsetTop+1, width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2, height=row.offsetHeight-2; let status=item.isTemp?"temp":(item.confirmed===true?"confirmed":(item.confirmed===false?"rejected":"pending")); let laneType=LANE_TYPE_MAP[getGroupIndex(item.lane)]; let slider=document.createElement("div"); slider.className=`slider ${status}`; if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); slider.setAttribute("data-lane-type",laneType); slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; let dot=document.createElement("div"); dot.className="guest-status-dot"; slider.appendChild(dot); let nameDiv=document.createElement("div"); nameDiv.className="sl-name"; nameDiv.textContent=item.isTemp?"Ожидает брони":(item.name||"Бронь"); let timeDiv=document.createElement("div"); timeDiv.className="sl-time"; timeDiv.textContent=fmtFromSlotIdx(startIdx); slider.append(nameDiv,timeDiv); let dragHandle=document.createElement("div"); dragHandle.className="drag-handle"; if(dragModeEnabled && !item.isTemp) dragHandle.addEventListener("mousedown",(e)=>{ e.stopPropagation(); startMoveDrag(item, e, rows, slots); }); else if(dragModeEnabled && item.isTemp) dragHandle.addEventListener("mousedown",(e)=>{ e.stopPropagation(); startMoveTempDrag(item, e, rows, slots); }); else dragHandle.addEventListener("click",(e)=>{ e.stopPropagation(); if(!item.isTemp && item.id) showInfoModal(item); else if(!item.isTemp && !item.id) alert("Загрузка данных..."); else alert("Временная бронь — сохраните для просмотра."); }); slider.appendChild(dragHandle); container.appendChild(slider); }); }
   
-  async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells = booking.endSlotIdx - booking.startSlotIdx; let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=booking.startSlotIdx; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStartIdx = finalStartIdx; let newEndIdx = finalStartIdx + durationCells; if(!hasConflict(finalLane, newStartIdx, newEndIdx, booking.id)){ booking.lane = finalLane; booking.startSlotIdx = newStartIdx; booking.endSlotIdx = newEndIdx; booking.start = slotsArr[newStartIdx].key; booking.end = slotsArr[newEndIdx+1]?.key || (slotsArr[newEndIdx].key+0.5); saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
-  async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells = temp.endSlotIdx - temp.startSlotIdx; let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=temp.startSlotIdx; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStartIdx=finalStartIdx, newEndIdx=finalStartIdx+durationCells; if(!hasConflict(finalLane, newStartIdx, newEndIdx)){ temp.lane=finalLane; temp.startSlotIdx=newStartIdx; temp.endSlotIdx=newEndIdx; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
+  // Улучшенная логика с призраком и динамическим предпросмотром позиции
+  async function startMoveDrag(booking, e, rows, slotsArr){ 
+    e.stopPropagation(); 
+    const slider=e.currentTarget.closest('.slider'); 
+    if(!slider) return; 
+    let durationCells = booking.endSlotIdx - booking.startSlotIdx; 
+    let ghost=createGhost(slider); 
+    let currentLane=booking.lane, currentStartIdx=booking.startSlotIdx; 
+    moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ 
+      let newStartIdx = finalStartIdx; 
+      let newEndIdx = finalStartIdx + durationCells; 
+      if(newEndIdx >= slotsArr.length) newEndIdx = slotsArr.length-1;
+      if(newStartIdx < 0) newStartIdx = 0;
+      if(!hasConflict(finalLane, newStartIdx, newEndIdx, booking.id)){ 
+        booking.lane = finalLane; 
+        booking.startSlotIdx = newStartIdx; 
+        booking.endSlotIdx = newEndIdx; 
+        booking.start = slotsArr[newStartIdx].key; 
+        booking.end = slotsArr[newEndIdx+1]?.key || (slotsArr[newEndIdx].key+0.5); 
+        saveToServer(booking); 
+        renderAllSliders(); 
+        updateCellsHighlight(); 
+      } else alert("Конфликт с другой броней"); 
+    }, currentLane,currentStartIdx); 
+  }
   
-  function createGhost(slider){ let ghost=document.createElement('div'); ghost.className='ghost-slider'; 
+  async function startMoveTempDrag(temp, e, rows, slotsArr){ 
+    e.stopPropagation(); 
+    const slider=e.currentTarget.closest('.slider'); 
+    if(!slider) return; 
+    let durationCells = temp.endSlotIdx - temp.startSlotIdx; 
+    let ghost=createGhost(slider); 
+    let currentLane=temp.lane, currentStartIdx=temp.startSlotIdx; 
+    moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ 
+      let newStartIdx=finalStartIdx, newEndIdx=finalStartIdx+durationCells;
+      if(newEndIdx >= slotsArr.length) newEndIdx = slotsArr.length-1;
+      if(newStartIdx < 0) newStartIdx = 0;
+      if(!hasConflict(finalLane, newStartIdx, newEndIdx)){ 
+        temp.lane=finalLane; 
+        temp.startSlotIdx=newStartIdx; 
+        temp.endSlotIdx=newEndIdx; 
+        renderInlineTempCards(); 
+        renderAllSliders(); 
+        updateCellsHighlight(); 
+      } else alert("Конфликт с другой броней"); 
+    }, currentLane,currentStartIdx); 
+  }
+  
+  function createGhost(slider){ 
+    let ghost=document.createElement('div'); 
+    ghost.className='ghost-slider'; 
     let nameClone = slider.querySelector('.sl-name')?.cloneNode(true);
     let timeClone = slider.querySelector('.sl-time')?.cloneNode(true);
     let dotClone = slider.querySelector('.guest-status-dot')?.cloneNode(true);
@@ -719,7 +707,8 @@
     if(nameClone) ghost.appendChild(nameClone);
     if(timeClone) ghost.appendChild(timeClone);
     ghost.style.cssText=slider.style.cssText; 
-    ghost.style.opacity='0.85'; ghost.style.transition='none';
+    ghost.style.opacity='0.85'; 
+    ghost.style.transition='none';
     $('slidersLayer').appendChild(ghost); 
     slider.classList.add('dragging');
     return ghost;
@@ -730,11 +719,18 @@
     function updateGhostPos(lane,startIdx){
       let row=rows[lane];
       if(!row) return;
-      let sc=row.cells[startIdx+1], ec=row.cells[startIdx+durationCells+1];
+      let endIdx = startIdx + durationCells;
+      if(endIdx >= slotsArr.length) endIdx = slotsArr.length - 1;
+      let sc=row.cells[startIdx+1], ec=row.cells[endIdx+1];
       if(sc&&ec){
         ghost.style.left=(sc.offsetLeft+1)+'px';
         ghost.style.top=(row.offsetTop+1)+'px';
         ghost.style.width=(ec.offsetLeft+ec.offsetWidth-sc.offsetLeft-2)+'px';
+        ghost.style.height=(row.offsetHeight-2)+'px';
+      } else if(sc && !ec) {
+        ghost.style.left=(sc.offsetLeft+1)+'px';
+        ghost.style.top=(row.offsetTop+1)+'px';
+        ghost.style.width=(sc.offsetWidth-2)+'px';
         ghost.style.height=(row.offsetHeight-2)+'px';
       }
     }
@@ -746,7 +742,8 @@
     function onDragMove(ev){
       let tgt=getTargetCoords(ev);
       if(tgt){
-        let nl=tgt.lane, nsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1);
+        let maxStartIdx = slotsArr.length - durationCells - 1;
+        let nl=tgt.lane, nsi=Math.min(Math.max(0,tgt.idx), maxStartIdx);
         if(nl!==currentLane||nsi!==currentStartIdx){
           currentLane=nl; currentStartIdx=nsi;
           updateGhostPos(currentLane,currentStartIdx);
@@ -756,8 +753,15 @@
     function onDragEnd(ev){
       let tgt=getTargetCoords(ev);
       if(tgt){
-        let fl=tgt.lane, fsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1);
-        onDrop(fl,fsi);
+        let maxStartIdx = slotsArr.length - durationCells - 1;
+        let fl=tgt.lane, fsi=Math.min(Math.max(0,tgt.idx), maxStartIdx);
+        if(fl !== undefined && fsi !== undefined) {
+          onDrop(fl,fsi);
+        } else {
+          onDrop(initialLane, initialStartIdx);
+        }
+      } else {
+        onDrop(initialLane, initialStartIdx);
       }
       if(ghost && ghost.parentNode) ghost.remove();
       if(slider) slider.classList.remove('dragging');

@@ -8,6 +8,7 @@
   <!-- Google Identity Services for login -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
+    /* ... весь ваш CSS остается без изменений ... */
     * {
       margin: 0;
       padding: 0;
@@ -479,6 +480,14 @@
 <div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
 
 <script>
+  // ============= ВАЖНО: ЗАМЕНИТЕ ЭТИ URL НА ВАШИ =============
+  // URL для ПРОВЕРКИ EMAIL (скрипт с листом доступа)
+  const CHECK_EMAIL_URL = "https://script.google.com/macros/s/AKfycbxwrSDinYCiGgHp0eohoRai-9KxvXO_xuoJX62yxGMh98LFeK6AjSAeuaYSKwYa2nX5/exec";
+  
+  // URL для БРОНИРОВАНИЙ (скрипт с листом броней)
+  const BOOKINGS_URL = "https://script.google.com/macros/s/AKfycbzLxSrpcGOIm34gLlFZS-EYZmG8liMLcUST3MRMoAp56y6XDC2ClapCDB18yiYmdrHZ/exec";
+  // ============================================================
+  
   // Отключаем системное перетаскивание изображений и текста для зон перетяжки
   document.addEventListener('dragstart', (e) => {
     if (e.target.closest('.drag-handle') || e.target.closest('.slider')) {
@@ -487,13 +496,10 @@
     }
   });
   
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbzLxSrpcGOIm34gLlFZS-EYZmG8liMLcUST3MRMoAp56y6XDC2ClapCDB18yiYmdrHZ/exec";
-  
-  // Конфигурация из Google Sheets (будет загружена при входе)
+  // Конфигурация (можно загружать из Google Sheets)
   let LANES = 12;
   let SH = 11;
   let EH = 22;
-  let ALLOWED_EMAILS = [];
   
   const slots = []; 
   
@@ -537,10 +543,10 @@
     let d = parseJwt(r.credential);
     let userEmail = d.email;
     
-    // Проверяем доступ через Google Sheets API
+    // Проверяем доступ через первый скрипт (проверка email)
     showLoad();
     try {
-      let response = await fetch(`${GAS_URL}?action=checkEmail&email=${encodeURIComponent(userEmail)}`);
+      let response = await fetch(`${CHECK_EMAIL_URL}?action=checkEmail&email=${encodeURIComponent(userEmail)}`);
       let result = await response.json();
       
       if (result.success && result.access) {
@@ -556,27 +562,16 @@
     hideLoad();
   }
   
-  async function loadConfigFromSheet() {
-    // Здесь можно загрузить конфигурацию (LANES, SH, EH) из отдельного листа
-    // Пока оставляем значения по умолчанию
-    // В будущем можно добавить отдельный запрос к GAS для получения конфигурации
-    return true;
-  }
-  
   window.onload = async () => {
     if(localStorage.getItem("ue")) {
-      // Проверяем, что email все еще в списке доступа
       let userEmail = localStorage.getItem("ue");
       showLoad();
       try {
-        let response = await fetch(`${GAS_URL}?action=checkEmail&email=${encodeURIComponent(userEmail)}`);
+        let response = await fetch(`${CHECK_EMAIL_URL}?action=checkEmail&email=${encodeURIComponent(userEmail)}`);
         let result = await response.json();
         
         if (result.success && result.access) {
-          // Загружаем конфигурацию
-          await loadConfigFromSheet();
           initSlots();
-          
           $("login").style.display = "none";
           $("content").style.display = "block";
           init();
@@ -797,7 +792,7 @@
     if(tempBookings.length===0) return; 
     showLoad(); 
     try{ 
-      await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ bookings:tempBookings.map(tb=>({ 
+      await fetch(BOOKINGS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ bookings:tempBookings.map(tb=>({ 
         date:window.dateInputForSync?.value || new Date().toISOString().split('T')[0], 
         tableNumber:tb.lane+1, 
         start:slots[tb.startSlotIdx].key, 
@@ -813,9 +808,9 @@
     hideLoad(); 
   }
   
-  async function loadFromServer(){ showLoad(); try{ let dateVal = window.dateInputForSync?.value || new Date().toISOString().split('T')[0]; let res=await fetch(GAS_URL+"?action=get&date="+dateVal); let data=await res.json(); bookings=data.bookings?data.bookings.map(b=>{ let startKey=parseFloat(b.start); let endKey=parseFloat(b.end); let startSlotIdx=slots.findIndex(s=>s.key===startKey); let endSlotIdx=slots.findIndex(s=>s.key===endKey)-1; if(endSlotIdx<0) endSlotIdx=slots.length-1; return { id:b.id, lane:b.table-1, start:startKey, end:endKey, startSlotIdx, endSlotIdx, name:b.name, phone:b.phone, comment:b.comment, confirmed:b.confirmed==="Да"?true:(b.confirmed==="Нет"?false:null) }; }):[]; renderAllSliders(); updateCellsHighlight(); } catch(e){console.error(e);} hideLoad(); }
+  async function loadFromServer(){ showLoad(); try{ let dateVal = window.dateInputForSync?.value || new Date().toISOString().split('T')[0]; let res=await fetch(BOOKINGS_URL+"?action=get&date="+dateVal); let data=await res.json(); bookings=data.bookings?data.bookings.map(b=>{ let startKey=parseFloat(b.start); let endKey=parseFloat(b.end); let startSlotIdx=slots.findIndex(s=>s.key===startKey); let endSlotIdx=slots.findIndex(s=>s.key===endKey)-1; if(endSlotIdx<0) endSlotIdx=slots.length-1; return { id:b.id, lane:b.table-1, start:startKey, end:endKey, startSlotIdx, endSlotIdx, name:b.name, phone:b.phone, comment:b.comment, confirmed:b.confirmed==="Да"?true:(b.confirmed==="Нет"?false:null) }; }):[]; renderAllSliders(); updateCellsHighlight(); } catch(e){console.error(e);} hideLoad(); }
   
-  async function saveToServer(booking){ if(!booking.id) return; await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id:booking.id, date:window.dateInputForSync?.value, tableNumber:booking.lane+1, start:booking.start, end:booking.end, name:booking.name, phone:booking.phone, comment:booking.comment }) }); }
+  async function saveToServer(booking){ if(!booking.id) return; await fetch(BOOKINGS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id:booking.id, date:window.dateInputForSync?.value, tableNumber:booking.lane+1, start:booking.start, end:booking.end, name:booking.name, phone:booking.phone, comment:booking.comment }) }); }
   
   function renderAllSliders(){ 
     let container=$("slidersLayer"); 
@@ -947,8 +942,8 @@
   }
   
   function closeInfoModal(){ $("infoModal").classList.remove("open"); currentBooking=null; }
-  async function confirmBooking(yes){ if(!currentBooking) return; showLoad(); await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"confirm", id:currentBooking.id, confirmed:yes }) }); closeInfoModal(); await loadFromServer(); hideLoad(); }
-  async function deleteBooking(){ if(!currentBooking||!confirm("Удалить?")) return; showLoad(); await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"delete", id:currentBooking.id }) }); closeInfoModal(); await loadFromServer(); hideLoad(); }
+  async function confirmBooking(yes){ if(!currentBooking) return; showLoad(); await fetch(BOOKINGS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"confirm", id:currentBooking.id, confirmed:yes }) }); closeInfoModal(); await loadFromServer(); hideLoad(); }
+  async function deleteBooking(){ if(!currentBooking||!confirm("Удалить?")) return; showLoad(); await fetch(BOOKINGS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"delete", id:currentBooking.id }) }); closeInfoModal(); await loadFromServer(); hideLoad(); }
   function showLoad(){ $("loader").style.display="flex"; }
   function hideLoad(){ $("loader").style.display="none"; }
   function openImg(){ $("imgPopup").classList.add("open"); }

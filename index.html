@@ -488,19 +488,28 @@
   });
   
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLxSrpcGOIm34gLlFZS-EYZmG8liMLcUST3MRMoAp56y6XDC2ClapCDB18yiYmdrHZ/exec";
-  const ALLOWED = ["vadiksss900@gmail.com","sergey99belov@gmail.com","popadinecvasil3@gmail.com","veronicadiakova04@gmail.com","info.luckystrike.kh@gmail.com","sashavolobuev123890@gmail.com","egorgorbushko@gmail.com","shatrava.o@gmail.com","Craftmax30@gmail.com","bowlingblock.b@gmail.com","lana.arnaut@gmail.com","polosinnikita1224@gmail.com","sofialat1506@gmail.com","ll3991940@gmail.com","ken040888@gmail.com"];
-  const LANES = 12, SH = 11, EH = 22;
+  
+  // Конфигурация из Google Sheets (будет загружена при входе)
+  let LANES = 12;
+  let SH = 11;
+  let EH = 22;
+  let ALLOWED_EMAILS = [];
+  
   const slots = []; 
-  for(let h=SH; h<=EH; h++) { 
-    slots.push({ label: `${h}:00`, key: h, hour: h, minute: 0 }); 
-    if(h<EH) slots.push({ label: `${h}:30`, key: h+0.5, hour: h, minute: 30 }); 
+  
+  function initSlots() {
+    slots.length = 0;
+    for(let h = SH; h <= EH; h++) { 
+      slots.push({ label: `${h}:00`, key: h, hour: h, minute: 0 }); 
+      if(h < EH) slots.push({ label: `${h}:30`, key: h + 0.5, hour: h, minute: 30 }); 
+    }
   }
   
   function getGroupIndex(lane) { 
-    let n = lane+1; 
-    if(n<=3) return 0; 
-    if(n===4) return 1; 
-    if(n<=6) return 0; 
+    let n = lane + 1; 
+    if(n <= 3) return 0; 
+    if(n === 4) return 1; 
+    if(n <= 6) return 0; 
     return 2; 
   }
   const GRP_CLASS = ['group-blue', 'group-green', 'group-red'];
@@ -521,20 +530,65 @@
       return !(endTime <= bStart || startTime >= bEnd);
     });
   }
+  
   function parseJwt(t){ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
-  function handleCredentialResponse(r){ 
-    let d=parseJwt(r.credential); 
-    if(ALLOWED.includes(d.email)){ 
-      localStorage.setItem("ue",d.email); 
-      location.reload(); 
-    } else alert("Доступ запрещён"); 
+  
+  async function handleCredentialResponse(r){ 
+    let d = parseJwt(r.credential);
+    let userEmail = d.email;
+    
+    // Проверяем доступ через Google Sheets API
+    showLoad();
+    try {
+      let response = await fetch(`${GAS_URL}?action=checkEmail&email=${encodeURIComponent(userEmail)}`);
+      let result = await response.json();
+      
+      if (result.success && result.access) {
+        localStorage.setItem("ue", userEmail);
+        location.reload();
+      } else {
+        alert("Доступ запрещён. Ваш email не найден в списке доступа.");
+      }
+    } catch (error) {
+      console.error("Ошибка проверки доступа:", error);
+      alert("Ошибка при проверке доступа. Попробуйте позже.");
+    }
+    hideLoad();
   }
   
-  window.onload = ()=>{
-    if(localStorage.getItem("ue") && ALLOWED.includes(localStorage.getItem("ue"))){
-      $("login").style.display="none";
-      $("content").style.display="block";
-      init();
+  async function loadConfigFromSheet() {
+    // Здесь можно загрузить конфигурацию (LANES, SH, EH) из отдельного листа
+    // Пока оставляем значения по умолчанию
+    // В будущем можно добавить отдельный запрос к GAS для получения конфигурации
+    return true;
+  }
+  
+  window.onload = async () => {
+    if(localStorage.getItem("ue")) {
+      // Проверяем, что email все еще в списке доступа
+      let userEmail = localStorage.getItem("ue");
+      showLoad();
+      try {
+        let response = await fetch(`${GAS_URL}?action=checkEmail&email=${encodeURIComponent(userEmail)}`);
+        let result = await response.json();
+        
+        if (result.success && result.access) {
+          // Загружаем конфигурацию
+          await loadConfigFromSheet();
+          initSlots();
+          
+          $("login").style.display = "none";
+          $("content").style.display = "block";
+          init();
+        } else {
+          localStorage.removeItem("ue");
+          location.reload();
+        }
+      } catch (error) {
+        console.error("Ошибка проверки доступа:", error);
+        alert("Ошибка при проверке доступа");
+      }
+      hideLoad();
     }
   };
   
@@ -622,7 +676,6 @@
   }
   function getSlotCell(lane, slotIdx){ return $("dtBody")?.rows[lane]?.cells[slotIdx+1]; }
   
-  // ИСПРАВЛЕННАЯ ФУНКЦИЯ ФОРМАТИРОВАНИЯ ВРЕМЕНИ
   function fmtFromSlotIdx(startSlotIdx, endSlotIdx = null){ 
     let s = slots[startSlotIdx];
     let endIdx = (endSlotIdx !== null) ? endSlotIdx + 1 : startSlotIdx + 1;
@@ -708,7 +761,6 @@
     } 
   }
   
-  // ИСПРАВЛЕННАЯ ФУНКЦИЯ onMouseUp
   function onMouseUp(){ 
     if(!dragModeEnabled && isDragging && dragInterval){ 
       let {lane,startIdx,endIdx}=dragInterval; 
@@ -902,6 +954,9 @@
   function openImg(){ $("imgPopup").classList.add("open"); }
   function closeImg(){ $("imgPopup").classList.remove("open"); }
   ["bookModal","infoModal","imgPopup"].forEach(id=>{ $(id)?.addEventListener("click",e=>{ if(e.target=== $(id)) $(id).classList.remove("open"); }); });
+  
+  // Инициализируем слоты с значениями по умолчанию
+  initSlots();
 </script>
 </body>
 </html>

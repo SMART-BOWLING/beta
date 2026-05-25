@@ -8,7 +8,6 @@
   <!-- Google Identity Services for login -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    /* ... весь ваш CSS остается без изменений ... */
     * {
       margin: 0;
       padding: 0;
@@ -480,15 +479,12 @@
 <div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
 
 <script>
-  // ============= ВАЖНО: ЗАМЕНИТЕ ЭТИ URL НА ВАШИ =============
+  // ============= ВАЖНО: ЗАМЕНИТЕ ЭТОТ URL НА ВАШ =============
   // URL для ПРОВЕРКИ EMAIL (скрипт с листом доступа)
-  const CHECK_EMAIL_URL = "https://script.google.com/macros/s/AKfycbzLxSrpcGOIm34gLlFZS-EYZmG8liMLcUST3MRMoAp56y6XDC2ClapCDB18yiYmdrHZ/exec";
-  
-  // URL для БРОНИРОВАНИЙ (скрипт с листом броней)
-  const BOOKINGS_URL = "https://script.google.com/macros/s/AKfycbxwrSDinYCiGgHp0eohoRai-9KxvXO_xuoJX62yxGMh98LFeK6AjSAeuaYSKwYa2nX5/exec";
+  const CHECK_EMAIL_URL = "https://script.google.com/macros/s/AKfycbw2KM4hjTe9Zwh6-8Tx2i3QvlFvLGhLSWpfcZ19rrx0SVko8h9_14hu1AoygDZcEQK9/exec";
   // ============================================================
   
-  // Отключаем системное перетаскивание изображений и текста для зон перетяжки
+  // Отключаем системное перетаскивание
   document.addEventListener('dragstart', (e) => {
     if (e.target.closest('.drag-handle') || e.target.closest('.slider')) {
       e.preventDefault();
@@ -496,7 +492,7 @@
     }
   });
   
-  // Конфигурация (можно загружать из Google Sheets)
+  // Конфигурация
   let LANES = 12;
   let SH = 11;
   let EH = 22;
@@ -543,17 +539,24 @@
     let d = parseJwt(r.credential);
     let userEmail = d.email;
     
-    // Проверяем доступ через первый скрипт (проверка email)
     showLoad();
     try {
       let response = await fetch(`${CHECK_EMAIL_URL}?action=checkEmail&email=${encodeURIComponent(userEmail)}`);
       let result = await response.json();
       
       if (result.success && result.access) {
+        // Сохраняем email и редиректим на URL из таблицы
         localStorage.setItem("ue", userEmail);
-        location.reload();
+        if (result.redirectUrl) {
+          window.location.href = result.redirectUrl;
+        } else {
+          // Если нет URL для редиректа, просто показываем интерфейс
+          $("login").style.display = "none";
+          $("content").style.display = "block";
+          init();
+        }
       } else {
-        alert("Доступ запрещён. Ваш email не найден в списке доступа.");
+        alert(result.message || "Доступ запрещён. Ваш email не найден в списке доступа.");
       }
     } catch (error) {
       console.error("Ошибка проверки доступа:", error);
@@ -563,27 +566,12 @@
   }
   
   window.onload = async () => {
-    if(localStorage.getItem("ue")) {
-      let userEmail = localStorage.getItem("ue");
-      showLoad();
-      try {
-        let response = await fetch(`${CHECK_EMAIL_URL}?action=checkEmail&email=${encodeURIComponent(userEmail)}`);
-        let result = await response.json();
-        
-        if (result.success && result.access) {
-          initSlots();
-          $("login").style.display = "none";
-          $("content").style.display = "block";
-          init();
-        } else {
-          localStorage.removeItem("ue");
-          location.reload();
-        }
-      } catch (error) {
-        console.error("Ошибка проверки доступа:", error);
-        alert("Ошибка при проверке доступа");
-      }
-      hideLoad();
+    // Проверяем, не находимся ли мы уже на странице с контентом
+    if (window.location.href.includes('beta') && localStorage.getItem("ue")) {
+      $("login").style.display = "none";
+      $("content").style.display = "block";
+      initSlots();
+      init();
     }
   };
   
@@ -950,7 +938,7 @@
   function closeImg(){ $("imgPopup").classList.remove("open"); }
   ["bookModal","infoModal","imgPopup"].forEach(id=>{ $(id)?.addEventListener("click",e=>{ if(e.target=== $(id)) $(id).classList.remove("open"); }); });
   
-  // Инициализируем слоты с значениями по умолчанию
+  // Инициализируем слоты
   initSlots();
 </script>
 </body>

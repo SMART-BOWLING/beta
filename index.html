@@ -1,4 +1,4 @@
-в той же гугл таблице в листе под названием 1 есть емейлы в колонке а, перед открытием сайта делай поиск емейла в колонке а, если емейл есть , открывай сайт. вот код :  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -7,7 +7,9 @@
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png">
   <!-- Google Identity Services for login -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js"></script>
   <style>
+    /* Ваши существующие стили остаются без изменений */
     * {
       margin: 0;
       padding: 0;
@@ -72,6 +74,7 @@
       font-weight: 450;
     }
 
+    /* Стили для страницы входа */
     #login {
       position: fixed;
       inset: 0;
@@ -84,13 +87,81 @@
       z-index: 9999;
       padding: 32px;
     }
-    .login-glyph { font-size: 52px; font-weight: 500; letter-spacing: -0.5px; color: var(--label-secondary); }
-    .login-title { font-size: 34px; font-weight: 600; letter-spacing: -0.7px; color: var(--label-dark); }
-    .login-sub { font-size: 16px; color: var(--label-tertiary); font-weight: 480; }
-    .login-sep { width: 32px; height: 2px; background: var(--border-strong); border-radius: 2px; }
+    
+    .login-glyph { 
+      font-size: 52px; 
+      font-weight: 500; 
+      letter-spacing: -0.5px; 
+      color: var(--label-secondary); 
+    }
+    
+    .login-title { 
+      font-size: 34px; 
+      font-weight: 600; 
+      letter-spacing: -0.7px; 
+      color: var(--label-dark); 
+    }
+    
+    .login-sub { 
+      font-size: 16px; 
+      color: var(--label-tertiary); 
+      font-weight: 480; 
+    }
+    
+    .login-sep { 
+      width: 32px; 
+      height: 2px; 
+      background: var(--border-strong); 
+      border-radius: 2px; 
+    }
 
-    #content { display: none; min-height: 100vh; }
+    #content { 
+      display: none; 
+      min-height: 100vh; 
+    }
 
+    /* Стили для пользовательского блока */
+    .user-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface-glass);
+      backdrop-filter: blur(28px);
+      padding: 6px 16px 6px 12px;
+      border-radius: 980px;
+      border: 0.5px solid var(--border-subtle);
+    }
+    
+    .user-pic {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    
+    .user-email {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--label-dark);
+    }
+    
+    .logout-btn {
+      background: none;
+      border: none;
+      padding: 6px 12px;
+      cursor: pointer;
+      color: var(--label-tertiary);
+      font-size: 14px;
+      border-radius: 980px;
+      transition: all 0.2s ease;
+    }
+    
+    .logout-btn:hover {
+      background: rgba(0,0,0,0.05);
+      color: var(--accent-red);
+    }
+
+    /* Остальные ваши стили остаются без изменений */
     .nav {
       position: sticky;
       top: 0;
@@ -104,7 +175,14 @@
       justify-content: space-between;
       padding: 0 36px;
     }
-    .nav-title { font-size: 22px; font-weight: 600; letter-spacing: -0.4px; color: var(--label-dark); }
+    
+    .nav-title { 
+      font-size: 22px; 
+      font-weight: 600; 
+      letter-spacing: -0.4px; 
+      color: var(--label-dark); 
+    }
+    
     .nav-btn {
       background: rgba(255,255,255,0.92);
       border: 0.5px solid var(--border-strong);
@@ -116,7 +194,11 @@
       cursor: pointer;
       transition: all 0.2s ease;
     }
-    .nav-btn:hover { background: var(--accent-blue-dim); transform: scale(0.97); }
+    
+    .nav-btn:hover { 
+      background: var(--accent-blue-dim); 
+      transform: scale(0.97); 
+    }
 
     .page {
       width: 100%;
@@ -152,18 +234,21 @@
       font-family: var(--font-system);
       box-shadow: 0 1px 2px rgba(0,0,0,0.02);
     }
+    
     .google-calendar-btn:hover {
       background: #ffffff;
       border-color: var(--accent-blue);
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
       transform: scale(0.98);
     }
+    
     .calendar-icon {
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--accent-blue);
     }
+    
     .calendar-date-text {
       font-size: 16px;
       font-weight: 550;
@@ -171,11 +256,13 @@
       letter-spacing: -0.2px;
       white-space: nowrap;
     }
+    
     .chevron-icon {
       margin-left: 4px;
       opacity: 0.6;
       transition: transform 0.2s;
     }
+    
     .google-calendar-btn:hover .chevron-icon {
       transform: translateY(2px);
     }
@@ -192,7 +279,11 @@
       cursor: pointer;
       transition: all 0.2s ease;
     }
-    .btn-book:hover { background: var(--accent-blue-hover); transform: scale(0.98); }
+    
+    .btn-book:hover { 
+      background: var(--accent-blue-hover); 
+      transform: scale(0.98); 
+    }
     
     .btn-drag-toggle {
       height: 54px;
@@ -206,10 +297,25 @@
       cursor: pointer;
       white-space: nowrap;
     }
-    .btn-drag-toggle.active { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
-    .btn-drag-toggle.active:hover { background: var(--accent-blue-hover); }
+    
+    .btn-drag-toggle.active { 
+      background: var(--accent-blue); 
+      color: white; 
+      border-color: var(--accent-blue); 
+    }
+    
+    .btn-drag-toggle.active:hover { 
+      background: var(--accent-blue-hover); 
+    }
 
-    .inline-temp-cards { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-left: auto; }
+    .inline-temp-cards { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      flex-wrap: wrap; 
+      margin-left: auto; 
+    }
+    
     .temp-card-inline {
       display: flex;
       align-items: center;
@@ -220,9 +326,31 @@
       padding: 6px 16px 6px 22px;
       font-size: 13px;
     }
-    .temp-card-inline strong { font-size: 14px; font-weight: 590; margin-right: 4px; }
-    .temp-card-inline .temp-time { font-family: monospace; font-size: 12px; background: #efefef; padding: 4px 12px; border-radius: 34px; }
-    .temp-card-inline .temp-rm { width: 28px; height: 28px; border-radius: 30px; background: #f2eaea; border: none; cursor: pointer; font-weight: 600; color: #b33f3f; }
+    
+    .temp-card-inline strong { 
+      font-size: 14px; 
+      font-weight: 590; 
+      margin-right: 4px; 
+    }
+    
+    .temp-card-inline .temp-time { 
+      font-family: monospace; 
+      font-size: 12px; 
+      background: #efefef; 
+      padding: 4px 12px; 
+      border-radius: 34px; 
+    }
+    
+    .temp-card-inline .temp-rm { 
+      width: 28px; 
+      height: 28px; 
+      border-radius: 30px; 
+      background: #f2eaea; 
+      border: none; 
+      cursor: pointer; 
+      font-weight: 600; 
+      color: #b33f3f; 
+    }
 
     .grid-card {
       background: var(--surface-primary);
@@ -230,7 +358,13 @@
       overflow: hidden;
       border: 0.5px solid var(--border-subtle);
     }
-    .grid-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; position: relative; }
+    
+    .grid-scroll { 
+      overflow-x: auto; 
+      -webkit-overflow-scrolling: touch; 
+      position: relative; 
+    }
+    
     #tableDesktop {
       display: table;
       border-collapse: collapse;
@@ -239,6 +373,7 @@
       min-width: 1150px;
       font-size: 14px;
     }
+    
     #tableDesktop thead th {
       height: var(--cell-height);
       font-size: 13px;
@@ -249,6 +384,7 @@
       text-align: center;
       background: #fafafa;
     }
+    
     #tableDesktop thead th.corner {
       width: var(--lane-width);
       position: sticky;
@@ -259,8 +395,16 @@
       color: var(--label-dark);
       background: #efefef;
     }
-    #tableDesktop thead th.th-time { cursor: pointer; width: var(--cell-width); }
-    #tableDesktop tbody tr { height: var(--cell-height); }
+    
+    #tableDesktop thead th.th-time { 
+      cursor: pointer; 
+      width: var(--cell-width); 
+    }
+    
+    #tableDesktop tbody tr { 
+      height: var(--cell-height); 
+    }
+    
     #tableDesktop tbody td.lane-hdr {
       width: var(--lane-width);
       font-size: 18px;
@@ -272,6 +416,7 @@
       left: 0;
       z-index: 2;
     }
+    
     .lane-hdr.group-blue { background: #2c5f7a; color: white; }
     .lane-hdr.group-green { background: #4f6b4e; color: white; }
     .lane-hdr.group-red { background: #9b4b4b; color: white; }
@@ -282,6 +427,7 @@
       border-right: 0.5px solid var(--border-subtle);
       transition: background 0.1s;
     }
+    
     #tableDesktop tbody tr:hover td.slot { background: #f6f6f6; }
     #tableDesktop tbody td.slot.booking-pending { background: #faf2e0 !important; }
     #tableDesktop tbody td.slot.booking-confirmed { background: #e3efe2 !important; }
@@ -342,13 +488,16 @@
       color: #fff;
       text-shadow: 0 1px 1px black;
     }
+    
     .ghost-slider .sl-name, .ghost-slider .sl-time {
       opacity: 0.85;
     }
+    
     .ghost-slider .guest-status-dot {
       background-color: #ffc107 !important;
       box-shadow: 0 0 0 1px rgba(0,0,0,0.3);
     }
+    
     .slider.dragging {
       opacity: 0.4;
       transition: opacity 0.1s;
@@ -383,6 +532,7 @@
       pointer-events: none;
       z-index: 12;
     }
+    
     .slider.confirmed .guest-status-dot { background-color: #3bc43b; }
     .slider.rejected .guest-status-dot { background-color: #e55a5a; }
     .slider.pending .guest-status-dot { background-color: #f5b042; }
@@ -401,6 +551,7 @@
       z-index: 2;
       pointer-events: auto;
     }
+    
     .slider.drag-mode-enabled .drag-handle { cursor: grab; }
     .slider.drag-mode-enabled .drag-handle:active { cursor: grabbing; }
     .slider:not(.drag-mode-enabled) .drag-handle { cursor: pointer; }
@@ -435,24 +586,50 @@
       .inline-temp-cards { margin-left: 0; justify-content: flex-start; }
       .btn-book, .btn-drag-toggle { width: 100%; }
       .google-calendar-btn { justify-content: center; width: 100%; }
+      .nav { padding: 0 16px; }
+      .user-bar { padding: 4px 12px 4px 8px; }
+      .user-email { display: none; }
     }
   </style>
 </head>
 <body>
 
+<!-- Страница входа -->
 <div id="login">
-  <div class="login-glyph">LUCKY STRIKE</div>
+  <div class="login-glyph">🎱 LUCKY STRIKE</div>
   <div class="login-title">Бильярдное ателье</div>
   <div class="login-sub">Бронирование столов</div>
   <div class="login-sep"></div>
-  <div id="g_id_onload" data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-  <div class="g_id_signin" data-type="standard"></div>
+  <div id="g_id_onload" 
+       data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com" 
+       data-callback="handleCredentialResponse" 
+       data-auto_prompt="false"
+       data-auto_select="false">
+  </div>
+  <div class="g_id_signin" 
+       data-type="standard" 
+       data-shape="pill" 
+       data-theme="outline" 
+       data-text="signin_with" 
+       data-size="large" 
+       data-logo_alignment="left">
+  </div>
 </div>
 
+<!-- Основной контент -->
 <div id="content">
   <nav class="nav">
-    <span class="nav-title">LUCKY STRIKE · Бильярд</span>
-    <button class="nav-btn" onclick="openImg()">План зала</button>
+    <span class="nav-title">🎱 LUCKY STRIKE · Бильярд</span>
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <div id="userInfo" class="user-bar" style="display: none;">
+        <img id="userPic" class="user-pic" src="" alt="">
+        <span id="userEmail" class="user-email"></span>
+        <button id="logoutButton" class="logout-btn" onclick="signOut()">
+          <i class="fas fa-sign-out-alt">🚪</i>
+        </button>
+      </div>
+      <button class="nav-btn" onclick="openImg()">План зала</button>
+    </div>
   </nav>
   <div class="page">
     <div class="ctrl">
@@ -470,25 +647,241 @@
     <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
   </div>
 </div>
+
 <div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">Режим перетяжки АКТИВЕН</div>
 
+<!-- Модальные окна -->
 <div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Подтверждение брони</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div id="bookingTimePreview" style="background:#f0f2f5; border-radius:24px; padding:14px 18px; margin-bottom:24px;"><span>Выбранное время: </span><span id="previewTimes">—</span></div><div class="f-group"><label class="f-label">Имя *</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+7 123 456-78-90"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitTempBookings()">Сохранить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
 
 <div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали брони</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><strong id="i-table"></strong></div><div class="info-row"><span>Время</span><strong id="i-time"></strong></div><div class="info-row"><span>Имя</span><strong id="i-name"></strong></div><div class="info-row"><span>Телефон</span><strong id="i-phone"></strong></div><div class="info-row"><span>Комментарий</span><strong id="i-comment" style="font-weight:normal;"></strong></div><div class="info-row"><span>Статус гостя</span><strong id="i-status"></strong></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Пришла бронь</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">Удалить бронь</button></div></div></div>
+
 <div id="imgPopup" class="overlay"><div class="sheet" style="max-width:90vw; background:transparent;"><img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width:100%; border-radius:48px;" onclick="closeImg()"/></div></div>
+
 <div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
 
 <script>
-  // Отключаем системное перетаскивание изображений и текста для зон перетяжки
-  document.addEventListener('dragstart', (e) => {
-    if (e.target.closest('.drag-handle') || e.target.closest('.slider')) {
-      e.preventDefault();
-      return false;
+  // ==================== КОНФИГУРАЦИЯ АВТОРИЗАЦИИ ====================
+  const SPREADSHEET_ID = '1-yiVdZYa6wJdupTiuiHvI_ht3Vu73RUjyCehZqs2cJ4';
+  const SHEET_NAME = '1';
+  const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
+  
+  // Список разрешенных email (локальный резерв)
+  const ALLOWED_EMAILS = [
+    "vadiksss900@gmail.com",
+    "sergey99belov@gmail.com",
+    "popadinecvasil3@gmail.com",
+    "veronicadiakova04@gmail.com",
+    "info.luckystrike.kh@gmail.com",
+    "sashavolobuev123890@gmail.com",
+    "egorgorbushko@gmail.com",
+    "shatrava.o@gmail.com",
+    "Craftmax30@gmail.com",
+    "bowlingblock.b@gmail.com",
+    "lana.arnaut@gmail.com",
+    "polosinnikita1224@gmail.com",
+    "sofialat1506@gmail.com",
+    "ll3991940@gmail.com",
+    "ken040888@gmail.com"
+  ];
+  
+  let currentUser = null;
+  let permissionsLoading = false;
+  
+  // Кэш разрешений
+  const PERMISSIONS_CACHE_KEY = 'billiardUserPermissions';
+  const CACHE_EXPIRY_KEY = 'billiardCacheExpiry';
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 минут
+  
+  // ==================== ФУНКЦИИ АВТОРИЗАЦИИ ====================
+  
+  function parseJwt(token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      console.error('Error parsing JWT:', e);
+      return {};
     }
-  });
+  }
+  
+  function loadSheetsAPI() {
+    return new Promise((resolve, reject) => {
+      if (window.gapi && gapi.client) {
+        resolve();
+        return;
+      }
+      gapi.load('client', {
+        callback: () => resolve(),
+        onerror: () => reject('Ошибка загрузки Google API'),
+        timeout: 8000,
+        ontimeout: () => reject('Таймаут загрузки Google API')
+      });
+    });
+  }
+  
+  function cacheUser(email) {
+    try {
+      localStorage.setItem('billiardUserEmail', email);
+      localStorage.setItem('billiardUserLoggedIn', 'true');
+    } catch (e) {
+      console.warn('Failed to cache user:', e);
+    }
+  }
+  
+  function getCachedUser() {
+    try {
+      const isLoggedIn = localStorage.getItem('billiardUserLoggedIn') === 'true';
+      const email = localStorage.getItem('billiardUserEmail');
+      if (isLoggedIn && email) {
+        return { email: email.toLowerCase().trim() };
+      }
+    } catch (e) {
+      console.warn('Failed to get cached user:', e);
+    }
+    return null;
+  }
+  
+  async function checkEmailInSheet(email) {
+    try {
+      await loadSheetsAPI();
+      await gapi.client.init({
+        apiKey: API_KEY,
+        discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+      });
+      
+      const response = await gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${SHEET_NAME}!A:A`, // Только колонку A с email
+      });
+      
+      const rows = response.result.values;
+      if (!rows || rows.length === 0) {
+        console.log('Sheet is empty');
+        return ALLOWED_EMAILS.includes(email);
+      }
+      
+      // Ищем email в колонке A
+      for (let i = 0; i < rows.length; i++) {
+        if (!rows[i][0]) continue;
+        const rowEmail = rows[i][0].toLowerCase().trim();
+        if (rowEmail === email) {
+          console.log('Email found in sheet:', email);
+          return true;
+        }
+      }
+      
+      console.log('Email not found in sheet:', email);
+      return false;
+      
+    } catch (error) {
+      console.error('Sheets API error:', error);
+      // При ошибке API используем локальный список
+      console.log('Using local allowed emails list');
+      return ALLOWED_EMAILS.includes(email);
+    }
+  }
+  
+  function showLoading(show) {
+    const loginDiv = document.getElementById('login');
+    permissionsLoading = show;
+    
+    if (show) {
+      if (!loginDiv.hasAttribute('data-original')) {
+        loginDiv.setAttribute('data-original', loginDiv.innerHTML);
+      }
+      loginDiv.innerHTML = '<div style="padding: 40px; text-align: center;"><div class="loading-spinner" style="display: inline-block; width: 40px; height: 40px; border: 4px solid rgba(59, 110, 143, 0.2); border-radius: 50%; border-top-color: #3b6e8f; animation: spin 0.8s ease-in-out infinite;"></div><br><span style="color: var(--label-tertiary); margin-top: 15px; display: block;">Проверка доступа...</span></div>';
+    } else {
+      if (loginDiv.getAttribute('data-original') && document.getElementById('login').style.display !== 'none') {
+        loginDiv.innerHTML = loginDiv.getAttribute('data-original');
+        
+        if (window.google && google.accounts && google.accounts.id) {
+          google.accounts.id.renderButton(
+            document.querySelector('.g_id_signin'),
+            { 
+              type: 'standard', 
+              shape: 'pill', 
+              theme: 'outline', 
+              text: 'signin_with', 
+              size: 'large', 
+              logo_alignment: 'left' 
+            }
+          );
+        }
+      }
+    }
+  }
+  
+  async function handleCredentialResponse(response) {
+    console.log("Google response received");
+    
+    try {
+      const payload = parseJwt(response.credential);
+      const email = payload.email.toLowerCase().trim();
+      console.log("User email:", email);
+      
+      showLoading(true);
+      
+      // Проверяем доступ в Google Sheets или локальном списке
+      const hasAccess = await checkEmailInSheet(email);
+      
+      if (hasAccess) {
+        currentUser = {
+          email: email,
+          name: payload.name,
+          picture: payload.picture
+        };
+        
+        cacheUser(email);
+        loginUser(currentUser);
+      } else {
+        showLoading(false);
+        alert('Доступ запрещен: Ваш email не найден в списке разрешенных');
+      }
+      
+    } catch (e) {
+      console.error("Error processing Google response:", e);
+      showLoading(false);
+      alert('Ошибка аутентификации: ' + e.message);
+    }
+  }
+  
+  function loginUser(user) {
+    console.log("Logging in user:", user.email);
+    
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+    
+    // Показываем информацию о пользователе
+    const userInfo = document.getElementById('userInfo');
+    const userPic = document.getElementById('userPic');
+    const userEmailSpan = document.getElementById('userEmail');
+    
+    userInfo.style.display = 'flex';
+    userPic.src = user.picture || 'https://via.placeholder.com/32';
+    userEmailSpan.textContent = user.email;
+    
+    showLoading(false);
+    
+    // Инициализируем основное приложение
+    initApplication();
+  }
+  
+  function signOut() {
+    console.log("Signing out");
+    localStorage.removeItem('billiardUserEmail');
+    localStorage.removeItem('billiardUserLoggedIn');
+    localStorage.removeItem(PERMISSIONS_CACHE_KEY);
+    localStorage.removeItem(CACHE_EXPIRY_KEY);
+    location.reload();
+  }
+  
+  // ==================== ОСНОВНАЯ ЛОГИКА ПРИЛОЖЕНИЯ ====================
   
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzLxSrpcGOIm34gLlFZS-EYZmG8liMLcUST3MRMoAp56y6XDC2ClapCDB18yiYmdrHZ/exec";
-  const ALLOWED = ["vadiksss900@gmail.com","sergey99belov@gmail.com","popadinecvasil3@gmail.com","veronicadiakova04@gmail.com","info.luckystrike.kh@gmail.com","sashavolobuev123890@gmail.com","egorgorbushko@gmail.com","shatrava.o@gmail.com","Craftmax30@gmail.com","bowlingblock.b@gmail.com","lana.arnaut@gmail.com","polosinnikita1224@gmail.com","sofialat1506@gmail.com","ll3991940@gmail.com","ken040888@gmail.com"];
   const LANES = 12, SH = 11, EH = 22;
   const slots = []; 
   for(let h=SH; h<=EH; h++) { 
@@ -521,22 +914,17 @@
       return !(endTime <= bStart || startTime >= bEnd);
     });
   }
-  function parseJwt(t){ return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
-  function handleCredentialResponse(r){ 
-    let d=parseJwt(r.credential); 
-    if(ALLOWED.includes(d.email)){ 
-      localStorage.setItem("ue",d.email); 
-      location.reload(); 
-    } else alert("Доступ запрещён"); 
-  }
   
-  window.onload = ()=>{
-    if(localStorage.getItem("ue") && ALLOWED.includes(localStorage.getItem("ue"))){
-      $("login").style.display="none";
-      $("content").style.display="block";
-      init();
+  function fmtFromSlotIdx(startSlotIdx, endSlotIdx = null){ 
+    let s = slots[startSlotIdx];
+    let endIdx = (endSlotIdx !== null) ? endSlotIdx + 1 : startSlotIdx + 1;
+    let e = slots[endIdx];
+    if (!e) {
+      let nextHour = Math.floor(s.key) + 1;
+      return `${s.label}–${nextHour}:00`;
     }
-  };
+    return `${s.label}–${e.label}`;
+  }
   
   function formatDateForDisplay(dateStr) {
     if (!dateStr) return "Выбрать дату";
@@ -552,62 +940,6 @@
     return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]}`;
   }
   
-  function init(){
-    const calendarBtn = document.getElementById("calendarButton");
-    const hiddenPicker = document.getElementById("hiddenDatePicker");
-    const displaySpan = document.getElementById("displayDateText");
-    const todayStr = new Date().toISOString().split('T')[0];
-    let currentDate = todayStr;
-    if (hiddenPicker) {
-      hiddenPicker.value = currentDate;
-      displaySpan.innerText = formatDateForDisplay(currentDate);
-    }
-    if (calendarBtn && hiddenPicker) {
-      calendarBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        if (hiddenPicker.showPicker) hiddenPicker.showPicker();
-        else { hiddenPicker.click(); hiddenPicker.focus(); }
-      });
-      hiddenPicker.addEventListener("change", (e) => {
-        const newDate = e.target.value;
-        if (newDate) {
-          currentDate = newDate;
-          displaySpan.innerText = formatDateForDisplay(newDate);
-          if (window.dateInputForSync) {
-            window.dateInputForSync.value = newDate;
-            const changeEvent = new Event('change');
-            window.dateInputForSync.dispatchEvent(changeEvent);
-          }
-          loadFromServer();
-          clearTempSelections();
-        }
-      });
-    }
-    let legacyDateInput = document.createElement("input");
-    legacyDateInput.type = "date";
-    legacyDateInput.id = "dateInput";
-    legacyDateInput.style.display = "none";
-    document.body.appendChild(legacyDateInput);
-    window.dateInputForSync = legacyDateInput;
-    legacyDateInput.value = currentDate;
-    buildDesktopTable();
-    legacyDateInput.addEventListener("change", () => { 
-      if (hiddenPicker) hiddenPicker.value = legacyDateInput.value;
-      if (displaySpan) displaySpan.innerText = formatDateForDisplay(legacyDateInput.value);
-      loadFromServer(); 
-      clearTempSelections(); 
-    });
-    loadFromServer();
-    const toggleBtn = $("dragToggleBtn");
-    toggleBtn.addEventListener("click", () => {
-      dragModeEnabled = !dragModeEnabled;
-      toggleBtn.textContent = dragModeEnabled ? "Режим перетяжки: ВКЛ" : "Режим перетяжки: ВЫКЛ";
-      toggleBtn.classList.toggle("active", dragModeEnabled);
-      $("dragModeIndicator").style.display = dragModeEnabled ? "block" : "none";
-      renderAllSliders();
-    });
-  }
-  
   function buildDesktopTable(){
     let headRow = document.querySelector("#dtHead tr");
     slots.forEach(sl=>{ let th=document.createElement("th"); th.className="th-time"; th.textContent=sl.label; headRow.appendChild(th); });
@@ -620,25 +952,15 @@
       body.appendChild(tr);
     }
   }
-  function getSlotCell(lane, slotIdx){ return $("dtBody")?.rows[lane]?.cells[slotIdx+1]; }
   
-  // ИСПРАВЛЕННАЯ ФУНКЦИЯ ФОРМАТИРОВАНИЯ ВРЕМЕНИ
-  function fmtFromSlotIdx(startSlotIdx, endSlotIdx = null){ 
-    let s = slots[startSlotIdx];
-    let endIdx = (endSlotIdx !== null) ? endSlotIdx + 1 : startSlotIdx + 1;
-    let e = slots[endIdx];
-    if (!e) {
-      let nextHour = Math.floor(s.key) + 1;
-      return `${s.label}–${nextHour}:00`;
-    }
-    return `${s.label}–${e.label}`;
-  }
+  function getSlotCell(lane, slotIdx){ return $("dtBody")?.rows[lane]?.cells[slotIdx+1]; }
   
   function updateCellsHighlight(){
     for(let row of $("dtBody").rows) for(let i=1;i<row.cells.length;i++) row.cells[i].classList.remove("booking-pending","booking-confirmed","booking-rejected","temp-highlight");
     for(let b of bookings){ let si=b.startSlotIdx, ei=b.endSlotIdx; if(si!==undefined && ei!==undefined) for(let i=si;i<=ei;i++){ let cell=getSlotCell(b.lane,i); if(cell) cell.classList.add(b.confirmed===true?"booking-confirmed":(b.confirmed===false?"booking-rejected":"booking-pending")); } }
     for(let t of tempBookings){ let si=t.startSlotIdx, ei=t.endSlotIdx; if(si!==undefined && ei!==undefined) for(let i=si;i<=ei;i++){ let cell=getSlotCell(t.lane,i); if(cell) cell.classList.add("temp-highlight"); } }
   }
+  
   function clearTempSelections(){ tempBookings = []; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); }
   
   function renderInlineTempCards(){ 
@@ -687,6 +1009,7 @@
       highlightDragInterval(lane,si,si); 
     } 
   }
+  
   function onMouseMove(e){ 
     if(!dragModeEnabled && isDragging && dragStartCell){ 
       let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); 
@@ -700,6 +1023,7 @@
       } 
     } 
   }
+  
   function highlightDragInterval(lane,si,ei){ 
     document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); 
     for(let i=si;i<=ei;i++){ 
@@ -708,7 +1032,6 @@
     } 
   }
   
-  // ИСПРАВЛЕННАЯ ФУНКЦИЯ onMouseUp
   function onMouseUp(){ 
     if(!dragModeEnabled && isDragging && dragInterval){ 
       let {lane,startIdx,endIdx}=dragInterval; 
@@ -731,10 +1054,6 @@
     dragStartCell=null; 
     document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); 
   }
-  
-  $("tableDesktop").addEventListener("mousedown", onMouseDown);
-  document.body.addEventListener("mousemove", onMouseMove);
-  document.body.addEventListener("mouseup", onMouseUp);
   
   function openBookModal(){ if(tempBookings.length===0){ alert("Сначала выделите интервал на столе"); return; } $("nameInput").value=""; $("phoneInput").value=""; $("commentInput").value=""; updatePreviewTimes(); $("bookModal").classList.add("open"); }
   function closeBookModal(){ $("bookModal").classList.remove("open"); }
@@ -901,7 +1220,92 @@
   function hideLoad(){ $("loader").style.display="none"; }
   function openImg(){ $("imgPopup").classList.add("open"); }
   function closeImg(){ $("imgPopup").classList.remove("open"); }
-  ["bookModal","infoModal","imgPopup"].forEach(id=>{ $(id)?.addEventListener("click",e=>{ if(e.target=== $(id)) $(id).classList.remove("open"); }); });
+  
+  function initApplication() {
+    // Отключаем системное перетаскивание изображений и текста для зон перетяжки
+    document.addEventListener('dragstart', (e) => {
+      if (e.target.closest('.drag-handle') || e.target.closest('.slider')) {
+        e.preventDefault();
+        return false;
+      }
+    });
+    
+    const calendarBtn = document.getElementById("calendarButton");
+    const hiddenPicker = document.getElementById("hiddenDatePicker");
+    const displaySpan = document.getElementById("displayDateText");
+    const todayStr = new Date().toISOString().split('T')[0];
+    let currentDate = todayStr;
+    if (hiddenPicker) {
+      hiddenPicker.value = currentDate;
+      displaySpan.innerText = formatDateForDisplay(currentDate);
+    }
+    if (calendarBtn && hiddenPicker) {
+      calendarBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (hiddenPicker.showPicker) hiddenPicker.showPicker();
+        else { hiddenPicker.click(); hiddenPicker.focus(); }
+      });
+      hiddenPicker.addEventListener("change", (e) => {
+        const newDate = e.target.value;
+        if (newDate) {
+          currentDate = newDate;
+          displaySpan.innerText = formatDateForDisplay(newDate);
+          if (window.dateInputForSync) {
+            window.dateInputForSync.value = newDate;
+            const changeEvent = new Event('change');
+            window.dateInputForSync.dispatchEvent(changeEvent);
+          }
+          loadFromServer();
+          clearTempSelections();
+        }
+      });
+    }
+    let legacyDateInput = document.createElement("input");
+    legacyDateInput.type = "date";
+    legacyDateInput.id = "dateInput";
+    legacyDateInput.style.display = "none";
+    document.body.appendChild(legacyDateInput);
+    window.dateInputForSync = legacyDateInput;
+    legacyDateInput.value = currentDate;
+    buildDesktopTable();
+    legacyDateInput.addEventListener("change", () => { 
+      if (hiddenPicker) hiddenPicker.value = legacyDateInput.value;
+      if (displaySpan) displaySpan.innerText = formatDateForDisplay(legacyDateInput.value);
+      loadFromServer(); 
+      clearTempSelections(); 
+    });
+    loadFromServer();
+    const toggleBtn = $("dragToggleBtn");
+    toggleBtn.addEventListener("click", () => {
+      dragModeEnabled = !dragModeEnabled;
+      toggleBtn.textContent = dragModeEnabled ? "Режим перетяжки: ВКЛ" : "Режим перетяжки: ВЫКЛ";
+      toggleBtn.classList.toggle("active", dragModeEnabled);
+      $("dragModeIndicator").style.display = dragModeEnabled ? "block" : "none";
+      renderAllSliders();
+    });
+    
+    $("tableDesktop").addEventListener("mousedown", onMouseDown);
+    document.body.addEventListener("mousemove", onMouseMove);
+    document.body.addEventListener("mouseup", onMouseUp);
+    
+    ["bookModal","infoModal","imgPopup"].forEach(id=>{ 
+      $(id)?.addEventListener("click",e=>{ 
+        if(e.target=== $(id)) $(id).classList.remove("open"); 
+      }); 
+    });
+  }
+  
+  // Проверка сессии при загрузке
+  window.addEventListener('load', function() {
+    console.log("Page loaded, checking session...");
+    
+    const cachedUser = getCachedUser();
+    if (cachedUser && cachedUser.email) {
+      console.log("Found stored session for:", cachedUser.email);
+      currentUser = cachedUser;
+      loginUser(currentUser);
+    }
+  });
 </script>
 </body>
 </html>

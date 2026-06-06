@@ -3,1309 +3,1488 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>Lucky Strike · Бильярд Бронирование</title>
+  <title>Lucky Strike · Бильярд</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png">
-  <!-- Google Identity Services for login -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js"></script>
   <style>
-    /* Ваши существующие стили остаются без изменений */
-    * {
-      margin: 0;
-      padding: 0;
+    *, *::before, *::after {
+      margin: 0; padding: 0;
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-    }
-    
-    input, textarea, .f-input, .sheet-body .f-input, .info-list strong, .info-list span, .temp-card-inline .temp-time {
-      user-select: text;
-      -webkit-user-select: text;
-      -moz-user-select: text;
-      -ms-user-select: text;
-    }
-    
-    .info-row strong, .info-row span {
-      user-select: text;
-      -webkit-user-select: text;
-    }
-    
-    .nav-title, .login-title, .login-sub, .sheet-title, .f-label, .ctrl button span, .calendar-date-text {
-      user-select: text;
-      -webkit-user-select: text;
     }
 
     :root {
-      --bg: #f2f2f2;
-      --surface-primary: #ffffff;
-      --surface-glass: rgba(255, 255, 255, 0.85);
-      --surface-secondary: #f8f8f8;
-      --border-subtle: #e5e5e5;
-      --border-strong: #cccccc;
-      --label-dark: #1e1e1e;
-      --label-secondary: #4a4a4a;
-      --label-tertiary: #7c7c7c;
-      --label-quaternary: #9a9a9a;
-      --accent-blue: #3b6e8f;
-      --accent-blue-hover: #2c5a77;
-      --accent-blue-dim: rgba(59, 110, 143, 0.12);
-      --accent-green: #4f6b4e;
-      --accent-green-dim: rgba(79, 107, 78, 0.12);
-      --accent-red: #b33f3f;
-      --accent-amber: #b87c2e;
-      --radius-card: 24px;
-      --radius-sm: 12px;
-      --radius-pill: 980px;
-      --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
-      --cell-height: 58px;
-      --cell-width: 74px;
-      --lane-width: 104px;
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface2: #222222;
+      --surface3: #2a2a2a;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.14);
+      --text: #f0f0f0;
+      --text2: #a0a0a0;
+      --text3: #666;
+      --gold: #c9a84c;
+      --gold2: #e8c97a;
+      --gold-dim: rgba(201,168,76,0.15);
+      --blue: #3b7ea1;
+      --blue-dim: rgba(59,126,161,0.2);
+      --green: #4a7c59;
+      --green-dim: rgba(74,124,89,0.2);
+      --red: #a14040;
+      --red-dim: rgba(161,64,64,0.2);
+      --danger: #e05252;
+      --success: #52c87a;
+      --warning: #e0a550;
+      --radius: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+      --font: 'Geologica', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --cell-h: 56px;
+      --cell-w: 72px;
+      --lane-w: 96px;
+      --nav-h: 64px;
     }
+
+    [data-theme="light"] {
+      --bg: #f4f1ec;
+      --surface: #ffffff;
+      --surface2: #f8f6f2;
+      --surface3: #eeebe4;
+      --border: rgba(0,0,0,0.08);
+      --border2: rgba(0,0,0,0.14);
+      --text: #1a1a1a;
+      --text2: #5a5a5a;
+      --text3: #999;
+      --gold: #9a7430;
+      --gold2: #c9a84c;
+      --gold-dim: rgba(154,116,48,0.12);
+      --blue: #2a6085;
+      --blue-dim: rgba(42,96,133,0.12);
+      --green: #3a6348;
+      --green-dim: rgba(58,99,72,0.12);
+      --red: #8a3535;
+      --red-dim: rgba(138,53,53,0.12);
+    }
+
+    * { user-select: none; -webkit-user-select: none; }
+    input, textarea, .selectable, .info-val, strong { user-select: text; -webkit-user-select: text; }
 
     body {
-      font-family: var(--font-system);
+      font-family: var(--font);
       background: var(--bg);
-      color: var(--label-dark);
+      color: var(--text);
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
-      font-weight: 450;
+      transition: background 0.3s, color 0.3s;
     }
 
-    /* Стили для страницы входа */
+    /* ===== LOGIN ===== */
     #login {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background: var(--bg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
-      z-index: 9999;
-      padding: 32px;
-    }
-    
-    .login-glyph { 
-      font-size: 52px; 
-      font-weight: 500; 
-      letter-spacing: -0.5px; 
-      color: var(--label-secondary); 
-    }
-    
-    .login-title { 
-      font-size: 34px; 
-      font-weight: 600; 
-      letter-spacing: -0.7px; 
-      color: var(--label-dark); 
-    }
-    
-    .login-sub { 
-      font-size: 16px; 
-      color: var(--label-tertiary); 
-      font-weight: 480; 
-    }
-    
-    .login-sep { 
-      width: 32px; 
-      height: 2px; 
-      background: var(--border-strong); 
-      border-radius: 2px; 
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0; z-index: 9999; overflow: hidden;
     }
 
-    #content { 
-      display: none; 
-      min-height: 100vh; 
+    .login-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(201,168,76,0.08) 0%, transparent 70%);
+      pointer-events: none;
     }
 
-    /* Стили для пользовательского блока */
-    .user-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--surface-glass);
-      backdrop-filter: blur(28px);
-      padding: 6px 16px 6px 12px;
-      border-radius: 980px;
-      border: 0.5px solid var(--border-subtle);
-    }
-    
-    .user-pic {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    
-    .user-email {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--label-dark);
-    }
-    
-    .logout-btn {
-      background: none;
-      border: none;
-      padding: 6px 12px;
-      cursor: pointer;
-      color: var(--label-tertiary);
-      font-size: 14px;
-      border-radius: 980px;
-      transition: all 0.2s ease;
-    }
-    
-    .logout-btn:hover {
-      background: rgba(0,0,0,0.05);
-      color: var(--accent-red);
+    .login-inner {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center; gap: 20px;
+      animation: fadeUp 0.6s ease both;
     }
 
-    /* Остальные ваши стили остаются без изменений */
+    .login-logo {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      box-shadow: 0 8px 32px rgba(201,168,76,0.3);
+      margin-bottom: 4px;
+    }
+
+    .login-title {
+      font-size: 32px; font-weight: 700; letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--gold2), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .login-sub { font-size: 15px; color: var(--text3); font-weight: 400; }
+
+    .login-divider {
+      width: 40px; height: 1px;
+      background: var(--border2); margin: 4px 0;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border2);
+      border-radius: var(--radius-xl);
+      padding: 28px 32px;
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.3);
+    }
+
+    .login-hint { font-size: 13px; color: var(--text3); text-align: center; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ===== CONTENT ===== */
+    #content { display: none; min-height: 100vh; }
+
+    /* ===== NAV ===== */
     .nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(28px) saturate(180%);
-      border-bottom: 0.5px solid var(--border-subtle);
-      height: 68px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 36px;
-    }
-    
-    .nav-title { 
-      font-size: 22px; 
-      font-weight: 600; 
-      letter-spacing: -0.4px; 
-      color: var(--label-dark); 
-    }
-    
-    .nav-btn {
-      background: rgba(255,255,255,0.92);
-      border: 0.5px solid var(--border-strong);
-      border-radius: 980px;
-      padding: 7px 24px;
-      font-size: 14px;
-      font-weight: 510;
-      color: var(--accent-blue);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .nav-btn:hover { 
-      background: var(--accent-blue-dim); 
-      transform: scale(0.97); 
+      position: sticky; top: 0; z-index: 100;
+      height: var(--nav-h);
+      background: rgba(15,15,15,0.9);
+      backdrop-filter: blur(24px) saturate(180%);
+      border-bottom: 0.5px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px;
+      transition: background 0.3s;
     }
 
-    .page {
-      width: 100%;
-      margin: 0;
-      padding: 28px 36px 80px;
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
+    [data-theme="light"] .nav { background: rgba(244,241,236,0.9); }
+
+    .nav-brand {
+      display: flex; align-items: center; gap: 12px;
     }
 
-    .ctrl {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-      flex-wrap: wrap;
-      background: var(--surface-primary);
-      border-radius: var(--radius-card);
-      padding: 16px 28px;
-      border: 0.5px solid var(--border-subtle);
-    }
-    
-    .google-calendar-btn {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--surface-secondary);
-      border: 1px solid var(--border-strong);
-      border-radius: 48px;
-      padding: 0 20px 0 16px;
-      height: 54px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-family: var(--font-system);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-    }
-    
-    .google-calendar-btn:hover {
-      background: #ffffff;
-      border-color: var(--accent-blue);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      transform: scale(0.98);
-    }
-    
-    .calendar-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent-blue);
-    }
-    
-    .calendar-date-text {
-      font-size: 16px;
-      font-weight: 550;
-      color: var(--label-dark);
-      letter-spacing: -0.2px;
-      white-space: nowrap;
-    }
-    
-    .chevron-icon {
-      margin-left: 4px;
-      opacity: 0.6;
-      transition: transform 0.2s;
-    }
-    
-    .google-calendar-btn:hover .chevron-icon {
-      transform: translateY(2px);
-    }
-
-    .btn-book {
-      height: 54px;
-      padding: 0 38px;
-      background: var(--accent-blue);
-      color: white;
-      border: none;
-      border-radius: var(--radius-pill);
-      font-size: 17px;
-      font-weight: 590;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .btn-book:hover { 
-      background: var(--accent-blue-hover); 
-      transform: scale(0.98); 
-    }
-    
-    .btn-drag-toggle {
-      height: 54px;
-      padding: 0 32px;
-      background: var(--surface-secondary);
-      color: var(--label-secondary);
-      border: 0.5px solid var(--border-strong);
-      border-radius: var(--radius-pill);
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    
-    .btn-drag-toggle.active { 
-      background: var(--accent-blue); 
-      color: white; 
-      border-color: var(--accent-blue); 
-    }
-    
-    .btn-drag-toggle.active:hover { 
-      background: var(--accent-blue-hover); 
-    }
-
-    .inline-temp-cards { 
-      display: flex; 
-      align-items: center; 
-      gap: 12px; 
-      flex-wrap: wrap; 
-      margin-left: auto; 
-    }
-    
-    .temp-card-inline {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: rgba(255,255,255,0.9);
-      border: 0.5px solid var(--border-subtle);
-      border-radius: 44px;
-      padding: 6px 16px 6px 22px;
-      font-size: 13px;
-    }
-    
-    .temp-card-inline strong { 
-      font-size: 14px; 
-      font-weight: 590; 
-      margin-right: 4px; 
-    }
-    
-    .temp-card-inline .temp-time { 
-      font-family: monospace; 
-      font-size: 12px; 
-      background: #efefef; 
-      padding: 4px 12px; 
-      border-radius: 34px; 
-    }
-    
-    .temp-card-inline .temp-rm { 
-      width: 28px; 
-      height: 28px; 
-      border-radius: 30px; 
-      background: #f2eaea; 
-      border: none; 
-      cursor: pointer; 
-      font-weight: 600; 
-      color: #b33f3f; 
-    }
-
-    .grid-card {
-      background: var(--surface-primary);
-      border-radius: var(--radius-card);
-      overflow: hidden;
-      border: 0.5px solid var(--border-subtle);
-    }
-    
-    .grid-scroll { 
-      overflow-x: auto; 
-      -webkit-overflow-scrolling: touch; 
-      position: relative; 
-    }
-    
-    #tableDesktop {
-      display: table;
-      border-collapse: collapse;
-      table-layout: fixed;
-      width: 100%;
-      min-width: 1150px;
-      font-size: 14px;
-    }
-    
-    #tableDesktop thead th {
-      height: var(--cell-height);
-      font-size: 13px;
-      font-weight: 590;
-      color: var(--label-tertiary);
-      border-bottom: 0.5px solid var(--border-strong);
-      border-right: 0.5px solid var(--border-subtle);
-      text-align: center;
-      background: #fafafa;
-    }
-    
-    #tableDesktop thead th.corner {
-      width: var(--lane-width);
-      position: sticky;
-      left: 0;
-      z-index: 5;
-      font-size: 15px;
-      font-weight: 620;
-      color: var(--label-dark);
-      background: #efefef;
-    }
-    
-    #tableDesktop thead th.th-time { 
-      cursor: pointer; 
-      width: var(--cell-width); 
-    }
-    
-    #tableDesktop tbody tr { 
-      height: var(--cell-height); 
-    }
-    
-    #tableDesktop tbody td.lane-hdr {
-      width: var(--lane-width);
+    .nav-logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
       font-size: 18px;
-      font-weight: 620;
-      border-bottom: 0.5px solid var(--border-strong);
-      border-right: 0.5px solid var(--border-strong);
-      text-align: center;
-      position: sticky;
-      left: 0;
-      z-index: 2;
     }
-    
-    .lane-hdr.group-blue { background: #2c5f7a; color: white; }
-    .lane-hdr.group-green { background: #4f6b4e; color: white; }
-    .lane-hdr.group-red { background: #9b4b4b; color: white; }
-    
+
+    .nav-title {
+      font-size: 17px; font-weight: 600; letter-spacing: -0.2px;
+      color: var(--text);
+    }
+
+    .nav-right { display: flex; gap: 10px; align-items: center; }
+
+    .nav-icon-btn {
+      width: 38px; height: 38px;
+      background: var(--surface2);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      transition: all 0.18s;
+      color: var(--text2);
+    }
+
+    .nav-icon-btn:hover { background: var(--surface3); border-color: var(--border2); }
+
+    .user-pill {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface2);
+      border: 0.5px solid var(--border);
+      border-radius: 980px;
+      padding: 4px 14px 4px 4px;
+    }
+
+    .user-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      object-fit: cover;
+      background: var(--surface3);
+    }
+
+    .user-name { font-size: 13px; font-weight: 500; color: var(--text); }
+    .user-email-sm { font-size: 11px; color: var(--text3); }
+
+    .logout-btn {
+      background: none; border: none;
+      padding: 4px 8px; cursor: pointer;
+      color: var(--text3); font-size: 14px;
+      border-radius: 8px;
+      transition: all 0.18s;
+    }
+    .logout-btn:hover { color: var(--danger); background: rgba(224,82,82,0.1); }
+
+    /* ===== PAGE ===== */
+    .page { width: 100%; padding: 24px 28px 80px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* ===== STATS BAR ===== */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      display: flex; flex-direction: column; gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .stat-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+
+    .stat-label { font-size: 11px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 26px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
+    .stat-sub { font-size: 12px; color: var(--text3); }
+    .stat-card.accent-gold .stat-value { color: var(--gold2); }
+    .stat-card.accent-green .stat-value { color: var(--success); }
+    .stat-card.accent-blue .stat-value { color: #6aafcf; }
+    .stat-card.accent-red .stat-value { color: var(--danger); }
+
+    /* ===== CTRL BAR ===== */
+    .ctrl {
+      display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 18px;
+    }
+
+    .date-btn {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface2);
+      border: 0.5px solid var(--border2);
+      border-radius: 12px;
+      padding: 0 16px;
+      height: 44px; cursor: pointer;
+      transition: all 0.18s;
+      color: var(--text);
+      font-family: var(--font);
+    }
+
+    .date-btn:hover { background: var(--surface3); border-color: var(--gold); }
+    .date-btn svg { color: var(--gold); }
+    .date-text { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; }
+
+    .search-wrap {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface2);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      padding: 0 14px; height: 44px;
+      transition: border-color 0.18s;
+    }
+    .search-wrap:focus-within { border-color: var(--gold); }
+    .search-wrap svg { color: var(--text3); flex-shrink: 0; }
+    .search-input {
+      background: none; border: none; outline: none;
+      font-size: 14px; color: var(--text); font-family: var(--font);
+      width: 160px;
+    }
+    .search-input::placeholder { color: var(--text3); }
+
+    .btn {
+      height: 44px; padding: 0 24px;
+      border: none; border-radius: 12px;
+      font-size: 14px; font-weight: 600; font-family: var(--font);
+      cursor: pointer; transition: all 0.18s; white-space: nowrap;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: #1a1200;
+    }
+    .btn-primary:hover { transform: scale(0.97); box-shadow: 0 4px 16px rgba(201,168,76,0.35); }
+
+    .btn-secondary {
+      background: var(--surface2); color: var(--text2);
+      border: 0.5px solid var(--border2);
+    }
+    .btn-secondary:hover { background: var(--surface3); color: var(--text); }
+    .btn-secondary.active { background: var(--gold-dim); color: var(--gold2); border-color: var(--gold); }
+
+    .ctrl-spacer { flex: 1; }
+
+    .temp-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+    .temp-chip {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--gold-dim);
+      border: 0.5px solid var(--gold);
+      border-radius: 8px;
+      padding: 4px 8px 4px 12px;
+      font-size: 12px; color: var(--gold2);
+      font-family: var(--mono);
+    }
+
+    .temp-chip-rm {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: rgba(201,168,76,0.2); border: none;
+      cursor: pointer; color: var(--gold);
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .temp-chip-rm:hover { background: rgba(224,82,82,0.3); color: var(--danger); }
+
+    /* ===== GRID ===== */
+    .grid-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .grid-scroll {
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      position: relative;
+    }
+
+    #tableDesktop {
+      display: table; border-collapse: collapse; table-layout: fixed;
+      width: 100%; min-width: 1100px;
+      font-size: 13px;
+    }
+
+    #tableDesktop thead th {
+      height: var(--cell-h);
+      font-size: 11px; font-weight: 600;
+      color: var(--text3);
+      border-bottom: 0.5px solid var(--border2);
+      border-right: 0.5px solid var(--border);
+      text-align: center;
+      background: var(--surface2);
+      font-family: var(--mono);
+      letter-spacing: 0.3px;
+    }
+
+    #tableDesktop thead th.corner {
+      width: var(--lane-w);
+      position: sticky; left: 0; z-index: 5;
+      font-family: var(--font);
+      font-size: 13px; font-weight: 700;
+      color: var(--text2);
+      background: var(--surface2);
+    }
+
+    #tableDesktop thead th.th-time { width: var(--cell-w); cursor: default; }
+
+    #tableDesktop thead th.th-hour {
+      background: var(--surface3);
+      color: var(--text2);
+      font-size: 12px;
+    }
+
+    #tableDesktop tbody tr { height: var(--cell-h); }
+
+    #tableDesktop tbody td.lane-hdr {
+      width: var(--lane-w);
+      font-size: 15px; font-weight: 700;
+      border-bottom: 0.5px solid var(--border2);
+      border-right: 0.5px solid var(--border2);
+      text-align: center;
+      position: sticky; left: 0; z-index: 2;
+    }
+
+    .lane-hdr.g-blue { background: #1e3d50; color: #7ab8d4; }
+    .lane-hdr.g-green { background: #1e3028; color: #7abd95; }
+    .lane-hdr.g-red { background: #3d1e1e; color: #d48080; }
+
+    [data-theme="light"] .lane-hdr.g-blue { background: #c8dfe9; color: #1e5a7a; }
+    [data-theme="light"] .lane-hdr.g-green { background: #c8dfd0; color: #1e5a38; }
+    [data-theme="light"] .lane-hdr.g-red { background: #e9c8c8; color: #7a1e1e; }
+
+    .lane-number { font-family: var(--mono); font-size: 16px; font-weight: 700; }
+    .lane-tag { font-size: 9px; font-weight: 500; opacity: 0.7; margin-top: 1px; }
+
     #tableDesktop tbody td.slot {
-      background: #ffffff;
-      border-bottom: 0.5px solid var(--border-subtle);
-      border-right: 0.5px solid var(--border-subtle);
+      background: transparent;
+      border-bottom: 0.5px solid var(--border);
+      border-right: 0.5px solid var(--border);
       transition: background 0.1s;
     }
-    
-    #tableDesktop tbody tr:hover td.slot { background: #f6f6f6; }
-    #tableDesktop tbody td.slot.booking-pending { background: #faf2e0 !important; }
-    #tableDesktop tbody td.slot.booking-confirmed { background: #e3efe2 !important; }
-    #tableDesktop tbody td.slot.booking-rejected { background: #f2e0e0 !important; }
-    #tableDesktop tbody td.slot.temp-highlight { background: #dde9f0 !important; border: 1px solid #3b6e8f !important; }
-    #tableDesktop tbody td.slot.drag-over { background: #e2dfcf !important; }
 
+    #tableDesktop tbody tr:hover td.slot { background: rgba(255,255,255,0.02); }
+    [data-theme="light"] #tableDesktop tbody tr:hover td.slot { background: rgba(0,0,0,0.02); }
+
+    #tableDesktop tbody td.slot.booking-pending { background: rgba(201,168,76,0.06) !important; }
+    #tableDesktop tbody td.slot.booking-confirmed { background: rgba(82,200,122,0.06) !important; }
+    #tableDesktop tbody td.slot.booking-rejected { background: rgba(224,82,82,0.05) !important; }
+    #tableDesktop tbody td.slot.temp-hl { background: rgba(201,168,76,0.12) !important; border-color: rgba(201,168,76,0.3) !important; }
+    #tableDesktop tbody td.slot.drag-over { background: rgba(201,168,76,0.18) !important; border-color: var(--gold) !important; }
+
+    /* half-hour separator */
+    #tableDesktop tbody td.slot.half-slot { border-right-style: dashed; border-right-color: rgba(255,255,255,0.04); }
+    [data-theme="light"] #tableDesktop tbody td.slot.half-slot { border-right-color: rgba(0,0,0,0.04); }
+
+    /* ===== SLIDERS ===== */
     #slidersLayer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 20;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 20;
     }
-    
+
     .slider {
-      position: absolute;
-      border-radius: 6px;
-      pointer-events: auto;
-      cursor: default;
-      padding: 6px 12px 6px 38px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 4px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      backdrop-filter: blur(8px);
-      border: 0.5px solid rgba(255,255,255,0.25);
+      position: absolute; border-radius: 8px;
+      pointer-events: auto; cursor: default;
+      padding: 5px 10px 5px 28px;
+      display: flex; flex-direction: column; justify-content: center; gap: 2px;
       will-change: left, top;
       transition: all 0.12s ease;
-      font-weight: 510;
-      font-family: var(--font-system);
-      overflow: hidden;
-      white-space: nowrap;
+      overflow: hidden; white-space: nowrap;
+      border: 0.5px solid rgba(255,255,255,0.1);
     }
-    
+
+    .slider[data-lt="blue"] { background: rgba(30,61,80,0.95); }
+    .slider[data-lt="green"] { background: rgba(30,48,40,0.95); }
+    .slider[data-lt="red"] { background: rgba(61,30,30,0.95); }
+
+    .slider.confirmed[data-lt="blue"] { background: rgba(30,61,80,1); border-color: rgba(122,184,212,0.3); }
+    .slider.confirmed[data-lt="green"] { background: rgba(30,48,40,1); border-color: rgba(122,189,149,0.3); }
+    .slider.confirmed[data-lt="red"] { background: rgba(61,30,30,1); border-color: rgba(212,128,128,0.3); }
+
+    .slider.rejected { opacity: 0.5; }
+
+    .slider.temp {
+      background: rgba(201,168,76,0.12) !important;
+      border: 1px dashed rgba(201,168,76,0.6) !important;
+    }
+
+    .slider.dragging { opacity: 0.3; transition: opacity 0.1s; }
+
     .ghost-slider {
-      position: absolute;
-      border-radius: 6px;
-      pointer-events: none;
-      padding: 6px 12px 6px 38px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 4px;
-      background: rgba(0, 0, 0, 0.45) !important;
-      backdrop-filter: blur(12px);
-      border: 2px dashed rgba(255, 215, 0, 0.9) !important;
-      box-shadow: 0 0 0 2px rgba(255,255,200,0.3), 0 8px 20px rgba(0,0,0,0.2);
-      z-index: 999;
-      font-weight: 510;
-      font-family: var(--font-system);
-      overflow: hidden;
-      white-space: nowrap;
-      transition: none;
-      color: #fff;
-      text-shadow: 0 1px 1px black;
+      position: absolute; border-radius: 8px; pointer-events: none;
+      padding: 5px 10px 5px 28px;
+      display: flex; flex-direction: column; justify-content: center; gap: 2px;
+      background: rgba(201,168,76,0.25) !important;
+      border: 1.5px dashed var(--gold) !important;
+      z-index: 999; overflow: hidden; white-space: nowrap;
+      transition: none; color: var(--gold2);
     }
-    
-    .ghost-slider .sl-name, .ghost-slider .sl-time {
-      opacity: 0.85;
+
+    .status-dot {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--text3);
+      box-shadow: 0 0 0 1.5px rgba(0,0,0,0.3);
+      pointer-events: none; z-index: 2;
     }
-    
-    .ghost-slider .guest-status-dot {
-      background-color: #ffc107 !important;
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.3);
-    }
-    
-    .slider.dragging {
-      opacity: 0.4;
-      transition: opacity 0.1s;
-    }
-    
-    .slider[data-lane-type="blue"] { background: rgba(44, 95, 122, 0.92); color: white; }
-    .slider[data-lane-type="green"] { background: rgba(79, 107, 78, 0.92); color: white; }
-    .slider[data-lane-type="red"] { background: rgba(155, 75, 75, 0.92); color: white; }
-    .slider.pending[data-lane-type="blue"] { background: rgba(44, 95, 122, 0.92); }
-    .slider.pending[data-lane-type="green"] { background: rgba(79, 107, 78, 0.92); }
-    .slider.pending[data-lane-type="red"] { background: rgba(155, 75, 75, 0.92); }
-    .slider.confirmed[data-lane-type="blue"] { background: #2c5f7a; }
-    .slider.confirmed[data-lane-type="green"] { background: #4f6b4e; }
-    .slider.confirmed[data-lane-type="red"] { background: #9b4b4b; }
-    .slider.rejected[data-lane-type="blue"] { background: rgba(44, 95, 122, 0.55); opacity: 0.85; }
-    .slider.rejected[data-lane-type="green"] { background: rgba(79, 107, 78, 0.55); }
-    .slider.rejected[data-lane-type="red"] { background: rgba(155, 75, 75, 0.55); }
-    .slider.temp[data-lane-type="blue"] { background: rgba(44, 95, 122, 0.75); border: 1px solid #c9b16b; }
-    .slider.temp[data-lane-type="green"] { background: rgba(79, 107, 78, 0.75); border: 1px solid #c9b16b; }
-    .slider.temp[data-lane-type="red"] { background: rgba(155, 75, 75, 0.75); border: 1px solid #c9b16b; }
-    
-    .guest-status-dot {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 12px;
-      height: 12px;
-      border-radius: 12px;
-      background-color: #d4d4d4;
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.6);
-      pointer-events: none;
-      z-index: 12;
-    }
-    
-    .slider.confirmed .guest-status-dot { background-color: #3bc43b; }
-    .slider.rejected .guest-status-dot { background-color: #e55a5a; }
-    .slider.pending .guest-status-dot { background-color: #f5b042; }
-    .slider.temp .guest-status-dot { background-color: #aaaaaa; opacity: 0.7; }
-    
-    .sl-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
-    .sl-time { font-size: 10px; opacity: 0.85; font-weight: 500; padding-right: 8px; }
-    
+
+    .slider.confirmed .status-dot { background: var(--success); box-shadow: 0 0 0 1.5px rgba(82,200,122,0.3); }
+    .slider.rejected .status-dot { background: var(--danger); }
+    .slider.pending .status-dot { background: var(--warning); }
+    .slider.temp .status-dot { background: var(--gold); opacity: 0.8; }
+    .ghost-slider .status-dot { background: var(--gold); }
+
+    .sl-name { font-size: 11px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; padding-right: 6px; color: var(--text); }
+    .sl-time { font-size: 9px; opacity: 0.7; font-family: var(--mono); padding-right: 6px; color: var(--text2); }
+    .slider.temp .sl-name { color: var(--gold2); }
+    .slider.temp .sl-time { color: var(--gold); }
+    .ghost-slider .sl-name, .ghost-slider .sl-time { color: var(--gold2); opacity: 0.9; }
+
     .drag-handle {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 100%;
-      cursor: default;
-      z-index: 2;
-      pointer-events: auto;
+      position: absolute; inset: 0; z-index: 2;
+      pointer-events: auto; cursor: pointer;
     }
-    
+
     .slider.drag-mode-enabled .drag-handle { cursor: grab; }
     .slider.drag-mode-enabled .drag-handle:active { cursor: grabbing; }
-    .slider:not(.drag-mode-enabled) .drag-handle { cursor: pointer; }
-    
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(20px); z-index: 2000; justify-content: center; align-items: center; }
+
+    /* ===== MODALS ===== */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(16px);
+      z-index: 2000; justify-content: center; align-items: center;
+      padding: 16px;
+    }
     .overlay.open { display: flex; }
-    .sheet { background: rgba(255,255,255,0.98); border-radius: 52px; width: 100%; max-width: 540px; box-shadow: 0 32px 56px rgba(0,0,0,0.2); }
-    .sheet-head { padding: 24px 28px 12px; display: flex; justify-content: space-between; align-items: center; }
-    .sheet-title { font-size: 28px; font-weight: 640; letter-spacing: -0.6px; }
-    .sheet-x { width: 42px; height: 42px; border-radius: 50%; background: #f2f2f5; border: none; font-size: 24px; cursor: pointer; }
-    .sheet-body { padding: 16px 28px 34px; }
-    .f-group { margin-bottom: 24px; }
-    .f-label { font-size: 13px; font-weight: 590; color: var(--label-tertiary); margin-bottom: 8px; display: block; }
-    .f-input { width: 100%; background: var(--surface-secondary); border: 0.5px solid var(--border-strong); border-radius: 20px; font-size: 16px; padding: 14px 20px; }
-    .f-actions { display: flex; gap: 16px; margin-top: 28px; }
-    .f-btn-ok { flex:1; height: 56px; background: var(--accent-blue); color: white; border: none; border-radius: 980px; font-weight: 600; cursor: pointer; }
-    .f-btn-cancel { flex:1; height: 56px; background: #f2f2f5; border: none; border-radius: 980px; font-weight: 500; cursor: pointer; }
-    .info-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 0.5px solid var(--border-subtle); font-size: 16px; }
-    .del-btn { width:100%; height: 54px; background: #f2eaea; border: none; border-radius: 980px; margin-top: 28px; cursor: pointer; font-weight: 600; color: #b33f3f; }
-    .confirm-btns { display: flex; gap: 16px; margin: 20px 0 8px; }
-    .cb-yes, .cb-no { flex:1; height: 54px; border-radius: 980px; font-weight: 600; border: none; cursor: pointer; }
-    .cb-yes { background: rgba(79, 107, 78, 0.12); color: #3c5a3b; }
-    .cb-no { background: rgba(179, 63, 63, 0.1); color: #a33a3a; }
-    #loader { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.3); backdrop-filter: blur(20px); z-index:5000; align-items:center; justify-content:center; }
-    .loader-box { background: rgba(255,255,255,0.96); border-radius: 56px; padding: 32px 48px; text-align: center; }
-    .spin { width: 44px; height: 44px; border: 3px solid #e9e9ef; border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 18px; }
+
+    .sheet {
+      background: var(--surface);
+      border: 0.5px solid var(--border2);
+      border-radius: var(--radius-xl);
+      width: 100%; max-width: 480px;
+      animation: slideUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @keyframes slideUp { from { opacity: 0; transform: translateY(24px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+    .sheet-head {
+      padding: 24px 24px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .sheet-title { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; }
+
+    .sheet-x {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--surface2); border: 0.5px solid var(--border);
+      font-size: 20px; cursor: pointer; color: var(--text2);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .sheet-x:hover { background: var(--surface3); color: var(--text); }
+
+    .sheet-body { padding: 20px 24px 28px; }
+
+    .f-group { margin-bottom: 18px; }
+    .f-label { font-size: 11px; font-weight: 600; color: var(--text3); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .f-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 0.5px solid var(--border2);
+      border-radius: 12px;
+      font-size: 15px; font-family: var(--font);
+      padding: 12px 16px;
+      color: var(--text);
+      transition: border-color 0.15s;
+      outline: none;
+    }
+    .f-input:focus { border-color: var(--gold); }
+    .f-input::placeholder { color: var(--text3); }
+
+    .preview-box {
+      background: var(--gold-dim);
+      border: 0.5px solid rgba(201,168,76,0.3);
+      border-radius: 12px; padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 13px; color: var(--gold2);
+      font-family: var(--mono);
+    }
+
+    .f-actions { display: flex; gap: 12px; margin-top: 24px; }
+    .f-btn-ok { flex: 1; height: 50px; background: linear-gradient(135deg, var(--gold), var(--gold2)); color: #1a1200; border: none; border-radius: 12px; font-weight: 700; font-size: 15px; font-family: var(--font); cursor: pointer; transition: all 0.18s; }
+    .f-btn-ok:hover { transform: scale(0.98); box-shadow: 0 4px 16px rgba(201,168,76,0.3); }
+    .f-btn-cancel { flex: 1; height: 50px; background: var(--surface2); border: 0.5px solid var(--border2); border-radius: 12px; font-weight: 600; font-size: 15px; font-family: var(--font); cursor: pointer; color: var(--text2); transition: all 0.18s; }
+    .f-btn-cancel:hover { background: var(--surface3); color: var(--text); }
+
+    /* Info modal */
+    .info-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0; border-bottom: 0.5px solid var(--border);
+      font-size: 14px; gap: 12px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-key { color: var(--text3); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; flex-shrink: 0; }
+    .info-val { color: var(--text); font-weight: 500; text-align: right; }
+    .info-val.phone-val { font-family: var(--mono); font-size: 15px; }
+    .copy-btn {
+      background: var(--surface2); border: 0.5px solid var(--border);
+      border-radius: 6px; padding: 4px 10px;
+      font-size: 11px; color: var(--text3); cursor: pointer;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .copy-btn:hover { background: var(--gold-dim); color: var(--gold2); border-color: var(--gold); }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+    }
+    .status-badge.s-wait { background: rgba(224,165,80,0.15); color: var(--warning); }
+    .status-badge.s-yes { background: rgba(82,200,122,0.15); color: var(--success); }
+    .status-badge.s-no { background: rgba(224,82,82,0.12); color: var(--danger); }
+
+    .action-btns { display: flex; gap: 10px; margin: 20px 0 14px; }
+    .ab { flex: 1; height: 46px; border-radius: 12px; font-weight: 600; font-size: 14px; font-family: var(--font); border: none; cursor: pointer; transition: all 0.18s; }
+    .ab-yes { background: rgba(82,200,122,0.15); color: var(--success); }
+    .ab-yes:hover { background: rgba(82,200,122,0.25); }
+    .ab-no { background: rgba(224,82,82,0.1); color: var(--danger); }
+    .ab-no:hover { background: rgba(224,82,82,0.2); }
+
+    .del-btn {
+      width: 100%; height: 46px;
+      background: rgba(224,82,82,0.08);
+      border: 0.5px solid rgba(224,82,82,0.2);
+      border-radius: 12px; cursor: pointer;
+      font-weight: 600; font-size: 14px; font-family: var(--font);
+      color: var(--danger); transition: all 0.18s;
+    }
+    .del-btn:hover { background: rgba(224,82,82,0.15); }
+
+    /* Loader */
+    #loader {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(12px);
+      z-index: 5000; align-items: center; justify-content: center;
+    }
+
+    .loader-box {
+      background: var(--surface);
+      border: 0.5px solid var(--border2);
+      border-radius: 24px;
+      padding: 28px 40px; text-align: center;
+    }
+
+    .spin {
+      width: 40px; height: 40px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 14px;
+    }
+
     @keyframes spin { to { transform: rotate(360deg); } }
-    .drag-mode-indicator { position: fixed; bottom: 28px; right: 28px; background: #2c2c2ecc; backdrop-filter: blur(20px); color: white; padding: 10px 26px; border-radius: 60px; font-size: 14px; z-index: 1000; pointer-events: none; }
+    .loader-text { font-size: 14px; color: var(--text3); }
+
+    /* Drag indicator */
+    .drag-indicator {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--gold);
+      color: #1a1200;
+      padding: 8px 24px; border-radius: 980px;
+      font-size: 13px; font-weight: 700;
+      z-index: 1000; pointer-events: none;
+      display: none;
+      animation: fadeUp 0.3s ease both;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--surface);
+      border: 0.5px solid var(--border2);
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-size: 14px; color: var(--text);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      z-index: 9000;
+      animation: slideInRight 0.3s ease both;
+      display: flex; align-items: center; gap: 10px;
+      max-width: 320px;
+    }
+
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+    .toast.toast-out { animation: slideOutRight 0.3s ease both; }
+    @keyframes slideOutRight { to { opacity: 0; transform: translateX(20px); } }
+    .toast-icon { font-size: 18px; }
+
+    /* Image popup */
+    #imgPopup .sheet { background: transparent; border: none; max-width: 90vw; }
+    #imgPopup img { width: 100%; border-radius: var(--radius-lg); cursor: pointer; }
+
+    /* Mobile */
     @media (max-width: 780px) {
-      .page { padding: 18px 16px 70px; }
-      .ctrl { flex-direction: column; align-items: stretch; }
-      .inline-temp-cards { margin-left: 0; justify-content: flex-start; }
-      .btn-book, .btn-drag-toggle { width: 100%; }
-      .google-calendar-btn { justify-content: center; width: 100%; }
-      .nav { padding: 0 16px; }
-      .user-bar { padding: 4px 12px 4px 8px; }
-      .user-email { display: none; }
+      .page { padding: 16px 14px 70px; gap: 14px; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .stat-card { padding: 12px 14px; }
+      .stat-value { font-size: 22px; }
+      .ctrl { flex-direction: column; align-items: stretch; gap: 10px; padding: 14px; }
+      .ctrl-spacer { display: none; }
+      .date-btn, .btn { width: 100%; justify-content: center; }
+      .search-wrap { width: 100%; }
+      .search-input { width: 100%; }
+      .nav { padding: 0 14px; }
+      .nav-title { font-size: 15px; }
+      .user-name, .user-email-sm { display: none; }
     }
   </style>
 </head>
 <body>
 
-<!-- Страница входа -->
+<!-- LOGIN -->
 <div id="login">
-  <div class="login-glyph">🎱 LUCKY STRIKE</div>
-  <div class="login-title">Бильярдное ателье</div>
-  <div class="login-sub">Бронирование столов</div>
-  <div class="login-sep"></div>
-  <div id="g_id_onload" 
-       data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com" 
-       data-callback="handleCredentialResponse" 
-       data-auto_prompt="false"
-       data-auto_select="false">
-  </div>
-  <div class="g_id_signin" 
-       data-type="standard" 
-       data-shape="pill" 
-       data-theme="outline" 
-       data-text="signin_with" 
-       data-size="large" 
-       data-logo_alignment="left">
+  <div class="login-bg"></div>
+  <div class="login-inner">
+    <div class="login-logo">🎱</div>
+    <div class="login-title">LUCKY STRIKE</div>
+    <div class="login-sub">Система бронирования столов</div>
+    <div class="login-divider"></div>
+    <div class="login-card">
+      <div class="login-hint">Войдите через корпоративный Google аккаунт</div>
+      <div id="g_id_onload"
+           data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com"
+           data-callback="handleCredentialResponse"
+           data-auto_prompt="false"
+           data-auto_select="false">
+      </div>
+      <div class="g_id_signin"
+           data-type="standard"
+           data-shape="pill"
+           data-theme="outline"
+           data-text="signin_with"
+           data-size="large"
+           data-logo_alignment="left">
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Основной контент -->
+<!-- CONTENT -->
 <div id="content">
   <nav class="nav">
-    <span class="nav-title">🎱 LUCKY STRIKE · Бильярд</span>
-    <div style="display: flex; gap: 12px; align-items: center;">
-      <div id="userInfo" class="user-bar" style="display: none;">
-        <img id="userPic" class="user-pic" src="" alt="">
-        <span id="userEmail" class="user-email"></span>
-        <button id="logoutButton" class="logout-btn" onclick="signOut()">
-          <i class="fas fa-sign-out-alt">🚪</i>
-        </button>
+    <div class="nav-brand">
+      <div class="nav-logo">🎱</div>
+      <span class="nav-title">Lucky Strike · Бильярд</span>
+    </div>
+    <div class="nav-right">
+      <button class="nav-icon-btn" id="themeToggle" title="Тема" onclick="toggleTheme()">🌙</button>
+      <button class="nav-icon-btn" onclick="openImg()" title="План зала">📐</button>
+      <div id="userInfo" class="user-pill" style="display:none;">
+        <img id="userPic" class="user-avatar" src="" alt="">
+        <div>
+          <div id="userName" class="user-name"></div>
+          <div id="userEmail" class="user-email-sm"></div>
+        </div>
+        <button class="logout-btn" onclick="signOut()" title="Выйти">✕</button>
       </div>
-      <button class="nav-btn" onclick="openImg()">План зала</button>
     </div>
   </nav>
+
   <div class="page">
-    <div class="ctrl">
-      <button id="calendarButton" class="google-calendar-btn" type="button">
-        <span class="calendar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"></path></svg></span>
-        <span id="displayDateText" class="calendar-date-text">Сегодня</span>
-        <span class="chevron-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
-      </button>
-      <input type="date" id="hiddenDatePicker" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;" />
-      
-      <button class="btn-book" onclick="openBookModal()">Новая бронь</button>
-      <button id="dragToggleBtn" class="btn-drag-toggle">Режим перетяжки: ВЫКЛ</button>
-      <div id="inlineTempContainer" class="inline-temp-cards"></div>
+
+    <!-- STATS -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-card accent-gold">
+        <div class="stat-label">Всего броней</div>
+        <div class="stat-value" id="statTotal">—</div>
+        <div class="stat-sub" id="statDate">Сегодня</div>
+      </div>
+      <div class="stat-card accent-green">
+        <div class="stat-label">Подтверждены</div>
+        <div class="stat-value" id="statConfirmed">—</div>
+        <div class="stat-sub">Пришли</div>
+      </div>
+      <div class="stat-card accent-blue">
+        <div class="stat-label">Ожидают</div>
+        <div class="stat-value" id="statPending">—</div>
+        <div class="stat-sub">Pending</div>
+      </div>
+      <div class="stat-card accent-red">
+        <div class="stat-label">Не пришли</div>
+        <div class="stat-value" id="statRejected">—</div>
+        <div class="stat-sub">Отмена</div>
+      </div>
     </div>
-    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
+
+    <!-- CTRL -->
+    <div class="ctrl">
+      <button id="calendarButton" class="date-btn" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <span id="displayDateText" class="date-text">Сегодня</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.5;">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <input type="date" id="hiddenDatePicker" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;"/>
+
+      <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input class="search-input" id="searchInput" placeholder="Поиск по имени..." oninput="onSearch(this.value)">
+      </div>
+
+      <button class="btn btn-primary" onclick="openBookModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Новая бронь
+      </button>
+
+      <button id="dragToggleBtn" class="btn btn-secondary" onclick="toggleDragMode()">
+        ↕ Перетяжка: ВЫКЛ
+      </button>
+
+      <div class="ctrl-spacer"></div>
+
+      <div id="tempChips" class="temp-chips"></div>
+    </div>
+
+    <!-- GRID -->
+    <div class="grid-card">
+      <div class="grid-scroll" id="gridScroll">
+        <table id="tableDesktop">
+          <thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead>
+          <tbody id="dtBody"></tbody>
+        </table>
+        <div id="slidersLayer"></div>
+      </div>
+    </div>
   </div>
 </div>
 
-<div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">Режим перетяжки АКТИВЕН</div>
+<div id="dragIndicator" class="drag-indicator">↕ Режим перетяжки активен</div>
 
-<!-- Модальные окна -->
-<div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Подтверждение брони</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div id="bookingTimePreview" style="background:#f0f2f5; border-radius:24px; padding:14px 18px; margin-bottom:24px;"><span>Выбранное время: </span><span id="previewTimes">—</span></div><div class="f-group"><label class="f-label">Имя *</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+7 123 456-78-90"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitTempBookings()">Сохранить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
+<!-- MODALS -->
+<div id="bookModal" class="overlay">
+  <div class="sheet">
+    <div class="sheet-head">
+      <div class="sheet-title">Новая бронь</div>
+      <button class="sheet-x" onclick="closeBookModal()">×</button>
+    </div>
+    <div class="sheet-body">
+      <div class="preview-box" id="previewBox">Выберите время на сетке</div>
+      <div class="f-group"><label class="f-label">Имя *</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div>
+      <div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+380 00 000-00-00" type="tel"/></div>
+      <div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания..."></textarea></div>
+      <div class="f-actions">
+        <button class="f-btn-ok" onclick="submitTempBookings()">Сохранить бронь</button>
+        <button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-<div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали брони</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><strong id="i-table"></strong></div><div class="info-row"><span>Время</span><strong id="i-time"></strong></div><div class="info-row"><span>Имя</span><strong id="i-name"></strong></div><div class="info-row"><span>Телефон</span><strong id="i-phone"></strong></div><div class="info-row"><span>Комментарий</span><strong id="i-comment" style="font-weight:normal;"></strong></div><div class="info-row"><span>Статус гостя</span><strong id="i-status"></strong></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Пришла бронь</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">Удалить бронь</button></div></div></div>
+<div id="infoModal" class="overlay">
+  <div class="sheet">
+    <div class="sheet-head">
+      <div class="sheet-title">Детали брони</div>
+      <button class="sheet-x" onclick="closeInfoModal()">×</button>
+    </div>
+    <div class="sheet-body">
+      <div class="info-row"><span class="info-key">Стол</span><span class="info-val" id="i-table"></span></div>
+      <div class="info-row"><span class="info-key">Время</span><span class="info-val" id="i-time" style="font-family:var(--mono);"></span></div>
+      <div class="info-row"><span class="info-key">Гость</span><span class="info-val" id="i-name"></span></div>
+      <div class="info-row">
+        <span class="info-key">Телефон</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="info-val phone-val" id="i-phone"></span>
+          <button class="copy-btn" id="copyPhoneBtn" onclick="copyPhone()">Копировать</button>
+        </div>
+      </div>
+      <div class="info-row"><span class="info-key">Комментарий</span><span class="info-val" id="i-comment" style="font-weight:400;font-style:italic;"></span></div>
+      <div class="info-row"><span class="info-key">Статус</span><span id="i-status"></span></div>
+      <div class="action-btns">
+        <button class="ab ab-yes" onclick="confirmBooking(true)">✅ Пришли</button>
+        <button class="ab ab-no" onclick="confirmBooking(false)">❌ Не пришли</button>
+      </div>
+      <button class="del-btn" onclick="deleteBooking()">Удалить бронь</button>
+    </div>
+  </div>
+</div>
 
-<div id="imgPopup" class="overlay"><div class="sheet" style="max-width:90vw; background:transparent;"><img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width:100%; border-radius:48px;" onclick="closeImg()"/></div></div>
+<div id="imgPopup" class="overlay">
+  <div class="sheet">
+    <img src="https://i.postimg.cc/52ZDKDDw/55.png" onclick="closeImg()" alt="План зала"/>
+  </div>
+</div>
 
-<div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
+<div id="loader"><div class="loader-box"><div class="spin"></div><div class="loader-text">Загрузка данных...</div></div></div>
 
 <script>
-  // ==================== КОНФИГУРАЦИЯ АВТОРИЗАЦИИ ====================
-  const SPREADSHEET_ID = '1-yiVdZYa6wJdupTiuiHvI_ht3Vu73RUjyCehZqs2cJ4';
-  const SHEET_NAME = '1';
-  const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
-  
-  // Список разрешенных email (локальный резерв)
-  const ALLOWED_EMAILS = [
-    "vadiksss900@gmail.com",
-    "sergey99belov@gmail.com",
-    "popadinecvasil3@gmail.com",
-    "veronicadiakova04@gmail.com",
-    "info.luckystrike.kh@gmail.com",
-    "sashavolobuev123890@gmail.com",
-    "egorgorbushko@gmail.com",
-    "shatrava.o@gmail.com",
-    "Craftmax30@gmail.com",
-    "bowlingblock.b@gmail.com",
-    "lana.arnaut@gmail.com",
-    "polosinnikita1224@gmail.com",
-    "sofialat1506@gmail.com",
-    "ll3991940@gmail.com",
-    "ken040888@gmail.com"
-  ];
-  
-  let currentUser = null;
-  let permissionsLoading = false;
-  
-  // Кэш разрешений
-  const PERMISSIONS_CACHE_KEY = 'billiardUserPermissions';
-  const CACHE_EXPIRY_KEY = 'billiardCacheExpiry';
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 минут
-  
-  // ==================== ФУНКЦИИ АВТОРИЗАЦИИ ====================
-  
-  function parseJwt(token) {
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-      return JSON.parse(jsonPayload);
-    } catch (e) {
-      console.error('Error parsing JWT:', e);
-      return {};
-    }
-  }
-  
-  function loadSheetsAPI() {
-    return new Promise((resolve, reject) => {
-      if (window.gapi && gapi.client) {
-        resolve();
-        return;
-      }
-      gapi.load('client', {
-        callback: () => resolve(),
-        onerror: () => reject('Ошибка загрузки Google API'),
-        timeout: 8000,
-        ontimeout: () => reject('Таймаут загрузки Google API')
-      });
-    });
-  }
-  
-  function cacheUser(email) {
-    try {
-      localStorage.setItem('billiardUserEmail', email);
-      localStorage.setItem('billiardUserLoggedIn', 'true');
-    } catch (e) {
-      console.warn('Failed to cache user:', e);
-    }
-  }
-  
-  function getCachedUser() {
-    try {
-      const isLoggedIn = localStorage.getItem('billiardUserLoggedIn') === 'true';
-      const email = localStorage.getItem('billiardUserEmail');
-      if (isLoggedIn && email) {
-        return { email: email.toLowerCase().trim() };
-      }
-    } catch (e) {
-      console.warn('Failed to get cached user:', e);
-    }
-    return null;
-  }
-  
-  async function checkEmailInSheet(email) {
-    try {
-      await loadSheetsAPI();
-      await gapi.client.init({
-        apiKey: API_KEY,
-        discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-      });
-      
-      const response = await gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: SPREADSHEET_ID,
-        range: `${SHEET_NAME}!A:A`, // Только колонку A с email
-      });
-      
-      const rows = response.result.values;
-      if (!rows || rows.length === 0) {
-        console.log('Sheet is empty');
-        return ALLOWED_EMAILS.includes(email);
-      }
-      
-      // Ищем email в колонке A
-      for (let i = 0; i < rows.length; i++) {
-        if (!rows[i][0]) continue;
-        const rowEmail = rows[i][0].toLowerCase().trim();
-        if (rowEmail === email) {
-          console.log('Email found in sheet:', email);
-          return true;
-        }
-      }
-      
-      console.log('Email not found in sheet:', email);
-      return false;
-      
-    } catch (error) {
-      console.error('Sheets API error:', error);
-      // При ошибке API используем локальный список
-      console.log('Using local allowed emails list');
-      return ALLOWED_EMAILS.includes(email);
-    }
-  }
-  
-  function showLoading(show) {
-    const loginDiv = document.getElementById('login');
-    permissionsLoading = show;
-    
-    if (show) {
-      if (!loginDiv.hasAttribute('data-original')) {
-        loginDiv.setAttribute('data-original', loginDiv.innerHTML);
-      }
-      loginDiv.innerHTML = '<div style="padding: 40px; text-align: center;"><div class="loading-spinner" style="display: inline-block; width: 40px; height: 40px; border: 4px solid rgba(59, 110, 143, 0.2); border-radius: 50%; border-top-color: #3b6e8f; animation: spin 0.8s ease-in-out infinite;"></div><br><span style="color: var(--label-tertiary); margin-top: 15px; display: block;">Проверка доступа...</span></div>';
-    } else {
-      if (loginDiv.getAttribute('data-original') && document.getElementById('login').style.display !== 'none') {
-        loginDiv.innerHTML = loginDiv.getAttribute('data-original');
-        
-        if (window.google && google.accounts && google.accounts.id) {
-          google.accounts.id.renderButton(
-            document.querySelector('.g_id_signin'),
-            { 
-              type: 'standard', 
-              shape: 'pill', 
-              theme: 'outline', 
-              text: 'signin_with', 
-              size: 'large', 
-              logo_alignment: 'left' 
-            }
-          );
-        }
-      }
-    }
-  }
-  
-  async function handleCredentialResponse(response) {
-    console.log("Google response received");
-    
-    try {
-      const payload = parseJwt(response.credential);
-      const email = payload.email.toLowerCase().trim();
-      console.log("User email:", email);
-      
-      showLoading(true);
-      
-      // Проверяем доступ в Google Sheets или локальном списке
-      const hasAccess = await checkEmailInSheet(email);
-      
-      if (hasAccess) {
-        currentUser = {
-          email: email,
-          name: payload.name,
-          picture: payload.picture
-        };
-        
-        cacheUser(email);
-        loginUser(currentUser);
-      } else {
-        showLoading(false);
-        alert('Доступ запрещен: Ваш email не найден в списке разрешенных');
-      }
-      
-    } catch (e) {
-      console.error("Error processing Google response:", e);
-      showLoading(false);
-      alert('Ошибка аутентификации: ' + e.message);
-    }
-  }
-  
-  function loginUser(user) {
-    console.log("Logging in user:", user.email);
-    
-    document.getElementById('login').style.display = 'none';
-    document.getElementById('content').style.display = 'block';
-    
-    // Показываем информацию о пользователе
-    const userInfo = document.getElementById('userInfo');
-    const userPic = document.getElementById('userPic');
-    const userEmailSpan = document.getElementById('userEmail');
-    
-    userInfo.style.display = 'flex';
-    userPic.src = user.picture || 'https://via.placeholder.com/32';
-    userEmailSpan.textContent = user.email;
-    
-    showLoading(false);
-    
-    // Инициализируем основное приложение
-    initApplication();
-  }
-  
-  function signOut() {
-    console.log("Signing out");
-    localStorage.removeItem('billiardUserEmail');
-    localStorage.removeItem('billiardUserLoggedIn');
-    localStorage.removeItem(PERMISSIONS_CACHE_KEY);
-    localStorage.removeItem(CACHE_EXPIRY_KEY);
-    location.reload();
-  }
-  
-  // ==================== ОСНОВНАЯ ЛОГИКА ПРИЛОЖЕНИЯ ====================
-  
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbzLxSrpcGOIm34gLlFZS-EYZmG8liMLcUST3MRMoAp56y6XDC2ClapCDB18yiYmdrHZ/exec";
-  const LANES = 12, SH = 11, EH = 22;
-  const slots = []; 
-  for(let h=SH; h<=EH; h++) { 
-    slots.push({ label: `${h}:00`, key: h, hour: h, minute: 0 }); 
-    if(h<EH) slots.push({ label: `${h}:30`, key: h+0.5, hour: h, minute: 30 }); 
-  }
-  
-  function getGroupIndex(lane) { 
-    let n = lane+1; 
-    if(n<=3) return 0; 
-    if(n===4) return 1; 
-    if(n<=6) return 0; 
-    return 2; 
-  }
-  const GRP_CLASS = ['group-blue', 'group-green', 'group-red'];
-  const LANE_TYPE_MAP = ['blue', 'green', 'red'];
-  
-  let bookings = [], tempBookings = [], nextTempId = 1;
-  let dragModeEnabled = false;
-  let currentBooking = null;
-  const $ = id => document.getElementById(id);
-  
-  function hasConflict(lane, startSlotIdx, endSlotIdx, excludeId = null) {
-    let startTime = slots[startSlotIdx].key;
-    let endTime = slots[endSlotIdx + 1]?.key || (slots[endSlotIdx].key + 0.5);
-    return bookings.some(b => {
-      if (excludeId !== null && b.id === excludeId) return false;
-      if (b.lane !== lane) return false;
-      let bStart = b.start, bEnd = b.end;
-      return !(endTime <= bStart || startTime >= bEnd);
-    });
-  }
-  
-  function fmtFromSlotIdx(startSlotIdx, endSlotIdx = null){ 
-    let s = slots[startSlotIdx];
-    let endIdx = (endSlotIdx !== null) ? endSlotIdx + 1 : startSlotIdx + 1;
-    let e = slots[endIdx];
-    if (!e) {
-      let nextHour = Math.floor(s.key) + 1;
-      return `${s.label}–${nextHour}:00`;
-    }
-    return `${s.label}–${e.label}`;
-  }
-  
-  function formatDateForDisplay(dateStr) {
-    if (!dateStr) return "Выбрать дату";
-    const date = new Date(dateStr);
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    if (date.getTime() === today.getTime()) return "Сегодня";
-    if (date.getTime() === tomorrow.getTime()) return "Завтра";
-    const months = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
-    const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-    return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]}`;
-  }
-  
-  function buildDesktopTable(){
-    let headRow = document.querySelector("#dtHead tr");
-    slots.forEach(sl=>{ let th=document.createElement("th"); th.className="th-time"; th.textContent=sl.label; headRow.appendChild(th); });
-    let body=$("dtBody");
-    for(let lane=0; lane<LANES; lane++){
-      let tr=document.createElement("tr"); tr.dataset.lane=lane;
-      let group=getGroupIndex(lane);
-      let lhdr=document.createElement("td"); lhdr.className=`lane-hdr ${GRP_CLASS[group]}`; lhdr.textContent=`№ ${lane+1}`; tr.appendChild(lhdr);
-      slots.forEach((sl,si)=>{ let td=document.createElement("td"); td.className="slot"; td.dataset.lane=lane; td.dataset.slotIdx=si; tr.appendChild(td); });
-      body.appendChild(tr);
-    }
-  }
-  
-  function getSlotCell(lane, slotIdx){ return $("dtBody")?.rows[lane]?.cells[slotIdx+1]; }
-  
-  function updateCellsHighlight(){
-    for(let row of $("dtBody").rows) for(let i=1;i<row.cells.length;i++) row.cells[i].classList.remove("booking-pending","booking-confirmed","booking-rejected","temp-highlight");
-    for(let b of bookings){ let si=b.startSlotIdx, ei=b.endSlotIdx; if(si!==undefined && ei!==undefined) for(let i=si;i<=ei;i++){ let cell=getSlotCell(b.lane,i); if(cell) cell.classList.add(b.confirmed===true?"booking-confirmed":(b.confirmed===false?"booking-rejected":"booking-pending")); } }
-    for(let t of tempBookings){ let si=t.startSlotIdx, ei=t.endSlotIdx; if(si!==undefined && ei!==undefined) for(let i=si;i<=ei;i++){ let cell=getSlotCell(t.lane,i); if(cell) cell.classList.add("temp-highlight"); } }
-  }
-  
-  function clearTempSelections(){ tempBookings = []; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); }
-  
-  function renderInlineTempCards(){ 
-    const container=$("inlineTempContainer"); 
-    if(!container) return; 
-    if(tempBookings.length===0){ 
-      container.innerHTML=""; 
-      return; 
-    } 
-    container.innerHTML=""; 
-    tempBookings.forEach((tb,idx)=>{ 
-      let card=document.createElement("div"); 
-      card.className="temp-card-inline"; 
-      let timeStr = fmtFromSlotIdx(tb.startSlotIdx, tb.endSlotIdx);
-      card.innerHTML=`<strong>Стол ${tb.lane+1}</strong><span class="temp-time">${timeStr}</span><button class="temp-rm" data-idx="${idx}">✕</button>`; 
-      card.querySelector(".temp-rm").onclick=()=>{ 
-        tempBookings.splice(idx,1); 
-        renderInlineTempCards(); 
-        renderAllSliders(); 
-        updateCellsHighlight(); 
-        updatePreviewTimes(); 
-      }; 
-      container.appendChild(card); 
-    }); 
-    updatePreviewTimes(); 
-  }
-  
-  function updatePreviewTimes() { 
-    const span=document.getElementById("previewTimes"); 
-    if(span) span.innerText = tempBookings.length ? tempBookings.map(tb=>{
-      let timeStr = fmtFromSlotIdx(tb.startSlotIdx, tb.endSlotIdx);
-      return `Стол ${tb.lane+1} (${timeStr})`;
-    }).join("; ") : "—"; 
-  }
-  
-  let isDragging=false, dragStartCell=null, dragInterval=null;
-  function onMouseDown(e){ 
-    if(dragModeEnabled) return; 
-    let t=e.target; 
-    if(t.classList?.contains("slot")){ 
-      e.preventDefault(); 
-      let lane=parseInt(t.dataset.lane), si=parseInt(t.dataset.slotIdx); 
-      isDragging=true; 
-      dragStartCell={lane,si}; 
-      dragInterval={lane,startIdx:si,endIdx:si}; 
-      highlightDragInterval(lane,si,si); 
-    } 
-  }
-  
-  function onMouseMove(e){ 
-    if(!dragModeEnabled && isDragging && dragStartCell){ 
-      let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains("slot")); 
-      if(el){ 
-        let lane=parseInt(el.dataset.lane), idx=parseInt(el.dataset.slotIdx); 
-        if(lane===dragStartCell.lane){ 
-          let ns=Math.min(dragStartCell.si,idx), ne=Math.max(dragStartCell.si,idx); 
-          dragInterval={lane,startIdx:ns,endIdx:ne}; 
-          highlightDragInterval(lane,ns,ne); 
-        } 
-      } 
-    } 
-  }
-  
-  function highlightDragInterval(lane,si,ei){ 
-    document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); 
-    for(let i=si;i<=ei;i++){ 
-      let cell=getSlotCell(lane,i); 
-      if(cell) cell.classList.add("drag-over"); 
-    } 
-  }
-  
-  function onMouseUp(){ 
-    if(!dragModeEnabled && isDragging && dragInterval){ 
-      let {lane,startIdx,endIdx}=dragInterval; 
-      if(hasConflict(lane, startIdx, endIdx)){ 
-        alert("Это время уже занято другой броней"); 
-      } else { 
-        tempBookings.push({ 
-          id:nextTempId++, 
-          lane, 
-          startSlotIdx: startIdx, 
-          endSlotIdx: endIdx
-        }); 
-      } 
-      renderInlineTempCards(); 
-      renderAllSliders(); 
-      updateCellsHighlight(); 
-    } 
-    isDragging=false; 
-    dragInterval=null; 
-    dragStartCell=null; 
-    document.querySelectorAll("#tableDesktop td.slot.drag-over").forEach(td=>td.classList.remove("drag-over")); 
-  }
-  
-  function openBookModal(){ if(tempBookings.length===0){ alert("Сначала выделите интервал на столе"); return; } $("nameInput").value=""; $("phoneInput").value=""; $("commentInput").value=""; updatePreviewTimes(); $("bookModal").classList.add("open"); }
-  function closeBookModal(){ $("bookModal").classList.remove("open"); }
-  
-  async function submitTempBookings(){ 
-    let name=$("nameInput").value.trim(); 
-    if(!name) return alert("Введите имя"); 
-    if(tempBookings.length===0) return; 
-    showLoad(); 
-    try{ 
-      await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ bookings:tempBookings.map(tb=>({ 
-        date:window.dateInputForSync?.value || new Date().toISOString().split('T')[0], 
-        tableNumber:tb.lane+1, 
-        start:slots[tb.startSlotIdx].key, 
-        end:slots[tb.endSlotIdx+1]?.key || (slots[tb.endSlotIdx].key+0.5), 
-        name, 
-        phone:$("phoneInput").value.trim(), 
-        comment:$("commentInput").value.trim() 
-      })) }) }); 
-      clearTempSelections(); 
-      await loadFromServer(); 
-      closeBookModal(); 
-    } catch(e){alert("Ошибка при сохранении");} 
-    hideLoad(); 
-  }
-  
-  async function loadFromServer(){ showLoad(); try{ let dateVal = window.dateInputForSync?.value || new Date().toISOString().split('T')[0]; let res=await fetch(GAS_URL+"?action=get&date="+dateVal); let data=await res.json(); bookings=data.bookings?data.bookings.map(b=>{ let startKey=parseFloat(b.start); let endKey=parseFloat(b.end); let startSlotIdx=slots.findIndex(s=>s.key===startKey); let endSlotIdx=slots.findIndex(s=>s.key===endKey)-1; if(endSlotIdx<0) endSlotIdx=slots.length-1; return { id:b.id, lane:b.table-1, start:startKey, end:endKey, startSlotIdx, endSlotIdx, name:b.name, phone:b.phone, comment:b.comment, confirmed:b.confirmed==="Да"?true:(b.confirmed==="Нет"?false:null) }; }):[]; renderAllSliders(); updateCellsHighlight(); } catch(e){console.error(e);} hideLoad(); }
-  
-  async function saveToServer(booking){ if(!booking.id) return; await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id:booking.id, date:window.dateInputForSync?.value, tableNumber:booking.lane+1, start:booking.start, end:booking.end, name:booking.name, phone:booking.phone, comment:booking.comment }) }); }
-  
-  function renderAllSliders(){ 
-    let container=$("slidersLayer"); 
-    if(!container) return; 
-    container.innerHTML=""; 
-    let rows=Array.from($("dtBody")?.querySelectorAll("tr")||[]); 
-    if(rows.length===0) return; 
-    [...bookings, ...tempBookings.map(t=>({...t,isTemp:true}))].forEach(item=>{ 
-      let startIdx=item.startSlotIdx, endIdx=item.endSlotIdx; 
-      if(startIdx===undefined || endIdx===undefined) return; 
-      let row=rows[item.lane]; 
-      if(!row) return; 
-      let sc=row.cells[startIdx+1], ec=row.cells[endIdx+1]; 
-      if(!sc||!ec) return; 
-      let left=sc.offsetLeft+1, top=row.offsetTop+1, width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2, height=row.offsetHeight-2; 
-      let status=item.isTemp?"temp":(item.confirmed===true?"confirmed":(item.confirmed===false?"rejected":"pending")); 
-      let laneType=LANE_TYPE_MAP[getGroupIndex(item.lane)]; 
-      let slider=document.createElement("div"); 
-      slider.className=`slider ${status}`; 
-      if(dragModeEnabled) slider.classList.add("drag-mode-enabled"); 
-      slider.setAttribute("data-lane-type",laneType); 
-      slider.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`; 
-      let dot=document.createElement("div"); 
-      dot.className="guest-status-dot"; 
-      slider.appendChild(dot); 
-      let nameDiv=document.createElement("div"); 
-      nameDiv.className="sl-name"; 
-      nameDiv.textContent=item.isTemp?"Ожидает брони":(item.name||"Бронь"); 
-      let timeDiv=document.createElement("div"); 
-      timeDiv.className="sl-time"; 
-      timeDiv.textContent=fmtFromSlotIdx(startIdx, endIdx); 
-      slider.append(nameDiv,timeDiv); 
-      let dragHandle=document.createElement("div"); 
-      dragHandle.className="drag-handle"; 
-      if(dragModeEnabled && !item.isTemp) dragHandle.addEventListener("mousedown",(e)=>{ 
-        e.stopPropagation(); 
-        startMoveDrag(item, e, rows, slots); 
-      }); 
-      else if(dragModeEnabled && item.isTemp) dragHandle.addEventListener("mousedown",(e)=>{ 
-        e.stopPropagation(); 
-        startMoveTempDrag(item, e, rows, slots); 
-      }); 
-      else dragHandle.addEventListener("click",(e)=>{ 
-        e.stopPropagation(); 
-        if(!item.isTemp && item.id) showInfoModal(item); 
-        else if(!item.isTemp && !item.id) alert("Загрузка данных..."); 
-        else alert("Временная бронь — сохраните для просмотра."); 
-      }); 
-      slider.appendChild(dragHandle); 
-      container.appendChild(slider); 
-    }); 
-  }
-  
-  async function startMoveDrag(booking, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells = booking.endSlotIdx - booking.startSlotIdx; let ghost=createGhost(slider); let currentLane=booking.lane, currentStartIdx=booking.startSlotIdx; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStartIdx = finalStartIdx; let newEndIdx = finalStartIdx + durationCells; if(!hasConflict(finalLane, newStartIdx, newEndIdx, booking.id)){ booking.lane = finalLane; booking.startSlotIdx = newStartIdx; booking.endSlotIdx = newEndIdx; booking.start = slotsArr[newStartIdx].key; booking.end = slotsArr[newEndIdx+1]?.key || (slotsArr[newEndIdx].key+0.5); saveToServer(booking); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
-  
-  async function startMoveTempDrag(temp, e, rows, slotsArr){ e.stopPropagation(); const slider=e.currentTarget.closest('.slider'); if(!slider) return; let durationCells = temp.endSlotIdx - temp.startSlotIdx; let ghost=createGhost(slider); let currentLane=temp.lane, currentStartIdx=temp.startSlotIdx; moveLogic(ghost,slider,rows,slotsArr, durationCells, (finalLane,finalStartIdx)=>{ let newStartIdx=finalStartIdx, newEndIdx=finalStartIdx+durationCells; if(!hasConflict(finalLane, newStartIdx, newEndIdx)){ temp.lane=finalLane; temp.startSlotIdx=newStartIdx; temp.endSlotIdx=newEndIdx; renderInlineTempCards(); renderAllSliders(); updateCellsHighlight(); } else alert("Конфликт с другой броней"); }, currentLane,currentStartIdx); }
-  
-  function createGhost(slider){ let ghost=document.createElement('div'); ghost.className='ghost-slider'; 
-    let nameClone = slider.querySelector('.sl-name')?.cloneNode(true);
-    let timeClone = slider.querySelector('.sl-time')?.cloneNode(true);
-    let dotClone = slider.querySelector('.guest-status-dot')?.cloneNode(true);
-    if(dotClone) ghost.appendChild(dotClone);
-    if(nameClone) ghost.appendChild(nameClone);
-    if(timeClone) ghost.appendChild(timeClone);
-    ghost.style.cssText=slider.style.cssText; 
-    ghost.style.opacity='0.85'; ghost.style.transition='none';
-    $('slidersLayer').appendChild(ghost); 
-    slider.classList.add('dragging');
-    return ghost;
-  }
-  
-  function moveLogic(ghost,slider,rows,slotsArr,durationCells, onDrop, initialLane, initialStartIdx){
-    let currentLane=initialLane, currentStartIdx=initialStartIdx;
-    function updateGhostPos(lane,startIdx){
-      let row=rows[lane];
-      if(!row) return;
-      let sc=row.cells[startIdx+1], ec=row.cells[startIdx+durationCells+1];
-      if(sc&&ec){
-        ghost.style.left=(sc.offsetLeft+1)+'px';
-        ghost.style.top=(row.offsetTop+1)+'px';
-        ghost.style.width=(ec.offsetLeft+ec.offsetWidth-sc.offsetLeft-2)+'px';
-        ghost.style.height=(row.offsetHeight-2)+'px';
-      }
-    }
-    function getTargetCoords(e){
-      let el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains('slot'));
-      if(!el) return null;
-      return {lane:parseInt(el.dataset.lane), idx:parseInt(el.dataset.slotIdx)};
-    }
-    function onDragMove(ev){
-      let tgt=getTargetCoords(ev);
-      if(tgt){
-        let nl=tgt.lane, nsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1);
-        if(nl!==currentLane||nsi!==currentStartIdx){
-          currentLane=nl; currentStartIdx=nsi;
-          updateGhostPos(currentLane,currentStartIdx);
-        }
-      }
-    }
-    function onDragEnd(ev){
-      let tgt=getTargetCoords(ev);
-      if(tgt){
-        let fl=tgt.lane, fsi=Math.min(Math.max(0,tgt.idx),slotsArr.length-durationCells-1);
-        onDrop(fl,fsi);
-      }
-      if(ghost && ghost.parentNode) ghost.remove();
-      if(slider) slider.classList.remove('dragging');
-      document.body.style.cursor='';
-      document.removeEventListener('mousemove',onDragMove);
-      document.removeEventListener('mouseup',onDragEnd);
-      renderAllSliders();
-    }
-    document.body.style.cursor='grabbing';
-    document.addEventListener('mousemove',onDragMove);
-    document.addEventListener('mouseup',onDragEnd);
-    updateGhostPos(currentLane,currentStartIdx);
-  }
-  
-  function showInfoModal(b){ 
-    currentBooking=b; 
-    $("i-table").textContent="№ "+(b.lane+1); 
-    $("i-time").textContent=fmtFromSlotIdx(b.startSlotIdx, b.endSlotIdx); 
-    $("i-name").textContent=b.name; 
-    $("i-phone").textContent=b.phone||"—"; 
-    $("i-comment").textContent=b.comment||"—"; 
-    let statusText=b.confirmed===true?"✅ Пришли":(b.confirmed===false?"❌ Не пришли":"⏳ Ожидание"); 
-    $("i-status").textContent=statusText; 
-    $("infoModal").classList.add("open"); 
-  }
-  
-  function closeInfoModal(){ $("infoModal").classList.remove("open"); currentBooking=null; }
-  async function confirmBooking(yes){ if(!currentBooking) return; showLoad(); await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"confirm", id:currentBooking.id, confirmed:yes }) }); closeInfoModal(); await loadFromServer(); hideLoad(); }
-  async function deleteBooking(){ if(!currentBooking||!confirm("Удалить?")) return; showLoad(); await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"delete", id:currentBooking.id }) }); closeInfoModal(); await loadFromServer(); hideLoad(); }
-  function showLoad(){ $("loader").style.display="flex"; }
-  function hideLoad(){ $("loader").style.display="none"; }
-  function openImg(){ $("imgPopup").classList.add("open"); }
-  function closeImg(){ $("imgPopup").classList.remove("open"); }
-  
-  function initApplication() {
-    // Отключаем системное перетаскивание изображений и текста для зон перетяжки
-    document.addEventListener('dragstart', (e) => {
-      if (e.target.closest('.drag-handle') || e.target.closest('.slider')) {
-        e.preventDefault();
-        return false;
-      }
-    });
-    
-    const calendarBtn = document.getElementById("calendarButton");
-    const hiddenPicker = document.getElementById("hiddenDatePicker");
-    const displaySpan = document.getElementById("displayDateText");
-    const todayStr = new Date().toISOString().split('T')[0];
-    let currentDate = todayStr;
-    if (hiddenPicker) {
-      hiddenPicker.value = currentDate;
-      displaySpan.innerText = formatDateForDisplay(currentDate);
-    }
-    if (calendarBtn && hiddenPicker) {
-      calendarBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        if (hiddenPicker.showPicker) hiddenPicker.showPicker();
-        else { hiddenPicker.click(); hiddenPicker.focus(); }
-      });
-      hiddenPicker.addEventListener("change", (e) => {
-        const newDate = e.target.value;
-        if (newDate) {
-          currentDate = newDate;
-          displaySpan.innerText = formatDateForDisplay(newDate);
-          if (window.dateInputForSync) {
-            window.dateInputForSync.value = newDate;
-            const changeEvent = new Event('change');
-            window.dateInputForSync.dispatchEvent(changeEvent);
-          }
-          loadFromServer();
-          clearTempSelections();
-        }
-      });
-    }
-    let legacyDateInput = document.createElement("input");
-    legacyDateInput.type = "date";
-    legacyDateInput.id = "dateInput";
-    legacyDateInput.style.display = "none";
-    document.body.appendChild(legacyDateInput);
-    window.dateInputForSync = legacyDateInput;
-    legacyDateInput.value = currentDate;
-    buildDesktopTable();
-    legacyDateInput.addEventListener("change", () => { 
-      if (hiddenPicker) hiddenPicker.value = legacyDateInput.value;
-      if (displaySpan) displaySpan.innerText = formatDateForDisplay(legacyDateInput.value);
-      loadFromServer(); 
-      clearTempSelections(); 
-    });
-    loadFromServer();
-    const toggleBtn = $("dragToggleBtn");
-    toggleBtn.addEventListener("click", () => {
-      dragModeEnabled = !dragModeEnabled;
-      toggleBtn.textContent = dragModeEnabled ? "Режим перетяжки: ВКЛ" : "Режим перетяжки: ВЫКЛ";
-      toggleBtn.classList.toggle("active", dragModeEnabled);
-      $("dragModeIndicator").style.display = dragModeEnabled ? "block" : "none";
-      renderAllSliders();
-    });
-    
-    $("tableDesktop").addEventListener("mousedown", onMouseDown);
-    document.body.addEventListener("mousemove", onMouseMove);
-    document.body.addEventListener("mouseup", onMouseUp);
-    
-    ["bookModal","infoModal","imgPopup"].forEach(id=>{ 
-      $(id)?.addEventListener("click",e=>{ 
-        if(e.target=== $(id)) $(id).classList.remove("open"); 
-      }); 
-    });
-  }
-  
-  // Проверка сессии при загрузке
-  window.addEventListener('load', function() {
-    console.log("Page loaded, checking session...");
-    
-    const cachedUser = getCachedUser();
-    if (cachedUser && cachedUser.email) {
-      console.log("Found stored session for:", cachedUser.email);
-      currentUser = cachedUser;
-      loginUser(currentUser);
-    }
+const SPREADSHEET_ID = '1-yiVdZYa6wJdupTiuiHvI_ht3Vu73RUjyCehZqs2cJ4';
+const SHEET_NAME = '1';
+const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzLxSrpcGOIm34gLlFZS-EYZmG8liMLcUST3MRMoAp56y6XDC2ClapCDB18yiYmdrHZ/exec";
+
+const ALLOWED_EMAILS = ["vadiksss900@gmail.com","sergey99belov@gmail.com","popadinecvasil3@gmail.com","veronicadiakova04@gmail.com","info.luckystrike.kh@gmail.com","sashavolobuev123890@gmail.com","egorgorbushko@gmail.com","shatrava.o@gmail.com","Craftmax30@gmail.com","bowlingblock.b@gmail.com","lana.arnaut@gmail.com","polosinnikita1224@gmail.com","sofialat1506@gmail.com","ll3991940@gmail.com","ken040888@gmail.com"];
+
+const LANES = 12, SH = 11, EH = 22;
+const slots = [];
+for (let h = SH; h <= EH; h++) {
+  slots.push({ label: `${h}:00`, key: h, hour: h, minute: 0 });
+  if (h < EH) slots.push({ label: `${h}:30`, key: h + 0.5, hour: h, minute: 30 });
+}
+
+function getGroupIndex(lane) { const n = lane + 1; if (n <= 3) return 0; if (n === 4) return 1; if (n <= 6) return 0; return 2; }
+const GRP_CLASS = ['g-blue', 'g-green', 'g-red'];
+const LANE_TYPE = ['blue', 'green', 'red'];
+const LANE_LABELS = ['Пул', 'Пул', 'Пул', 'Снук', 'Пул', 'Пул', 'Рус', 'Рус', 'Рус', 'Рус', 'Рус', 'Рус'];
+
+let bookings = [], tempBookings = [], nextTempId = 1;
+let dragModeEnabled = false, currentBooking = null;
+let searchQuery = '';
+let currentUser = null;
+
+const $ = id => document.getElementById(id);
+
+// ===== THEME =====
+function initTheme() {
+  const saved = localStorage.getItem('ls-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  $('themeToggle').textContent = saved === 'dark' ? '🌙' : '☀️';
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('ls-theme', next);
+  $('themeToggle').textContent = next === 'dark' ? '🌙' : '☀️';
+}
+
+// ===== TOAST =====
+function showToast(msg, icon = 'ℹ️', duration = 3000) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<span class="toast-icon">${icon}</span><span>${msg}</span>`;
+  document.body.appendChild(t);
+  setTimeout(() => {
+    t.classList.add('toast-out');
+    setTimeout(() => t.remove(), 300);
+  }, duration);
+}
+
+// ===== AUTH =====
+function parseJwt(token) {
+  try {
+    return JSON.parse(decodeURIComponent(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+  } catch { return {}; }
+}
+
+function loadSheetsAPI() {
+  return new Promise((resolve, reject) => {
+    if (window.gapi && gapi.client) { resolve(); return; }
+    gapi.load('client', { callback: resolve, onerror: () => reject('err'), timeout: 8000, ontimeout: () => reject('timeout') });
   });
+}
+
+async function checkEmailInSheet(email) {
+  try {
+    await loadSheetsAPI();
+    await gapi.client.init({ apiKey: API_KEY, discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'] });
+    const r = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: `${SHEET_NAME}!A:A` });
+    if (!r.result.values) return ALLOWED_EMAILS.map(e => e.toLowerCase()).includes(email);
+    return r.result.values.some(row => row[0] && row[0].toLowerCase().trim() === email);
+  } catch {
+    return ALLOWED_EMAILS.map(e => e.toLowerCase()).includes(email);
+  }
+}
+
+async function handleCredentialResponse(response) {
+  const payload = parseJwt(response.credential);
+  const email = payload.email.toLowerCase().trim();
+  $('login').innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:16px;"><div class="spin"></div><span style="color:var(--text3)">Проверка доступа...</span></div>';
+  const ok = await checkEmailInSheet(email);
+  if (ok) {
+    currentUser = { email, name: payload.name, picture: payload.picture };
+    localStorage.setItem('ls-user', JSON.stringify({ email, name: payload.name, picture: payload.picture }));
+    loginUser(currentUser);
+  } else {
+    location.reload();
+    alert('Доступ запрещён');
+  }
+}
+
+function loginUser(user) {
+  $('login').style.display = 'none';
+  $('content').style.display = 'block';
+  const info = $('userInfo');
+  info.style.display = 'flex';
+  $('userPic').src = user.picture || '';
+  $('userName').textContent = user.name || '';
+  $('userEmail').textContent = user.email || '';
+  initApplication();
+}
+
+function signOut() {
+  localStorage.removeItem('ls-user');
+  location.reload();
+}
+
+// ===== TABLE =====
+function buildDesktopTable() {
+  const headRow = document.querySelector('#dtHead tr');
+  slots.forEach(sl => {
+    const th = document.createElement('th');
+    th.className = 'th-time' + (sl.minute === 0 ? ' th-hour' : '');
+    th.textContent = sl.label;
+    headRow.appendChild(th);
+  });
+  const body = $('dtBody');
+  for (let lane = 0; lane < LANES; lane++) {
+    const tr = document.createElement('tr');
+    tr.dataset.lane = lane;
+    const g = getGroupIndex(lane);
+    const lhdr = document.createElement('td');
+    lhdr.className = `lane-hdr ${GRP_CLASS[g]}`;
+    lhdr.innerHTML = `<div class="lane-number">${lane + 1}</div><div class="lane-tag">${LANE_LABELS[lane]}</div>`;
+    tr.appendChild(lhdr);
+    slots.forEach((sl, si) => {
+      const td = document.createElement('td');
+      td.className = 'slot' + (sl.minute === 30 ? ' half-slot' : '');
+      td.dataset.lane = lane; td.dataset.slotIdx = si;
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  }
+}
+
+function getSlotCell(lane, si) { return $('dtBody')?.rows[lane]?.cells[si + 1]; }
+
+function updateCellsHighlight() {
+  for (const row of $('dtBody').rows)
+    for (let i = 1; i < row.cells.length; i++)
+      row.cells[i].classList.remove('booking-pending', 'booking-confirmed', 'booking-rejected', 'temp-hl');
+  for (const b of bookings) {
+    if (b.startSlotIdx === undefined) continue;
+    const cls = b.confirmed === true ? 'booking-confirmed' : b.confirmed === false ? 'booking-rejected' : 'booking-pending';
+    for (let i = b.startSlotIdx; i <= b.endSlotIdx; i++) { const c = getSlotCell(b.lane, i); if (c) c.classList.add(cls); }
+  }
+  for (const t of tempBookings) {
+    if (t.startSlotIdx === undefined) continue;
+    for (let i = t.startSlotIdx; i <= t.endSlotIdx; i++) { const c = getSlotCell(t.lane, i); if (c) c.classList.add('temp-hl'); }
+  }
+  updateStats();
+}
+
+// ===== STATS =====
+function updateStats() {
+  const total = bookings.length;
+  const confirmed = bookings.filter(b => b.confirmed === true).length;
+  const pending = bookings.filter(b => b.confirmed === null).length;
+  const rejected = bookings.filter(b => b.confirmed === false).length;
+  $('statTotal').textContent = total;
+  $('statConfirmed').textContent = confirmed;
+  $('statPending').textContent = pending;
+  $('statRejected').textContent = rejected;
+}
+
+// ===== SEARCH =====
+function onSearch(q) {
+  searchQuery = q.trim().toLowerCase();
+  renderAllSliders();
+}
+
+// ===== TEMP BOOKINGS =====
+function fmtSlots(si, ei) {
+  const s = slots[si], e = slots[ei + 1];
+  return s.label + '–' + (e ? e.label : (Math.floor(slots[ei].key) + 1) + ':00');
+}
+
+function renderTempChips() {
+  const c = $('tempChips');
+  c.innerHTML = '';
+  tempBookings.forEach((tb, idx) => {
+    const chip = document.createElement('div');
+    chip.className = 'temp-chip';
+    chip.innerHTML = `<span>Стол ${tb.lane + 1} · ${fmtSlots(tb.startSlotIdx, tb.endSlotIdx)}</span><button class="temp-chip-rm">✕</button>`;
+    chip.querySelector('.temp-chip-rm').onclick = () => {
+      tempBookings.splice(idx, 1);
+      renderTempChips(); renderAllSliders(); updateCellsHighlight(); updatePreview();
+    };
+    c.appendChild(chip);
+  });
+  updatePreview();
+}
+
+function updatePreview() {
+  const box = $('previewBox');
+  box.textContent = tempBookings.length
+    ? tempBookings.map(tb => `Стол ${tb.lane + 1} · ${fmtSlots(tb.startSlotIdx, tb.endSlotIdx)}`).join('   |   ')
+    : 'Выберите время на сетке';
+}
+
+function hasConflict(lane, s, e, excludeId = null) {
+  const st = slots[s].key, et = slots[e + 1]?.key || (slots[e].key + 0.5);
+  return bookings.some(b => {
+    if (excludeId !== null && b.id === excludeId) return false;
+    if (b.lane !== lane) return false;
+    return !(et <= b.start || st >= b.end);
+  });
+}
+
+// ===== DRAG SELECT =====
+let isDragging = false, dragStart = null, dragInterval = null;
+
+function onMouseDown(e) {
+  if (dragModeEnabled) return;
+  const t = e.target;
+  if (t.classList?.contains('slot')) {
+    e.preventDefault();
+    const lane = parseInt(t.dataset.lane), si = parseInt(t.dataset.slotIdx);
+    isDragging = true;
+    dragStart = { lane, si };
+    dragInterval = { lane, startIdx: si, endIdx: si };
+    highlightDrag(lane, si, si);
+  }
+}
+
+function onMouseMove(e) {
+  if (!dragModeEnabled && isDragging && dragStart) {
+    const el = document.elementsFromPoint(e.clientX, e.clientY).find(el => el.classList?.contains('slot'));
+    if (el) {
+      const lane = parseInt(el.dataset.lane), idx = parseInt(el.dataset.slotIdx);
+      if (lane === dragStart.lane) {
+        const ns = Math.min(dragStart.si, idx), ne = Math.max(dragStart.si, idx);
+        dragInterval = { lane, startIdx: ns, endIdx: ne };
+        highlightDrag(lane, ns, ne);
+      }
+    }
+  }
+}
+
+// Touch support
+function onTouchStart(e) {
+  if (dragModeEnabled) return;
+  const touch = e.touches[0];
+  const el = document.elementFromPoint(touch.clientX, touch.clientY);
+  if (el?.classList?.contains('slot')) {
+    const lane = parseInt(el.dataset.lane), si = parseInt(el.dataset.slotIdx);
+    isDragging = true;
+    dragStart = { lane, si };
+    dragInterval = { lane, startIdx: si, endIdx: si };
+    highlightDrag(lane, si, si);
+  }
+}
+
+function onTouchMove(e) {
+  if (!isDragging || dragModeEnabled) return;
+  e.preventDefault();
+  const touch = e.touches[0];
+  const el = document.elementFromPoint(touch.clientX, touch.clientY);
+  if (el?.classList?.contains('slot')) {
+    const lane = parseInt(el.dataset.lane), idx = parseInt(el.dataset.slotIdx);
+    if (lane === dragStart.lane) {
+      const ns = Math.min(dragStart.si, idx), ne = Math.max(dragStart.si, idx);
+      dragInterval = { lane, startIdx: ns, endIdx: ne };
+      highlightDrag(lane, ns, ne);
+    }
+  }
+}
+
+function onTouchEnd() { finishDrag(); }
+
+function highlightDrag(lane, si, ei) {
+  document.querySelectorAll('#tableDesktop td.slot.drag-over').forEach(td => td.classList.remove('drag-over'));
+  for (let i = si; i <= ei; i++) { const c = getSlotCell(lane, i); if (c) c.classList.add('drag-over'); }
+}
+
+function finishDrag() {
+  if (isDragging && dragInterval) {
+    const { lane, startIdx, endIdx } = dragInterval;
+    if (hasConflict(lane, startIdx, endIdx)) {
+      showToast('Это время уже занято', '⚠️');
+    } else {
+      tempBookings.push({ id: nextTempId++, lane, startSlotIdx: startIdx, endSlotIdx: endIdx });
+      renderTempChips(); renderAllSliders(); updateCellsHighlight();
+    }
+  }
+  isDragging = false; dragInterval = null; dragStart = null;
+  document.querySelectorAll('#tableDesktop td.slot.drag-over').forEach(td => td.classList.remove('drag-over'));
+}
+
+function onMouseUp() { if (!dragModeEnabled) finishDrag(); }
+
+// ===== BOOK MODAL =====
+function openBookModal() {
+  if (tempBookings.length === 0) { showToast('Сначала выделите интервал на сетке', '📌'); return; }
+  $('nameInput').value = ''; $('phoneInput').value = ''; $('commentInput').value = '';
+  updatePreview();
+  $('bookModal').classList.add('open');
+  setTimeout(() => $('nameInput').focus(), 100);
+}
+
+function closeBookModal() { $('bookModal').classList.remove('open'); }
+
+function clearTempSelections() {
+  tempBookings = [];
+  renderTempChips(); renderAllSliders(); updateCellsHighlight();
+}
+
+async function submitTempBookings() {
+  const name = $('nameInput').value.trim();
+  if (!name) { showToast('Введите имя гостя', '⚠️'); return; }
+  if (!tempBookings.length) return;
+  showLoad();
+  try {
+    const dateVal = window.currentDate || new Date().toISOString().split('T')[0];
+    await fetch(GAS_URL, {
+      method: 'POST', mode: 'no-cors',
+      body: JSON.stringify({
+        bookings: tempBookings.map(tb => ({
+          date: dateVal, tableNumber: tb.lane + 1,
+          start: slots[tb.startSlotIdx].key,
+          end: slots[tb.endSlotIdx + 1]?.key || (slots[tb.endSlotIdx].key + 0.5),
+          name, phone: $('phoneInput').value.trim(), comment: $('commentInput').value.trim()
+        }))
+      })
+    });
+    clearTempSelections();
+    await loadFromServer();
+    closeBookModal();
+    showToast(`Бронь для ${name} сохранена`, '✅');
+  } catch { showToast('Ошибка сохранения', '❌'); }
+  hideLoad();
+}
+
+// ===== SERVER =====
+async function loadFromServer() {
+  showLoad();
+  try {
+    const dateVal = window.currentDate || new Date().toISOString().split('T')[0];
+    const res = await fetch(GAS_URL + '?action=get&date=' + dateVal);
+    const data = await res.json();
+    bookings = (data.bookings || []).map(b => {
+      const startKey = parseFloat(b.start), endKey = parseFloat(b.end);
+      let si = slots.findIndex(s => s.key === startKey);
+      let ei = slots.findIndex(s => s.key === endKey) - 1;
+      if (ei < 0) ei = slots.length - 1;
+      return { id: b.id, lane: b.table - 1, start: startKey, end: endKey, startSlotIdx: si, endSlotIdx: ei, name: b.name, phone: b.phone, comment: b.comment, confirmed: b.confirmed === 'Да' ? true : b.confirmed === 'Нет' ? false : null };
+    });
+    renderAllSliders(); updateCellsHighlight();
+  } catch (e) { console.error(e); showToast('Ошибка загрузки', '❌'); }
+  hideLoad();
+}
+
+async function saveToServer(b) {
+  if (!b.id) return;
+  await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'update', id: b.id, date: window.currentDate, tableNumber: b.lane + 1, start: b.start, end: b.end, name: b.name, phone: b.phone, comment: b.comment }) });
+}
+
+// ===== SLIDERS =====
+function renderAllSliders() {
+  const container = $('slidersLayer');
+  if (!container) return;
+  container.innerHTML = '';
+  const rows = Array.from($('dtBody')?.querySelectorAll('tr') || []);
+  if (!rows.length) return;
+
+  const allItems = [...bookings, ...tempBookings.map(t => ({ ...t, isTemp: true }))];
+
+  allItems.forEach(item => {
+    const { startSlotIdx: si, endSlotIdx: ei, lane } = item;
+    if (si === undefined || ei === undefined) return;
+
+    // Search filter
+    if (searchQuery && !item.isTemp) {
+      const name = (item.name || '').toLowerCase();
+      const phone = (item.phone || '').toLowerCase();
+      if (!name.includes(searchQuery) && !phone.includes(searchQuery)) return;
+    }
+
+    const row = rows[lane];
+    if (!row) return;
+    const sc = row.cells[si + 1], ec = row.cells[ei + 1];
+    if (!sc || !ec) return;
+
+    const left = sc.offsetLeft + 1, top = row.offsetTop + 1;
+    const width = ec.offsetLeft + ec.offsetWidth - sc.offsetLeft - 2;
+    const height = row.offsetHeight - 2;
+    const status = item.isTemp ? 'temp' : item.confirmed === true ? 'confirmed' : item.confirmed === false ? 'rejected' : 'pending';
+    const lt = LANE_TYPE[getGroupIndex(lane)];
+
+    const slider = document.createElement('div');
+    slider.className = `slider ${status}`;
+    if (dragModeEnabled) slider.classList.add('drag-mode-enabled');
+    slider.setAttribute('data-lt', lt);
+    slider.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+
+    // Highlight search match
+    if (searchQuery && !item.isTemp) slider.style.outline = '2px solid var(--gold)';
+
+    const dot = document.createElement('div'); dot.className = 'status-dot'; slider.appendChild(dot);
+    const nameDiv = document.createElement('div'); nameDiv.className = 'sl-name'; nameDiv.textContent = item.isTemp ? 'Новая бронь' : (item.name || '—');
+    const timeDiv = document.createElement('div'); timeDiv.className = 'sl-time'; timeDiv.textContent = fmtSlots(si, ei);
+    slider.append(nameDiv, timeDiv);
+
+    const dh = document.createElement('div'); dh.className = 'drag-handle';
+    if (dragModeEnabled && !item.isTemp) {
+      dh.addEventListener('mousedown', e => { e.stopPropagation(); startMoveDrag(item, e, rows); });
+    } else if (dragModeEnabled && item.isTemp) {
+      dh.addEventListener('mousedown', e => { e.stopPropagation(); startMoveTempDrag(item, e, rows); });
+    } else {
+      dh.addEventListener('click', e => {
+        e.stopPropagation();
+        if (!item.isTemp && item.id) showInfoModal(item);
+        else if (item.isTemp) showToast('Временная бронь — сохраните для просмотра', 'ℹ️');
+      });
+    }
+    slider.appendChild(dh);
+    container.appendChild(slider);
+  });
+}
+
+// ===== DRAG MOVE =====
+async function startMoveDrag(booking, e, rows) {
+  e.stopPropagation();
+  const slider = e.currentTarget.closest('.slider');
+  if (!slider) return;
+  const dur = booking.endSlotIdx - booking.startSlotIdx;
+  const ghost = createGhost(slider);
+  moveLogic(ghost, slider, rows, dur, (fl, fsi) => {
+    const nei = fsi + dur;
+    if (!hasConflict(fl, fsi, nei, booking.id)) {
+      booking.lane = fl; booking.startSlotIdx = fsi; booking.endSlotIdx = nei;
+      booking.start = slots[fsi].key; booking.end = slots[nei + 1]?.key || (slots[nei].key + 0.5);
+      saveToServer(booking); renderAllSliders(); updateCellsHighlight();
+      showToast('Бронь перемещена', '↕');
+    } else { showToast('Конфликт с другой броней', '⚠️'); }
+  }, booking.lane, booking.startSlotIdx);
+}
+
+async function startMoveTempDrag(temp, e, rows) {
+  e.stopPropagation();
+  const slider = e.currentTarget.closest('.slider');
+  if (!slider) return;
+  const dur = temp.endSlotIdx - temp.startSlotIdx;
+  const ghost = createGhost(slider);
+  moveLogic(ghost, slider, rows, dur, (fl, fsi) => {
+    const nei = fsi + dur;
+    if (!hasConflict(fl, fsi, nei)) {
+      temp.lane = fl; temp.startSlotIdx = fsi; temp.endSlotIdx = nei;
+      renderTempChips(); renderAllSliders(); updateCellsHighlight();
+    } else { showToast('Конфликт с другой броней', '⚠️'); }
+  }, temp.lane, temp.startSlotIdx);
+}
+
+function createGhost(slider) {
+  const ghost = document.createElement('div');
+  ghost.className = 'ghost-slider';
+  const dot = slider.querySelector('.status-dot')?.cloneNode(true);
+  const n = slider.querySelector('.sl-name')?.cloneNode(true);
+  const t = slider.querySelector('.sl-time')?.cloneNode(true);
+  if (dot) ghost.appendChild(dot);
+  if (n) ghost.appendChild(n);
+  if (t) ghost.appendChild(t);
+  ghost.style.cssText = slider.style.cssText;
+  $('slidersLayer').appendChild(ghost);
+  slider.classList.add('dragging');
+  return ghost;
+}
+
+function moveLogic(ghost, slider, rows, dur, onDrop, initLane, initSi) {
+  let cl = initLane, cs = initSi;
+  const updateGhost = (lane, si) => {
+    const row = rows[lane]; if (!row) return;
+    const sc = row.cells[si + 1], ec = row.cells[si + dur + 1];
+    if (sc && ec) { ghost.style.left = (sc.offsetLeft + 1) + 'px'; ghost.style.top = (row.offsetTop + 1) + 'px'; ghost.style.width = (ec.offsetLeft + ec.offsetWidth - sc.offsetLeft - 2) + 'px'; ghost.style.height = (row.offsetHeight - 2) + 'px'; }
+  };
+  const getTarget = e => { const el = document.elementsFromPoint(e.clientX, e.clientY).find(el => el.classList?.contains('slot')); return el ? { lane: parseInt(el.dataset.lane), idx: parseInt(el.dataset.slotIdx) } : null; };
+  const onMove = ev => { const t = getTarget(ev); if (t) { const nl = t.lane, ns = Math.min(Math.max(0, t.idx), slots.length - dur - 1); if (nl !== cl || ns !== cs) { cl = nl; cs = ns; updateGhost(cl, cs); } } };
+  const onEnd = ev => { const t = getTarget(ev); if (t) { const fl = t.lane, fs = Math.min(Math.max(0, t.idx), slots.length - dur - 1); onDrop(fl, fs); } ghost?.remove(); slider.classList.remove('dragging'); document.body.style.cursor = ''; document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onEnd); renderAllSliders(); };
+  document.body.style.cursor = 'grabbing';
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onEnd);
+  updateGhost(cl, cs);
+}
+
+// ===== INFO MODAL =====
+function showInfoModal(b) {
+  currentBooking = b;
+  $('i-table').textContent = 'Стол №' + (b.lane + 1);
+  $('i-time').textContent = fmtSlots(b.startSlotIdx, b.endSlotIdx);
+  $('i-name').textContent = b.name || '—';
+  $('i-phone').textContent = b.phone || '—';
+  $('copyPhoneBtn').style.display = b.phone ? '' : 'none';
+  $('i-comment').textContent = b.comment || '—';
+  const statusEl = $('i-status');
+  if (b.confirmed === true) statusEl.innerHTML = '<span class="status-badge s-yes">✅ Гость пришёл</span>';
+  else if (b.confirmed === false) statusEl.innerHTML = '<span class="status-badge s-no">❌ Не явились</span>';
+  else statusEl.innerHTML = '<span class="status-badge s-wait">⏳ Ожидание</span>';
+  $('infoModal').classList.add('open');
+}
+
+function closeInfoModal() { $('infoModal').classList.remove('open'); currentBooking = null; }
+
+function copyPhone() {
+  const phone = currentBooking?.phone;
+  if (!phone) return;
+  navigator.clipboard.writeText(phone).then(() => showToast('Телефон скопирован', '📋')).catch(() => showToast('Ошибка копирования', '❌'));
+}
+
+async function confirmBooking(yes) {
+  if (!currentBooking) return;
+  showLoad();
+  await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'confirm', id: currentBooking.id, confirmed: yes }) });
+  closeInfoModal(); await loadFromServer(); hideLoad();
+  showToast(yes ? 'Гость подтверждён' : 'Помечено как неявка', yes ? '✅' : '❌');
+}
+
+async function deleteBooking() {
+  if (!currentBooking || !confirm('Удалить бронь?')) return;
+  showLoad();
+  await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'delete', id: currentBooking.id }) });
+  closeInfoModal(); await loadFromServer(); hideLoad();
+  showToast('Бронь удалена', '🗑️');
+}
+
+// ===== DRAG MODE =====
+function toggleDragMode() {
+  dragModeEnabled = !dragModeEnabled;
+  const btn = $('dragToggleBtn');
+  btn.textContent = dragModeEnabled ? '↕ Перетяжка: ВКЛ' : '↕ Перетяжка: ВЫКЛ';
+  btn.classList.toggle('active', dragModeEnabled);
+  $('dragIndicator').style.display = dragModeEnabled ? 'block' : 'none';
+  renderAllSliders();
+}
+
+function showLoad() { $('loader').style.display = 'flex'; }
+function hideLoad() { $('loader').style.display = 'none'; }
+function openImg() { $('imgPopup').classList.add('open'); }
+function closeImg() { $('imgPopup').classList.remove('open'); }
+
+// ===== DATE =====
+function formatDate(dateStr) {
+  if (!dateStr) return 'Сегодня';
+  const d = new Date(dateStr), t = new Date(); t.setHours(0, 0, 0, 0);
+  const tom = new Date(t); tom.setDate(tom.getDate() + 1);
+  if (d.getTime() === t.getTime()) return 'Сегодня';
+  if (d.getTime() === tom.getTime()) return 'Завтра';
+  const months = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+  const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+  return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`;
+}
+
+// ===== INIT =====
+function initApplication() {
+  document.addEventListener('dragstart', e => { if (e.target.closest('.drag-handle, .slider')) e.preventDefault(); });
+
+  const today = new Date().toISOString().split('T')[0];
+  window.currentDate = today;
+  const picker = $('hiddenDatePicker');
+  if (picker) picker.value = today;
+  $('displayDateText').textContent = formatDate(today);
+
+  $('calendarButton').addEventListener('click', () => {
+    if (picker.showPicker) picker.showPicker();
+    else { picker.click(); picker.focus(); }
+  });
+
+  picker.addEventListener('change', e => {
+    const d = e.target.value;
+    if (!d) return;
+    window.currentDate = d;
+    $('displayDateText').textContent = formatDate(d);
+    $('statDate').textContent = formatDate(d);
+    loadFromServer(); clearTempSelections();
+  });
+
+  buildDesktopTable();
+
+  const table = $('tableDesktop');
+  table.addEventListener('mousedown', onMouseDown);
+  document.body.addEventListener('mousemove', onMouseMove);
+  document.body.addEventListener('mouseup', onMouseUp);
+  table.addEventListener('touchstart', onTouchStart, { passive: true });
+  table.addEventListener('touchmove', onTouchMove, { passive: false });
+  table.addEventListener('touchend', onTouchEnd);
+
+  ['bookModal', 'infoModal', 'imgPopup'].forEach(id => {
+    $(id)?.addEventListener('click', e => { if (e.target === $(id)) $(id).classList.remove('open'); });
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') ['bookModal', 'infoModal', 'imgPopup'].forEach(id => $(id)?.classList.remove('open'));
+    if (e.key === 'Enter' && $('bookModal').classList.contains('open')) submitTempBookings();
+  });
+
+  loadFromServer();
+
+  // Auto-refresh every 2 minutes
+  setInterval(() => loadFromServer(), 120000);
+}
+
+// ===== BOOT =====
+window.addEventListener('load', () => {
+  initTheme();
+  try {
+    const saved = JSON.parse(localStorage.getItem('ls-user') || 'null');
+    if (saved && saved.email) { currentUser = saved; loginUser(currentUser); }
+  } catch { /* ignore */ }
+});
 </script>
 </body>
 </html>

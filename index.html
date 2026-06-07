@@ -204,6 +204,12 @@
       background: var(--accent-blue-dim); 
       transform: scale(0.97); 
     }
+    
+    .nav-btn-disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
 
     .page {
       width: 100%;
@@ -744,7 +750,7 @@
         <span id="userRole" class="user-role"></span>
         <button id="logoutButton" class="logout-btn" onclick="signOut()">🚪</button>
       </div>
-      <button class="nav-btn" onclick="openAdminPanel()">👥 Админ панель</button>
+      <button id="adminPanelBtn" class="nav-btn" onclick="openAdminPanel()">👥 Админ панель</button>
     </div>
   </nav>
   <div class="page">
@@ -778,7 +784,7 @@
     <div class="sheet-body">
       <div class="admin-header">
         <span class="admin-title">Список сотрудников</span>
-        <button class="add-user-btn" onclick="showAddUserForm()">+ Добавить</button>
+        <button id="addUserBtn" class="add-user-btn">+ Добавить</button>
       </div>
       <div id="usersList">
         <div style="text-align: center; padding: 40px;">Загрузка...</div>
@@ -794,13 +800,13 @@
       <button class="sheet-x" onclick="closeUserFormModal()">×</button>
     </div>
     <div class="sheet-body">
-      <form id="userForm" class="user-form" onsubmit="saveUser(event)">
+      <form id="userForm" class="user-form" onsubmit="return false;">
         <input type="hidden" id="editRow" value="">
         <input type="email" id="userEmail" placeholder="Email *" required>
         <input type="text" id="userName" placeholder="Имя">
         <input type="text" id="userRole" placeholder="Должность">
         <div class="form-actions">
-          <button type="submit" class="save-btn">Сохранить</button>
+          <button type="button" class="save-btn" onclick="saveUser()">Сохранить</button>
           <button type="button" class="cancel-btn" onclick="closeUserFormModal()">Отмена</button>
         </div>
       </form>
@@ -996,6 +1002,22 @@
       userRoleSpan.style.display = 'none';
     }
     
+    // Проверяем доступ к админ-панели (только для Управляющий и Разработчик)
+    const adminBtn = document.getElementById('adminPanelBtn');
+    const allowedRoles = ['Управляющий', 'Разработчик'];
+    
+    if (allowedRoles.includes(user.role)) {
+      adminBtn.classList.remove('nav-btn-disabled');
+      adminBtn.style.opacity = '1';
+      adminBtn.style.pointerEvents = 'auto';
+      adminBtn.onclick = openAdminPanel;
+    } else {
+      adminBtn.classList.add('nav-btn-disabled');
+      adminBtn.style.opacity = '0.5';
+      adminBtn.style.pointerEvents = 'none';
+      adminBtn.onclick = null;
+    }
+    
     showLoading(false);
     initApplication();
   }
@@ -1011,7 +1033,18 @@
   
   // ==================== АДМИН-ПАНЕЛЬ ====================
   
+  // Проверка прав доступа к админ-панели
+  function hasAdminAccess() {
+    const allowedRoles = ['Управляющий', 'Разработчик'];
+    return currentUser && allowedRoles.includes(currentUser.role);
+  }
+  
   async function openAdminPanel() {
+    if (!hasAdminAccess()) {
+      alert('Доступ запрещен. Админ-панель доступна только для Управляющего и Разработчика.');
+      return;
+    }
+    
     showLoad();
     document.getElementById("adminModal").classList.add("open");
     await loadUsersList();
@@ -1047,14 +1080,19 @@
       `;
       
       data.users.forEach(user => {
+        // Экранируем данные для безопасной вставки в onclick
+        const safeEmail = user.email.replace(/'/g, "\\'");
+        const safeName = (user.name || '').replace(/'/g, "\\'");
+        const safeRole = (user.role || '').replace(/'/g, "\\'");
+        
         html += `
           <tr>
             <td>${escapeHtml(user.email)}</td>
             <td>${escapeHtml(user.name || '-')}</td>
             <td>${escapeHtml(user.role || '-')}</td>
             <td class="user-actions">
-              <button class="edit-user-btn" onclick='editUser(${user.row}, "${escapeHtml(user.email)}", "${escapeHtml(user.name || '')}", "${escapeHtml(user.role || '')}")'>✏️</button>
-              <button class="delete-user-btn" onclick='deleteUser(${user.row}, "${escapeHtml(user.email)}")'>🗑️</button>
+              <button class="edit-user-btn" onclick="editUser(${user.row}, '${safeEmail}', '${safeName}', '${safeRole}')">✏️</button>
+              <button class="delete-user-btn" onclick="deleteUser(${user.row}, '${safeEmail}')">🗑️</button>
             </td>
           </tr>
         `;
@@ -1062,6 +1100,12 @@
       
       html += `</tbody></table>`;
       container.innerHTML = html;
+      
+      // Назначаем обработчик для кнопки добавления
+      const addBtn = document.getElementById('addUserBtn');
+      if (addBtn) {
+        addBtn.onclick = showAddUserForm;
+      }
       
     } catch (error) {
       console.error("Error loading users:", error);
@@ -1093,9 +1137,7 @@
     document.getElementById("userFormModal").classList.remove("open");
   }
   
-  async function saveUser(event) {
-    event.preventDefault();
-    
+  async function saveUser() {
     const row = document.getElementById("editRow").value;
     const email = document.getElementById("userEmail").value.trim();
     const name = document.getElementById("userName").value.trim();
@@ -1103,6 +1145,13 @@
     
     if (!email) {
       alert("Введите email");
+      return;
+    }
+    
+    // Проверка формата email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert("Введите корректный email адрес");
       return;
     }
     
@@ -1119,13 +1168,14 @@
         data = { action, email, name, role };
       }
       
-      await fetch(GAS_URL, {
+      const response = await fetch(GAS_URL, {
         method: "POST",
         mode: "no-cors",
         body: JSON.stringify(data)
       });
       
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Даём время серверу обработать запрос
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
       closeUserFormModal();
       await loadUsersList();
@@ -1153,7 +1203,7 @@
         body: JSON.stringify({ action: "deleteUser", row: parseInt(row) })
       });
       
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
       await loadUsersList();
       alert("Пользователь удалён");
       

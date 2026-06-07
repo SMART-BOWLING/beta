@@ -8,7 +8,6 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js"></script>
   <style>
-    /* ВСЕ ВАШИ СТИЛИ ОСТАЮТСЯ БЕЗ ИЗМЕНЕНИЙ */
     * {
       margin: 0;
       padding: 0;
@@ -204,12 +203,6 @@
     .nav-btn:hover { 
       background: var(--accent-blue-dim); 
       transform: scale(0.97); 
-    }
-    
-    .nav-btn-disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      pointer-events: none;
     }
 
     .page {
@@ -593,6 +586,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .drag-mode-indicator { position: fixed; bottom: 28px; right: 28px; background: #2c2c2ecc; backdrop-filter: blur(20px); color: white; padding: 10px 26px; border-radius: 60px; font-size: 14px; z-index: 1000; pointer-events: none; }
     
+    /* Стили для админ-панели */
     .admin-panel {
       max-width: 800px;
       width: 90%;
@@ -678,15 +672,6 @@
       border: 1px solid var(--border-strong);
       border-radius: 12px;
       font-size: 14px;
-      background: white;
-    }
-    
-    .user-form input:-webkit-autofill,
-    .user-form input:-webkit-autofill:hover,
-    .user-form input:-webkit-autofill:focus,
-    .user-form input:-webkit-autofill:active {
-      -webkit-box-shadow: 0 0 0 30px white inset !important;
-      box-shadow: 0 0 0 30px white inset !important;
     }
     
     .form-actions {
@@ -759,7 +744,7 @@
         <span id="userRole" class="user-role"></span>
         <button id="logoutButton" class="logout-btn" onclick="signOut()">🚪</button>
       </div>
-      <button id="adminPanelBtn" class="nav-btn">👥 Админ панель</button>
+      <button class="nav-btn" onclick="openAdminPanel()">👥 Админ панель</button>
     </div>
   </nav>
   <div class="page">
@@ -774,7 +759,7 @@
       <button id="dragToggleBtn" class="btn-drag-toggle">Режим перетяжки: ВЫКЛ</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
-    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody><tr><div id="slidersLayer"></div></div></div>
+    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
   </div>
 </div>
 
@@ -793,7 +778,7 @@
     <div class="sheet-body">
       <div class="admin-header">
         <span class="admin-title">Список сотрудников</span>
-        <button id="addUserBtn" class="add-user-btn">+ Добавить</button>
+        <button class="add-user-btn" onclick="showAddUserForm()">+ Добавить</button>
       </div>
       <div id="usersList">
         <div style="text-align: center; padding: 40px;">Загрузка...</div>
@@ -809,13 +794,13 @@
       <button class="sheet-x" onclick="closeUserFormModal()">×</button>
     </div>
     <div class="sheet-body">
-      <form id="userForm" class="user-form" autocomplete="off">
+      <form id="userForm" class="user-form" onsubmit="saveUser(event)">
         <input type="hidden" id="editRow" value="">
-        <input type="email" id="userEmail" placeholder="Email *" required autocomplete="off">
-        <input type="text" id="userName" placeholder="Имя" autocomplete="off">
-        <input type="text" id="userRole" placeholder="Должность" autocomplete="off">
+        <input type="email" id="userEmail" placeholder="Email *" required>
+        <input type="text" id="userName" placeholder="Имя">
+        <input type="text" id="userRole" placeholder="Должность">
         <div class="form-actions">
-          <button type="button" class="save-btn" id="saveUserBtn">Сохранить</button>
+          <button type="submit" class="save-btn">Сохранить</button>
           <button type="button" class="cancel-btn" onclick="closeUserFormModal()">Отмена</button>
         </div>
       </form>
@@ -826,11 +811,11 @@
 <div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
 
 <script>
-  // ==================== КОНФИГУРАЦИЯ ====================
+  // ==================== КОНФИГУРАЦИЯ АВТОРИЗАЦИИ ====================
   const AUTH_SPREADSHEET_ID = '1zwi1CInK3NZ8YRAegRMAdjin6XPacVkAkFsjAiqVE0w';
   const AUTH_SHEET_NAME = '1';
   const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
-  const GAS_URL = "https://script.google.com/macros/s/AKfycby1TMXq9YJDFrekfXbFINlp4lWqQHa8XhvaCMW9Q-4e5YoImzIQ3mj4bR3wXQ9kblrJ/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbwRgM5TR3PtSYU6HHuvmxl_8ZQB39Lb8vudYvaA2ict9zgFZfx1M4tJKQsOfj93i7Dv/exec";
   
   let currentUser = null;
   
@@ -908,6 +893,7 @@
       
       const rows = response.result.values;
       if (!rows || rows.length === 0) {
+        console.log('Sheet is empty');
         return { found: false };
       }
       
@@ -915,12 +901,14 @@
         if (!rows[i][0]) continue;
         const rowEmail = rows[i][0].toLowerCase().trim();
         if (rowEmail === email) {
+          console.log('Email found in sheet:', email);
           const userName = rows[i][1] ? rows[i][1].trim() : email.split('@')[0];
           const userRole = rows[i][2] ? rows[i][2].trim() : '';
           return { found: true, name: userName, role: userRole };
         }
       }
       
+      console.log('Email not found in sheet:', email);
       return { found: false };
       
     } catch (error) {
@@ -944,7 +932,14 @@
         if (window.google && google.accounts && google.accounts.id) {
           google.accounts.id.renderButton(
             document.querySelector('.g_id_signin'),
-            { type: 'standard', shape: 'pill', theme: 'outline', text: 'signin_with', size: 'large', logo_alignment: 'left' }
+            { 
+              type: 'standard', 
+              shape: 'pill', 
+              theme: 'outline', 
+              text: 'signin_with', 
+              size: 'large', 
+              logo_alignment: 'left' 
+            }
           );
         }
       }
@@ -1001,19 +996,6 @@
       userRoleSpan.style.display = 'none';
     }
     
-    const adminBtn = document.getElementById('adminPanelBtn');
-    const allowedRoles = ['Управляющий', 'Разработчик'];
-    
-    if (allowedRoles.includes(user.role)) {
-      adminBtn.classList.remove('nav-btn-disabled');
-      adminBtn.style.opacity = '1';
-      adminBtn.style.pointerEvents = 'auto';
-    } else {
-      adminBtn.classList.add('nav-btn-disabled');
-      adminBtn.style.opacity = '0.5';
-      adminBtn.style.pointerEvents = 'none';
-    }
-    
     showLoading(false);
     initApplication();
   }
@@ -1029,17 +1011,7 @@
   
   // ==================== АДМИН-ПАНЕЛЬ ====================
   
-  function hasAdminAccess() {
-    const allowedRoles = ['Управляющий', 'Разработчик'];
-    return currentUser && allowedRoles.includes(currentUser.role);
-  }
-  
   async function openAdminPanel() {
-    if (!hasAdminAccess()) {
-      alert('Доступ запрещен. Админ-панель доступна только для Управляющего и Разработчика.');
-      return;
-    }
-    
     showLoad();
     document.getElementById("adminModal").classList.add("open");
     await loadUsersList();
@@ -1052,7 +1024,6 @@
   
   async function loadUsersList() {
     try {
-      // Используем обычный fetch, без JSONP
       const response = await fetch(`${GAS_URL}?action=getUsers&_=${Date.now()}`);
       const data = await response.json();
       
@@ -1076,29 +1047,25 @@
       `;
       
       data.users.forEach(user => {
-        const safeEmail = user.email.replace(/'/g, "\\'");
-        const safeName = (user.name || '').replace(/'/g, "\\'");
-        const safeRole = (user.role || '').replace(/'/g, "\\'");
-        
         html += `
           <tr>
             <td>${escapeHtml(user.email)}</td>
             <td>${escapeHtml(user.name || '-')}</td>
             <td>${escapeHtml(user.role || '-')}</td>
             <td class="user-actions">
-              <button class="edit-user-btn" onclick="editUser(${user.row}, '${safeEmail}', '${safeName}', '${safeRole}')">✏️</button>
-              <button class="delete-user-btn" onclick="deleteUser(${user.row}, '${safeEmail}')">🗑️</button>
+              <button class="edit-user-btn" onclick='editUser(${user.row}, "${escapeHtml(user.email)}", "${escapeHtml(user.name || '')}", "${escapeHtml(user.role || '')}")'>✏️</button>
+              <button class="delete-user-btn" onclick='deleteUser(${user.row}, "${escapeHtml(user.email)}")'>🗑️</button>
             </td>
-          </tr>
+           </tr>
         `;
       });
       
-      html += `</tbody></table>`;
+      html += `</tbody> Cruise`;
       container.innerHTML = html;
       
     } catch (error) {
       console.error("Error loading users:", error);
-      document.getElementById("usersList").innerHTML = '<div style="text-align: center; padding: 40px; color: var(--accent-red);">Ошибка загрузки списка пользователей. Попробуйте обновить страницу.</div>';
+      document.getElementById("usersList").innerHTML = '<div style="text-align: center; padding: 40px; color: var(--accent-red);">Ошибка загрузки списка пользователей</div>';
     }
   }
   
@@ -1126,7 +1093,9 @@
     document.getElementById("userFormModal").classList.remove("open");
   }
   
-  async function saveUser() {
+  async function saveUser(event) {
+    event.preventDefault();
+    
     const row = document.getElementById("editRow").value;
     const email = document.getElementById("userEmail").value.trim();
     const name = document.getElementById("userName").value.trim();
@@ -1134,12 +1103,6 @@
     
     if (!email) {
       alert("Введите email");
-      return;
-    }
-    
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      alert("Введите корректный email адрес");
       return;
     }
     
@@ -1156,10 +1119,8 @@
         data = { action, email, name, role };
       }
       
-      // Используем обычный POST fetch
       const response = await fetch(GAS_URL, {
         method: "POST",
-        mode: "cors",
         headers: {
           'Content-Type': 'application/json',
         },
@@ -1168,17 +1129,17 @@
       
       const result = await response.json();
       
-      if (result.success) {
-        closeUserFormModal();
-        await loadUsersList();
-        alert(row ? "Пользователь обновлён" : "Пользователь добавлен");
-      } else {
-        alert(result.message || "Ошибка при сохранении");
+      if (!result.success) {
+        throw new Error(result.message || "Ошибка сохранения");
       }
+      
+      closeUserFormModal();
+      await loadUsersList();
+      alert(row ? "Пользователь обновлён" : "Пользователь добавлен");
       
     } catch (error) {
       console.error("Error saving user:", error);
-      alert("Ошибка при сохранении пользователя. Попробуйте еще раз.");
+      alert("Ошибка при сохранении пользователя: " + error.message);
     } finally {
       hideLoad();
     }
@@ -1194,7 +1155,6 @@
     try {
       const response = await fetch(GAS_URL, {
         method: "POST",
-        mode: "cors",
         headers: {
           'Content-Type': 'application/json',
         },
@@ -1203,16 +1163,16 @@
       
       const result = await response.json();
       
-      if (result.success) {
-        await loadUsersList();
-        alert("Пользователь удалён");
-      } else {
-        alert(result.message || "Ошибка при удалении");
+      if (!result.success) {
+        throw new Error(result.message || "Ошибка удаления");
       }
+      
+      await loadUsersList();
+      alert("Пользователь удалён");
       
     } catch (error) {
       console.error("Error deleting user:", error);
-      alert("Ошибка при удалении пользователя");
+      alert("Ошибка при удалении пользователя: " + error.message);
     } finally {
       hideLoad();
     }
@@ -1402,15 +1362,21 @@
     if(tempBookings.length===0) return; 
     showLoad(); 
     try{ 
-      await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ bookings:tempBookings.map(tb=>({ 
-        date:window.dateInputForSync?.value || new Date().toISOString().split('T')[0], 
-        tableNumber:tb.lane+1, 
-        start:slots[tb.startSlotIdx].key, 
-        end:slots[tb.endSlotIdx+1]?.key || (slots[tb.endSlotIdx].key+0.5), 
-        name, 
-        phone:$("phoneInput").value.trim(), 
-        comment:$("commentInput").value.trim() 
-      })) }) }); 
+      await fetch(GAS_URL,{ 
+        method:"POST", 
+        headers: {'Content-Type': 'application/json'},
+        body:JSON.stringify({ 
+          bookings:tempBookings.map(tb=>({ 
+            date:window.dateInputForSync?.value || new Date().toISOString().split('T')[0], 
+            tableNumber:tb.lane+1, 
+            start:slots[tb.startSlotIdx].key, 
+            end:slots[tb.endSlotIdx+1]?.key || (slots[tb.endSlotIdx].key+0.5), 
+            name, 
+            phone:$("phoneInput").value.trim(), 
+            comment:$("commentInput").value.trim() 
+          })) 
+        })
+      }); 
       clearTempSelections(); 
       await loadFromServer(); 
       closeBookModal(); 
@@ -1420,7 +1386,7 @@
   
   async function loadFromServer(){ showLoad(); try{ let dateVal = window.dateInputForSync?.value || new Date().toISOString().split('T')[0]; let res=await fetch(GAS_URL+"?action=get&date="+dateVal); let data=await res.json(); bookings=data.bookings?data.bookings.map(b=>{ let startKey=parseFloat(b.start); let endKey=parseFloat(b.end); let startSlotIdx=slots.findIndex(s=>s.key===startKey); let endSlotIdx=slots.findIndex(s=>s.key===endKey)-1; if(endSlotIdx<0) endSlotIdx=slots.length-1; return { id:b.id, lane:b.table-1, start:startKey, end:endKey, startSlotIdx, endSlotIdx, name:b.name, phone:b.phone, comment:b.comment, confirmed:b.confirmed==="Да"?true:(b.confirmed==="Нет"?false:null) }; }):[]; renderAllSliders(); updateCellsHighlight(); } catch(e){console.error(e);} hideLoad(); }
   
-  async function saveToServer(booking){ if(!booking.id) return; await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"update", id:booking.id, date:window.dateInputForSync?.value, tableNumber:booking.lane+1, start:booking.start, end:booking.end, name:booking.name, phone:booking.phone, comment:booking.comment }) }); }
+  async function saveToServer(booking){ if(!booking.id) return; await fetch(GAS_URL,{ method:"POST", headers: {'Content-Type': 'application/json'}, body:JSON.stringify({ action:"update", id:booking.id, date:window.dateInputForSync?.value, tableNumber:booking.lane+1, start:booking.start, end:booking.end, name:booking.name, phone:booking.phone, comment:booking.comment }) }); }
   
   function renderAllSliders(){ 
     let container=$("slidersLayer"); 
@@ -1552,8 +1518,8 @@
   }
   
   function closeInfoModal(){ $("infoModal").classList.remove("open"); currentBooking=null; }
-  async function confirmBooking(yes){ if(!currentBooking) return; showLoad(); await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"confirm", id:currentBooking.id, confirmed:yes }) }); closeInfoModal(); await loadFromServer(); hideLoad(); }
-  async function deleteBooking(){ if(!currentBooking||!confirm("Удалить?")) return; showLoad(); await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"delete", id:currentBooking.id }) }); closeInfoModal(); await loadFromServer(); hideLoad(); }
+  async function confirmBooking(yes){ if(!currentBooking) return; showLoad(); await fetch(GAS_URL,{ method:"POST", headers: {'Content-Type': 'application/json'}, body:JSON.stringify({ action:"confirm", id:currentBooking.id, confirmed:yes }) }); closeInfoModal(); await loadFromServer(); hideLoad(); }
+  async function deleteBooking(){ if(!currentBooking||!confirm("Удалить?")) return; showLoad(); await fetch(GAS_URL,{ method:"POST", headers: {'Content-Type': 'application/json'}, body:JSON.stringify({ action:"delete", id:currentBooking.id }) }); closeInfoModal(); await loadFromServer(); hideLoad(); }
   function showLoad(){ $("loader").style.display="flex"; }
   function hideLoad(){ $("loader").style.display="none"; }
   
@@ -1574,24 +1540,6 @@
         return false;
       }
     });
-    
-    // Назначаем обработчик кнопки админ-панели
-    const adminBtn = document.getElementById('adminPanelBtn');
-    if (adminBtn) {
-      adminBtn.onclick = function() { openAdminPanel(); };
-    }
-    
-    // Назначаем обработчик кнопки добавления пользователя
-    const addUserBtn = document.getElementById('addUserBtn');
-    if (addUserBtn) {
-      addUserBtn.onclick = function() { showAddUserForm(); };
-    }
-    
-    // Назначаем обработчик кнопки сохранения
-    const saveUserBtn = document.getElementById('saveUserBtn');
-    if (saveUserBtn) {
-      saveUserBtn.onclick = function() { saveUser(); };
-    }
     
     const calendarBtn = document.getElementById("calendarButton");
     const hiddenPicker = document.getElementById("hiddenDatePicker");

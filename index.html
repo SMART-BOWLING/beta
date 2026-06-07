@@ -759,7 +759,7 @@
       <button id="dragToggleBtn" class="btn-drag-toggle">Режим перетяжки: ВЫКЛ</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
-    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
+    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody> </table><div id="slidersLayer"></div></div></div>
   </div>
 </div>
 
@@ -996,6 +996,24 @@
       userRoleSpan.style.display = 'none';
     }
     
+    // ==================== ПРАВИЛО ДОСТУПА К АДМИН-ПАНЕЛИ ====================
+    // Кнопку "Админ панель" может нажать только пользователь с должностью "Разработчик" или "Управляющий"
+    const adminPanelBtn = document.querySelector('.nav-btn');
+    if (adminPanelBtn) {
+      // Разрешенные должности (регистр не важен)
+      const allowedRoles = ['разработчик', 'управляющий'];
+      const userRole = (user.role || '').toLowerCase().trim();
+      
+      if (allowedRoles.includes(userRole)) {
+        adminPanelBtn.style.display = 'block'; // Показываем кнопку
+        console.log('Админ-панель доступна для роли:', user.role);
+      } else {
+        adminPanelBtn.style.display = 'none'; // Скрываем кнопку
+        console.log('Админ-панель НЕ доступна для роли:', user.role || '(не указана)');
+      }
+    }
+    // ======================================================================
+    
     showLoading(false);
     initApplication();
   }
@@ -1056,7 +1074,7 @@
               <button class="edit-user-btn" onclick='editUser(${user.row}, "${escapeHtml(user.email)}", "${escapeHtml(user.name || '')}", "${escapeHtml(user.role || '')}")'>✏️</button>
               <button class="delete-user-btn" onclick='deleteUser(${user.row}, "${escapeHtml(user.email)}")'>🗑️</button>
             </td>
-          </tr>
+          </td>
         `;
       });
       

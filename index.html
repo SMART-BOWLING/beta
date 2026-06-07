@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <title>Lucky Strike · Бильярд Бронирование</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png">
+  <!-- Font Awesome 6 (Free Icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js"></script>
   <style>
@@ -185,7 +187,10 @@
       font-size: 22px; 
       font-weight: 600; 
       letter-spacing: -0.4px; 
-      color: var(--label-dark); 
+      color: var(--label-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
     .nav-btn {
@@ -198,6 +203,9 @@
       color: var(--accent-blue);
       cursor: pointer;
       transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
     .nav-btn:hover { 
@@ -283,6 +291,9 @@
       font-weight: 590;
       cursor: pointer;
       transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
     .btn-book:hover { 
@@ -301,6 +312,9 @@
       font-weight: 500;
       cursor: pointer;
       white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
     .btn-drag-toggle.active { 
@@ -565,7 +579,7 @@
     .overlay.open { display: flex; }
     .sheet { background: rgba(255,255,255,0.98); border-radius: 12px; width: 100%; max-width: 540px; box-shadow: 0 32px 56px rgba(0,0,0,0.2); }
     .sheet-head { padding: 24px 28px 12px; display: flex; justify-content: space-between; align-items: center; }
-    .sheet-title { font-size: 28px; font-weight: 640; letter-spacing: -0.6px; }
+    .sheet-title { font-size: 28px; font-weight: 640; letter-spacing: -0.6px; display: flex; align-items: center; gap: 12px; }
     .sheet-x { width: 42px; height: 42px; border-radius: 8px; background: #f2f2f5; border: none; font-size: 24px; cursor: pointer; }
     .sheet-body { padding: 16px 28px 34px; }
     .f-group { margin-bottom: 24px; }
@@ -577,7 +591,7 @@
     .info-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 0.5px solid var(--border-subtle); font-size: 16px; }
     .del-btn { width:100%; height: 54px; background: #f2eaea; border: none; border-radius: 8px; margin-top: 28px; cursor: pointer; font-weight: 600; color: #b33f3f; }
     .confirm-btns { display: flex; gap: 16px; margin: 20px 0 8px; }
-    .cb-yes, .cb-no { flex:1; height: 54px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; }
+    .cb-yes, .cb-no { flex:1; height: 54px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .cb-yes { background: rgba(79, 107, 78, 0.12); color: #3c5a3b; }
     .cb-no { background: rgba(179, 63, 63, 0.1); color: #a33a3a; }
     #loader { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.3); backdrop-filter: blur(20px); z-index:5000; align-items:center; justify-content:center; }
@@ -586,7 +600,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .drag-mode-indicator { position: fixed; bottom: 28px; right: 28px; background: #2c2c2ecc; backdrop-filter: blur(20px); color: white; padding: 10px 26px; border-radius: 8px; font-size: 14px; z-index: 1000; pointer-events: none; }
     
-    /* Стили для админ-панели */
+    /* Admin panel styles */
     .admin-panel {
       max-width: 800px;
       width: 90%;
@@ -616,6 +630,9 @@
       border-radius: 8px;
       cursor: pointer;
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
     .users-table {
@@ -703,7 +720,7 @@
       .page { padding: 18px 16px 70px; }
       .ctrl { flex-direction: column; align-items: stretch; }
       .inline-temp-cards { margin-left: 0; justify-content: flex-start; }
-      .btn-book, .btn-drag-toggle { width: 100%; }
+      .btn-book, .btn-drag-toggle { width: 100%; justify-content: center; }
       .google-calendar-btn { justify-content: center; width: 100%; }
       .nav { padding: 0 16px; }
       .user-bar { padding: 4px 12px 4px 8px; }
@@ -714,9 +731,9 @@
 <body>
 
 <div id="login">
-  <div class="login-glyph">🎱 LUCKY STRIKE</div>
-  <div class="login-title">Бильярдное ателье</div>
-  <div class="login-sub">Бронирование столов</div>
+  <div class="login-glyph"><i class="fas fa-table-tennis"></i> <i class="fas fa-crown"></i></div>
+  <div class="login-title">LUCKY STRIKE</div>
+  <div class="login-sub">Бильярдное ателье</div>
   <div class="login-sep"></div>
   <div id="g_id_onload" 
        data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com" 
@@ -736,49 +753,49 @@
 
 <div id="content">
   <nav class="nav">
-    <span class="nav-title">🎱 LUCKY STRIKE · Бильярд</span>
+    <span class="nav-title"><i class="fas fa-table-tennis"></i> LUCKY STRIKE · Бильярд</span>
     <div style="display: flex; gap: 12px; align-items: center;">
       <div id="userInfo" class="user-bar" style="display: none;">
         <img id="userPic" class="user-pic" src="" alt="">
         <span id="userEmail" class="user-email"></span>
         <span id="userRoleDisplay" class="user-role"></span>
-        <button id="logoutButton" class="logout-btn" onclick="signOut()">🚪</button>
+        <button id="logoutButton" class="logout-btn" onclick="signOut()"><i class="fas fa-sign-out-alt"></i></button>
       </div>
-      <button class="nav-btn" onclick="openAdminPanel()">👥 Админ панель</button>
+      <button class="nav-btn" onclick="openAdminPanel()"><i class="fas fa-users-cog"></i> Админ панель</button>
     </div>
   </nav>
   <div class="page">
     <div class="ctrl">
       <button id="calendarButton" class="google-calendar-btn" type="button">
-        <span class="calendar-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"></path></svg></span>
+        <span class="calendar-icon"><i class="far fa-calendar-alt"></i></span>
         <span id="displayDateText" class="calendar-date-text">Сегодня</span>
-        <span class="chevron-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
+        <span class="chevron-icon"><i class="fas fa-chevron-down"></i></span>
       </button>
       <input type="date" id="hiddenDatePicker" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;" />
-      <button class="btn-book" onclick="openBookModal()">Новая бронь</button>
-      <button id="dragToggleBtn" class="btn-drag-toggle">Режим перетяжки: ВЫКЛ</button>
+      <button class="btn-book" onclick="openBookModal()"><i class="fas fa-plus-circle"></i> Новая бронь</button>
+      <button id="dragToggleBtn" class="btn-drag-toggle"><i class="fas fa-arrows-alt"></i> Режим перетяжки: ВЫКЛ</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
     </div>
-    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody> </table><div id="slidersLayer"></div></div></div>
+    <div class="grid-card"><div class="grid-scroll" id="gridScroll"><table id="tableDesktop"><thead id="dtHead"><tr><th class="corner">СТОЛ</th></tr></thead><tbody id="dtBody"></tbody></table><div id="slidersLayer"></div></div></div>
   </div>
 </div>
 
 <div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">Режим перетяжки АКТИВЕН</div>
 
-<div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Подтверждение брони</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div id="bookingTimePreview" style="background:#f0f2f5; border-radius:8px; padding:14px 18px; margin-bottom:24px;"><span>Выбранное время: </span><span id="previewTimes">—</span></div><div class="f-group"><label class="f-label">Имя *</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+7 123 456-78-90"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitTempBookings()">Сохранить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
+<div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title"><i class="fas fa-check-circle"></i> Подтверждение брони</div><button class="sheet-x" onclick="closeBookModal()"><i class="fas fa-times"></i></button></div><div class="sheet-body"><div id="bookingTimePreview" style="background:#f0f2f5; border-radius:8px; padding:14px 18px; margin-bottom:24px;"><span>Выбранное время: </span><span id="previewTimes">—</span></div><div class="f-group"><label class="f-label">Имя *</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+7 123 456-78-90"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitTempBookings()">Сохранить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
 
-<div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали брони</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><strong id="i-table"></strong></div><div class="info-row"><span>Время</span><strong id="i-time"></strong></div><div class="info-row"><span>Имя</span><strong id="i-name"></strong></div><div class="info-row"><span>Телефон</span><strong id="i-phone"></strong></div><div class="info-row"><span>Комментарий</span><strong id="i-comment" style="font-weight:normal;"></strong></div><div class="info-row"><span>Статус гостя</span><strong id="i-status"></strong></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Пришла бронь</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">Удалить бронь</button></div></div></div>
+<div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title"><i class="fas fa-info-circle"></i> Детали брони</div><button class="sheet-x" onclick="closeInfoModal()"><i class="fas fa-times"></i></button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><strong id="i-table"></strong></div><div class="info-row"><span>Время</span><strong id="i-time"></strong></div><div class="info-row"><span>Имя</span><strong id="i-name"></strong></div><div class="info-row"><span>Телефон</span><strong id="i-phone"></strong></div><div class="info-row"><span>Комментарий</span><strong id="i-comment" style="font-weight:normal;"></strong></div><div class="info-row"><span>Статус гостя</span><strong id="i-status"></strong></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)"><i class="fas fa-check-circle"></i> Пришла бронь</button><button class="cb-no" onclick="confirmBooking(false)"><i class="fas fa-times-circle"></i> Не пришли</button></div><button class="del-btn" onclick="deleteBooking()"><i class="fas fa-trash-alt"></i> Удалить бронь</button></div></div></div>
 
 <div id="adminModal" class="overlay">
   <div class="sheet admin-panel">
     <div class="sheet-head">
-      <div class="sheet-title">👥 Управление сотрудниками</div>
-      <button class="sheet-x" onclick="closeAdminModal()">×</button>
+      <div class="sheet-title"><i class="fas fa-shield-alt"></i> Панель управления</div>
+      <button class="sheet-x" onclick="closeAdminModal()"><i class="fas fa-times"></i></button>
     </div>
     <div class="sheet-body">
       <div class="admin-header">
-        <span class="admin-title">Список сотрудников</span>
-        <button class="add-user-btn" onclick="showAddUserForm()">+ Добавить</button>
+        <span class="admin-title"><i class="fas fa-users"></i> Список сотрудников</span>
+        <button class="add-user-btn" onclick="showAddUserForm()"><i class="fas fa-user-plus"></i> Добавить</button>
       </div>
       <div id="usersList">
         <div style="text-align: center; padding: 40px;">Загрузка...</div>
@@ -790,8 +807,8 @@
 <div id="userFormModal" class="overlay">
   <div class="sheet" style="max-width: 450px;">
     <div class="sheet-head">
-      <div class="sheet-title" id="userFormTitle">Добавить сотрудника</div>
-      <button class="sheet-x" onclick="closeUserFormModal()">×</button>
+      <div class="sheet-title" id="userFormTitle"><i class="fas fa-user-edit"></i> Добавить сотрудника</div>
+      <button class="sheet-x" onclick="closeUserFormModal()"><i class="fas fa-times"></i></button>
     </div>
     <div class="sheet-body">
       <form id="userForm" class="user-form" onsubmit="saveUser(event)">
@@ -800,7 +817,7 @@
         <input type="text" id="userNameInput" placeholder="Имя">
         <input type="text" id="userRoleInput" placeholder="Должность">
         <div class="form-actions">
-          <button type="submit" class="save-btn">Сохранить</button>
+          <button type="submit" class="save-btn"><i class="fas fa-save"></i> Сохранить</button>
           <button type="button" class="cancel-btn" onclick="closeUserFormModal()">Отмена</button>
         </div>
       </form>
@@ -996,23 +1013,20 @@
       userRoleSpan.style.display = 'none';
     }
     
-    // ==================== ПРАВИЛО ДОСТУПА К АДМИН-ПАНЕЛИ ====================
-    // Кнопку "Админ панель" может нажать только пользователь с должностью "Разработчик" или "Управляющий"
+    // Access rule: Only "Разработчик" or "Управляющий" can see Admin panel
     const adminPanelBtn = document.querySelector('.nav-btn');
     if (adminPanelBtn) {
-      // Разрешенные должности (регистр не важен)
       const allowedRoles = ['разработчик', 'управляющий'];
       const userRole = (user.role || '').toLowerCase().trim();
       
       if (allowedRoles.includes(userRole)) {
-        adminPanelBtn.style.display = 'block'; // Показываем кнопку
-        console.log('Админ-панель доступна для роли:', user.role);
+        adminPanelBtn.style.display = 'flex';
+        console.log('Admin panel доступна для роли:', user.role);
       } else {
-        adminPanelBtn.style.display = 'none'; // Скрываем кнопку
-        console.log('Админ-панель НЕ доступна для роли:', user.role || '(не указана)');
+        adminPanelBtn.style.display = 'none';
+        console.log('Admin panel НЕ доступна для роли:', user.role || '(не указана)');
       }
     }
-    // ======================================================================
     
     showLoading(false);
     initApplication();
@@ -1071,14 +1085,14 @@
             <td>${escapeHtml(user.name || '-')}</td>
             <td>${escapeHtml(user.role || '-')}</td>
             <td class="user-actions">
-              <button class="edit-user-btn" onclick='editUser(${user.row}, "${escapeHtml(user.email)}", "${escapeHtml(user.name || '')}", "${escapeHtml(user.role || '')}")'>✏️</button>
-              <button class="delete-user-btn" onclick='deleteUser(${user.row}, "${escapeHtml(user.email)}")'>🗑️</button>
-            </td>
-          </tr>
+              <button class="edit-user-btn" onclick='editUser(${user.row}, "${escapeHtml(user.email)}", "${escapeHtml(user.name || '')}", "${escapeHtml(user.role || '')}")'><i class="fas fa-edit"></i></button>
+              <button class="delete-user-btn" onclick='deleteUser(${user.row}, "${escapeHtml(user.email)}")'><i class="fas fa-trash"></i></button>
+             </td>
+          </td>
         `;
       });
       
-      html += `</tbody> </table>`;
+      html += `</tbody>  таблица`;
       container.innerHTML = html;
       
     } catch (error) {
@@ -1088,7 +1102,7 @@
   }
   
   function showAddUserForm() {
-    document.getElementById("userFormTitle").textContent = "Добавить сотрудника";
+    document.getElementById("userFormTitle").innerHTML = '<i class="fas fa-user-plus"></i> Добавить сотрудника';
     document.getElementById("editRow").value = "";
     document.getElementById("userEmailInput").value = "";
     document.getElementById("userNameInput").value = "";
@@ -1098,7 +1112,7 @@
   }
   
   function editUser(row, email, name, role) {
-    document.getElementById("userFormTitle").textContent = "Редактировать сотрудника";
+    document.getElementById("userFormTitle").innerHTML = '<i class="fas fa-user-edit"></i> Редактировать сотрудника';
     document.getElementById("editRow").value = row;
     document.getElementById("userEmailInput").value = email;
     document.getElementById("userNameInput").value = name;
@@ -1286,7 +1300,7 @@
       let card=document.createElement("div"); 
       card.className="temp-card-inline"; 
       let timeStr = fmtFromSlotIdx(tb.startSlotIdx, tb.endSlotIdx);
-      card.innerHTML=`<strong>Стол ${tb.lane+1}</strong><span class="temp-time">${timeStr}</span><button class="temp-rm" data-idx="${idx}">✕</button>`; 
+      card.innerHTML=`<strong>Стол ${tb.lane+1}</strong><span class="temp-time">${timeStr}</span><button class="temp-rm" data-idx="${idx}"><i class="fas fa-times"></i></button>`; 
       card.querySelector(".temp-rm").onclick=()=>{ 
         tempBookings.splice(idx,1); 
         renderInlineTempCards(); 
@@ -1602,7 +1616,7 @@
     const toggleBtn = $("dragToggleBtn");
     toggleBtn.addEventListener("click", () => {
       dragModeEnabled = !dragModeEnabled;
-      toggleBtn.textContent = dragModeEnabled ? "Режим перетяжки: ВКЛ" : "Режим перетяжки: ВЫКЛ";
+      toggleBtn.innerHTML = dragModeEnabled ? '<i class="fas fa-arrows-alt"></i> Режим перетяжки: ВКЛ' : '<i class="fas fa-arrows-alt"></i> Режим перетяжки: ВЫКЛ';
       toggleBtn.classList.toggle("active", dragModeEnabled);
       $("dragModeIndicator").style.display = dragModeEnabled ? "block" : "none";
       renderAllSliders();

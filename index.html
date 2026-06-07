@@ -5,11 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <title>Lucky Strike · Бильярд Бронирование</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png">
-  <!-- Google Identity Services for login -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js"></script>
   <style>
-    /* Ваши существующие стили остаются без изменений */
     * {
       margin: 0;
       padding: 0;
@@ -74,7 +72,6 @@
       font-weight: 450;
     }
 
-    /* Стили для страницы входа */
     #login {
       position: fixed;
       inset: 0;
@@ -120,7 +117,6 @@
       min-height: 100vh; 
     }
 
-    /* Стили для пользовательского блока */
     .user-bar {
       display: flex;
       align-items: center;
@@ -171,7 +167,6 @@
       color: var(--accent-red);
     }
 
-    /* Остальные ваши стили остаются без изменений */
     .nav {
       position: sticky;
       top: 0;
@@ -590,6 +585,120 @@
     .spin { width: 44px; height: 44px; border: 3px solid #e9e9ef; border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 18px; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .drag-mode-indicator { position: fixed; bottom: 28px; right: 28px; background: #2c2c2ecc; backdrop-filter: blur(20px); color: white; padding: 10px 26px; border-radius: 60px; font-size: 14px; z-index: 1000; pointer-events: none; }
+    
+    /* Стили для админ-панели */
+    .admin-panel {
+      max-width: 800px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .admin-title {
+      font-size: 24px;
+      font-weight: 600;
+    }
+    
+    .add-user-btn {
+      background: var(--accent-green);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 980px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    
+    .users-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .users-table th,
+    .users-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .users-table th {
+      background: var(--surface-secondary);
+      font-weight: 600;
+      color: var(--label-secondary);
+    }
+    
+    .user-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .edit-user-btn,
+    .delete-user-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    
+    .edit-user-btn {
+      background: var(--accent-blue-dim);
+      color: var(--accent-blue);
+    }
+    
+    .delete-user-btn {
+      background: rgba(179, 63, 63, 0.1);
+      color: var(--accent-red);
+    }
+    
+    .user-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .user-form input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      font-size: 14px;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    
+    .form-actions button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 980px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    
+    .save-btn {
+      background: var(--accent-blue);
+      color: white;
+    }
+    
+    .cancel-btn {
+      background: var(--surface-secondary);
+      color: var(--label-secondary);
+    }
+    
     @media (max-width: 780px) {
       .page { padding: 18px 16px 70px; }
       .ctrl { flex-direction: column; align-items: stretch; }
@@ -604,7 +713,6 @@
 </head>
 <body>
 
-<!-- Страница входа -->
 <div id="login">
   <div class="login-glyph">🎱 LUCKY STRIKE</div>
   <div class="login-title">Бильярдное ателье</div>
@@ -626,7 +734,6 @@
   </div>
 </div>
 
-<!-- Основной контент -->
 <div id="content">
   <nav class="nav">
     <span class="nav-title">🎱 LUCKY STRIKE · Бильярд</span>
@@ -635,11 +742,9 @@
         <img id="userPic" class="user-pic" src="" alt="">
         <span id="userEmail" class="user-email"></span>
         <span id="userRole" class="user-role"></span>
-        <button id="logoutButton" class="logout-btn" onclick="signOut()">
-          <i class="fas fa-sign-out-alt">🚪</i>
-        </button>
+        <button id="logoutButton" class="logout-btn" onclick="signOut()">🚪</button>
       </div>
-      <button class="nav-btn" onclick="openImg()">План зала</button>
+      <button class="nav-btn" onclick="openAdminPanel()">👥 Админ панель</button>
     </div>
   </nav>
   <div class="page">
@@ -650,7 +755,6 @@
         <span class="chevron-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
       </button>
       <input type="date" id="hiddenDatePicker" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;" />
-      
       <button class="btn-book" onclick="openBookModal()">Новая бронь</button>
       <button id="dragToggleBtn" class="btn-drag-toggle">Режим перетяжки: ВЫКЛ</button>
       <div id="inlineTempContainer" class="inline-temp-cards"></div>
@@ -661,21 +765,57 @@
 
 <div id="dragModeIndicator" class="drag-mode-indicator" style="display: none;">Режим перетяжки АКТИВЕН</div>
 
-<!-- Модальные окна -->
 <div id="bookModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Подтверждение брони</div><button class="sheet-x" onclick="closeBookModal()">×</button></div><div class="sheet-body"><div id="bookingTimePreview" style="background:#f0f2f5; border-radius:24px; padding:14px 18px; margin-bottom:24px;"><span>Выбранное время: </span><span id="previewTimes">—</span></div><div class="f-group"><label class="f-label">Имя *</label><input class="f-input" id="nameInput" placeholder="Иван Петров"/></div><div class="f-group"><label class="f-label">Телефон</label><input class="f-input" id="phoneInput" placeholder="+7 123 456-78-90"/></div><div class="f-group"><label class="f-label">Комментарий</label><textarea class="f-input" id="commentInput" rows="2" placeholder="Пожелания"></textarea></div><div class="f-actions"><button class="f-btn-ok" onclick="submitTempBookings()">Сохранить</button><button class="f-btn-cancel" onclick="closeBookModal()">Отмена</button></div></div></div></div>
 
 <div id="infoModal" class="overlay"><div class="sheet"><div class="sheet-head"><div class="sheet-title">Детали брони</div><button class="sheet-x" onclick="closeInfoModal()">×</button></div><div class="sheet-body"><div class="info-list"><div class="info-row"><span>Стол</span><strong id="i-table"></strong></div><div class="info-row"><span>Время</span><strong id="i-time"></strong></div><div class="info-row"><span>Имя</span><strong id="i-name"></strong></div><div class="info-row"><span>Телефон</span><strong id="i-phone"></strong></div><div class="info-row"><span>Комментарий</span><strong id="i-comment" style="font-weight:normal;"></strong></div><div class="info-row"><span>Статус гостя</span><strong id="i-status"></strong></div></div><div class="confirm-btns"><button class="cb-yes" onclick="confirmBooking(true)">✅ Пришла бронь</button><button class="cb-no" onclick="confirmBooking(false)">❌ Не пришли</button></div><button class="del-btn" onclick="deleteBooking()">Удалить бронь</button></div></div></div>
 
-<div id="imgPopup" class="overlay"><div class="sheet" style="max-width:90vw; background:transparent;"><img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width:100%; border-radius:48px;" onclick="closeImg()"/></div></div>
+<div id="adminModal" class="overlay">
+  <div class="sheet admin-panel">
+    <div class="sheet-head">
+      <div class="sheet-title">👥 Управление сотрудниками</div>
+      <button class="sheet-x" onclick="closeAdminModal()">×</button>
+    </div>
+    <div class="sheet-body">
+      <div class="admin-header">
+        <span class="admin-title">Список сотрудников</span>
+        <button class="add-user-btn" onclick="showAddUserForm()">+ Добавить</button>
+      </div>
+      <div id="usersList">
+        <div style="text-align: center; padding: 40px;">Загрузка...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="userFormModal" class="overlay">
+  <div class="sheet" style="max-width: 450px;">
+    <div class="sheet-head">
+      <div class="sheet-title" id="userFormTitle">Добавить сотрудника</div>
+      <button class="sheet-x" onclick="closeUserFormModal()">×</button>
+    </div>
+    <div class="sheet-body">
+      <form id="userForm" class="user-form" onsubmit="saveUser(event)">
+        <input type="hidden" id="editRow" value="">
+        <input type="email" id="userEmail" placeholder="Email *" required>
+        <input type="text" id="userName" placeholder="Имя">
+        <input type="text" id="userRole" placeholder="Должность">
+        <div class="form-actions">
+          <button type="submit" class="save-btn">Сохранить</button>
+          <button type="button" class="cancel-btn" onclick="closeUserFormModal()">Отмена</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
 
 <script>
   // ==================== КОНФИГУРАЦИЯ АВТОРИЗАЦИИ ====================
-  // Ваша таблица для авторизации: колонка A - email, B - имя, C - должность
   const AUTH_SPREADSHEET_ID = '1zwi1CInK3NZ8YRAegRMAdjin6XPacVkAkFsjAiqVE0w';
   const AUTH_SHEET_NAME = '1';
   const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbwChbytX5vDyO-P2Cg4aVb5s7yHIRRDp-b_Xf_gp1D74FLak80U5GG5k9V6y058mgS9/exec";
   
   let currentUser = null;
   
@@ -746,7 +886,6 @@
         discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
       });
       
-      // Получаем данные из колонок A (email), B (имя), C (должность)
       const response = await gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: AUTH_SPREADSHEET_ID,
         range: `${AUTH_SHEET_NAME}!A:C`,
@@ -758,8 +897,7 @@
         return { found: false };
       }
       
-      // Ищем email в колонке A
-      for (let i = 0; i < rows.length; i++) {
+      for (let i = 1; i < rows.length; i++) {
         if (!rows[i][0]) continue;
         const rowEmail = rows[i][0].toLowerCase().trim();
         if (rowEmail === email) {
@@ -809,16 +947,11 @@
   }
   
   async function handleCredentialResponse(response) {
-    console.log("Google response received");
-    
     try {
       const payload = parseJwt(response.credential);
       const email = payload.email.toLowerCase().trim();
-      console.log("User email:", email);
       
       showLoading(true);
-      
-      // Проверяем доступ в Google Sheets
       const checkResult = await checkEmailInSheet(email);
       
       if (checkResult.found) {
@@ -844,12 +977,9 @@
   }
   
   function loginUser(user) {
-    console.log("Logging in user:", user.email);
-    
     document.getElementById('login').style.display = 'none';
     document.getElementById('content').style.display = 'block';
     
-    // Показываем информацию о пользователе
     const userInfo = document.getElementById('userInfo');
     const userPic = document.getElementById('userPic');
     const userEmailSpan = document.getElementById('userEmail');
@@ -867,13 +997,10 @@
     }
     
     showLoading(false);
-    
-    // Инициализируем основное приложение
     initApplication();
   }
   
   function signOut() {
-    console.log("Signing out");
     localStorage.removeItem('billiardUserEmail');
     localStorage.removeItem('billiardUserName');
     localStorage.removeItem('billiardUserRole');
@@ -882,10 +1009,164 @@
     location.reload();
   }
   
-  // ==================== ОСТАЛЬНАЯ ЛОГИКА ПРИЛОЖЕНИЯ ====================
-  // (вся остальная логика бронирования остаётся без изменений)
+  // ==================== АДМИН-ПАНЕЛЬ ====================
   
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbzLxSrpcGOIm34gLlFZS-EYZmG8liMLcUST3MRMoAp56y6XDC2ClapCDB18yiYmdrHZ/exec";
+  async function openAdminPanel() {
+    showLoad();
+    document.getElementById("adminModal").classList.add("open");
+    await loadUsersList();
+    hideLoad();
+  }
+  
+  function closeAdminModal() {
+    document.getElementById("adminModal").classList.remove("open");
+  }
+  
+  async function loadUsersList() {
+    try {
+      const response = await fetch(`${GAS_URL}?action=getUsers&_=${Date.now()}`);
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+      
+      const container = document.getElementById("usersList");
+      
+      if (!data.users || data.users.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--label-tertiary);">Нет добавленных сотрудников</div>';
+        return;
+      }
+      
+      let html = `
+        <table class="users-table">
+          <thead>
+            <tr><th>Email</th><th>Имя</th><th>Должность</th><th>Действия</th></tr>
+          </thead>
+          <tbody>
+      `;
+      
+      data.users.forEach(user => {
+        html += `
+          <tr>
+            <td>${escapeHtml(user.email)}</td>
+            <td>${escapeHtml(user.name || '-')}</td>
+            <td>${escapeHtml(user.role || '-')}</td>
+            <td class="user-actions">
+              <button class="edit-user-btn" onclick='editUser(${user.row}, "${escapeHtml(user.email)}", "${escapeHtml(user.name || '')}", "${escapeHtml(user.role || '')}")'>✏️</button>
+              <button class="delete-user-btn" onclick='deleteUser(${user.row}, "${escapeHtml(user.email)}")'>🗑️</button>
+            </td>
+          </tr>
+        `;
+      });
+      
+      html += `</tbody></table>`;
+      container.innerHTML = html;
+      
+    } catch (error) {
+      console.error("Error loading users:", error);
+      document.getElementById("usersList").innerHTML = '<div style="text-align: center; padding: 40px; color: var(--accent-red);">Ошибка загрузки списка пользователей</div>';
+    }
+  }
+  
+  function showAddUserForm() {
+    document.getElementById("userFormTitle").textContent = "Добавить сотрудника";
+    document.getElementById("editRow").value = "";
+    document.getElementById("userEmail").value = "";
+    document.getElementById("userName").value = "";
+    document.getElementById("userRole").value = "";
+    document.getElementById("userEmail").disabled = false;
+    document.getElementById("userFormModal").classList.add("open");
+  }
+  
+  function editUser(row, email, name, role) {
+    document.getElementById("userFormTitle").textContent = "Редактировать сотрудника";
+    document.getElementById("editRow").value = row;
+    document.getElementById("userEmail").value = email;
+    document.getElementById("userName").value = name;
+    document.getElementById("userRole").value = role;
+    document.getElementById("userEmail").disabled = true;
+    document.getElementById("userFormModal").classList.add("open");
+  }
+  
+  function closeUserFormModal() {
+    document.getElementById("userFormModal").classList.remove("open");
+  }
+  
+  async function saveUser(event) {
+    event.preventDefault();
+    
+    const row = document.getElementById("editRow").value;
+    const email = document.getElementById("userEmail").value.trim();
+    const name = document.getElementById("userName").value.trim();
+    const role = document.getElementById("userRole").value.trim();
+    
+    if (!email) {
+      alert("Введите email");
+      return;
+    }
+    
+    showLoad();
+    
+    try {
+      let action, data;
+      
+      if (row) {
+        action = "updateUser";
+        data = { action, row: parseInt(row), email, name, role };
+      } else {
+        action = "addUser";
+        data = { action, email, name, role };
+      }
+      
+      await fetch(GAS_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(data)
+      });
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      closeUserFormModal();
+      await loadUsersList();
+      alert(row ? "Пользователь обновлён" : "Пользователь добавлен");
+      
+    } catch (error) {
+      console.error("Error saving user:", error);
+      alert("Ошибка при сохранении пользователя");
+    } finally {
+      hideLoad();
+    }
+  }
+  
+  async function deleteUser(row, email) {
+    if (!confirm(`Удалить пользователя ${email}? Он потеряет доступ к сайту.`)) {
+      return;
+    }
+    
+    showLoad();
+    
+    try {
+      await fetch(GAS_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify({ action: "deleteUser", row: parseInt(row) })
+      });
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      await loadUsersList();
+      alert("Пользователь удалён");
+      
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      alert("Ошибка при удалении пользователя");
+    } finally {
+      hideLoad();
+    }
+  }
+  
+  // ==================== ОСНОВНАЯ ЛОГИКА ПРИЛОЖЕНИЯ ====================
+  
   const LANES = 12, SH = 11, EH = 22;
   const slots = []; 
   for(let h=SH; h<=EH; h++) { 
@@ -1225,6 +1506,16 @@
   function openImg(){ $("imgPopup").classList.add("open"); }
   function closeImg(){ $("imgPopup").classList.remove("open"); }
   
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+  
   function initApplication() {
     document.addEventListener('dragstart', (e) => {
       if (e.target.closest('.drag-handle') || e.target.closest('.slider')) {
@@ -1291,20 +1582,16 @@
     document.body.addEventListener("mousemove", onMouseMove);
     document.body.addEventListener("mouseup", onMouseUp);
     
-    ["bookModal","infoModal","imgPopup"].forEach(id=>{ 
+    ["bookModal","infoModal","adminModal","userFormModal"].forEach(id=>{ 
       $(id)?.addEventListener("click",e=>{ 
         if(e.target=== $(id)) $(id).classList.remove("open"); 
       }); 
     });
   }
   
-  // Проверка сессии при загрузке
   window.addEventListener('load', function() {
-    console.log("Page loaded, checking session...");
-    
     const cachedUser = getCachedUser();
     if (cachedUser && cachedUser.email) {
-      console.log("Found stored session for:", cachedUser.email);
       currentUser = cachedUser;
       loginUser(currentUser);
     }

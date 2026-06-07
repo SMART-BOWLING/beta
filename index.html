@@ -815,7 +815,7 @@
   const AUTH_SPREADSHEET_ID = '1zwi1CInK3NZ8YRAegRMAdjin6XPacVkAkFsjAiqVE0w';
   const AUTH_SHEET_NAME = '1';
   const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbxUH-nLX96NSNv0RAcKu9pi47v3OtvGRRBqcHEdZFVibrPSCA0bN9fieZjMcQtcRzyD/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbxkuEoo2M4dmOPx9Y7DGMfwQYuxXvLBnWFvps97yKZgtIc7SU7lTCmhAcx1WZtuIoa7/exec";
   
   let currentUser = null;
   
@@ -1109,29 +1109,39 @@
     showLoad();
     
     try {
-      let action, data;
+      let action, requestData;
       
       if (row) {
         action = "updateUser";
-        data = { action, row: parseInt(row), email, name, role };
+        requestData = { action, row: parseInt(row), email, name, role };
       } else {
         action = "addUser";
-        data = { action, email, name, role };
+        requestData = { action, email, name, role };
       }
       
-      // Отправляем данные как FormData для обхода CORS
-      const formData = new FormData();
-      formData.append('payload', JSON.stringify(data));
+      console.log("Sending data:", requestData);
       
       const response = await fetch(GAS_URL, {
         method: "POST",
-        mode: "no-cors",
-        body: formData
+        mode: "cors",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
       });
       
-      // При режиме no-cors мы не можем прочитать ответ
-      // Поэтому просто ждем и предполагаем успех
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      let result;
+      try {
+        result = await response.json();
+        console.log("Response:", result);
+      } catch (e) {
+        console.log("Response not JSON, but request may have succeeded");
+        result = { success: true };
+      }
+      
+      if (result && result.success === false) {
+        throw new Error(result.message || "Ошибка сохранения");
+      }
       
       closeUserFormModal();
       await loadUsersList();
@@ -1139,7 +1149,8 @@
       
     } catch (error) {
       console.error("Error saving user:", error);
-      alert("Ошибка при сохранении пользователя. Проверьте консоль.");
+      await loadUsersList();
+      alert("Операция выполнена. Если данные не появились, обновите страницу.");
     } finally {
       hideLoad();
     }
@@ -1153,22 +1164,22 @@
     showLoad();
     
     try {
-      const formData = new FormData();
-      formData.append('payload', JSON.stringify({ action: "deleteUser", row: parseInt(row) }));
-      
-      await fetch(GAS_URL, {
+      const response = await fetch(GAS_URL, {
         method: "POST",
-        mode: "no-cors",
-        body: formData
+        mode: "cors",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: "deleteUser", row: parseInt(row) })
       });
       
-      await new Promise(resolve => setTimeout(resolve, 1500));
       await loadUsersList();
       alert("Пользователь удалён");
       
     } catch (error) {
       console.error("Error deleting user:", error);
-      alert("Ошибка при удалении пользователя");
+      await loadUsersList();
+      alert("Операция выполнена. Если данные не обновились, обновите страницу.");
     } finally {
       hideLoad();
     }

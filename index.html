@@ -741,7 +741,7 @@
       <div id="userInfo" class="user-bar" style="display: none;">
         <img id="userPic" class="user-pic" src="" alt="">
         <span id="userEmail" class="user-email"></span>
-        <span id="userRole" class="user-role"></span>
+        <span id="userRoleDisplay" class="user-role"></span>
         <button id="logoutButton" class="logout-btn" onclick="signOut()">🚪</button>
       </div>
       <button class="nav-btn" onclick="openAdminPanel()">👥 Админ панель</button>
@@ -797,8 +797,8 @@
       <form id="userForm" class="user-form" onsubmit="saveUser(event)">
         <input type="hidden" id="editRow" value="">
         <input type="text" id="userEmailInput" placeholder="Email или логин *" required>
-        <input type="text" id="userName" placeholder="Имя">
-        <input type="text" id="userRole" placeholder="Должность">
+        <input type="text" id="userNameInput" placeholder="Имя">
+        <input type="text" id="userRoleInput" placeholder="Должность">
         <div class="form-actions">
           <button type="submit" class="save-btn">Сохранить</button>
           <button type="button" class="cancel-btn" onclick="closeUserFormModal()">Отмена</button>
@@ -815,7 +815,7 @@
   const AUTH_SPREADSHEET_ID = '1zwi1CInK3NZ8YRAegRMAdjin6XPacVkAkFsjAiqVE0w';
   const AUTH_SHEET_NAME = '1';
   const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbz_xj-2g7Un7IOrL6S-JCzwDaYT8-lUkz_0g8IW7-iB1pvH-ajygUe-Yj7b2gLv7yMa/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbyVH7brTDjP-ori4QFy_wAMkjPkqKYcd8WHtMYFlPH4Kl1wzAYSSWdN-C_CzBucuOhG/exec";
   
   let currentUser = null;
   
@@ -983,7 +983,7 @@
     const userInfo = document.getElementById('userInfo');
     const userPic = document.getElementById('userPic');
     const userEmailSpan = document.getElementById('userEmail');
-    const userRoleSpan = document.getElementById('userRole');
+    const userRoleSpan = document.getElementById('userRoleDisplay');
     
     userInfo.style.display = 'flex';
     userPic.src = user.picture || 'https://via.placeholder.com/32';
@@ -1073,8 +1073,8 @@
     document.getElementById("userFormTitle").textContent = "Добавить сотрудника";
     document.getElementById("editRow").value = "";
     document.getElementById("userEmailInput").value = "";
-    document.getElementById("userName").value = "";
-    document.getElementById("userRole").value = "";
+    document.getElementById("userNameInput").value = "";
+    document.getElementById("userRoleInput").value = "";
     document.getElementById("userEmailInput").disabled = false;
     document.getElementById("userFormModal").classList.add("open");
   }
@@ -1083,8 +1083,8 @@
     document.getElementById("userFormTitle").textContent = "Редактировать сотрудника";
     document.getElementById("editRow").value = row;
     document.getElementById("userEmailInput").value = email;
-    document.getElementById("userName").value = name;
-    document.getElementById("userRole").value = role;
+    document.getElementById("userNameInput").value = name;
+    document.getElementById("userRoleInput").value = role;
     document.getElementById("userEmailInput").disabled = true;
     document.getElementById("userFormModal").classList.add("open");
   }
@@ -1098,8 +1098,8 @@
     
     const row = document.getElementById("editRow").value;
     const email = document.getElementById("userEmailInput").value.trim();
-    const name = document.getElementById("userName").value.trim();
-    const role = document.getElementById("userRole").value.trim();
+    const name = document.getElementById("userNameInput").value.trim();
+    const role = document.getElementById("userRoleInput").value.trim();
     
     if (!email) {
       alert("Введите email или логин");

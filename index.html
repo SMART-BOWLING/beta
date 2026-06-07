@@ -678,6 +678,16 @@
       border: 1px solid var(--border-strong);
       border-radius: 12px;
       font-size: 14px;
+      background: white;
+    }
+    
+    /* Отключаем автозаполнение и подсказки */
+    .user-form input:-webkit-autofill,
+    .user-form input:-webkit-autofill:hover,
+    .user-form input:-webkit-autofill:focus,
+    .user-form input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 30px white inset !important;
+      box-shadow: 0 0 0 30px white inset !important;
     }
     
     .form-actions {
@@ -800,13 +810,13 @@
       <button class="sheet-x" onclick="closeUserFormModal()">×</button>
     </div>
     <div class="sheet-body">
-      <form id="userForm" class="user-form" onsubmit="return false;">
+      <form id="userForm" class="user-form" autocomplete="off">
         <input type="hidden" id="editRow" value="">
-        <input type="email" id="userEmail" placeholder="Email *" required>
-        <input type="text" id="userName" placeholder="Имя">
-        <input type="text" id="userRole" placeholder="Должность">
+        <input type="email" id="userEmail" placeholder="Email *" required autocomplete="off" autocomplete="new-password">
+        <input type="text" id="userName" placeholder="Имя" autocomplete="off">
+        <input type="text" id="userRole" placeholder="Должность" autocomplete="off">
         <div class="form-actions">
-          <button type="button" class="save-btn" onclick="saveUser()">Сохранить</button>
+          <button type="button" class="save-btn" id="saveUserBtn">Сохранить</button>
           <button type="button" class="cancel-btn" onclick="closeUserFormModal()">Отмена</button>
         </div>
       </form>
@@ -1010,7 +1020,7 @@
       adminBtn.classList.remove('nav-btn-disabled');
       adminBtn.style.opacity = '1';
       adminBtn.style.pointerEvents = 'auto';
-      adminBtn.onclick = openAdminPanel;
+      adminBtn.onclick = function() { openAdminPanel(); };
     } else {
       adminBtn.classList.add('nav-btn-disabled');
       adminBtn.style.opacity = '0.5';
@@ -1033,7 +1043,6 @@
   
   // ==================== АДМИН-ПАНЕЛЬ ====================
   
-  // Проверка прав доступа к админ-панели
   function hasAdminAccess() {
     const allowedRoles = ['Управляющий', 'Разработчик'];
     return currentUser && allowedRoles.includes(currentUser.role);
@@ -1080,7 +1089,6 @@
       `;
       
       data.users.forEach(user => {
-        // Экранируем данные для безопасной вставки в onclick
         const safeEmail = user.email.replace(/'/g, "\\'");
         const safeName = (user.name || '').replace(/'/g, "\\'");
         const safeRole = (user.role || '').replace(/'/g, "\\'");
@@ -1104,7 +1112,11 @@
       // Назначаем обработчик для кнопки добавления
       const addBtn = document.getElementById('addUserBtn');
       if (addBtn) {
-        addBtn.onclick = showAddUserForm;
+        // Убираем старые обработчики
+        const newBtn = addBtn.cloneNode(true);
+        addBtn.parentNode.replaceChild(newBtn, addBtn);
+        newBtn.id = 'addUserBtn';
+        newBtn.onclick = function() { showAddUserForm(); };
       }
       
     } catch (error) {
@@ -1121,6 +1133,15 @@
     document.getElementById("userRole").value = "";
     document.getElementById("userEmail").disabled = false;
     document.getElementById("userFormModal").classList.add("open");
+    
+    // Назначаем обработчик для кнопки сохранения
+    const saveBtn = document.getElementById('saveUserBtn');
+    if (saveBtn) {
+      const newSaveBtn = saveBtn.cloneNode(true);
+      saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+      newSaveBtn.id = 'saveUserBtn';
+      newSaveBtn.onclick = function() { saveUser(); };
+    }
   }
   
   function editUser(row, email, name, role) {
@@ -1131,6 +1152,15 @@
     document.getElementById("userRole").value = role;
     document.getElementById("userEmail").disabled = true;
     document.getElementById("userFormModal").classList.add("open");
+    
+    // Назначаем обработчик для кнопки сохранения
+    const saveBtn = document.getElementById('saveUserBtn');
+    if (saveBtn) {
+      const newSaveBtn = saveBtn.cloneNode(true);
+      saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+      newSaveBtn.id = 'saveUserBtn';
+      newSaveBtn.onclick = function() { saveUser(); };
+    }
   }
   
   function closeUserFormModal() {
@@ -1148,7 +1178,6 @@
       return;
     }
     
-    // Проверка формата email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       alert("Введите корректный email адрес");
@@ -1168,13 +1197,12 @@
         data = { action, email, name, role };
       }
       
-      const response = await fetch(GAS_URL, {
+      await fetch(GAS_URL, {
         method: "POST",
         mode: "no-cors",
         body: JSON.stringify(data)
       });
       
-      // Даём время серверу обработать запрос
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       closeUserFormModal();
@@ -1553,8 +1581,6 @@
   async function deleteBooking(){ if(!currentBooking||!confirm("Удалить?")) return; showLoad(); await fetch(GAS_URL,{ method:"POST", mode:"no-cors", body:JSON.stringify({ action:"delete", id:currentBooking.id }) }); closeInfoModal(); await loadFromServer(); hideLoad(); }
   function showLoad(){ $("loader").style.display="flex"; }
   function hideLoad(){ $("loader").style.display="none"; }
-  function openImg(){ $("imgPopup").classList.add("open"); }
-  function closeImg(){ $("imgPopup").classList.remove("open"); }
   
   function escapeHtml(str) {
     if (!str) return '';

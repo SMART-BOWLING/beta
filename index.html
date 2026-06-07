@@ -815,7 +815,7 @@
   const AUTH_SPREADSHEET_ID = '1zwi1CInK3NZ8YRAegRMAdjin6XPacVkAkFsjAiqVE0w';
   const AUTH_SHEET_NAME = '1';
   const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbxlXPzD6YwsZ316Mu8yNelyxEZIxkEIYsW6xb3sGkouof5Bv37CkIh4gP6etCzpdDm5/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbz_xj-2g7Un7IOrL6S-JCzwDaYT8-lUkz_0g8IW7-iB1pvH-ajygUe-Yj7b2gLv7yMa/exec";
   
   let currentUser = null;
   
@@ -1117,6 +1117,7 @@
       }
       
       console.log("Sending request to:", url);
+      console.log("Role value being sent:", role);
       
       const response = await fetch(url, {
         method: "GET",

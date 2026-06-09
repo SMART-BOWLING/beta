@@ -9,84 +9,39 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js"></script>
   <style>
-    /* ══════════════════════════════════════════
-       RESET
-    ══════════════════════════════════════════ */
     *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}
     input,textarea{user-select:text;-webkit-user-select:text;}
-
-    /* ══════════════════════════════════════════
-       ПЕРЕМЕННЫЕ — цвета ПК версии
-    ══════════════════════════════════════════ */
     :root{
-      --bg:#f2f2f2;
-      --surface:#ffffff;
-      --surface2:#f8f8f8;
-      --border:#e5e5e5;
-      --border2:#cccccc;
-      --label:#1e1e1e;
-      --label2:#4a4a4a;
-      --label3:#7c7c7c;
-      --label4:#9a9a9a;
-      --blue:#3b6e8f;
-      --blue-h:#2c5a77;
-      --blue-dim:rgba(59,110,143,0.12);
-      --green:#4f6b4e;
-      --red:#b33f3f;
-      /* lane colors — как на ПК */
-      --g-blue:#2c5f7a;
-      --g-green:#4f6b4e;
-      --g-red:#9b4b4b;
-      /* cell tints */
-      --cb-blue:rgba(167,199,231,0.55);
-      --cb-green:rgba(167,220,150,0.55);
-      --cb-red:rgba(248,173,157,0.55);
-      /* highlight (выбор) */
-      --hl:#ef4444;
-      --hl-bg:#ef4444;
-      /* status */
-      --st-pending:#faf2e0;
-      --st-confirmed:#e3efe2;
-      --st-rejected:#f2e0e0;
-      /* table */
-      --cell-size:50px;
-      --safe-b:env(safe-area-inset-bottom,0px);
+      --bg:#f2f2f2;--surface:#ffffff;--surface2:#f8f8f8;
+      --border:#e5e5e5;--border2:#cccccc;
+      --label:#1e1e1e;--label2:#4a4a4a;--label3:#7c7c7c;--label4:#9a9a9a;
+      --blue:#3b6e8f;--blue-h:#2c5a77;--blue-dim:rgba(59,110,143,0.12);
+      --green:#4f6b4e;--red:#b33f3f;
+      --g-blue:#2c5f7a;--g-green:#4f6b4e;--g-red:#9b4b4b;
+      --cb-blue:rgba(167,199,231,0.55);--cb-green:rgba(167,220,150,0.55);--cb-red:rgba(248,173,157,0.55);
+      --hl:#ef4444;--hl-bg:#ef4444;
+      --st-pending:#faf2e0;--st-confirmed:#e3efe2;--st-rejected:#f2e0e0;
+      --cell-size:50px;--safe-b:env(safe-area-inset-bottom,0px);
       --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",system-ui,sans-serif;
     }
-
     body{font-family:var(--font);background:var(--bg);color:var(--label);min-height:100vh;-webkit-font-smoothing:antialiased;}
 
-    /* ══════════════════════════════════════════
-       LOGIN
-    ══════════════════════════════════════════ */
-    #login{
-      position:fixed;inset:0;background:var(--bg);
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-      gap:20px;z-index:9999;padding:32px;
-    }
+    /* LOGIN */
+    #login{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:9999;padding:32px;}
     .login-glyph{font-size:48px;color:var(--label2);}
     .login-title{font-size:30px;font-weight:700;letter-spacing:-0.6px;color:var(--label);}
     .login-sub{font-size:15px;color:var(--label3);}
     .login-sep{width:32px;height:2px;background:var(--border2);}
     #content{display:none;}
 
-    /* ══════════════════════════════════════════
-       LOADER
-    ══════════════════════════════════════════ */
+    /* LOADER */
     #loader{display:none;position:fixed;inset:0;background:rgba(255,255,255,0.8);z-index:5000;align-items:center;justify-content:center;}
     .loader-box{text-align:center;}
     .spin{width:46px;height:46px;border:4px solid #f0f0f0;border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;}
     @keyframes spin{to{transform:rotate(360deg);}}
 
-    /* ══════════════════════════════════════════
-       DESKTOP NAV
-    ══════════════════════════════════════════ */
-    .d-nav{
-      position:sticky;top:0;z-index:100;
-      background:rgba(255,255,255,0.88);backdrop-filter:blur(28px) saturate(180%);
-      border-bottom:.5px solid var(--border);
-      height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;
-    }
+    /* DESKTOP NAV */
+    .d-nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.88);backdrop-filter:blur(28px) saturate(180%);border-bottom:.5px solid var(--border);height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;}
     .d-nav-title{font-size:22px;font-weight:600;letter-spacing:-.4px;color:var(--label);display:flex;align-items:center;gap:8px;}
     .d-nav-right{display:flex;gap:12px;align-items:center;}
     .user-bar{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.88);backdrop-filter:blur(20px);padding:5px 14px 5px 10px;border-radius:6px;border:.5px solid var(--border);}
@@ -98,9 +53,7 @@
     .d-nav-btn{background:rgba(255,255,255,.92);border:.5px solid var(--border2);border-radius:6px;padding:7px 22px;font-size:14px;font-weight:510;color:var(--blue);cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .2s;}
     .d-nav-btn:hover{background:var(--blue-dim);}
 
-    /* ══════════════════════════════════════════
-       DESKTOP PAGE
-    ══════════════════════════════════════════ */
+    /* DESKTOP PAGE */
     .d-page{padding:28px 36px 80px;display:flex;flex-direction:column;gap:28px;}
     .d-ctrl{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--surface);border-radius:6px;padding:16px 24px;border:.5px solid var(--border);}
     .d-cal-btn{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:0 18px 0 14px;height:52px;cursor:pointer;font-family:var(--font);transition:all .2s;}
@@ -163,9 +116,7 @@
     .d-slider:not(.drag-enabled) .d-drag-handle{cursor:pointer;}
     .d-drag-ind{position:fixed;bottom:24px;right:24px;background:#2c2c2ecc;backdrop-filter:blur(16px);color:white;padding:9px 22px;border-radius:4px;font-size:13px;z-index:1000;pointer-events:none;}
 
-    /* ══════════════════════════════════════════
-       SHARED MODALS (desktop)
-    ══════════════════════════════════════════ */
+    /* SHARED MODALS */
     .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(18px);z-index:2000;justify-content:center;align-items:center;}
     .overlay.open{display:flex;}
     .sheet{background:#fff;border-radius:6px;width:100%;max-width:520px;box-shadow:0 20px 48px rgba(0,0,0,.18);}
@@ -190,9 +141,7 @@
     .cb-yes{background:rgba(79,107,78,.12);color:#3c5a3b;}
     .cb-no{background:rgba(179,63,63,.1);color:#a33a3a;}
 
-    /* ══════════════════════════════════════════
-       ADMIN
-    ══════════════════════════════════════════ */
+    /* ADMIN */
     .admin-panel{max-width:780px;width:92%;max-height:82vh;overflow-y:auto;}
     .adm-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);}
     .adm-title{font-size:20px;font-weight:700;}
@@ -211,222 +160,97 @@
     .u-cancel-btn{background:var(--surface2);color:var(--label2);}
 
     /* ══════════════════════════════════════════
-       MOBILE — ОРИГИНАЛЬНЫЙ ФУНКЦИОНАЛ
-       Цвета ПК, закругления минимальные (≤4px)
+       MOBILE
     ══════════════════════════════════════════ */
     @media (max-width: 767px) {
-      /* Скрыть desktop */
       .d-nav{display:none!important;}
       .d-page{display:none!important;}
 
-      /* Sheet на мобиле — снизу, без закруглений */
       .overlay{align-items:flex-end;}
       .sheet{border-radius:0;max-width:100%;max-height:88dvh;overflow-y:auto;padding-bottom:var(--safe-b);}
 
-      /* ─ Хедер ─ */
-      .m-header{
-        display:flex;align-items:center;justify-content:space-between;
-        padding:0 12px;height:52px;
-        background:linear-gradient(to right,#1e3c72,#2a5298);
-        border-bottom:1px solid rgba(255,255,255,.12);
-        position:sticky;top:0;z-index:100;
-      }
+      /* Хедер */
+      .m-header{display:flex;align-items:center;justify-content:space-between;padding:0 12px;height:52px;background:linear-gradient(to right,#1e3c72,#2a5298);border-bottom:1px solid rgba(255,255,255,.12);position:sticky;top:0;z-index:100;}
       .m-logo{font-size:15px;font-weight:700;color:#fff;display:flex;align-items:center;gap:7px;letter-spacing:-.2px;}
       .m-hdr-right{display:flex;gap:6px;align-items:center;}
-      .m-icon-btn{
-        width:32px;height:32px;border-radius:4px;
-        background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);
-        display:flex;align-items:center;justify-content:center;
-        cursor:pointer;font-size:13px;color:#fff;
-      }
+      .m-icon-btn{width:32px;height:32px;border-radius:4px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#fff;}
       .m-icon-btn:active{background:rgba(255,255,255,.25);}
       .m-user-pic{width:20px;height:20px;border-radius:3px;object-fit:cover;}
 
-      /* ─ Дата-чипы ─ */
-      .m-date-bar{
-        display:flex;align-items:center;gap:4px;
-        padding:8px 10px;
-        background:linear-gradient(to right,#1e3c72,#2a5298);
-        border-bottom:1px solid rgba(255,255,255,.1);
-        overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
-      }
+      /* Дата-чипы */
+      .m-date-bar{display:flex;align-items:center;gap:4px;padding:8px 10px;background:linear-gradient(to right,#1e3c72,#2a5298);border-bottom:1px solid rgba(255,255,255,.1);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
       .m-date-bar::-webkit-scrollbar{display:none;}
-      .m-date-chip{
-        display:flex;flex-direction:column;align-items:center;
-        padding:5px 10px;border-radius:3px;cursor:pointer;flex-shrink:0;
-        border:1px solid transparent;min-width:42px;transition:all .12s;
-      }
+      .m-date-chip{display:flex;flex-direction:column;align-items:center;padding:5px 10px;border-radius:3px;cursor:pointer;flex-shrink:0;border:1px solid transparent;min-width:42px;transition:all .12s;}
       .m-date-chip.active{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.5);}
       .m-date-chip:not(.active){background:rgba(255,255,255,.08);}
       .m-date-chip:active{background:rgba(255,255,255,.3);}
       .dc-day{font-size:15px;font-weight:700;color:#fff;line-height:1.2;}
       .dc-dow{font-size:9px;color:rgba(255,255,255,.7);font-weight:500;margin-top:1px;}
 
-      /* ─ Hint-бар (шаг выбора) ─ */
-      .m-hint-bar{
-        padding:7px 12px;
-        background:#fffbeb;border-bottom:1px solid #fde68a;
-        font-size:12px;color:#92400e;
-        display:none;align-items:center;gap:8px;
-      }
+      /* Hint-бар */
+      .m-hint-bar{padding:7px 12px;background:#fffbeb;border-bottom:1px solid #fde68a;font-size:12px;color:#92400e;display:none;align-items:center;gap:8px;}
       .m-hint-bar.visible{display:flex;}
       .m-hint-cancel{margin-left:auto;background:none;border:none;color:#92400e;cursor:pointer;font-size:12px;font-weight:700;}
 
-      /* ─ Бар выбранных интервалов ─ */
-      .m-sel-bar{
-        padding:6px 10px;display:none;flex-wrap:wrap;gap:5px;
-        background:var(--surface);border-bottom:1px solid var(--border);
-      }
+      /* Бар выбранных интервалов */
+      .m-sel-bar{padding:6px 10px;display:none;flex-wrap:wrap;gap:5px;background:var(--surface);border-bottom:1px solid var(--border);}
       .m-sel-bar.visible{display:flex;}
-      .m-sel-chip{
-        display:flex;align-items:center;gap:6px;
-        background:var(--blue-dim);border:1px solid rgba(59,110,143,.25);
-        border-radius:3px;padding:4px 9px;font-size:12px;color:var(--blue);font-weight:600;
-      }
+      .m-sel-chip{display:flex;align-items:center;gap:6px;background:var(--blue-dim);border:1px solid rgba(59,110,143,.25);border-radius:3px;padding:4px 9px;font-size:12px;color:var(--blue);font-weight:600;}
       .m-sel-chip button{background:none;border:none;cursor:pointer;color:var(--red);font-size:14px;line-height:1;padding:0;}
 
-      /* ─ FAB «Забронировать» ─ */
-      .m-fab{
-        position:fixed;bottom:calc(14px + var(--safe-b));right:14px;
-        background:linear-gradient(to right,#1e3c72,#2a5298);
-        color:white;border:none;border-radius:4px;
-        height:46px;padding:0 20px;
-        font-size:14px;font-weight:700;cursor:pointer;
-        box-shadow:0 4px 14px rgba(30,60,114,.4);
-        display:flex;align-items:center;gap:8px;z-index:190;
-        transition:opacity .15s;
-      }
+      /* FAB */
+      .m-fab{position:fixed;bottom:calc(14px + var(--safe-b));right:14px;background:linear-gradient(to right,#1e3c72,#2a5298);color:white;border:none;border-radius:4px;height:46px;padding:0 20px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(30,60,114,.4);display:flex;align-items:center;gap:8px;z-index:190;transition:opacity .15s;}
       .m-fab:active{opacity:.8;}
       .m-fab.hidden{display:none;}
 
-      /* ─ Тело (скролл таблицы) ─ */
-      .m-body{
-        overflow-y:auto;-webkit-overflow-scrolling:touch;
-        /* высота = 100dvh - header(52) - datebar(≈54) */
-        height:calc(100dvh - 52px - 54px);
-        background:var(--bg);
-      }
+      /* Тело */
+      .m-body{overflow-y:auto;-webkit-overflow-scrolling:touch;height:calc(100dvh - 52px - 54px);background:var(--bg);}
 
-      /* ─ Враппер таблицы ─ */
-      .m-grid-wrap{
-        position:relative;
-        overflow-x:auto;-webkit-overflow-scrolling:touch;
-        background:var(--surface);
-      }
+      /* Враппер таблицы */
+      .m-grid-wrap{position:relative;overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--surface);}
       .m-grid-wrap::-webkit-scrollbar{height:2px;}
       .m-grid-wrap::-webkit-scrollbar-thumb{background:var(--border2);}
 
-      /* ─ Таблица ─ */
-      #mTable{
-        border-collapse:collapse;table-layout:fixed;
-        font-family:var(--font);
-      }
+      /* Таблица */
+      #mTable{border-collapse:collapse;table-layout:fixed;font-family:var(--font);}
 
-      /* Угловая ячейка */
-      #mTable thead th.m-corner{
-        background:linear-gradient(to right,#1e3c72,#2a5298);
-        color:white;font-size:10px;font-weight:700;
-        width:var(--cell-size);height:var(--cell-size);
-        position:sticky;left:0;top:0;z-index:6;
-        border-bottom:1px solid rgba(255,255,255,.15);
-        border-right:1px solid rgba(255,255,255,.15);
-        text-align:center;vertical-align:middle;
-      }
+      /* Угол */
+      #mTable thead th.m-corner{background:linear-gradient(to right,#1e3c72,#2a5298);color:white;font-size:10px;font-weight:700;width:var(--cell-size);height:var(--cell-size);position:sticky;left:0;top:0;z-index:6;border-bottom:1px solid rgba(255,255,255,.15);border-right:1px solid rgba(255,255,255,.15);text-align:center;vertical-align:middle;}
 
-      /* Заголовки столов (кликабельные) */
-      #mTable thead th.m-lane-hdr{
-        height:var(--cell-size);width:var(--cell-size);
-        font-size:11px;font-weight:700;color:white;
-        border-bottom:1px solid rgba(255,255,255,.15);
-        border-right:1px solid rgba(255,255,255,.1);
-        text-align:center;vertical-align:middle;
-        cursor:pointer;position:sticky;top:0;z-index:4;
-        white-space:nowrap;
-      }
+      /* Заголовки столов */
+      #mTable thead th.m-lane-hdr{height:var(--cell-size);width:var(--cell-size);font-size:11px;font-weight:700;color:white;border-bottom:1px solid rgba(255,255,255,.15);border-right:1px solid rgba(255,255,255,.1);text-align:center;vertical-align:middle;cursor:pointer;position:sticky;top:0;z-index:4;white-space:nowrap;}
       #mTable thead th.m-lane-hdr.lb{background:linear-gradient(to right,#1e3c72,#2a5298);}
       #mTable thead th.m-lane-hdr.lg{background:linear-gradient(135deg,#3a6b38,#4f6b4e);}
       #mTable thead th.m-lane-hdr.lr{background:linear-gradient(135deg,#7b2c2c,#9b4b4b);}
-      /* подсветка выбранного столбца */
-      #mTable thead th.m-lane-hdr.col-sel{
-        background:var(--hl-bg)!important;
-        color:white!important;
-      }
+      #mTable thead th.m-lane-hdr.col-sel{background:var(--hl-bg)!important;color:white!important;}
 
-      /* Ячейки времени — левый столбец (липкий) */
-      #mTable tbody td.m-time-l{
-        width:var(--cell-size);height:var(--cell-size);
-        background:linear-gradient(145deg,#1e3a8a,#0f2a5f);
-        color:white;font-size:10px;font-weight:700;
-        border-bottom:1px solid rgba(255,255,255,.08);
-        border-right:2px solid rgba(255,255,255,.2);
-        text-align:center;vertical-align:middle;
-        position:sticky;left:0;z-index:3;cursor:pointer;
-        white-space:nowrap;
-      }
-      #mTable tbody td.m-time-l:hover,
+      /* Левое время */
+      #mTable tbody td.m-time-l{width:var(--cell-size);height:var(--cell-size);background:linear-gradient(145deg,#1e3a8a,#0f2a5f);color:white;font-size:10px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.08);border-right:2px solid rgba(255,255,255,.2);text-align:center;vertical-align:middle;position:sticky;left:0;z-index:3;cursor:pointer;white-space:nowrap;}
       #mTable tbody td.m-time-l:active{background:linear-gradient(145deg,#2a5298,#1e3a8a);}
 
-      /* Ячейки времени — правый столбец */
-      #mTable tbody td.m-time-r{
-        width:var(--cell-size);height:var(--cell-size);
-        background:linear-gradient(145deg,#1e3a8a,#0f2a5f);
-        color:white;font-size:10px;font-weight:700;
-        border-bottom:1px solid rgba(255,255,255,.08);
-        border-left:2px solid rgba(255,255,255,.2);
-        text-align:center;vertical-align:middle;
-        cursor:pointer;white-space:nowrap;
-      }
-      #mTable tbody td.m-time-r:hover,
+      /* Правое время */
+      #mTable tbody td.m-time-r{width:var(--cell-size);height:var(--cell-size);background:linear-gradient(145deg,#1e3a8a,#0f2a5f);color:white;font-size:10px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.08);border-left:2px solid rgba(255,255,255,.2);text-align:center;vertical-align:middle;cursor:pointer;white-space:nowrap;}
       #mTable tbody td.m-time-r:active{background:linear-gradient(145deg,#2a5298,#1e3a8a);}
 
       /* Слоты */
-      #mTable tbody td.m-slot{
-        height:var(--cell-size);width:var(--cell-size);
-        border-bottom:1px solid var(--border);
-        border-right:1px solid var(--border);
-        text-align:center;vertical-align:middle;
-        cursor:pointer;transition:background .1s;
-        position:relative;
-      }
-      /* цвета групп — как на ПК */
+      #mTable tbody td.m-slot{height:var(--cell-size);width:var(--cell-size);border-bottom:1px solid var(--border);border-right:1px solid var(--border);text-align:center;vertical-align:middle;cursor:pointer;transition:background .1s;position:relative;}
       #mTable tbody td.m-slot.cb{background:var(--cb-blue);}
       #mTable tbody td.m-slot.cg{background:var(--cb-green);}
       #mTable tbody td.m-slot.cr{background:var(--cb-red);}
-      /* статусы броней */
       #mTable tbody td.m-slot.bk-p{background:var(--st-pending)!important;}
       #mTable tbody td.m-slot.bk-c{background:var(--st-confirmed)!important;}
       #mTable tbody td.m-slot.bk-r{background:var(--st-rejected)!important;}
-      /* выделение (выбранный интервал) */
       #mTable tbody td.m-slot.sel{background:var(--hl-bg)!important;border-color:transparent;}
-      #mTable tbody td.m-slot.sel.rt{border-top-left-radius:0;border-top-right-radius:0;}
-      #mTable tbody td.m-slot.sel.rb{border-bottom-left-radius:0;border-bottom-right-radius:0;}
-      /* точка начала */
-      #mTable tbody td.m-slot.sel-start{
-        background:rgba(239,68,68,.22)!important;
-        border:2px solid var(--hl)!important;
-      }
-      /* вертикальные красные линии выбранного столбца */
+      #mTable tbody td.m-slot.sel-start{background:rgba(239,68,68,.22)!important;border:2px solid var(--hl)!important;}
       #mTable tbody td.m-slot.v-line::before,
-      #mTable tbody td.m-slot.v-line::after{
-        content:"";position:absolute;top:0;bottom:0;width:2px;
-        background:var(--hl);z-index:5;
-      }
+      #mTable tbody td.m-slot.v-line::after{content:"";position:absolute;top:0;bottom:0;width:2px;background:var(--hl);z-index:5;}
       #mTable tbody td.m-slot.v-line::before{left:0;}
       #mTable tbody td.m-slot.v-line::after{right:0;}
 
-      /* ─ Ползунки на мобиле ─ */
+      /* Ползунки */
       #mSliders{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;}
-      .m-slider{
-        position:absolute;border-radius:3px;pointer-events:auto;cursor:pointer;
-        padding:3px 5px 3px 16px;
-        display:flex;flex-direction:column;justify-content:center;gap:2px;
-        box-shadow:0 2px 6px rgba(0,0,0,.2);
-        border:.5px solid rgba(255,255,255,.18);
-        overflow:hidden;white-space:nowrap;font-family:var(--font);
-        transition:transform .1s;
-      }
+      .m-slider{position:absolute;border-radius:3px;pointer-events:auto;cursor:pointer;padding:3px 5px 3px 16px;display:flex;flex-direction:column;justify-content:center;gap:2px;box-shadow:0 2px 6px rgba(0,0,0,.2);border:.5px solid rgba(255,255,255,.18);overflow:hidden;white-space:nowrap;font-family:var(--font);transition:transform .1s;}
       .m-slider:active{transform:scale(.97);}
-      /* цвета как ПК */
       .m-slider[data-lt="blue"]{background:rgba(44,95,122,.92);color:white;}
       .m-slider[data-lt="green"]{background:rgba(79,107,78,.92);color:white;}
       .m-slider[data-lt="red"]{background:rgba(155,75,75,.92);color:white;}
@@ -434,18 +258,14 @@
       .m-slider.sc[data-lt="green"]{background:#4f6b4e;}
       .m-slider.sc[data-lt="red"]{background:#9b4b4b;}
       .m-slider.sr{opacity:.6;}
-      .m-dot{
-        position:absolute;left:4px;top:50%;transform:translateY(-50%);
-        width:8px;height:8px;border-radius:50%;
-        box-shadow:0 0 0 1px rgba(255,255,255,.4);
-      }
+      .m-dot{position:absolute;left:4px;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;box-shadow:0 0 0 1px rgba(255,255,255,.4);}
       .m-slider.sp .m-dot{background:#f5b042;}
       .m-slider.sc .m-dot{background:#3bc43b;}
       .m-slider.sr .m-dot{background:#e55a5a;}
       .m-sl-name{font-size:9px;font-weight:700;overflow:hidden;text-overflow:ellipsis;}
       .m-sl-time{font-size:8px;opacity:.8;}
 
-      /* ─ Мобильный info-sheet ─ */
+      /* Info sheet */
       .m-info-block{background:var(--surface2);border-radius:0;padding:14px;margin-bottom:12px;}
       .m-i-row{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:.5px solid var(--border);}
       .m-i-row:last-child{border:none;}
@@ -456,13 +276,9 @@
       .m-cb-yes{background:rgba(79,107,78,.12);color:#3c5a3b;}
       .m-cb-no{background:rgba(179,63,63,.1);color:#a33a3a;}
       .m-del{width:100%;height:44px;background:#f2eaea;border:none;border-radius:3px;margin-top:10px;cursor:pointer;font-weight:700;color:var(--red);font-size:14px;}
-
-      /* форма — увеличенный шрифт чтобы iOS не зумил */
-      .m-book-form .f-inp,
-      .m-book-form textarea.f-inp{font-size:16px!important;}
+      .m-book-form .f-inp,.m-book-form textarea.f-inp{font-size:16px!important;}
     }
 
-    /* Desktop: скрываем мобильные элементы */
     @media (min-width: 768px) {
       .m-header,.m-date-bar,.m-hint-bar,.m-sel-bar,.m-fab,
       .m-body,.m-grid-wrap,#mTable,#mSliders{display:none!important;}
@@ -471,7 +287,7 @@
 </head>
 <body>
 
-<!-- ════ LOGIN ════ -->
+<!-- LOGIN -->
 <div id="login">
   <div class="login-glyph"><i class="fas fa-table-tennis"></i> <i class="fas fa-crown"></i></div>
   <div class="login-title">LUCKY STRIKE</div>
@@ -485,7 +301,7 @@
        data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
 </div>
 
-<!-- ════ CONTENT ════ -->
+<!-- CONTENT -->
 <div id="content">
 
   <!-- DESKTOP NAV -->
@@ -526,7 +342,7 @@
     </div>
   </div>
 
-  <!-- ════ МОБАЙЛ ════ -->
+  <!-- MOBILE -->
   <div class="m-header">
     <div class="m-logo"><i class="fas fa-table-tennis"></i> LUCKY STRIKE</div>
     <div class="m-hdr-right">
@@ -542,17 +358,13 @@
     </div>
   </div>
   <input type="date" id="mHiddenDate" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
-
   <div class="m-date-bar" id="mDateBar"></div>
-
   <div class="m-hint-bar" id="mHintBar">
     <i class="fas fa-hand-pointer"></i>
     <span id="mHintText">Выберите стол, затем нажмите на время</span>
     <button class="m-hint-cancel" onclick="mCancelSel()">✕ Отмена</button>
   </div>
-
   <div class="m-sel-bar" id="mSelBar"></div>
-
   <div class="m-body" id="mBodyWrap">
     <div class="m-grid-wrap" id="mGridWrap">
       <table id="mTable">
@@ -562,14 +374,13 @@
       <div id="mSliders"></div>
     </div>
   </div>
-
   <button class="m-fab hidden" id="mFab" onclick="openMBookModal()">
     <i class="fas fa-check"></i> Забронировать
   </button>
 
-</div><!-- /content -->
+</div>
 
-<!-- ════ DESKTOP BOOK MODAL ════ -->
+<!-- DESKTOP BOOK MODAL -->
 <div id="dBookModal" class="overlay">
   <div class="sheet">
     <div class="sh-head">
@@ -591,7 +402,7 @@
   </div>
 </div>
 
-<!-- ════ MOBILE BOOK MODAL ════ -->
+<!-- MOBILE BOOK MODAL -->
 <div id="mBookModal" class="overlay">
   <div class="sheet m-book-form">
     <div class="sh-head">
@@ -613,7 +424,7 @@
   </div>
 </div>
 
-<!-- ════ INFO MODAL ════ -->
+<!-- INFO MODAL -->
 <div id="infoModal" class="overlay">
   <div class="sheet">
     <div class="sh-head">
@@ -636,7 +447,7 @@
   </div>
 </div>
 
-<!-- ════ ADMIN ════ -->
+<!-- ADMIN -->
 <div id="adminModal" class="overlay">
   <div class="sheet admin-panel">
     <div class="sh-head">
@@ -653,7 +464,7 @@
   </div>
 </div>
 
-<!-- ════ USER FORM ════ -->
+<!-- USER FORM -->
 <div id="userFormModal" class="overlay">
   <div class="sheet" style="max-width:420px">
     <div class="sh-head">
@@ -679,235 +490,77 @@
 <div id="loader"><div class="loader-box"><div class="spin"></div><div>Загрузка...</div></div></div>
 
 <script>
-// ══════════════════════════════════════════════════
-//  CONFIG
-// ══════════════════════════════════════════════════
 const AUTH_SHEET_ID='1zwi1CInK3NZ8YRAegRMAdjin6XPacVkAkFsjAiqVE0w';
 const AUTH_SHEET='1';
 const API_KEY='AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
 const GAS_URL='https://script.google.com/macros/s/AKfycbyVH7brTDjP-ori4QFy_wAMkjPkqKYcd8WHtMYFlPH4Kl1wzAYSSWdN-C_CzBucuOhG/exec';
 
-const LANES=12, SH=11, EH=22;
+const LANES=12,SH=11,EH=22;
 const slots=[];
-for(let h=SH;h<=EH;h++){
-  slots.push({label:`${h}:00`,key:h});
-  if(h<EH) slots.push({label:`${h}:30`,key:h+0.5});
-}
+for(let h=SH;h<=EH;h++){slots.push({label:`${h}:00`,key:h});if(h<EH)slots.push({label:`${h}:30`,key:h+0.5});}
 
 function laneGroup(l){const n=l+1;if(n<=3)return 0;if(n===4)return 1;if(n<=6)return 0;return 2;}
 const GRP_CLS=['lb','lg','lr'];
 const GRP_LT=['blue','green','red'];
 const CELL_BG_CLS=['cb','cg','cr'];
+const DOW=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
 
-let bookings=[], curBooking=null, dragModeOn=false;
+let bookings=[],curBooking=null,dragModeOn=false;
 let curDate=new Date().toISOString().split('T')[0];
 const $=id=>document.getElementById(id);
 function esc(s){if(!s)return'';return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function enc(s){return encodeURIComponent(s);}
 function fmt(v){const h=Math.floor(v),m=v%1===0.5?'30':'00';return`${h}:${m}`;}
 function slotLabel(si,ei){const s=slots[si];const e=slots[ei+1]||{label:fmt(slots[ei].key+0.5)};return`${s.label}–${e.label}`;}
-function fmtDate(ds){
-  if(!ds)return'—';const d=new Date(ds);
-  const t=new Date();t.setHours(0,0,0,0);
-  const tm=new Date(t);tm.setDate(tm.getDate()+1);
-  if(d.getTime()===t.getTime())return'Сегодня';
-  if(d.getTime()===tm.getTime())return'Завтра';
-  const M=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
-  const D=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-  return`${D[d.getDay()]}, ${d.getDate()} ${M[d.getMonth()]}`;
-}
-function hasConflict(lane,si,ei,exId=null){
-  const st=slots[si].key,en=slots[ei+1]?.key||(slots[ei].key+0.5);
-  return bookings.some(b=>{
-    if(exId!==null&&b.id===exId)return false;
-    if(b.lane!==lane)return false;
-    return!(en<=b.start||st>=b.end);
-  });
-}
+function fmtDate(ds){if(!ds)return'—';const d=new Date(ds);const t=new Date();t.setHours(0,0,0,0);const tm=new Date(t);tm.setDate(tm.getDate()+1);if(d.getTime()===t.getTime())return'Сегодня';if(d.getTime()===tm.getTime())return'Завтра';const M=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];const D=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];return`${D[d.getDay()]}, ${d.getDate()} ${M[d.getMonth()]}`;}
+function hasConflict(lane,si,ei,exId=null){const st=slots[si].key,en=slots[ei+1]?.key||(slots[ei].key+0.5);return bookings.some(b=>{if(exId!==null&&b.id===exId)return false;if(b.lane!==lane)return false;return!(en<=b.start||st>=b.end);});}
 function showLoad(){$('loader').style.display='flex';}
 function hideLoad(){$('loader').style.display='none';}
 
-// ══════════════════════════════════════════════════
-//  AUTH
-// ══════════════════════════════════════════════════
+// AUTH
 let curUser=null;
 function parseJwt(t){try{const b=t.split('.')[1];return JSON.parse(decodeURIComponent(atob(b.replace(/-/g,'+').replace(/_/g,'/')).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')));}catch(e){return{};}}
 function loadGAPI(){return new Promise((res,rej)=>{if(window.gapi&&gapi.client){res();return;}gapi.load('client',{callback:()=>res(),onerror:()=>rej(),timeout:8000,ontimeout:()=>rej()});});}
 function cacheU(e,n,r,p){try{localStorage.setItem('blsEmail',e);localStorage.setItem('blsName',n);localStorage.setItem('blsRole',r);localStorage.setItem('blsPic',p);localStorage.setItem('blsIn','1');}catch(e){}}
 function getCachedU(){try{if(localStorage.getItem('blsIn')==='1'){const e=localStorage.getItem('blsEmail');if(e)return{email:e.toLowerCase().trim(),name:localStorage.getItem('blsName'),role:localStorage.getItem('blsRole'),picture:localStorage.getItem('blsPic')};}}catch(e){}return null;}
-async function checkEmail(email){
-  try{
-    await loadGAPI();
-    await gapi.client.init({apiKey:API_KEY,discoveryDocs:['https://sheets.googleapis.com/$discovery/rest?version=v4']});
-    const r=await gapi.client.sheets.spreadsheets.values.get({spreadsheetId:AUTH_SHEET_ID,range:`${AUTH_SHEET}!A:C`});
-    const rows=r.result.values||[];
-    for(let i=1;i<rows.length;i++){
-      if(rows[i][0]&&rows[i][0].toLowerCase().trim()===email)
-        return{found:true,name:(rows[i][1]||email.split('@')[0]).trim(),role:(rows[i][2]||'').trim()};
-    }
-    return{found:false};
-  }catch(e){return{found:false,error:true};}
-}
-async function handleCredentialResponse(resp){
-  const pl=parseJwt(resp.credential),email=pl.email.toLowerCase().trim();
-  showLoad();
-  const check=await checkEmail(email);
-  if(check.found){
-    curUser={email,name:check.name||pl.name,role:check.role||'',picture:pl.picture};
-    cacheU(email,curUser.name,curUser.role,curUser.picture);
-    loginUser(curUser);
-  }else{hideLoad();alert('Доступ запрещён: email не найден');}
-}
-function loginUser(user){
-  $('login').style.display='none';$('content').style.display='block';
-  $('userInfo').style.display='flex';
-  $('userPic').src=user.picture||'';$('userEmail').textContent=user.email;
-  const rd=$('userRoleDisp');if(user.role){rd.textContent=user.role;rd.style.display='inline-block';}else rd.style.display='none';
-  const allow=['разработчик','управляющий'].includes((user.role||'').toLowerCase().trim());
-  $('dAdminBtn').style.display=allow?'flex':'none';
-  $('mAdminBtn').style.display=allow?'flex':'none';
-  $('mUserPic').src=user.picture||'';$('mUserBtn').style.display='flex';
-  hideLoad();initApp();
-}
+async function checkEmail(email){try{await loadGAPI();await gapi.client.init({apiKey:API_KEY,discoveryDocs:['https://sheets.googleapis.com/$discovery/rest?version=v4']});const r=await gapi.client.sheets.spreadsheets.values.get({spreadsheetId:AUTH_SHEET_ID,range:`${AUTH_SHEET}!A:C`});const rows=r.result.values||[];for(let i=1;i<rows.length;i++){if(rows[i][0]&&rows[i][0].toLowerCase().trim()===email)return{found:true,name:(rows[i][1]||email.split('@')[0]).trim(),role:(rows[i][2]||'').trim()};}return{found:false};}catch(e){return{found:false,error:true};}}
+async function handleCredentialResponse(resp){const pl=parseJwt(resp.credential),email=pl.email.toLowerCase().trim();showLoad();const check=await checkEmail(email);if(check.found){curUser={email,name:check.name||pl.name,role:check.role||'',picture:pl.picture};cacheU(email,curUser.name,curUser.role,curUser.picture);loginUser(curUser);}else{hideLoad();alert('Доступ запрещён: email не найден');}}
+function loginUser(user){$('login').style.display='none';$('content').style.display='block';$('userInfo').style.display='flex';$('userPic').src=user.picture||'';$('userEmail').textContent=user.email;const rd=$('userRoleDisp');if(user.role){rd.textContent=user.role;rd.style.display='inline-block';}else rd.style.display='none';const allow=['разработчик','управляющий'].includes((user.role||'').toLowerCase().trim());$('dAdminBtn').style.display=allow?'flex':'none';$('mAdminBtn').style.display=allow?'flex':'none';$('mUserPic').src=user.picture||'';$('mUserBtn').style.display='flex';hideLoad();initApp();}
 function signOut(){['blsEmail','blsName','blsRole','blsPic','blsIn'].forEach(k=>localStorage.removeItem(k));location.reload();}
 
-// ══════════════════════════════════════════════════
-//  ADMIN
-// ══════════════════════════════════════════════════
+// ADMIN
 async function openAdmin(){showLoad();$('adminModal').classList.add('open');await loadUsers();hideLoad();}
 function closeAdmin(){$('adminModal').classList.remove('open');}
-async function loadUsers(){
-  try{
-    const r=await fetch(`${GAS_URL}?action=getUsers&_=${Date.now()}`);const d=await r.json();
-    if(!d.success)throw new Error(d.message);
-    const c=$('adminUsersList');
-    if(!d.users||!d.users.length){c.innerHTML='<div style="text-align:center;padding:40px;color:var(--label3)">Нет сотрудников</div>';return;}
-    let h=`<table class="u-table"><thead><tr><th>Email</th><th>Имя</th><th>Должность</th><th></th></tr></thead><tbody>`;
-    d.users.forEach(u=>{h+=`<tr><td>${esc(u.email)}</td><td>${esc(u.name||'-')}</td><td>${esc(u.role||'-')}</td><td><button class="u-edit" onclick='editUser(${u.row},"${esc(u.email)}","${esc(u.name||'')}","${esc(u.role||'')}")'><i class="fas fa-edit"></i></button> <button class="u-del" onclick='delUser(${u.row},"${esc(u.email)}")'><i class="fas fa-trash"></i></button></td></tr>`;});
-    h+='</tbody></table>';c.innerHTML=h;
-  }catch(e){$('adminUsersList').innerHTML='<div style="text-align:center;padding:40px;color:var(--red)">Ошибка загрузки</div>';}
-}
+async function loadUsers(){try{const r=await fetch(`${GAS_URL}?action=getUsers&_=${Date.now()}`);const d=await r.json();if(!d.success)throw new Error(d.message);const c=$('adminUsersList');if(!d.users||!d.users.length){c.innerHTML='<div style="text-align:center;padding:40px;color:var(--label3)">Нет сотрудников</div>';return;}let h=`<table class="u-table"><thead><tr><th>Email</th><th>Имя</th><th>Должность</th><th></th></tr></thead><tbody>`;d.users.forEach(u=>{h+=`<tr><td>${esc(u.email)}</td><td>${esc(u.name||'-')}</td><td>${esc(u.role||'-')}</td><td><button class="u-edit" onclick='editUser(${u.row},"${esc(u.email)}","${esc(u.name||'')}","${esc(u.role||'')}")'><i class="fas fa-edit"></i></button> <button class="u-del" onclick='delUser(${u.row},"${esc(u.email)}")'><i class="fas fa-trash"></i></button></td></tr>`;});h+='</tbody></table>';c.innerHTML=h;}catch(e){$('adminUsersList').innerHTML='<div style="text-align:center;padding:40px;color:var(--red)">Ошибка загрузки</div>';}}
 function showAddUser(){$('uFormTitle').innerHTML='<i class="fas fa-user-plus" style="color:var(--blue)"></i> Добавить';$('uEditRow').value='';$('uEmail').value='';$('uName').value='';$('uRole').value='';$('uEmail').disabled=false;$('userFormModal').classList.add('open');}
 function editUser(row,email,name,role){$('uFormTitle').innerHTML='<i class="fas fa-user-edit" style="color:var(--blue)"></i> Редактировать';$('uEditRow').value=row;$('uEmail').value=email;$('uName').value=name;$('uRole').value=role;$('uEmail').disabled=true;$('userFormModal').classList.add('open');}
 function closeUserForm(){$('userFormModal').classList.remove('open');}
-async function saveUser(e){
-  e.preventDefault();
-  const row=$('uEditRow').value,email=$('uEmail').value.trim(),name=$('uName').value.trim(),role=$('uRole').value.trim();
-  if(!email)return alert('Введите email');showLoad();
-  try{
-    const url=row?`${GAS_URL}?action=updateUser&row=${row}&email=${enc(email)}&name=${enc(name)}&role=${enc(role)}`:`${GAS_URL}?action=addUser&email=${enc(email)}&name=${enc(name)}&role=${enc(role)}`;
-    const res=await(await fetch(url)).json();if(res&&res.success===false)throw new Error(res.message);
-    closeUserForm();await loadUsers();alert(row?'Обновлён':'Добавлен');
-  }catch(err){alert('Ошибка: '+err.message);}finally{hideLoad();}
-}
-async function delUser(row,email){
-  if(!confirm(`Удалить ${email}?`))return;showLoad();
-  try{const res=await(await fetch(`${GAS_URL}?action=deleteUser&row=${row}`)).json();if(res&&res.success===false)throw new Error(res.message);await loadUsers();alert('Удалён');}
-  catch(e){alert('Ошибка: '+e.message);}finally{hideLoad();}
-}
+async function saveUser(e){e.preventDefault();const row=$('uEditRow').value,email=$('uEmail').value.trim(),name=$('uName').value.trim(),role=$('uRole').value.trim();if(!email)return alert('Введите email');showLoad();try{const url=row?`${GAS_URL}?action=updateUser&row=${row}&email=${enc(email)}&name=${enc(name)}&role=${enc(role)}`:`${GAS_URL}?action=addUser&email=${enc(email)}&name=${enc(name)}&role=${enc(role)}`;const res=await(await fetch(url)).json();if(res&&res.success===false)throw new Error(res.message);closeUserForm();await loadUsers();alert(row?'Обновлён':'Добавлен');}catch(err){alert('Ошибка: '+err.message);}finally{hideLoad();}}
+async function delUser(row,email){if(!confirm(`Удалить ${email}?`))return;showLoad();try{const res=await(await fetch(`${GAS_URL}?action=deleteUser&row=${row}`)).json();if(res&&res.success===false)throw new Error(res.message);await loadUsers();alert('Удалён');}catch(e){alert('Ошибка: '+e.message);}finally{hideLoad();}}
 
-// ══════════════════════════════════════════════════
-//  SERVER
-// ══════════════════════════════════════════════════
-async function loadFromServer(){
-  showLoad();
-  try{
-    const res=await fetch(`${GAS_URL}?action=get&date=${curDate}`);
-    const data=await res.json();
-    bookings=(data.bookings||[]).map(b=>{
-      const sk=parseFloat(b.start),ek=parseFloat(b.end);
-      const si=slots.findIndex(s=>s.key===sk);
-      let ei=slots.findIndex(s=>s.key===ek)-1;if(ei<0)ei=slots.length-1;
-      return{id:b.id,lane:b.table-1,start:sk,end:ek,startSlotIdx:si,endSlotIdx:ei,
-             name:b.name,phone:b.phone,comment:b.comment,
-             confirmed:b.confirmed==='Да'?true:(b.confirmed==='Нет'?false:null)};
-    });
-    renderDesktop();renderMobile();
-  }catch(e){console.error(e);}
-  hideLoad();
-}
+// SERVER
+async function loadFromServer(){showLoad();try{const res=await fetch(`${GAS_URL}?action=get&date=${curDate}`);const data=await res.json();bookings=(data.bookings||[]).map(b=>{const sk=parseFloat(b.start),ek=parseFloat(b.end);const si=slots.findIndex(s=>s.key===sk);let ei=slots.findIndex(s=>s.key===ek)-1;if(ei<0)ei=slots.length-1;return{id:b.id,lane:b.table-1,start:sk,end:ek,startSlotIdx:si,endSlotIdx:ei,name:b.name,phone:b.phone,comment:b.comment,confirmed:b.confirmed==='Да'?true:(b.confirmed==='Нет'?false:null)};});renderDesktop();renderMobile();}catch(e){console.error(e);}hideLoad();}
 async function postBookings(arr){await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bookings:arr})});}
 async function postAction(obj){await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(obj)});}
 
-// ══════════════════════════════════════════════════
-//  INFO / CONFIRM / DELETE
-// ══════════════════════════════════════════════════
-function showInfoModal(b){
-  curBooking=b;
-  $('ii-table').textContent=`№${b.lane+1}`;
-  $('ii-time').textContent=slotLabel(b.startSlotIdx,b.endSlotIdx);
-  $('ii-name').textContent=b.name;
-  $('ii-phone').textContent=b.phone||'—';
-  $('ii-comment').textContent=b.comment||'—';
-  $('ii-status').textContent=b.confirmed===true?'✅ Пришли':(b.confirmed===false?'❌ Не пришли':'⏳ Ожидание');
-  $('infoModal').classList.add('open');
-}
+// INFO / CONFIRM / DELETE
+function showInfoModal(b){curBooking=b;$('ii-table').textContent=`№${b.lane+1}`;$('ii-time').textContent=slotLabel(b.startSlotIdx,b.endSlotIdx);$('ii-name').textContent=b.name;$('ii-phone').textContent=b.phone||'—';$('ii-comment').textContent=b.comment||'—';$('ii-status').textContent=b.confirmed===true?'✅ Пришли':(b.confirmed===false?'❌ Не пришли':'⏳ Ожидание');$('infoModal').classList.add('open');}
 function closeInfoModal(){$('infoModal').classList.remove('open');curBooking=null;}
 async function doConfirm(yes){if(!curBooking)return;showLoad();await postAction({action:'confirm',id:curBooking.id,confirmed:yes});closeInfoModal();await loadFromServer();hideLoad();}
 async function doDelete(){if(!curBooking||!confirm('Удалить бронь?'))return;showLoad();await postAction({action:'delete',id:curBooking.id});closeInfoModal();await loadFromServer();hideLoad();}
 
-// ══════════════════════════════════════════════════
-//  DESKTOP TABLE
-// ══════════════════════════════════════════════════
-let dTempBookings=[], dNextTid=1, dIsDragging=false, dDragStart=null, dDragInterval=null;
-
-function buildDesktop(){
-  const hr=$('dHeadRow');
-  slots.forEach(sl=>{const th=document.createElement('th');th.className='d-th-time';th.textContent=sl.label;hr.appendChild(th);});
-  const body=$('dBody');
-  for(let lane=0;lane<LANES;lane++){
-    const tr=document.createElement('tr');tr.dataset.lane=lane;
-    const lh=document.createElement('td');lh.className=`d-lane-hdr ${GRP_CLS[laneGroup(lane)]}`;lh.textContent=`№${lane+1}`;tr.appendChild(lh);
-    slots.forEach((sl,si)=>{const td=document.createElement('td');td.className='d-slot';td.dataset.lane=lane;td.dataset.si=si;tr.appendChild(td);});
-    body.appendChild(tr);
-  }
-}
+// DESKTOP TABLE
+let dTempBookings=[],dNextTid=1,dIsDragging=false,dDragStart=null,dDragInterval=null;
+function buildDesktop(){const hr=$('dHeadRow');slots.forEach(sl=>{const th=document.createElement('th');th.className='d-th-time';th.textContent=sl.label;hr.appendChild(th);});const body=$('dBody');for(let lane=0;lane<LANES;lane++){const tr=document.createElement('tr');tr.dataset.lane=lane;const lh=document.createElement('td');lh.className=`d-lane-hdr ${GRP_CLS[laneGroup(lane)]}`;lh.textContent=`№${lane+1}`;tr.appendChild(lh);slots.forEach((sl,si)=>{const td=document.createElement('td');td.className='d-slot';td.dataset.lane=lane;td.dataset.si=si;tr.appendChild(td);});body.appendChild(tr);}}
 function getDCell(lane,si){return $('dBody')?.rows[lane]?.cells[si+1];}
-function updateDCells(){
-  for(const r of $('dBody').rows)for(let i=1;i<r.cells.length;i++)r.cells[i].classList.remove('sp','sc','sr','st');
-  for(const b of bookings)for(let i=b.startSlotIdx;i<=b.endSlotIdx;i++){const c=getDCell(b.lane,i);if(c)c.classList.add(b.confirmed===true?'sc':(b.confirmed===false?'sr':'sp'));}
-  for(const t of dTempBookings)for(let i=t.startSlotIdx;i<=t.endSlotIdx;i++){const c=getDCell(t.lane,i);if(c)c.classList.add('st');}
-}
-function renderDSliders(){
-  const c=$('dsliders');c.innerHTML='';
-  const rows=Array.from($('dBody')?.querySelectorAll('tr')||[]);if(!rows.length)return;
-  [...bookings,...dTempBookings.map(t=>({...t,isTemp:true}))].forEach(item=>{
-    const si=item.startSlotIdx,ei=item.endSlotIdx,row=rows[item.lane];if(!row)return;
-    const sc=row.cells[si+1],ec=row.cells[ei+1];if(!sc||!ec)return;
-    const left=sc.offsetLeft+1,top=row.offsetTop+1,width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2,height=row.offsetHeight-2;
-    const status=item.isTemp?'st':(item.confirmed===true?'sc':(item.confirmed===false?'sr':'sp'));
-    const lt=GRP_LT[laneGroup(item.lane)];
-    const sl=document.createElement('div');sl.className=`d-slider ${status}`;if(dragModeOn)sl.classList.add('drag-enabled');sl.setAttribute('data-lt',lt);sl.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
-    const dot=document.createElement('div');dot.className='d-status-dot';sl.appendChild(dot);
-    const nd=document.createElement('div');nd.className='d-sl-name';nd.textContent=item.isTemp?'Ожидает':(item.name||'Бронь');
-    const td=document.createElement('div');td.className='d-sl-time';td.textContent=slotLabel(si,ei);
-    sl.append(nd,td);
-    const dh=document.createElement('div');dh.className='d-drag-handle';
-    if(dragModeOn&&!item.isTemp)dh.addEventListener('mousedown',e=>{e.stopPropagation();dStartMove(item,e,rows);});
-    else if(dragModeOn&&item.isTemp)dh.addEventListener('mousedown',e=>{e.stopPropagation();dStartMoveTemp(item,e,rows);});
-    else dh.addEventListener('click',e=>{e.stopPropagation();if(!item.isTemp&&item.id)showInfoModal(item);});
-    sl.appendChild(dh);c.appendChild(sl);
-  });
-}
+function updateDCells(){for(const r of $('dBody').rows)for(let i=1;i<r.cells.length;i++)r.cells[i].classList.remove('sp','sc','sr','st');for(const b of bookings)for(let i=b.startSlotIdx;i<=b.endSlotIdx;i++){const c=getDCell(b.lane,i);if(c)c.classList.add(b.confirmed===true?'sc':(b.confirmed===false?'sr':'sp'));}for(const t of dTempBookings)for(let i=t.startSlotIdx;i<=t.endSlotIdx;i++){const c=getDCell(t.lane,i);if(c)c.classList.add('st');}}
+function renderDSliders(){const c=$('dsliders');c.innerHTML='';const rows=Array.from($('dBody')?.querySelectorAll('tr')||[]);if(!rows.length)return;[...bookings,...dTempBookings.map(t=>({...t,isTemp:true}))].forEach(item=>{const si=item.startSlotIdx,ei=item.endSlotIdx,row=rows[item.lane];if(!row)return;const sc=row.cells[si+1],ec=row.cells[ei+1];if(!sc||!ec)return;const left=sc.offsetLeft+1,top=row.offsetTop+1,width=(ec.offsetLeft+ec.offsetWidth)-sc.offsetLeft-2,height=row.offsetHeight-2;const status=item.isTemp?'st':(item.confirmed===true?'sc':(item.confirmed===false?'sr':'sp'));const lt=GRP_LT[laneGroup(item.lane)];const sl=document.createElement('div');sl.className=`d-slider ${status}`;if(dragModeOn)sl.classList.add('drag-enabled');sl.setAttribute('data-lt',lt);sl.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;const dot=document.createElement('div');dot.className='d-status-dot';sl.appendChild(dot);const nd=document.createElement('div');nd.className='d-sl-name';nd.textContent=item.isTemp?'Ожидает':(item.name||'Бронь');const td=document.createElement('div');td.className='d-sl-time';td.textContent=slotLabel(si,ei);sl.append(nd,td);const dh=document.createElement('div');dh.className='d-drag-handle';if(dragModeOn&&!item.isTemp)dh.addEventListener('mousedown',e=>{e.stopPropagation();dStartMove(item,e,rows);});else if(dragModeOn&&item.isTemp)dh.addEventListener('mousedown',e=>{e.stopPropagation();dStartMoveTemp(item,e,rows);});else dh.addEventListener('click',e=>{e.stopPropagation();if(!item.isTemp&&item.id)showInfoModal(item);});sl.appendChild(dh);c.appendChild(sl);});}
 function renderDesktop(){renderDSliders();updateDCells();renderDTempCards();}
-function renderDTempCards(){
-  const c=$('dTempCards');c.innerHTML='';
-  dTempBookings.forEach((tb,i)=>{
-    const card=document.createElement('div');card.className='d-temp-card';
-    card.innerHTML=`<strong>Стол ${tb.lane+1}</strong><span class="tc-time">${slotLabel(tb.startSlotIdx,tb.endSlotIdx)}</span><button class="tc-rm"><i class="fas fa-times"></i></button>`;
-    card.querySelector('.tc-rm').onclick=()=>{dTempBookings.splice(i,1);renderDesktop();updateDPreview();};
-    c.appendChild(card);
-  });
-  updateDPreview();
-}
+function renderDTempCards(){const c=$('dTempCards');c.innerHTML='';dTempBookings.forEach((tb,i)=>{const card=document.createElement('div');card.className='d-temp-card';card.innerHTML=`<strong>Стол ${tb.lane+1}</strong><span class="tc-time">${slotLabel(tb.startSlotIdx,tb.endSlotIdx)}</span><button class="tc-rm"><i class="fas fa-times"></i></button>`;card.querySelector('.tc-rm').onclick=()=>{dTempBookings.splice(i,1);renderDesktop();updateDPreview();};c.appendChild(card);});updateDPreview();}
 function updateDPreview(){$('dPreviewTxt').textContent=dTempBookings.length?dTempBookings.map(t=>`Стол ${t.lane+1} (${slotLabel(t.startSlotIdx,t.endSlotIdx)})`).join('; '):'—';}
 function openDeskBookModal(){if(!dTempBookings.length){alert('Сначала выделите интервал');return;}$('dNameInp').value='';$('dPhoneInp').value='';$('dCommentInp').value='';updateDPreview();$('dBookModal').classList.add('open');}
 function closeDeskBookModal(){$('dBookModal').classList.remove('open');}
-async function submitDeskBooking(){
-  const name=$('dNameInp').value.trim();if(!name)return alert('Введите имя');showLoad();
-  try{await postBookings(dTempBookings.map(tb=>({date:curDate,tableNumber:tb.lane+1,start:slots[tb.startSlotIdx].key,end:slots[tb.endSlotIdx+1]?.key||(slots[tb.endSlotIdx].key+0.5),name,phone:$('dPhoneInp').value.trim(),comment:$('dCommentInp').value.trim()})));dTempBookings=[];closeDeskBookModal();await loadFromServer();}
-  catch(e){alert('Ошибка сохранения');}hideLoad();
-}
+async function submitDeskBooking(){const name=$('dNameInp').value.trim();if(!name)return alert('Введите имя');showLoad();try{await postBookings(dTempBookings.map(tb=>({date:curDate,tableNumber:tb.lane+1,start:slots[tb.startSlotIdx].key,end:slots[tb.endSlotIdx+1]?.key||(slots[tb.endSlotIdx].key+0.5),name,phone:$('dPhoneInp').value.trim(),comment:$('dCommentInp').value.trim()})));dTempBookings=[];closeDeskBookModal();await loadFromServer();}catch(e){alert('Ошибка сохранения');}hideLoad();}
 function dOnMouseDown(e){if(dragModeOn)return;const t=e.target;if(!t.classList.contains('d-slot'))return;e.preventDefault();dIsDragging=true;dDragStart={lane:+t.dataset.lane,si:+t.dataset.si};dDragInterval={lane:+t.dataset.lane,startIdx:+t.dataset.si,endIdx:+t.dataset.si};dHighlight(+t.dataset.lane,+t.dataset.si,+t.dataset.si);}
 function dOnMouseMove(e){if(!dragModeOn&&dIsDragging&&dDragStart){const el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains('d-slot'));if(el&&+el.dataset.lane===dDragStart.lane){const ns=Math.min(dDragStart.si,+el.dataset.si),ne=Math.max(dDragStart.si,+el.dataset.si);dDragInterval={lane:dDragStart.lane,startIdx:ns,endIdx:ne};dHighlight(dDragStart.lane,ns,ne);}}}
 function dHighlight(lane,si,ei){document.querySelectorAll('#dtable td.d-slot.sd').forEach(td=>td.classList.remove('sd'));for(let i=si;i<=ei;i++){const c=getDCell(lane,i);if(c)c.classList.add('sd');}}
@@ -917,134 +570,110 @@ function dStartMoveTemp(tmp,e,rows){const sl=e.currentTarget.closest('.d-slider'
 function dCreateGhost(sl){const g=document.createElement('div');g.className='d-ghost';const nc=sl.querySelector('.d-sl-name')?.cloneNode(true),tc=sl.querySelector('.d-sl-time')?.cloneNode(true),dc=sl.querySelector('.d-status-dot')?.cloneNode(true);if(dc)g.appendChild(dc);if(nc)g.appendChild(nc);if(tc)g.appendChild(tc);g.style.cssText=sl.style.cssText;g.style.opacity='0.88';g.style.transition='none';$('dsliders').appendChild(g);sl.classList.add('dragging');return g;}
 function dMoveLogic(ghost,slider,rows,dur,onDrop,iL,iSi){let cL=iL,cSi=iSi;function upd(l,si){const r=rows[l];if(!r)return;const sc=r.cells[si+1],ec=r.cells[si+dur+1];if(sc&&ec){ghost.style.left=(sc.offsetLeft+1)+'px';ghost.style.top=(r.offsetTop+1)+'px';ghost.style.width=(ec.offsetLeft+ec.offsetWidth-sc.offsetLeft-2)+'px';ghost.style.height=(r.offsetHeight-2)+'px';}}function getT(e){const el=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList?.contains('d-slot'));if(!el)return null;return{lane:+el.dataset.lane,idx:+el.dataset.si};}function mv(ev){const t=getT(ev);if(t){const ns=Math.min(Math.max(0,t.idx),slots.length-dur-1);if(t.lane!==cL||ns!==cSi){cL=t.lane;cSi=ns;upd(cL,cSi);}}}function up(ev){const t=getT(ev);if(t)onDrop(t.lane,Math.min(Math.max(0,t.idx),slots.length-dur-1));ghost?.remove();slider?.classList.remove('dragging');document.body.style.cursor='';document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);}document.body.style.cursor='grabbing';document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);upd(cL,cSi);}
 
-// ══════════════════════════════════════════════════
-//  MOBILE — ОРИГИНАЛЬНЫЙ ФУНКЦИОНАЛ
-//  Стол → тап на столбец (заголовок или ячейку) → время начала → время конца
-//  Ползунки через абсолютное позиционирование
-// ══════════════════════════════════════════════════
-const DOW=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+// MOBILE
+let mSelLane=null,mSelStart=null;
+let mTempBookings=[],mNextTid=1;
 
-// Состояние выбора
-let mSelLane=null, mSelStart=null;
-let mTempBookings=[], mNextTid=1;
-
-// ── Строим сетку ──
 function buildMobileGrid(){
-  const CS=50; // cell size px
+  const CS=50;
   $('mHead').innerHTML='';$('mBody').innerHTML='';
-
-  // Заголовок
   const hr=document.createElement('tr');
   const corner=document.createElement('th');corner.className='m-corner';corner.textContent='';hr.appendChild(corner);
-  for(let lane=0;lane<LANES;lane++){
-    const th=document.createElement('th');
-    th.className=`m-lane-hdr ${GRP_CLS[laneGroup(lane)]}`;
-    th.style.cssText=`width:${CS}px;min-width:${CS}px;`;
-    th.textContent=`№${lane+1}`;
-    th.dataset.lane=lane;
-    th.addEventListener('click',()=>mTapLane(lane));
-    hr.appendChild(th);
-  }
-  // Правая угловая
+  for(let lane=0;lane<LANES;lane++){const th=document.createElement('th');th.className=`m-lane-hdr ${GRP_CLS[laneGroup(lane)]}`;th.style.cssText=`width:${CS}px;min-width:${CS}px;`;th.textContent=`№${lane+1}`;th.dataset.lane=lane;th.addEventListener('click',()=>mTapLane(lane));hr.appendChild(th);}
   const rc=document.createElement('th');rc.className='m-corner';rc.style.cssText=`width:${CS}px;min-width:${CS}px;`;hr.appendChild(rc);
   $('mHead').appendChild(hr);
-
-  // Строки
   slots.forEach((sl,si)=>{
     const tr=document.createElement('tr');
-    // Левое время
-    const tl=document.createElement('td');tl.className='m-time-l';tl.style.cssText=`width:${CS}px;min-width:${CS}px;`;
-    tl.textContent=sl.label;tl.dataset.si=si;
-    tl.addEventListener('click',()=>mTapTime(si));
-    tr.appendChild(tl);
-    // Слоты
-    for(let lane=0;lane<LANES;lane++){
-      const td=document.createElement('td');td.className=`m-slot ${CELL_BG_CLS[laneGroup(lane)]}`;
-      td.style.cssText=`width:${CS}px;min-width:${CS}px;`;
-      td.dataset.lane=lane;td.dataset.si=si;
-      td.addEventListener('click',()=>mTapSlot(lane,si));
-      tr.appendChild(td);
-    }
-    // Правое время
-    const tr2=document.createElement('td');tr2.className='m-time-r';tr2.style.cssText=`width:${CS}px;min-width:${CS}px;`;
-    tr2.textContent=sl.label;tr2.dataset.si=si;
-    tr2.addEventListener('click',()=>mTapTime(si));
-    tr.appendChild(tr2);
+    const tl=document.createElement('td');tl.className='m-time-l';tl.style.cssText=`width:${CS}px;min-width:${CS}px;`;tl.textContent=sl.label;tl.dataset.si=si;tl.addEventListener('click',()=>mTapTime(si));tr.appendChild(tl);
+    for(let lane=0;lane<LANES;lane++){const td=document.createElement('td');td.className=`m-slot ${CELL_BG_CLS[laneGroup(lane)]}`;td.style.cssText=`width:${CS}px;min-width:${CS}px;`;td.dataset.lane=lane;td.dataset.si=si;td.addEventListener('click',()=>mTapSlot(lane,si));tr.appendChild(td);}
+    const tr2=document.createElement('td');tr2.className='m-time-r';tr2.style.cssText=`width:${CS}px;min-width:${CS}px;`;tr2.textContent=sl.label;tr2.dataset.si=si;tr2.addEventListener('click',()=>mTapTime(si));tr.appendChild(tr2);
     $('mBody').appendChild(tr);
   });
   $('mTable').style.minWidth=(CS+LANES*CS+CS)+'px';
 }
 
-// ── Обновить классы ячеек ──
 function updateMCells(){
   if(!$('mBody'))return;
   document.querySelectorAll('#mTable td.m-slot').forEach(td=>td.classList.remove('bk-p','bk-c','bk-r','sel','sel-start','v-line'));
   document.querySelectorAll('#mTable thead th.m-lane-hdr').forEach(th=>th.classList.remove('col-sel'));
-
-  // Статусы броней
-  for(const b of bookings){
-    for(let i=b.startSlotIdx;i<=b.endSlotIdx;i++){
-      const c=getMCell(b.lane,i);if(c)c.classList.add(b.confirmed===true?'bk-c':(b.confirmed===false?'bk-r':'bk-p'));
-    }
-  }
-  // Выбранный столбец
-  if(mSelLane!==null){
-    document.querySelectorAll('#mTable td.m-slot').forEach(td=>{if(+td.dataset.lane===mSelLane)td.classList.add('v-line');});
-    document.querySelectorAll('#mTable thead th.m-lane-hdr').forEach(th=>{if(+th.dataset.lane===mSelLane)th.classList.add('col-sel');});
-  }
-  // Точка начала
-  if(mSelLane!==null&&mSelStart!==null){
-    const c=getMCell(mSelLane,mSelStart);if(c)c.classList.add('sel-start');
-  }
+  for(const b of bookings){for(let i=b.startSlotIdx;i<=b.endSlotIdx;i++){const c=getMCell(b.lane,i);if(c)c.classList.add(b.confirmed===true?'bk-c':(b.confirmed===false?'bk-r':'bk-p'));}}
+  if(mSelLane!==null){document.querySelectorAll('#mTable td.m-slot').forEach(td=>{if(+td.dataset.lane===mSelLane)td.classList.add('v-line');});document.querySelectorAll('#mTable thead th.m-lane-hdr').forEach(th=>{if(+th.dataset.lane===mSelLane)th.classList.add('col-sel');});}
+  if(mSelLane!==null&&mSelStart!==null){const c=getMCell(mSelLane,mSelStart);if(c)c.classList.add('sel-start');}
 }
 
 function getMCell(lane,si){const row=$('mBody').rows[si];if(!row)return null;return row.cells[lane+1];}
 
-// ── Ползунки ──
 function renderMSliders(){
   const c=$('mSliders');if(!c)return;c.innerHTML='';
   const wrap=$('mGridWrap');if(!wrap)return;
-  // Нужен reflow чтобы getBoundingClientRect работал корректно
   bookings.forEach(b=>{
-    const startRow=$('mBody').rows[b.startSlotIdx];
-    const endRow=$('mBody').rows[b.endSlotIdx];
-    if(!startRow||!endRow)return;
-    const startCell=startRow.cells[b.lane+1];
-    const endCell=endRow.cells[b.lane+1];
-    if(!startCell||!endCell)return;
-    const wRect=wrap.getBoundingClientRect();
-    const scRect=startCell.getBoundingClientRect();
-    const ecRect=endCell.getBoundingClientRect();
-    const left=scRect.left-wRect.left+wrap.scrollLeft+1;
-    const top=scRect.top-wRect.top+wrap.scrollTop+1;
-    const width=scRect.width-2;
-    const height=ecRect.bottom-scRect.top-2;
-    const status=b.confirmed===true?'sc':(b.confirmed===false?'sr':'sp');
-    const lt=GRP_LT[laneGroup(b.lane)];
-    const sl=document.createElement('div');sl.className=`m-slider ${status}`;sl.setAttribute('data-lt',lt);
-    sl.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+    const startRow=$('mBody').rows[b.startSlotIdx];const endRow=$('mBody').rows[b.endSlotIdx];if(!startRow||!endRow)return;
+    const startCell=startRow.cells[b.lane+1];const endCell=endRow.cells[b.lane+1];if(!startCell||!endCell)return;
+    const wRect=wrap.getBoundingClientRect();const scRect=startCell.getBoundingClientRect();const ecRect=endCell.getBoundingClientRect();
+    const left=scRect.left-wRect.left+wrap.scrollLeft+1;const top=scRect.top-wRect.top+wrap.scrollTop+1;const width=scRect.width-2;const height=ecRect.bottom-scRect.top-2;
+    const status=b.confirmed===true?'sc':(b.confirmed===false?'sr':'sp');const lt=GRP_LT[laneGroup(b.lane)];
+    const sl=document.createElement('div');sl.className=`m-slider ${status}`;sl.setAttribute('data-lt',lt);sl.style.cssText=`left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
     const dot=document.createElement('div');dot.className='m-dot';sl.appendChild(dot);
     const nm=document.createElement('div');nm.className='m-sl-name';nm.textContent=b.name||'Бронь';
     const tm=document.createElement('div');tm.className='m-sl-time';tm.textContent=slotLabel(b.startSlotIdx,b.endSlotIdx);
-    sl.append(nm,tm);
-    sl.addEventListener('click',e=>{e.stopPropagation();showInfoModal(b);});
-    c.appendChild(sl);
+    sl.append(nm,tm);sl.addEventListener('click',e=>{e.stopPropagation();showInfoModal(b);});c.appendChild(sl);
   });
 }
 
 function renderMobile(){updateMCells();renderMSliders();buildMDateBar();}
 
-// ── Дата-чипы ──
 function buildMDateBar(){
-  const bar=$('mDateBar');bar.innerHTML='';
-  const today=new Date();
-  for(let i=-1;i<=5;i++){
-    const d=new Date(today);d.setDate(today.getDate()+i);
-    const ds=d.toISOString().split('T')[0];
-    const chip=document.createElement('div');chip.className='m-date-chip'+(ds===curDate?' active':'');
-    chip.innerHTML=`<span class="dc-day">${d.getDate()}</span><span class="dc-dow">${DOW[d.getDay()]}</span>`;
-    chip.addEventListener('click',()=>selectDate(ds));
-    bar.appendChild(chip);
-  }
+  const bar=$('mDateBar');bar.innerHTML='';const today=new Date();
+  for(let i=-1;i<=5;i++){const d=new Date(today);d.setDate(today.getDate()+i);const ds=d.toISOString().split('T')[0];const chip=document.createElement('div');chip.className='m-date-chip'+(ds===curDate?' active':'');chip.innerHTML=`<span class="dc-day">${d.getDate()}</span><span class="dc-dow">${DOW[d.getDay()]}</span>`;chip.addEventListener('click',()=>selectDate(ds));bar.appendChild(chip);}
 }
-function
+
+function selectDate(ds){curDate=ds;if($('dHiddenDate'))$('dHiddenDate').value=ds;if($('dDateTxt'))$('dDateTxt').textContent=fmtDate(ds);mCancelSel();mTempBookings=[];renderMSelBar();loadFromServer();}
+function openMDatePicker(){const p=$('mHiddenDate');if(p.showPicker)p.showPicker();else{p.click();p.focus();}}
+
+function mTapLane(lane){mSelLane=lane;mSelStart=null;updateMCells();$('mHintBar').classList.add('visible');$('mHintText').textContent=`Стол №${lane+1} выбран — нажмите на ВРЕМЯ начала (левый или правый столбец)`;}
+
+function mTapSlot(lane,si){
+  if(mSelLane===null){mSelLane=lane;mSelStart=null;updateMCells();$('mHintBar').classList.add('visible');$('mHintText').textContent=`Стол №${lane+1} — нажмите на время начала`;return;}
+  if(lane!==mSelLane){mSelLane=lane;mSelStart=null;updateMCells();$('mHintText').textContent=`Стол №${lane+1} — нажмите на время начала`;return;}
+  mSelStart=si;updateMCells();$('mHintText').textContent=`Стол №${lane+1}, начало ${slots[si].label} — нажмите на ВРЕМЯ конца`;
+}
+
+function mTapTime(si){
+  if(mSelLane===null){alert('Сначала нажмите на заголовок стола');return;}
+  if(mSelStart===null){mSelStart=si;updateMCells();$('mHintText').textContent=`Стол №${mSelLane+1}, начало ${slots[si].label} — теперь время конца`;return;}
+  if(si<=mSelStart){alert('Время конца должно быть позже начала');return;}
+  const endIdx=si-1;
+  if(hasConflict(mSelLane,mSelStart,endIdx)){alert('Это время уже занято другой броней');return;}
+  mTempBookings.push({id:mNextTid++,lane:mSelLane,startSlotIdx:mSelStart,endSlotIdx:endIdx});
+  mSelLane=null;mSelStart=null;$('mHintBar').classList.remove('visible');
+  document.querySelectorAll('#mTable td.m-slot').forEach(td=>td.classList.remove('v-line','sel-start'));
+  document.querySelectorAll('#mTable thead th.m-lane-hdr').forEach(th=>th.classList.remove('col-sel'));
+  updateMCells();renderMSelBar();if(mTempBookings.length)$('mFab').classList.remove('hidden');
+}
+
+function mCancelSel(){mSelLane=null;mSelStart=null;$('mHintBar').classList.remove('visible');document.querySelectorAll('#mTable td.m-slot').forEach(td=>td.classList.remove('v-line','sel','sel-start'));document.querySelectorAll('#mTable thead th.m-lane-hdr').forEach(th=>th.classList.remove('col-sel'));}
+
+function renderMSelBar(){const bar=$('mSelBar');if(!mTempBookings.length){bar.classList.remove('visible');$('mFab').classList.add('hidden');return;}bar.classList.add('visible');bar.innerHTML='';mTempBookings.forEach((tb,i)=>{const chip=document.createElement('div');chip.className='m-sel-chip';chip.innerHTML=`<span>Стол ${tb.lane+1} · ${slotLabel(tb.startSlotIdx,tb.endSlotIdx)}</span><button onclick="mRemoveSel(${i})">×</button>`;bar.appendChild(chip);});$('mFab').classList.remove('hidden');}
+function mRemoveSel(i){mTempBookings.splice(i,1);renderMSelBar();updateMCells();}
+function openMBookModal(){if(!mTempBookings.length){alert('Выберите интервал');return;}$('mPreviewTxt').textContent=mTempBookings.map(t=>`Стол ${t.lane+1} (${slotLabel(t.startSlotIdx,t.endSlotIdx)})`).join('; ');$('mNameInp').value='';$('mPhoneInp').value='';$('mCommentInp').value='';$('mBookModal').classList.add('open');}
+function closeMBookModal(){$('mBookModal').classList.remove('open');}
+async function submitMBooking(){const name=$('mNameInp').value.trim();if(!name)return alert('Введите имя');showLoad();try{await postBookings(mTempBookings.map(tb=>({date:curDate,tableNumber:tb.lane+1,start:slots[tb.startSlotIdx].key,end:slots[tb.endSlotIdx+1]?.key||(slots[tb.endSlotIdx].key+0.5),name,phone:$('mPhoneInp').value.trim(),comment:$('mCommentInp').value.trim()})));mTempBookings=[];mCancelSel();closeMBookModal();$('mFab').classList.add('hidden');renderMSelBar();await loadFromServer();}catch(e){alert('Ошибка сохранения');}hideLoad();}
+
+// INIT
+function initApp(){
+  const dPicker=$('dHiddenDate'),dTxt=$('dDateTxt');
+  dPicker.value=curDate;dTxt.textContent=fmtDate(curDate);
+  $('dCalBtn').addEventListener('click',e=>{e.preventDefault();if(dPicker.showPicker)dPicker.showPicker();else{dPicker.click();dPicker.focus();}});
+  dPicker.addEventListener('change',e=>{if(e.target.value){curDate=e.target.value;dTxt.textContent=fmtDate(curDate);dTempBookings=[];mTempBookings=[];mCancelSel();renderMSelBar();loadFromServer();}});
+  $('mHiddenDate').value=curDate;$('mHiddenDate').addEventListener('change',e=>{if(e.target.value)selectDate(e.target.value);});
+  $('dDragBtn').addEventListener('click',()=>{dragModeOn=!dragModeOn;$('dDragBtn').innerHTML=`<i class="fas fa-arrows-alt"></i> Перетяжка: ${dragModeOn?'ВКЛ':'ВЫКЛ'}`;$('dDragBtn').classList.toggle('active',dragModeOn);$('dDragInd').style.display=dragModeOn?'block':'none';renderDSliders();});
+  $('dtable').addEventListener('mousedown',dOnMouseDown);document.body.addEventListener('mousemove',dOnMouseMove);document.body.addEventListener('mouseup',dOnMouseUp);
+  document.addEventListener('dragstart',e=>{if(e.target.closest('.d-drag-handle')||e.target.closest('.d-slider'))e.preventDefault();});
+  ['dBookModal','mBookModal','infoModal','adminModal','userFormModal'].forEach(id=>{$(id)?.addEventListener('click',e=>{if(e.target===$(id))$(id).classList.remove('open');});});
+  buildDesktop();buildMobileGrid();buildMDateBar();loadFromServer();
+}
+
+window.addEventListener('load',()=>{const cu=getCachedU();if(cu&&cu.email){curUser=cu;loginUser(curUser);}});
+</script>
+</body>
+</html>

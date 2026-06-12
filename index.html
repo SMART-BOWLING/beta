@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes" />
-  <title>БРОНИ БИЛЬЯРД — строгая сетка</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>БРОНИ БИЛЬЯРД — минималистичная сетка</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png" />
   <!-- Google Identity Script -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -17,16 +17,14 @@
       --rejected-color: #b91c1c;
       --background-color: #f8fafc;
       --card-color: #e0f2fe;
-      --custom-dark: #1a2f40;            /* основной цвет времени/столов */
-      --booking-btn-color: #0e1f2c;      /* цвет кнопки бронирования (темный) */
-      --grid-border-color: #0e1f2c;      /* ЦВЕТ МЕЖДУ ЯЧЕЙКАМИ — КАК КНОПКА ЗАБРОНИРОВАТЬ */
-      --border-spacing: 2px;              /* ЧЁТКИЙ ЗАЗОР (видимая сетка) */
+      --custom-dark: #1a2f40;      /* цвет времени/столов */
+      --border-spacing: 1px;        /* минимальный зазор между ячейками */
     }
 
     @media (max-width: 768px) {
       :root { 
         --cell-size: calc((100vw - 20px) / 13);
-        --border-spacing: 2px;
+        --border-spacing: 1px;
       }
       
       table {
@@ -92,49 +90,51 @@
       display: flex;
       justify-content: center;
       background: transparent;
-      border-radius: 0px;
+      border-radius: 0px;           /* без лишних скруглений */
       box-shadow: none;
     }
 
-    /* ГЛАВНОЕ: ТАБЛИЦА С ЯВНЫМИ ПРОМЕЖУТКАМИ (СЕТКА) */
     table {
       border-collapse: separate;
-      border-spacing: var(--border-spacing) var(--border-spacing); /* РАВНОМЕРНЫЙ ЗАЗОР И ПО ГОРИЗОНТАЛИ И ПО ВЕРТИКАЛИ */
+      border-spacing: var(--border-spacing) 0;   /* минимальное расстояние между клетками */
       table-layout: fixed;
       max-width: 100vw;
       user-select: none;
       touch-action: manipulation;
       margin: 0 auto;
-      background: var(--grid-border-color);  /* ФОН ТАБЛИЦЫ — ЦВЕТ СЕТКИ (как кнопка) */
-      border-radius: 0px;
+      background: white;
+      border-radius: 0px;           /* строгая таблица */
     }
 
-    /* КАЖДАЯ ЯЧЕЙКА ИМЕЕТ ФОН, ИЗ-ЗА ПРОБЕЛА ВИДНА СЕТКА */
-    th, td {
-      width: var(--cell-size);
-      height: var(--cell-size);
-      border: none;                /* убираем старые бордеры, сетка формируется фоном таблицы + border-spacing */
-      text-align: center;
-      vertical-align: middle;
-      box-sizing: border-box;
-      background: white;          /* белый фон ячеек */
-      font-size: 12px;
-      position: relative;
-      border-radius: 0px;
-      transition: background 0.1s ease;
-    }
-
-    /* Заголовки столов и времени — темный фон, но сетка остаётся той же (промежутки видны) */
     thead th {
-      background: var(--custom-dark);
-      background: linear-gradient(145deg, #1a2f40, #102433);
+      position: sticky;
+      top: 0;
       color: white;
+      z-index: 2;
       font-weight: 600;
       letter-spacing: 0.3px;
       font-size: 14px;
     }
 
-    /* Столбец времени справа такой же стиль */
+    /* все заголовки столов (1-12) и столбец времени — цвет #1a2f40 */
+    thead th:nth-child(1),
+    thead th:nth-child(2),
+    thead th:nth-child(3),
+    thead th:nth-child(4),
+    thead th:nth-child(5),
+    thead th:nth-child(6),
+    thead th:nth-child(7),
+    thead th:nth-child(8),
+    thead th:nth-child(9),
+    thead th:nth-child(10),
+    thead th:nth-child(11),
+    thead th:nth-child(12),
+    thead th.time-col {
+      background: var(--custom-dark);
+      background: linear-gradient(145deg, #1a2f40, #102433);
+    }
+
+    /* время справа */
     th.time-col, .time-right {
       background: var(--custom-dark);
       background: linear-gradient(145deg, #1a2f40, #0e1f2c);
@@ -143,7 +143,20 @@
       cursor: pointer;
     }
 
-    /* фоновые оттенки для разных групп столов (сохраняем) */
+    th, td {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      border: 1px solid #d4dcec;    /* тонкая, но четкая граница */
+      text-align: center;
+      vertical-align: middle;
+      box-sizing: border-box;
+      background: white;
+      font-size: 12px;
+      position: relative;
+      border-radius: 0px;            /* НЕТ ЗАКРУГЛЕНИЙ — строгий вид */
+    }
+
+    /* фоны для разных групп столов (оставлены легкие оттенки) */
     td.slot[data-lane="0"],
     td.slot[data-lane="1"],
     td.slot[data-lane="2"],
@@ -151,9 +164,11 @@
     td.slot[data-lane="5"] {
       background-color: rgba(167, 199, 231, 0.6);
     }
+
     td.slot[data-lane="3"] {
       background-color: rgba(181, 228, 140, 0.6);
     }
+
     td.slot[data-lane="6"],
     td.slot[data-lane="7"],
     td.slot[data-lane="8"],
@@ -163,7 +178,7 @@
       background-color: rgba(248, 173, 157, 0.6);
     }
 
-    /* Подсветка выбранного столбца (вертикальные линии поверх ячеек) */
+    /* Подсветка выбранного столбца (тонкие вертикальные линии) */
     td.vertical-line::before,
     td.vertical-line::after {
       content: "";
@@ -173,14 +188,13 @@
       width: 2px;
       background-color: var(--highlight-color);
       z-index: 10;
-      pointer-events: none;
     }
     td.vertical-line::before { left: 0; }
     td.vertical-line::after  { right: 0; }
 
     td.slot { 
       cursor: pointer; 
-      transition: all 0.1s ease;
+      transition: all 0.15s ease;
     }
     
     td.slot:hover {
@@ -191,12 +205,12 @@
     td.selected {
       background: #fecaca !important;
       border: 1px solid #ef4444 !important;
-      z-index: 2;
+      z-index: 1;
       color: #7f1d1d;
       font-weight: 500;
     }
 
-    /* минимальные метки для выбранного блока */
+    /* минимум скруглений — только легкое обозначение границ выбранного блока */
     td.selected.rounded-top {
       border-top: 2px solid #ef4444;
     }
@@ -217,7 +231,7 @@
       filter: brightness(1.02);
     }
 
-    /* Карточки выбранных интервалов */
+    /* Карточки выбранных интервалов (аккуратные) */
     #cardsContainer {
       margin: 20px auto 10px;
       padding: 0;
@@ -273,7 +287,7 @@
       color: white;
     }
 
-    /* панель управления */
+    /* панель управления: одинаковые размеры */
     #controls {
       margin-top: 20px;
       display: flex;
@@ -329,7 +343,7 @@
       background: var(--highlight-bg);
     }
 
-    /* модальные окна */
+    /* модальные окна с минимальным дизайном */
     #modal {
       display: none;
       position: fixed;
@@ -465,7 +479,7 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 15;
+      z-index: 5;
     }
     .existing-slider {
       position: absolute;
@@ -482,11 +496,10 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
       border-left: 3px solid white;
       border-right: 1px solid rgba(0,0,0,0.1);
-      backdrop-filter: brightness(0.96);
     }
     .existing-slider.confirmed { background: #15803d; }
     .existing-slider.rejected { background: #b91c1c; }
-    .existing-slider:hover { filter: brightness(1.05); z-index: 20; }
+    .existing-slider:hover { filter: brightness(1.05); z-index: 15; }
 
     .loading-overlay {
       position: fixed;

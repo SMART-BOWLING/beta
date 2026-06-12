@@ -77,6 +77,15 @@
         text-align: center;
         box-sizing: border-box;
       }
+      
+      .column-markers {
+        gap: var(--border-spacing);
+        justify-content: center;
+      }
+      
+      .marker {
+        width: var(--cell-size);
+      }
     }
 
     body {
@@ -97,7 +106,8 @@
       overflow-x: auto;
       margin: 0 auto;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
       background: transparent;
     }
 
@@ -106,12 +116,18 @@
       border-collapse: separate;
       border-spacing: var(--border-spacing);
       table-layout: fixed;
-      max-width: 100vw;
       user-select: none;
       touch-action: manipulation;
       margin: 0 auto;
       background: #1a2f40;
       padding: var(--border-spacing);
+    }
+
+    /* ОБЕРТКА ДЛЯ ТАБЛИЦЫ, ЧТОБЫ МАРКЕРЫ БЫЛИ ТОЧНО ПОД НЕЙ */
+    .table-wrapper {
+      display: inline-block;
+      position: relative;
+      margin: 0 auto;
     }
 
     thead th {
@@ -149,7 +165,7 @@
       cursor: pointer;
     }
 
-    /* Все ячейки - без скруглений, белый фон */
+    /* Все ячейки - без скруглений, ВСЕ БЕЛЫЕ */
     th, td {
       width: var(--cell-size);
       height: var(--cell-size);
@@ -157,31 +173,9 @@
       text-align: center;
       vertical-align: middle;
       box-sizing: border-box;
-      background: white;
+      background: white !important;
       font-size: 12px;
       position: relative;
-    }
-
-    /* Цвета для ячеек столбцов (фон слотов) */
-    td.slot[data-lane="0"],
-    td.slot[data-lane="1"],
-    td.slot[data-lane="2"],
-    td.slot[data-lane="4"],
-    td.slot[data-lane="5"] {
-      background-color: rgba(167, 199, 231, 0.9);
-    }
-
-    td.slot[data-lane="3"] {
-      background-color: rgba(181, 228, 140, 0.9);
-    }
-
-    td.slot[data-lane="6"],
-    td.slot[data-lane="7"],
-    td.slot[data-lane="8"],
-    td.slot[data-lane="9"],
-    td.slot[data-lane="10"],
-    td.slot[data-lane="11"] {
-      background-color: rgba(248, 173, 157, 0.9);
     }
 
     th.highlight-header {
@@ -209,7 +203,7 @@
     }
     
     td.slot:hover {
-      filter: brightness(0.95);
+      background: #f0f0f0 !important;
     }
 
     /* выделенные ячейки — цвет как у кнопки */
@@ -225,6 +219,37 @@
       background: #ef4444 !important;
       border: none !important;
       z-index: 2;
+      color: white;
+    }
+
+    /* КОНТЕЙНЕР С МАРКЕРАМИ ПОД КАЖДОЙ КОЛОНКОЙ */
+    .column-markers {
+      display: flex;
+      gap: var(--border-spacing);
+      margin-top: 5px;
+      padding: 0;
+    }
+
+    .marker {
+      height: 6px;
+      border-radius: 3px;
+    }
+
+    .marker.blue {
+      background-color: rgba(167, 199, 231, 1);
+    }
+
+    .marker.green {
+      background-color: rgba(181, 228, 140, 1);
+    }
+
+    .marker.red {
+      background-color: rgba(248, 173, 157, 1);
+    }
+
+    /* Пустой маркер для колонки времени */
+    .marker.empty {
+      background: transparent;
     }
 
     #cardsContainer {
@@ -593,18 +618,23 @@
 </head>
 <body>
   <div class="table-container">
-    <table id="bookingTable">
-      <thead>
-        <tr>
-          <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
-          <th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th>
-          <th class="time-col">
-            <button id="openImage" style="padding:6px 12px; border:2px solid white; background:#1a2f40; color:white; cursor:pointer; font-weight:bold; border-radius:8px;">СТОЛЫ</button>
-          </th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
+    <div class="table-wrapper">
+      <table id="bookingTable">
+        <thead>
+          <tr>
+            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
+            <th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th>
+            <th class="time-col">
+              <button id="openImage" style="padding:6px 12px; border:2px solid white; background:#1a2f40; color:white; cursor:pointer; font-weight:bold; border-radius:8px;">СТОЛЫ</button>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      
+      <!-- ЦВЕТНЫЕ МАРКЕРЫ ПОД КАЖДОЙ КОЛОНКОЙ -->
+      <div id="columnMarkers" class="column-markers"></div>
+    </div>
     <div id="slidersContainer"></div>
   </div>
 
@@ -682,6 +712,53 @@
     tableBody.appendChild(row);
   });
 
+  // Функция для обновления ширины маркеров (чтобы они точно соответствовали колонкам)
+  function updateMarkersWidth() {
+    const headers = document.querySelectorAll('thead th');
+    const markers = document.querySelectorAll('.marker');
+    if (headers.length === markers.length) {
+      for (let i = 0; i < headers.length; i++) {
+        const width = headers[i].offsetWidth;
+        markers[i].style.width = width + 'px';
+      }
+    }
+  }
+
+  // СОЗДАНИЕ ЦВЕТНЫХ МАРКЕРОВ ПОД КАЖДЫМ СТОЛОМ
+  const columnMarkers = document.getElementById("columnMarkers");
+  function createMarkers() {
+    columnMarkers.innerHTML = "";
+    // Создаем маркеры для 12 столов
+    for (let lane = 0; lane < lanes; lane++) {
+      const marker = document.createElement("div");
+      marker.className = "marker";
+      // Определяем цвет маркера в зависимости от категории стола
+      if (lane === 0 || lane === 1 || lane === 2 || lane === 4 || lane === 5) {
+        marker.classList.add("blue");
+      } else if (lane === 3) {
+        marker.classList.add("green");
+      } else if (lane >= 6 && lane <= 11) {
+        marker.classList.add("red");
+      }
+      columnMarkers.appendChild(marker);
+    }
+    // Маркер для колонки времени
+    const timeMarker = document.createElement("div");
+    timeMarker.className = "marker empty";
+    columnMarkers.appendChild(timeMarker);
+    
+    // Устанавливаем ширину маркеров после отрисовки
+    setTimeout(updateMarkersWidth, 10);
+  }
+  createMarkers();
+
+  // Обновляем ширину маркеров при изменении размера окна
+  window.addEventListener('resize', updateMarkersWidth);
+  
+  // Также обновляем при прокрутке и загрузке
+  window.addEventListener('load', updateMarkersWidth);
+  setTimeout(updateMarkersWidth, 100);
+
   let intervalsByLane = {}, currentLane = null, currentStart = null, currentBookingId = null;
   function clearStartTimeHighlight() { document.querySelectorAll('td.start-time-chosen').forEach(c => c.classList.remove('start-time-chosen')); }
   function clearHeaderHighlight() { document.querySelectorAll('thead th.highlight-header').forEach(th => th.classList.remove('highlight-header')); }
@@ -749,7 +826,7 @@
     } catch(e){ loadingOverlay.style.display='none'; console.error(e); }
   }
   dateInput.addEventListener('change', async () => { await loadExisting(); intervalsByLane = {}; currentLane = currentStart = null; clearStartTimeHighlight(); clearHeaderHighlight(); clearVerticalLines(); updateTableSelection(); });
-  document.addEventListener('DOMContentLoaded', async () => { await loadExisting(); updateTableSelection(); });
+  document.addEventListener('DOMContentLoaded', async () => { await loadExisting(); updateTableSelection(); updateMarkersWidth(); });
   document.getElementById("openImage").onclick = () => { document.getElementById("imagePopup").style.display = "flex"; };
   function closeImagePopup() { document.getElementById("imagePopup").style.display = "none"; }
 </script>

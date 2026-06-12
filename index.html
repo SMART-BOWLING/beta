@@ -235,16 +235,20 @@
       border-radius: 3px;
     }
 
+    /* ЯРКИЕ И НАСЫЩЕННЫЕ ЦВЕТА МАРКЕРОВ */
     .marker.blue {
-      background-color: rgba(167, 199, 231, 1);
+      background-color: #3b82f6;  /* Яркий синий */
+      box-shadow: 0 0 2px rgba(59,130,246,0.5);
     }
 
     .marker.green {
-      background-color: rgba(181, 228, 140, 1);
+      background-color: #22c55e;  /* Яркий зеленый */
+      box-shadow: 0 0 2px rgba(34,197,94,0.5);
     }
 
     .marker.red {
-      background-color: rgba(248, 173, 157, 1);
+      background-color: #ef4444;  /* Яркий красный */
+      box-shadow: 0 0 2px rgba(239,68,68,0.5);
     }
 
     /* Пустой маркер для колонки времени */
@@ -724,7 +728,7 @@
     }
   }
 
-  // СОЗДАНИЕ ЦВЕТНЫХ МАРКЕРОВ ПОД КАЖДЫМ СТОЛОМ
+  // СОЗДАНИЕ ЦВЕТНЫХ МАРКЕРОВ ПОД КАЖДЫМ СТОЛОМ - ЯРКИЕ ЦВЕТА!
   const columnMarkers = document.getElementById("columnMarkers");
   function createMarkers() {
     columnMarkers.innerHTML = "";
@@ -732,7 +736,7 @@
     for (let lane = 0; lane < lanes; lane++) {
       const marker = document.createElement("div");
       marker.className = "marker";
-      // Определяем цвет маркера в зависимости от категории стола
+      // Определяем цвет маркера в зависимости от категории стола - ЯРКИЕ НАСЫЩЕННЫЕ ЦВЕТА
       if (lane === 0 || lane === 1 || lane === 2 || lane === 4 || lane === 5) {
         marker.classList.add("blue");
       } else if (lane === 3) {

@@ -339,7 +339,7 @@
     #dateInput {
       background: white;
       color: #1e293b;
-      border: 1px solid white;  /* ТОНЬКАЯ БЕЛАЯ ОБВОДКА */
+      border: 1px solid white;
       box-shadow: 0 2px 5px rgba(26, 47, 64, 0.1);
     }
     
@@ -352,7 +352,7 @@
     .booking-button {
       background: #1a2f40;
       color: white;
-      border: 1px solid white;  /* ТОНЬКАЯ БЕЛАЯ ОБВОДКА */
+      border: 1px solid white;
       box-shadow: 0 4px 8px rgba(26, 47, 64, 0.2);
       letter-spacing: 0.5px;
     }
@@ -488,7 +488,7 @@
       position: absolute;
       background: #1a2f40;
       border: none;
-      border-radius: 0;
+      border-radius: 6px;
       pointer-events: auto;
       box-sizing: border-box;
       cursor: pointer;
@@ -511,6 +511,28 @@
     }
     .existing-slider.rejected {
       background: var(--rejected-color);
+    }
+    
+    /* КРАСНЫЕ ПОЛОСКИ ВВЕРХУ И ВНИЗУ ПОЛЗУНКА - С ЗАКРУГЛЕНИЕМ */
+    .existing-slider::before,
+    .existing-slider::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: #ef4444;
+      z-index: 15;
+    }
+    
+    .existing-slider::before {
+      top: 0;
+      border-radius: 6px 6px 0 0;
+    }
+    
+    .existing-slider::after {
+      bottom: 0;
+      border-radius: 0 0 6px 6px;
     }
 
     .booking-info-popup {

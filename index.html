@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
@@ -6,7 +6,7 @@
   <title>БРОНИ БИЛЬЯРД</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png" />
   <!-- Google Identity Script -->
- <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
       --cell-size: 50px;
@@ -17,14 +17,17 @@
       --rejected-color: #b91c1c;
       --background-color: #f8fafc;
       --card-color: #e0f2fe;
-      --blue-color: #2563eb;   /* насыщенный синий */
---red-color: #ef4444;    /* ярко-красный */
---green-color: #22c55e;  /* ярко-зеленый */
+      --blue-color: #2563eb;
+      --red-color: #ef4444;
+      --green-color: #22c55e;
+      --custom-dark: #1a2f40;      /* цвет для времени и названий столов */
+      --border-spacing: 1px;        /* уменьшенное расстояние между клетками */
     }
 
     @media (max-width: 768px) {
       :root { 
-        --cell-size: calc((100vw - 20px) / 13); 
+        --cell-size: calc((100vw - 20px) / 13);
+        --border-spacing: 1px;
       }
       
       table {
@@ -49,23 +52,33 @@
         width: 100%;
       }
       
+      /* панель управления: кнопки и дата одинаковые по ширине */
       #controls {
+        display: flex;
         flex-direction: row;
-        align-items: center;
-        gap: 10px;
+        justify-content: center;
+        align-items: stretch;
+        gap: 12px;
         width: 100%;
-        padding: 0 5px;
+        max-width: 480px;
+        margin: 15px auto 0;
+        padding: 0 10px;
         box-sizing: border-box;
       }
       
       #dateInput {
         flex: 1;
-        margin: 5px 0;
+        margin: 0;
+        min-width: 0;
+        box-sizing: border-box;
       }
       
       .booking-button {
         flex: 1;
-        margin: 5px 0;
+        margin: 0;
+        min-width: 0;
+        text-align: center;
+        box-sizing: border-box;
       }
     }
 
@@ -94,7 +107,7 @@
 
     table {
       border-collapse: separate;
-      border-spacing: 2px 0;
+      border-spacing: var(--border-spacing) 0;   /* горизонтальное расстояние между клетками уменьшено */
       table-layout: fixed;
       max-width: 100vw;
       user-select: none;
@@ -107,7 +120,6 @@
     thead th {
       position: sticky;
       top: 0;
-      background: #1a2f40;
       color: white;
       z-index: 2;
       transition: background-color 0.2s, color 0.2s;
@@ -115,26 +127,31 @@
       letter-spacing: 0.5px;
     }
 
-    /* Цвета для заголовков столбцов */
+    /* ========= ВСЕ ЗАГОЛОВКИ СТОЛОВ (1-12) И ВРЕМЯ = цвет #1a2f40 ========= */
     thead th:nth-child(1),
     thead th:nth-child(2),
     thead th:nth-child(3),
+    thead th:nth-child(4),
     thead th:nth-child(5),
-    thead th:nth-child(6) {
-      background: #1a2f40;
-    }
-
-    thead th:nth-child(4) {
-      background: #1a2f40;
-    }
-
+    thead th:nth-child(6),
     thead th:nth-child(7),
     thead th:nth-child(8),
     thead th:nth-child(9),
     thead th:nth-child(10),
     thead th:nth-child(11),
-    thead th:nth-child(12) {
-     background: #1a2f40;
+    thead th:nth-child(12),
+    thead th.time-col {
+      background: var(--custom-dark) !important;
+      background: linear-gradient(145deg, #1a2f40, #0e1f2c);
+    }
+
+    /* столбец времени (правый столбец) */
+    th.time-col, .time-right {
+      background: var(--custom-dark) !important;
+      background: linear-gradient(145deg, #1a2f40, #0e1f2c);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
     }
 
     th, td {
@@ -149,14 +166,7 @@
       position: relative;
     }
 
-    th.time-col, .time-right {
-      background: #1a2f40;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    /* Цвета для ячеек столбцов */
+    /* Цвета для ячеек столбцов (фон слотов) */
     td.slot[data-lane="0"],
     td.slot[data-lane="1"],
     td.slot[data-lane="2"],
@@ -178,13 +188,12 @@
       background-color: rgba(248, 173, 157, 0.7);
     }
 
-    /* Подсветка заголовков выбранных столбцов */
     th.highlight-header {
       background: var(--highlight-bg) !important;
       color: white !important;
     }
 
-    /* Вертикальные красные линии при выборе столбца */
+    /* Вертикальные красные линии */
     td.vertical-line::before,
     td.vertical-line::after {
       content: "";
@@ -208,7 +217,7 @@
     }
 
     td.selected {
-      background: var(--highlight-bg) !important; /* Убрали градиент */
+      background: var(--highlight-bg) !important;
       border: none !important;
       z-index: 1;
       color: #7f1d1d;
@@ -234,16 +243,16 @@
       box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
     }
 
-#cardsContainer {
-  margin: 20px auto 10px; /* авто по бокам */
-  padding: 0; /* убрать padding */
-  max-width: 100vw;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  box-sizing: border-box;
-}
+    #cardsContainer {
+      margin: 20px auto 10px;
+      padding: 0;
+      max-width: 100vw;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      box-sizing: border-box;
+    }
 
     .booking-card {
       position: relative;
@@ -289,32 +298,62 @@
       transform: translate(50%, -50%) scale(1.1);
     }
 
-    .booking-button {
-      padding: 12px 24px;
-      font-size: 16px;
-      font-weight: 600;
-      background: linear-gradient(145deg, var(--main-color), #0f2a5f);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 4px 6px rgba(30, 58, 138, 0.2);
-      transition: all 0.3s ease;
-      letter-spacing: 0.5px;
-    }
-    .booking-button:hover { 
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(30, 58, 138, 0.3);
-    }
-    .booking-button:active {
-      transform: translateY(1px);
-      box-shadow: 0 2px 4px rgba(30, 58, 138, 0.2);
+    /* Контейнер для управления — ОДИНАКОВЫЙ РАЗМЕР КНОПОК */
+    #controls {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      gap: 15px;
+      flex-wrap: wrap;
+      width: 100%;
+      max-width: 500px;
     }
     
-    /* Стиль для нажатой кнопки */
-    .booking-button.pressed {
-      background: var(--highlight-bg);
+    #dateInput, .booking-button {
+      flex: 1 1 0;
+      min-width: 140px;
+      padding: 12px 16px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    
+    #dateInput {
+      background: white;
+      color: #1e293b;
+      border: 2px solid var(--custom-dark);
+      box-shadow: 0 2px 5px rgba(26, 47, 64, 0.1);
+    }
+    
+    #dateInput:hover {
+      background: #f8fafc;
+      border-color: #0e1f2c;
+      transform: translateY(-1px);
+    }
+    
+    .booking-button {
+      background: linear-gradient(145deg, var(--custom-dark), #0e1f2c);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 8px rgba(26, 47, 64, 0.2);
+      letter-spacing: 0.5px;
+    }
+    
+    .booking-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(26, 47, 64, 0.3);
+      background: linear-gradient(145deg, #1f3e55, #122c3b);
+    }
+    
+    .booking-button:active, .booking-button.pressed {
       transform: translateY(1px);
+      background: var(--highlight-bg);
       box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
     }
 
@@ -340,7 +379,7 @@
     }
     #modal h3 { 
       margin-top: 0; 
-      color: var(--main-color);
+      color: var(--custom-dark);
       text-align: center;
       font-size: 1.5rem;
     }
@@ -362,12 +401,8 @@
     }
     #modal input:focus, #modal textarea:focus {
       outline: none;
-      border-color: var(--main-color);
-      box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
-    }
-    #modal textarea { 
-      resize: vertical; 
-      min-height: 80px;
+      border-color: var(--custom-dark);
+      box-shadow: 0 0 0 3px rgba(26, 47, 64, 0.1);
     }
     #modal button {
       padding: 10px 20px;
@@ -378,54 +413,16 @@
       transition: all 0.2s;
     }
     #modal button:first-of-type {
-      background: linear-gradient(145deg, var(--main-color), #0f2a5f);
+      background: linear-gradient(145deg, var(--custom-dark), #0e1f2c);
       color: white;
-      box-shadow: 0 3px 6px rgba(30, 58, 138, 0.2);
     }
     #modal button:first-of-type:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 10px rgba(30, 58, 138, 0.3);
     }
     #modal button:last-of-type {
       margin-left: 10px;
       background: #f1f5f9;
       color: #64748b;
-    }
-    #modal button:last-of-type:hover {
-      background: #e2e8f0;
-    }
-
-    #controls {
-      margin-top: 15px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-    #dateInput {
-      padding: 12px 20px;
-      font-size: 16px;
-      background: white;
-      color: #334155;
-      border: 2px solid var(--main-color);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-weight: 500;
-      box-shadow: 0 2px 5px rgba(30, 58, 138, 0.1);
-    }
-    #dateInput:hover { 
-      background: #f8fafc; 
-      box-shadow: 0 3px 8px rgba(30, 58, 138, 0.15);
-    }
-    #dateInput:focus {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.2);
-    }
-    #dateInput::-webkit-calendar-picker-indicator {
-      filter: invert(27%) sepia(51%) saturate(2878%) hue-rotate(202deg) brightness(104%) contrast(97%);
-      cursor: pointer;
     }
 
     .image-popup {
@@ -445,7 +442,6 @@
       max-width: 90vw;
       max-height: 90vh;
       overflow: auto;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
     }
     .image-popup .popup-content img {
       width: 100%; height: auto; border-radius: 8px;
@@ -453,24 +449,20 @@
     .image-popup .close-popup {
       position: absolute;
       top: 10px; right: 10px;
-      background: var(--main-color);
+      background: var(--custom-dark);
       color: white;
       border: none;
       border-radius: 50%;
       width: 35px; height: 35px; font-size: 20px;
       cursor: pointer;
-      box-shadow: 0 0 8px rgba(0,0,0,0.4);
-      transition: all 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
     }
     .image-popup .close-popup:hover {
-      transform: scale(1.1);
       background: var(--highlight-color);
     }
 
-    /* Слой для ползунков существующих броней */
     #slidersContainer {
       position: absolute;
       top: 0;
@@ -482,7 +474,7 @@
     }
     .existing-slider {
       position: absolute;
-      background: var(--main-color);
+      background: var(--custom-dark);
       border: none;
       color: white;
       border-radius: 6px;
@@ -499,22 +491,17 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
       transition: transform 0.2s;
     }
-    
     .existing-slider:hover {
       transform: scale(1.02);
       z-index: 10;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
-
-    /* Стили для разных статусов брони */
     .existing-slider.confirmed {
-      background: var(--confirmed-color); /* Убрали градиент */
+      background: var(--confirmed-color);
     }
     .existing-slider.rejected {
-      background: var(--rejected-color); /* Убрали градиент */
+      background: var(--rejected-color);
     }
 
-    /* Модальное окно информации о брони */
     .booking-info-popup {
       display: none;
       position: fixed;
@@ -531,58 +518,46 @@
       border-radius: 12px;
       max-width: 90vw;
       width: 400px;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
     }
-
     .booking-info-popup .close-btn {
       position: absolute;
-      top: 12px;
-      right: 12px;
-      background: var(--main-color);
+      top: 12px; right: 12px;
+      background: var(--custom-dark);
       color: white;
       border: none;
       border-radius: 50%;
-      width: 32px;
-      height: 32px; 
+      width: 32px; height: 32px; 
       font-size: 20px;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: all 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    
     .booking-info-popup .close-btn:hover {
       background: var(--highlight-color);
-      transform: scale(1.1);
     }
-
     .booking-info-popup h3 {
       margin-top: 0;
-      color: var(--main-color);
+      color: var(--custom-dark);
       text-align: center;
-      font-size: 1.5rem;
       padding-bottom: 10px;
       border-bottom: 1px solid #e2e8f0;
       margin-bottom: 20px;
     }
-    .booking-info-popup .info-row {
+    .info-row {
       margin-bottom: 15px;
       display: flex;
       justify-content: space-between;
     }
-    .booking-info-popup .info-label {
+    .info-label {
       font-weight: 600;
-      color: var(--main-color);
+      color: var(--custom-dark);
       min-width: 120px;
     }
-    .booking-info-popup .info-value {
+    .info-value {
       text-align: right;
       flex-grow: 1;
     }
-    
-    /* Стили для кнопок подтверждения брони */
     .confirmation-buttons {
       display: flex;
       justify-content: space-between;
@@ -596,27 +571,10 @@
       cursor: pointer;
       font-weight: 600;
       flex: 1;
-      transition: all 0.2s;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      transition: 0.2s;
     }
-    .confirm-yes {
-      background: var(--confirmed-color); /* Убрали градиент */
-      color: white;
-    }
-    .confirm-yes:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 10px rgba(22, 163, 74, 0.3);
-    }
-    .confirm-no {
-      background: var(--rejected-color); /* Убрали градиент */
-      color: white;
-    }
-    .confirm-no:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 10px rgba(185, 28, 28, 0.3);
-    }
-    
-    /* Стили для кнопки удаления */
+    .confirm-yes { background: var(--confirmed-color); color: white; }
+    .confirm-no { background: var(--rejected-color); color: white; }
     .delete-btn {
       background: linear-gradient(145deg, #475569, #334155);
       color: white;
@@ -627,50 +585,32 @@
       font-weight: 600;
       margin-top: 20px;
       width: 100%;
-      transition: all 0.3s;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      transition: 0.3s;
     }
-    .delete-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 12px rgba(0,0,0,0.2);
-      background: var(--highlight-bg); /* Убрали градиент */
-    }
-    
-    /* Анимация загрузки */
+    .delete-btn:hover { background: var(--highlight-bg); }
+
     .loading-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(255, 255, 255, 0.8);
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 2000;
     }
-    
     .loading-spinner {
       width: 50px;
       height: 50px;
       border: 5px solid #f3f3f3;
-      border-top: 5px solid var(--main-color);
+      border-top: 5px solid var(--custom-dark);
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    /* Стили для авторизации */
     #login {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(255, 255, 255, 0.95);
       display: flex;
       flex-direction: column;
@@ -679,35 +619,22 @@
       z-index: 10000;
       padding: 20px;
     }
-    
-    #login h2 {
-      color: var(--main-color);
-      margin-bottom: 20px;
-    }
-    
-    #content {
-      display: none;
-      width: 100%;
-    }
-    
+    #login h2 { color: var(--custom-dark); margin-bottom: 20px; }
+    #content { display: none; width: 100%; }
   </style>
 </head>
 <body>
-
-  <!-- Блок авторизации -->
   <div id="login">
     <h2>Вход на сайт</h2>
-<div id="g_id_onload"
-     data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com"
-     data-callback="handleCredentialResponse"
-     data-auto_prompt="false">
-</div>
+    <div id="g_id_onload"
+         data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse"
+         data-auto_prompt="false">
+    </div>
     <div class="g_id_signin" data-type="standard"></div>
   </div>
 
-  <!-- Контент для авторизованных -->
   <div id="content" style="display:none">
-
     <div class="table-container">
       <table id="bookingTable">
         <thead>
@@ -715,10 +642,7 @@
             <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
             <th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th>
             <th class="time-col">
-              <button id="openImage" style="padding:5px 10px; border:1px solid var(--main-color);
-                background:var(--main-color); color:white; border-radius:5px; cursor:pointer;">
-                СТОЛЫ
-              </button>
+              <button id="openImage" style="padding:6px 12px; border:none; background:var(--custom-dark); color:white; border-radius:6px; cursor:pointer; font-weight:bold;">СТОЛЫ</button>
             </th>
           </tr>
         </thead>
@@ -754,83 +678,38 @@
       </div>
     </div>
 
-    <!-- Модальное окно информации о брони -->
     <div id="bookingInfoPopup" class="booking-info-popup">
       <div class="popup-content">
         <button class="close-btn" onclick="closeBookingInfoPopup()">&times;</button>
         <h3>Информация о бронировании</h3>
-        <div class="info-row">
-          <span class="info-label">Стол:</span> <span id="info-table" class="info-value"></span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Дата:</span> <span id="info-date" class="info-value"></span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Время:</span> <span id="info-time" class="info-value"></span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Имя:</span> <span id="info-name" class="info-value"></span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Телефон:</span> <span id="info-phone" class="info-value"></span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Комментарий:</span> <span id="info-comment" class="info-value"></span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Посещение состоялось?</span>
-          <span id="info-confirmed" class="info-value"></span>
-        </div>
-        <div class="confirmation-buttons">
-          <button class="confirm-yes" onclick="confirmBooking(true)">Да</button>
-          <button class="confirm-no" onclick="confirmBooking(false)">Нет</button>
-        </div>
+        <div class="info-row"><span class="info-label">Стол:</span> <span id="info-table" class="info-value"></span></div>
+        <div class="info-row"><span class="info-label">Дата:</span> <span id="info-date" class="info-value"></span></div>
+        <div class="info-row"><span class="info-label">Время:</span> <span id="info-time" class="info-value"></span></div>
+        <div class="info-row"><span class="info-label">Имя:</span> <span id="info-name" class="info-value"></span></div>
+        <div class="info-row"><span class="info-label">Телефон:</span> <span id="info-phone" class="info-value"></span></div>
+        <div class="info-row"><span class="info-label">Комментарий:</span> <span id="info-comment" class="info-value"></span></div>
+        <div class="info-row"><span class="info-label">Посещение состоялось?</span><span id="info-confirmed" class="info-value"></span></div>
+        <div class="confirmation-buttons"><button class="confirm-yes" onclick="confirmBooking(true)">Да</button><button class="confirm-no" onclick="confirmBooking(false)">Нет</button></div>
         <button class="delete-btn" onclick="deleteBooking()">УДАЛИТЬ БРОНЬ</button>
       </div>
     </div>
-    
-    <!-- Оверлей загрузки -->
-    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-      <div class="loading-spinner"></div>
-    </div>
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;"><div class="loading-spinner"></div></div>
   </div>
 
 <script>
-  // Настройки авторизации
- const allowedEmails = [
-"vadiksss900@gmail.com",
-  "sergey99belov@gmail.com", 
-  "popadinecvasil3@gmail.com", 
-  "veronicadiakova04@gmail.com",
-  "info.luckystrike.kh@gmail.com", 
-  "sashavolobuev123890@gmail.com", 
-  "egorgorbushko@gmail.com", 
-  "shatrava.o@gmail.com", 
-  "Craftmax30@gmail.com", 
-  "bowlingblock.b@gmail.com",
-  "lana.arnaut@gmail.com",
-   "polosinnikita1224@gmail.com",
-  "sofialat1506@gmail.com",
-  "ll3991940@gmail.com",
-    "m02083215@gmail.com",
-  "ken040888@gmail.com"
- ];
+  const allowedEmails = [
+    "vadiksss900@gmail.com", "sergey99belov@gmail.com", "popadinecvasil3@gmail.com", "veronicadiakova04@gmail.com",
+    "info.luckystrike.kh@gmail.com", "sashavolobuev123890@gmail.com", "egorgorbushko@gmail.com", "shatrava.o@gmail.com",
+    "Craftmax30@gmail.com", "bowlingblock.b@gmail.com", "lana.arnaut@gmail.com", "polosinnikita1224@gmail.com",
+    "sofialat1506@gmail.com", "ll3991940@gmail.com", "m02083215@gmail.com", "ken040888@gmail.com"
+  ];
 
-  // Обработчик ответа от Google
   function handleCredentialResponse(response) {
     const data = parseJwt(response.credential);
-    const email = data.email;
-
-    if (allowedEmails.includes(email)) {
-      localStorage.setItem("userEmail", email);
-      location.reload();
-    } else {
-      alert("Доступ запрещён для: " + email);
-    }
+    if (allowedEmails.includes(data.email)) { localStorage.setItem("userEmail", data.email); location.reload(); }
+    else alert("Доступ запрещён для: " + data.email);
   }
 
-
-  // Проверка авторизации при загрузке страницы
   window.onload = () => {
     const userEmail = localStorage.getItem("userEmail");
     if (userEmail && allowedEmails.includes(userEmail)) {
@@ -838,49 +717,25 @@
       document.getElementById("content").style.display = "block";
     }
   };
-
-  // Функция для разбора JWT токена
   function parseJwt(token) {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
     return JSON.parse(jsonPayload);
   }
 
-  // JavaScript код с изменениями
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxfRLDGA29FrqKS61HmYN_FUnDwOydeCaEdeW4oc4wyroQzvb4h1OnwQ5HeotIHhcj9/exec";
-
-  // Инициализация календаря
   const dateInput = document.getElementById('dateInput');
   const today = new Date().toISOString().split('T')[0];
   dateInput.min = today;
   dateInput.value = today;
-
-  // Изменяем время работы до 22:00 включительно
   const startHour = 11, endHour = 22, lanes = 12;
-  const tableBody = document.getElementById("tableBody"),
-        cardsContainer = document.getElementById("cardsContainer"),
-        slidersContainer = document.getElementById("slidersContainer"),
-        bookingTable = document.getElementById("bookingTable"),
-        tableContainer = document.querySelector(".table-container"),
-        loadingOverlay = document.getElementById("loadingOverlay");
-
-  // Создаем временные слоты с 11:00 до 22:00 включительно
+  const tableBody = document.getElementById("tableBody"), cardsContainer = document.getElementById("cardsContainer"), slidersContainer = document.getElementById("slidersContainer"), bookingTable = document.getElementById("bookingTable"), tableContainer = document.querySelector(".table-container"), loadingOverlay = document.getElementById("loadingOverlay");
   const timeSlots = [];
   for (let h = startHour; h <= endHour; h++) {
-    // Добавляем только 00 для последнего часа (22:00)
-    if (h < endHour) {
-      timeSlots.push({ display: `${h}:00`, key: h });
-      timeSlots.push({ display: `${h}:30`, key: h + 0.5 });
-    } else {
-      timeSlots.push({ display: `${h}:00`, key: h });
-    }
+    if (h < endHour) { timeSlots.push({ display: `${h}:00`, key: h }); timeSlots.push({ display: `${h}:30`, key: h + 0.5 }); }
+    else timeSlots.push({ display: `${h}:00`, key: h });
   }
-
-  // Заполняем таблицу
   timeSlots.forEach(slot => {
     const row = document.createElement("tr");
     for (let lane = 0; lane < lanes; lane++) {
@@ -898,406 +753,78 @@
     tableBody.appendChild(row);
   });
 
-  const intervalsByLane = {};
-  let currentLane = null, currentStart = null;
-  let currentBookingId = null; // Для хранения ID текущей брони
-
-  // --- Работа с визуалом выбора интервалов ---
-  function clearStartTimeHighlight() {
-    document.querySelectorAll('td.start-time-chosen').forEach(c => c.classList.remove('start-time-chosen'));
-  }
-  function clearHeaderHighlight() {
-    document.querySelectorAll('thead th.highlight-header').forEach(th => th.classList.remove('highlight-header'));
-  }
-  function clearVerticalLines() {
-    document.querySelectorAll('td.vertical-line').forEach(td => td.classList.remove('vertical-line'));
-  }
-  function highlightHeader(lane) {
-    clearHeaderHighlight();
-    const headerCells = document.querySelectorAll('thead th');
-    if (lane >= 0 && lane < lanes) headerCells[lane].classList.add('highlight-header');
-  }
-  function highlightColumn(lane) {
-    clearVerticalLines();
-    document.querySelectorAll(`td.slot[data-lane="${lane}"]`).forEach(td => td.classList.add('vertical-line'));
-  }
+  let intervalsByLane = {}, currentLane = null, currentStart = null, currentBookingId = null;
+  function clearStartTimeHighlight() { document.querySelectorAll('td.start-time-chosen').forEach(c => c.classList.remove('start-time-chosen')); }
+  function clearHeaderHighlight() { document.querySelectorAll('thead th.highlight-header').forEach(th => th.classList.remove('highlight-header')); }
+  function clearVerticalLines() { document.querySelectorAll('td.vertical-line').forEach(td => td.classList.remove('vertical-line')); }
+  function highlightHeader(lane) { clearHeaderHighlight(); const headerCells = document.querySelectorAll('thead th'); if (lane >= 0 && lane < lanes) headerCells[lane].classList.add('highlight-header'); }
+  function highlightColumn(lane) { clearVerticalLines(); document.querySelectorAll(`td.slot[data-lane="${lane}"]`).forEach(td => td.classList.add('vertical-line')); }
   function updateTableSelection() {
-    // Сброс выделений
     document.querySelectorAll("td.selected").forEach(c => c.classList.remove("selected","rounded-top","rounded-bottom"));
-
     for (let laneStr in intervalsByLane) {
-      const lane = +laneStr;
-      intervalsByLane[lane].forEach(interval => {
-        const start = Math.min(interval.start, interval.end),
-              end = Math.max(interval.start, interval.end);
-        document.querySelectorAll(`td.slot[data-lane="${lane}"]`).forEach(cell => {
-          const t = parseFloat(cell.dataset.time);
-          if (t >= start && t <= end) cell.classList.add("selected");
-        });
-        const sc = document.querySelector(`td.slot[data-lane="${lane}"][data-time="${start}"]`);
-        const ec = document.querySelector(`td.slot[data-lane="${lane}"][data-time="${end}"]`);
-        if (sc) sc.classList.add("rounded-top");
-        if (ec && end !== start) ec.classList.add("rounded-bottom");
+      intervalsByLane[laneStr].forEach(interval => {
+        const start = Math.min(interval.start, interval.end), end = Math.max(interval.start, interval.end);
+        document.querySelectorAll(`td.slot[data-lane="${laneStr}"]`).forEach(cell => { const t = parseFloat(cell.dataset.time); if (t >= start && t <= end) cell.classList.add("selected"); });
+        const sc = document.querySelector(`td.slot[data-lane="${laneStr}"][data-time="${start}"]`), ec = document.querySelector(`td.slot[data-lane="${laneStr}"][data-time="${end}"]`);
+        if (sc) sc.classList.add("rounded-top"); if (ec && end !== start) ec.classList.add("rounded-bottom");
       });
     }
-
-    // Рендер карточек выбранных интервалов
     cardsContainer.innerHTML = "";
-    function fmt(v) {
-      const h = Math.floor(v), m = v % 1 === 0.5 ? "30" : "00";
-      return `${h}:${m}`;
-    }
     const selDate = dateInput.value.split("-").reverse().join(".");
     for (let laneStr in intervalsByLane) {
-      const lane = +laneStr;
-      intervalsByLane[lane].forEach((interval, idx) => {
-        const s = Math.min(interval.start, interval.end),
-              e = Math.max(interval.start, interval.end);
-        const card = document.createElement("div");
-        card.className = "booking-card";
-        card.textContent = `Стол № ${lane+1} | ${selDate} | с ${fmt(s)} по ${fmt(e)}`;
-        const btn = document.createElement("button");
-        btn.className = "close-btn";
-        btn.innerHTML = "&times;";
-        btn.onclick = ev => {
-          ev.stopPropagation();
-          intervalsByLane[lane].splice(idx,1);
-          updateTableSelection();
-        };
-        card.appendChild(btn);
-        cardsContainer.appendChild(card);
+      intervalsByLane[laneStr].forEach((interval, idx) => {
+        const s = Math.min(interval.start, interval.end), e = Math.max(interval.start, interval.end);
+        const card = document.createElement("div"); card.className = "booking-card"; card.textContent = `Стол № ${+laneStr+1} | ${selDate} | с ${Math.floor(s)}:${s%1===0.5?"30":"00"} по ${Math.floor(e)}:${e%1===0.5?"30":"00"}`;
+        const btn = document.createElement("button"); btn.className = "close-btn"; btn.innerHTML = "&times;"; btn.onclick = ev => { ev.stopPropagation(); intervalsByLane[laneStr].splice(idx,1); updateTableSelection(); };
+        card.appendChild(btn); cardsContainer.appendChild(card);
       });
     }
   }
 
-  // Обработка клика по ячейкам таблицы
   tableBody.addEventListener("click", e => {
-    if (e.target.classList.contains("slot")) {
-      const lane = +e.target.dataset.lane;
-      if (currentStart === null) {
-        currentLane = lane;
-        clearStartTimeHighlight();
-        highlightHeader(lane);
-        highlightColumn(lane);
-      }
-    }
-    if (e.target.classList.contains("time-right")) {
-      if (currentLane === null) return alert("Сначала выберите столбец.");
-      const txt = e.target.textContent;
-      const time = parseFloat(txt.includes(":30") ? txt.replace(":30",".5") : txt.replace(":00",".0"));
-      if (currentStart === null) {
-        currentStart = time;
-        clearStartTimeHighlight();
-        const sc = document.querySelector(`td.slot[data-lane="${currentLane}"][data-time="${currentStart}"]`);
-        if (sc) sc.classList.add("start-time-chosen");
-      } else {
+    if (e.target.classList.contains("slot")) { currentLane = +e.target.dataset.lane; clearStartTimeHighlight(); highlightHeader(currentLane); highlightColumn(currentLane); }
+    if (e.target.classList.contains("time-right") && currentLane !== null) {
+      const time = parseFloat(e.target.textContent.replace(":30",".5").replace(":00",".0"));
+      if (currentStart === null) { currentStart = time; clearStartTimeHighlight(); const sc = document.querySelector(`td.slot[data-lane="${currentLane}"][data-time="${currentStart}"]`); if(sc) sc.classList.add("start-time-chosen"); }
+      else {
         if (time <= currentStart) return alert("Время конца должно быть больше времени начала.");
         if (!intervalsByLane[currentLane]) intervalsByLane[currentLane] = [];
         intervalsByLane[currentLane].push({ start: currentStart, end: time });
-        currentLane = null;
-        currentStart = null;
-        clearStartTimeHighlight();
-        clearHeaderHighlight();
-        clearVerticalLines();
-        updateTableSelection();
+        currentLane = null; currentStart = null; clearStartTimeHighlight(); clearHeaderHighlight(); clearVerticalLines(); updateTableSelection();
       }
     }
   });
+  tableBody.addEventListener("dblclick", e => { if(!e.target.classList.contains("slot")) return; const lane = +e.target.dataset.lane, time = parseFloat(e.target.dataset.time); if(intervalsByLane[lane]){ const idx = intervalsByLane[lane].findIndex(iv => time >= Math.min(iv.start, iv.end) && time <= Math.max(iv.start, iv.end)); if(idx !== -1){ intervalsByLane[lane].splice(idx,1); updateTableSelection(); } } });
 
-  // Удаление интервала по двойному клику
-  tableBody.addEventListener("dblclick", e => {
-    if (!e.target.classList.contains("slot")) return;
-    const lane = +e.target.dataset.lane;
-    const time = parseFloat(e.target.dataset.time);
-    if (!intervalsByLane[lane]) return;
-    const idx = intervalsByLane[lane].findIndex(iv => {
-      const s = Math.min(iv.start, iv.end), t = Math.max(iv.start, iv.end);
-      return time >= s && time <= t;
-    });
-    if (idx !== -1) {
-      intervalsByLane[lane].splice(idx, 1);
-      updateTableSelection();
-    }
-  });
-
-  // Модалка брони
-  function openModal() {
-    if (!Object.values(intervalsByLane).some(a => a.length)) {
-      return alert("Сначала выберите время.");
-    }
-    document.getElementById("modal").style.display = "flex";
-    
-    // Добавляем эффект нажатия на кнопку
-    const btn = document.querySelector('.booking-button');
-    btn.classList.add('pressed');
-    setTimeout(() => btn.classList.remove('pressed'), 200);
-  }
-  function closeModal() {
-    document.getElementById("modal").style.display = "none";
-  }
-
-  // Отправка брони на сервер
+  function openModal() { if (!Object.values(intervalsByLane).some(a=>a.length)) return alert("Сначала выберите время."); document.getElementById("modal").style.display = "flex"; const btn = document.querySelector('.booking-button'); btn.classList.add('pressed'); setTimeout(()=>btn.classList.remove('pressed'),200); }
+  function closeModal() { document.getElementById("modal").style.display = "none"; }
   async function submitForm() {
-    const name = document.getElementById("nameInput").value.trim();
-    const phone = document.getElementById("phoneInput").value.trim();
-    const comment = document.getElementById("commentInput").value.trim();
-    const date = dateInput.value;
-    if (!name || !phone) return alert("Введите имя и телефон.");
-    if (!date) return alert("Выберите дату.");
-
-    const bookings = [];
-    for (let lane in intervalsByLane) {
-      intervalsByLane[lane].forEach(iv => {
-        bookings.push({
-          date,
-          tableNumber: +lane + 1,
-          start: iv.start,
-          end: iv.end,
-          name, phone, comment
-        });
-      });
-    }
+    const name = document.getElementById("nameInput").value.trim(), phone = document.getElementById("phoneInput").value.trim(), comment = document.getElementById("commentInput").value.trim(), date = dateInput.value;
+    if (!name || !phone) return alert("Введите имя и телефон."); if (!date) return alert("Выберите дату.");
+    const bookings = []; for (let lane in intervalsByLane) intervalsByLane[lane].forEach(iv => { bookings.push({ date, tableNumber: +lane+1, start: iv.start, end: iv.end, name, phone, comment }); });
     if (!bookings.length) return alert("Нет выбранных интервалов.");
-
     try {
-      // Показываем анимацию загрузки
       loadingOverlay.style.display = 'flex';
-      
-      // Отправляем все бронирования
-      await Promise.all(bookings.map(b => {
-        return fetch(GAS_URL, {
-          method: "POST",
-          mode: "no-cors",
-          body: JSON.stringify({ bookings: [b] })
-        });
-      }));
-      
-      // Скрываем анимацию загрузки
+      await Promise.all(bookings.map(b => fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ bookings: [b] }) })));
       loadingOverlay.style.display = 'none';
-      
-      // Очищаем форму
-      closeModal();
-      for (let l in intervalsByLane) intervalsByLane[l] = [];
-      currentLane = currentStart = null;
-      clearStartTimeHighlight();
-      clearHeaderHighlight();
-      clearVerticalLines();
-      updateTableSelection();
-      document.getElementById("nameInput").value = "";
-      document.getElementById("phoneInput").value = "";
-      document.getElementById("commentInput").value = "";
-      
-      // Обновляем существующие брони
+      closeModal(); for(let l in intervalsByLane) intervalsByLane[l] = []; currentLane = currentStart = null; clearStartTimeHighlight(); clearHeaderHighlight(); clearVerticalLines(); updateTableSelection();
+      document.getElementById("nameInput").value = ""; document.getElementById("phoneInput").value = ""; document.getElementById("commentInput").value = "";
       await loadExisting();
-    } catch (error) {
-      loadingOverlay.style.display = 'none';
-      console.error("Ошибка при отправке бронирования:", error);
-      alert("Произошла ошибка при отправке бронирования");
-    }
+    } catch (error) { loadingOverlay.style.display = 'none'; alert("Ошибка при отправке бронирования"); }
   }
-
-  // Функция для отображения информации о брони
-  function showBookingInfo(booking) {
-    document.getElementById('info-table').textContent = `№${booking.table}`;
-    document.getElementById('info-date').textContent = booking.date.split('-').reverse().join('.');
-    document.getElementById('info-time').textContent = `${formatTime(booking.start)} - ${formatTime(booking.end)}`;
-    document.getElementById('info-name').textContent = booking.name;
-    document.getElementById('info-phone').textContent = booking.phone;
-    document.getElementById('info-comment').textContent = booking.comment || 'нет комментария';
-    document.getElementById('info-confirmed').textContent = booking.confirmed || '';
-    document.getElementById('bookingInfoPopup').style.display = 'flex';
-    currentBookingId = booking.id; // Сохраняем ID брони для подтверждения
-  }
-
-  // Функция для закрытия окна информации
-  function closeBookingInfoPopup() {
-    document.getElementById('bookingInfoPopup').style.display = 'none';
-    currentBookingId = null;
-  }
-
-  // Функция подтверждения брони (да/нет)
-  async function confirmBooking(confirmed) {
-    if (!currentBookingId) return;
-    
-    try {
-      // Показываем анимацию загрузки
-      loadingOverlay.style.display = 'flex';
-      
-      // Отправляем данные на сервер
-      await fetch(GAS_URL, {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify({ 
-          action: "confirm",
-          id: currentBookingId,
-          confirmed: confirmed
-        })
-      });
-      
-      // Скрываем анимацию загрузки
-      loadingOverlay.style.display = 'none';
-      
-      closeBookingInfoPopup();
-      await loadExisting(); // Обновляем список броней
-    } catch(error) {
-      loadingOverlay.style.display = 'none';
-      console.error("Ошибка при обновлении статуса брони:", error);
-      alert("Произошла ошибка при обновлении статуса брони");
-    }
-  }
-  
-  // Функция удаления брони
-  async function deleteBooking() {
-    if (!currentBookingId) return;
-    
-    if (!confirm("Вы уверены, что хотите удалить эту бронь?")) return;
-    
-    try {
-      // Показываем анимацию загрузки
-      loadingOverlay.style.display = 'flex';
-      
-      // Отправляем запрос на удаление
-      await fetch(GAS_URL, {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify({ 
-          action: "delete",
-          id: currentBookingId
-        })
-      });
-      
-      // Скрываем анимацию загрузки
-      loadingOverlay.style.display = 'none';
-      
-      closeBookingInfoPopup();
-      await loadExisting(); // Обновляем список броней
-    } catch(error) {
-      loadingOverlay.style.display = 'none';
-      console.error("Ошибка при удалении брони:", error);
-      alert("Произошла ошибка при удалении брони");
-    }
-  }
-
-  // Загрузка существующих броней с сервера
+  function showBookingInfo(b) { document.getElementById('info-table').textContent = `№${b.table}`; document.getElementById('info-date').textContent = b.date.split('-').reverse().join('.'); document.getElementById('info-time').textContent = `${Math.floor(b.start)}:${b.start%1===0.5?"30":"00"} - ${Math.floor(b.end)}:${b.end%1===0.5?"30":"00"}`; document.getElementById('info-name').textContent = b.name; document.getElementById('info-phone').textContent = b.phone; document.getElementById('info-comment').textContent = b.comment || 'нет комментария'; document.getElementById('info-confirmed').textContent = b.confirmed || ''; document.getElementById('bookingInfoPopup').style.display = 'flex'; currentBookingId = b.id; }
+  function closeBookingInfoPopup() { document.getElementById('bookingInfoPopup').style.display = 'none'; currentBookingId = null; }
+  async function confirmBooking(confirmed) { if(!currentBookingId) return; try{ loadingOverlay.style.display='flex'; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:currentBookingId,confirmed})}); loadingOverlay.style.display='none'; closeBookingInfoPopup(); await loadExisting(); } catch(e){ loadingOverlay.style.display='none'; alert("Ошибка обновления статуса"); } }
+  async function deleteBooking() { if(!currentBookingId || !confirm("Удалить бронь?")) return; try{ loadingOverlay.style.display='flex'; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:currentBookingId})}); loadingOverlay.style.display='none'; closeBookingInfoPopup(); await loadExisting(); } catch(e){ loadingOverlay.style.display='none'; alert("Ошибка удаления"); } }
   async function loadExisting() {
-    try {
-      // Показываем анимацию загрузки
-      loadingOverlay.style.display = 'flex';
-      
-      slidersContainer.innerHTML = "";
-      const res = await fetch(GAS_URL + "?action=get&date=" + dateInput.value);
-      const data = await res.json();
-      
-      // Скрываем анимацию загрузки
-      loadingOverlay.style.display = 'none';
-      
-      if (!data.bookings || !data.bookings.length) return;
-
-      // Получаем все ячейки времени (правый столбец)
-      const timeCells = Array.from(document.querySelectorAll('th.time-right'));
-      
-      // Получаем все ячейки таблицы
-      const tableCells = Array.from(document.querySelectorAll('td.slot'));
-      
-      // Получаем позицию контейнера таблиции
-      const containerRect = tableContainer.getBoundingClientRect();
-      const tableRect = bookingTable.getBoundingClientRect();
-      
-      data.bookings.forEach(b => {
-        if (b.date === dateInput.value) {
-          const laneIndex = b.table - 1;
-          const start = parseFloat(b.start);
-          const end = parseFloat(b.end);
-          
-          // Находим индексы временных слотов
-          const startIndex = timeSlots.findIndex(ts => ts.key === start);
-          const endIndex = timeSlots.findIndex(ts => ts.key === end);
-          
-          if (startIndex === -1 || endIndex === -1) return;
-          
-          // Находим ячейку начала брони
-          const startCell = tableCells.find(cell => 
-            parseInt(cell.dataset.lane) === laneIndex && 
-            parseFloat(cell.dataset.time) === start
-          );
-          
-          if (!startCell) return;
-          
-          // Получаем позицию ячейки начала относительно контейнера
-          const startCellRect = startCell.getBoundingClientRect();
-          
-          // Рассчитываем высоту блока брони
-          const startTimeCell = timeCells[startIndex];
-          const endTimeCell = timeCells[endIndex];
-          const height = endTimeCell.offsetTop + endTimeCell.offsetHeight - startTimeCell.offsetTop;
-          
-          // Рассчитываем позицию ползунка относительно контейнера
-          const left = startCellRect.left - containerRect.left;
-          const top = startTimeCell.offsetTop;
-          
-          // Создаем ползунок
-          const slider = document.createElement("div");
-          slider.className = "existing-slider";
-          
-          // Добавляем класс в зависимости от статуса брони
-          if (b.confirmed === "Да") {
-            slider.classList.add("confirmed");
-          } else if (b.confirmed === "Нет") {
-            slider.classList.add("rejected");
-          }
-          
-          slider.style.top = `${top}px`;
-          slider.style.left = `${left}px`;
-          slider.style.width = `${startCellRect.width}px`;
-          slider.style.height = `${height}px`;
-          
-          // Добавляем обработчик клика
-          slider.addEventListener('click', (e) => {
-            e.stopPropagation();
-            showBookingInfo(b);
-          });
-          
-          slidersContainer.appendChild(slider);
-        }
-      });
-    } catch(e) {
-      // Скрываем анимацию загрузки в случае ошибки
-      loadingOverlay.style.display = 'none';
-      console.error("Ошибка загрузки бронирований:", e);
-    }
+    try{ loadingOverlay.style.display='flex'; slidersContainer.innerHTML=""; const res = await fetch(GAS_URL+"?action=get&date="+dateInput.value); const data = await res.json(); loadingOverlay.style.display='none'; if(!data.bookings?.length) return; const timeCells = Array.from(document.querySelectorAll('th.time-right')), tableCells = Array.from(document.querySelectorAll('td.slot')), containerRect = tableContainer.getBoundingClientRect();
+      data.bookings.forEach(b => { if(b.date===dateInput.value){ const laneIndex = b.table-1; const startIndex = timeSlots.findIndex(ts => ts.key===parseFloat(b.start)), endIndex = timeSlots.findIndex(ts => ts.key===parseFloat(b.end)); if(startIndex===-1||endIndex===-1) return; const startCell = tableCells.find(cell => parseInt(cell.dataset.lane)===laneIndex && parseFloat(cell.dataset.time)===parseFloat(b.start)); if(!startCell) return; const startCellRect = startCell.getBoundingClientRect(); const startTimeCell = timeCells[startIndex], endTimeCell = timeCells[endIndex]; const height = endTimeCell.offsetTop + endTimeCell.offsetHeight - startTimeCell.offsetTop; const left = startCellRect.left - containerRect.left, top = startTimeCell.offsetTop; const slider = document.createElement("div"); slider.className = "existing-slider"; if (b.confirmed === "Да") slider.classList.add("confirmed"); else if (b.confirmed === "Нет") slider.classList.add("rejected"); slider.style.top = `${top}px`; slider.style.left = `${left}px`; slider.style.width = `${startCellRect.width}px`; slider.style.height = `${height}px`; slider.addEventListener('click', (e) => { e.stopPropagation(); showBookingInfo(b); }); slidersContainer.appendChild(slider); } });
+    } catch(e){ loadingOverlay.style.display='none'; console.error(e); }
   }
-
-  function formatTime(v) {
-    const h = Math.floor(v);
-    const m = v % 1 === 0.5 ? "30" : "00";
-    return `${h}:${m}`;
-  }
-
-  // При изменении даты обновляем брони
-  dateInput.addEventListener('change', async () => {
-    await loadExisting();
-    // Сброс выборов
-    currentLane = currentStart = null;
-    for (let k in intervalsByLane) intervalsByLane[k] = [];
-    clearStartTimeHighlight();
-    clearHeaderHighlight();
-    clearVerticalLines();
-    updateTableSelection();
-  });
-
-  // Инициализация
-  document.addEventListener('DOMContentLoaded', async () => {
-    await loadExisting();
-    updateTableSelection();
-  });
-
-  document.getElementById("openImage").onclick = () => {
-    document.getElementById("imagePopup").style.display = "flex";
-  };
-  function closeImagePopup() {
-    document.getElementById("imagePopup").style.display = "none";
-  }
+  dateInput.addEventListener('change', async () => { await loadExisting(); intervalsByLane = {}; currentLane = currentStart = null; clearStartTimeHighlight(); clearHeaderHighlight(); clearVerticalLines(); updateTableSelection(); });
+  document.addEventListener('DOMContentLoaded', async () => { await loadExisting(); updateTableSelection(); });
+  document.getElementById("openImage").onclick = () => { document.getElementById("imagePopup").style.display = "flex"; };
+  function closeImagePopup() { document.getElementById("imagePopup").style.display = "none"; }
 </script>
-
 </body>
 </html>

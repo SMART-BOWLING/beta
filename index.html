@@ -96,27 +96,6 @@
       .login-title {
         font-size: 24px !important;
       }
-      /* Кнопка выхода на мобильных */
-      .logout-btn {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        z-index: 100;
-        background: #475569;
-        color: white;
-        border: none;
-        border-radius: 30px;
-        padding: 8px 15px;
-        font-size: 14px;
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        transition: all 0.2s;
-      }
-      .logout-btn:hover {
-        background: #1e293b;
-        transform: scale(1.02);
-      }
     }
 
     body {
@@ -256,6 +235,11 @@
     .marker {
       height: 6px;
       border-radius: 3px;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+    .marker:active {
+      transform: scale(0.97);
     }
 
     .marker.blue {
@@ -275,6 +259,10 @@
 
     .marker.empty {
       background: transparent;
+      cursor: default;
+    }
+    .marker.empty:active {
+      transform: none;
     }
 
     #cardsContainer {
@@ -687,26 +675,30 @@
       transform: scale(0.97);
     }
     
-    /* Кнопка выхода (десктоп) */
-    .logout-btn {
-      position: fixed;
-      top: 15px;
-      right: 20px;
-      background: #475569;
+    /* Кнопка выхода в углу (теперь в шапке таблицы) */
+    .logout-header-btn {
+      background: #dc2626;
       color: white;
       border: none;
-      border-radius: 30px;
-      padding: 8px 18px;
-      font-size: 14px;
+      border-radius: 8px;
+      padding: 6px 12px;
       font-weight: bold;
       cursor: pointer;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      font-size: 14px;
       transition: all 0.2s;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
-    .logout-btn:hover {
-      background: #1e293b;
-      transform: scale(1.03);
+    .logout-header-btn:hover {
+      background: #b91c1c;
+      transform: scale(1.02);
+    }
+    .logout-header-btn:active {
+      transform: scale(0.98);
     }
   </style>
 </head>
@@ -740,13 +732,13 @@
           <tr>
             <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
             <th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th>
-            <th class="time-col">
-              <button id="openImage" style="padding:6px 12px; border:1px solid white; background:#1a2f40; color:white; cursor:pointer; font-weight:bold; border-radius:8px;">СТОЛЫ</button>
+            <th class="time-col" style="padding: 0;">
+              <button id="logoutButtonHeader" class="logout-header-btn">🚪 Выйти</button>
             </th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
-      </table>
+       </table>
       
       <div id="columnMarkers" class="column-markers"></div>
     </div>
@@ -759,7 +751,7 @@
     <input type="date" id="dateInput" />
     <button class="booking-button" onclick="openModal()">ЗАБРОНИРОВАТЬ</button>
   </div>
-  <!-- Кнопка выхода будет добавлена динамически -->
+
   <div id="modal">
     <div>
       <h3>Введите данные</h3>
@@ -919,30 +911,19 @@
     if (overlay) overlay.style.display = show ? 'flex' : 'none';
   }
   
-  // Функция добавления кнопки выхода
-  function addLogoutButton() {
-    // Удаляем старую, если есть
-    const oldBtn = document.getElementById('dynamicLogoutBtn');
-    if (oldBtn) oldBtn.remove();
-    
-    const logoutBtn = document.createElement('button');
-    logoutBtn.id = 'dynamicLogoutBtn';
-    logoutBtn.textContent = '🚪 Выйти';
-    logoutBtn.className = 'logout-btn';
-    logoutBtn.onclick = () => {
-      if (confirm('Вы уверены, что хотите выйти из системы?')) {
-        clearStoredSession();
-        currentUser = null;
-        document.getElementById('mainContent').style.display = 'none';
-        document.getElementById('loginScreen').style.display = 'flex';
-        // Очищаем выбранные интервалы
-        if (typeof intervalsByLane !== 'undefined') {
-          for(let l in intervalsByLane) intervalsByLane[l] = [];
-          if (typeof updateTableSelection === 'function') updateTableSelection();
-        }
+  // Функция выхода
+  function logout() {
+    if (confirm('Вы уверены, что хотите выйти из системы?')) {
+      clearStoredSession();
+      currentUser = null;
+      document.getElementById('mainContent').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+      // Очищаем выбранные интервалы
+      if (typeof intervalsByLane !== 'undefined') {
+        for(let l in intervalsByLane) intervalsByLane[l] = [];
+        if (typeof updateTableSelection === 'function') updateTableSelection();
       }
-    };
-    document.body.appendChild(logoutBtn);
+    }
   }
   
   window.handleCredentialResponse = async function(response) {
@@ -969,7 +950,13 @@
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('mainContent').style.display = 'block';
         showLoadingOverlay(false);
-        addLogoutButton(); // добавляем кнопку выхода
+        
+        // Привязываем кнопку выхода в шапке
+        const logoutBtn = document.getElementById('logoutButtonHeader');
+        if (logoutBtn) {
+          logoutBtn.onclick = logout;
+        }
+        
         initAppAfterAuth();
       } else {
         showLoadingOverlay(false);
@@ -990,8 +977,12 @@
       currentUser = savedUser;
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('mainContent').style.display = 'block';
-      addLogoutButton();
-      // Небольшая задержка для инициализации DOM
+      
+      const logoutBtn = document.getElementById('logoutButtonHeader');
+      if (logoutBtn) {
+        logoutBtn.onclick = logout;
+      }
+      
       setTimeout(() => {
         initAppAfterAuth();
       }, 100);
@@ -1054,6 +1045,10 @@
       } else if (lane >= 6 && lane <= 11) {
         marker.classList.add("red");
       }
+      // Вешаем обработчик для показа картинки со столами (как было на кнопке "СТОЛЫ")
+      marker.onclick = () => {
+        document.getElementById("imagePopup").style.display = "flex";
+      };
       columnMarkers.appendChild(marker);
     }
     const timeMarker = document.createElement("div");
@@ -1141,16 +1136,14 @@
     updateMarkersWidth();
   }
   
-  document.getElementById("openImage").onclick = () => { document.getElementById("imagePopup").style.display = "flex"; };
   window.closeImagePopup = function() { document.getElementById("imagePopup").style.display = "none"; }
   
   // Пытаемся восстановить сессию при загрузке страницы
   if (!tryRestoreSession()) {
-    // Если сессии нет, показываем экран логина (он уже показан по умолчанию)
     document.getElementById('loginScreen').style.display = 'flex';
   }
   
-  // Подгружаем FontAwesome для иконок (опционально, но не ломает)
+  // Подгружаем FontAwesome для иконок
   const faLink = document.createElement('link');
   faLink.rel = 'stylesheet';
   faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';

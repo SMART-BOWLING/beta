@@ -675,15 +675,15 @@
       transform: scale(0.97);
     }
     
-    /* Кнопка выхода в углу (теперь в шапке таблицы) */
-    .logout-header-btn {
-      background: #dc2626;
-      color: white;
-      border: none;
-      border-radius: 8px;
+    /* Кнопка "Выйти" теперь такая же, как была кнопка "СТОЛЫ" */
+    .logout-like-tables-btn {
       padding: 6px 12px;
-      font-weight: bold;
+      border: 1px solid white;
+      background: #1a2f40;
+      color: white;
       cursor: pointer;
+      font-weight: bold;
+      border-radius: 8px;
       font-size: 14px;
       transition: all 0.2s;
       width: 100%;
@@ -691,13 +691,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-sizing: border-box;
     }
-    .logout-header-btn:hover {
-      background: #b91c1c;
+    .logout-like-tables-btn:hover {
+      background: #2a4a62;
       transform: scale(1.02);
     }
-    .logout-header-btn:active {
+    .logout-like-tables-btn:active {
       transform: scale(0.98);
     }
   </style>
@@ -733,12 +733,12 @@
             <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
             <th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th>
             <th class="time-col" style="padding: 0;">
-              <button id="logoutButtonHeader" class="logout-header-btn">🚪 Выйти</button>
+              <button id="logoutButtonHeader" class="logout-like-tables-btn">Выйти</button>
             </th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
-       </table>
+      </table>
       
       <div id="columnMarkers" class="column-markers"></div>
     </div>
@@ -951,7 +951,7 @@
         document.getElementById('mainContent').style.display = 'block';
         showLoadingOverlay(false);
         
-        // Привязываем кнопку выхода в шапке
+        // Привязываем кнопку выхода в шапке (стиль как у старой кнопки "СТОЛЫ")
         const logoutBtn = document.getElementById('logoutButtonHeader');
         if (logoutBtn) {
           logoutBtn.onclick = logout;
@@ -1045,7 +1045,7 @@
       } else if (lane >= 6 && lane <= 11) {
         marker.classList.add("red");
       }
-      // Вешаем обработчик для показа картинки со столами (как было на кнопке "СТОЛЫ")
+      // Вешаем обработчик для показа картинки со столами (вместо старой кнопки)
       marker.onclick = () => {
         document.getElementById("imagePopup").style.display = "flex";
       };

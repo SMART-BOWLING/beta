@@ -88,6 +88,35 @@
       .marker {
         width: var(--cell-size);
       }
+      
+      /* Адаптация панели входа для мобильных */
+      .login-container {
+        padding: 20px !important;
+      }
+      .login-title {
+        font-size: 24px !important;
+      }
+      /* Кнопка выхода на мобильных */
+      .logout-btn {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 100;
+        background: #475569;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 8px 15px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        transition: all 0.2s;
+      }
+      .logout-btn:hover {
+        background: #1e293b;
+        transform: scale(1.02);
+      }
     }
 
     body {
@@ -643,17 +672,41 @@
       z-index: 10000;
     }
     
+    /* Центрируем кнопку, убираем все лишние тексты */
     .login-button-wrapper {
       display: flex;
       justify-content: center;
       align-items: center;
     }
     
+    /* Легкий эффект нажатия для кнопки */
     .g_id_signin {
       transition: transform 0.1s ease;
     }
     .g_id_signin:active {
       transform: scale(0.97);
+    }
+    
+    /* Кнопка выхода (десктоп) */
+    .logout-btn {
+      position: fixed;
+      top: 15px;
+      right: 20px;
+      background: #475569;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      padding: 8px 18px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: all 0.2s;
+    }
+    .logout-btn:hover {
+      background: #1e293b;
+      transform: scale(1.03);
     }
   </style>
 </head>
@@ -706,7 +759,7 @@
     <input type="date" id="dateInput" />
     <button class="booking-button" onclick="openModal()">ЗАБРОНИРОВАТЬ</button>
   </div>
-
+  <!-- Кнопка выхода будет добавлена динамически -->
   <div id="modal">
     <div>
       <h3>Введите данные</h3>
@@ -746,7 +799,7 @@
 </div>
 
 <script>
-  // ==================== АВТОРИЗАЦИЯ С АВТОМАТИЧЕСКИМ ВХОДОМ ====================
+  // ==================== АВТОРИЗАЦИЯ С СОХРАНЕНИЕМ СЕССИИ ====================
   const AUTH_SPREADSHEET_ID = '1zwi1CInK3NZ8YRAegRMAdjin6XPacVkAkFsjAiqVE0w';
   const AUTH_SHEET_NAME = '1';
   const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
@@ -755,8 +808,10 @@
   let currentUser = null;
   let gapiInitialized = false;
   
-  // Ключ для хранения email авторизованного пользователя
-  const STORED_EMAIL_KEY = 'billiard_authorized_email';
+  // Ключи для localStorage
+  const STORAGE_USER_KEY = 'billiard_user_data';
+  const STORAGE_EXPIRY_KEY = 'billiard_user_expiry';
+  const SESSION_DURATION_DAYS = 7; // 7 дней авторизации
   
   function parseJwt(token) {
     try {
@@ -827,62 +882,67 @@
     }
   }
   
+  function saveUserToStorage(userData) {
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + SESSION_DURATION_DAYS);
+    localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(userData));
+    localStorage.setItem(STORAGE_EXPIRY_KEY, expiryDate.toISOString());
+  }
+  
+  function getUserFromStorage() {
+    const userRaw = localStorage.getItem(STORAGE_USER_KEY);
+    const expiryRaw = localStorage.getItem(STORAGE_EXPIRY_KEY);
+    if (!userRaw || !expiryRaw) return null;
+    
+    const expiryDate = new Date(expiryRaw);
+    if (expiryDate < new Date()) {
+      // Сессия истекла
+      localStorage.removeItem(STORAGE_USER_KEY);
+      localStorage.removeItem(STORAGE_EXPIRY_KEY);
+      return null;
+    }
+    
+    try {
+      return JSON.parse(userRaw);
+    } catch(e) {
+      return null;
+    }
+  }
+  
+  function clearStoredSession() {
+    localStorage.removeItem(STORAGE_USER_KEY);
+    localStorage.removeItem(STORAGE_EXPIRY_KEY);
+  }
+  
   function showLoadingOverlay(show) {
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) overlay.style.display = show ? 'flex' : 'none';
   }
   
-  // Сохраняем email авторизованного пользователя
-  function saveAuthorizedEmail(email) {
-    localStorage.setItem(STORED_EMAIL_KEY, email);
-  }
-  
-  // Получаем сохраненный email
-  function getStoredEmail() {
-    return localStorage.getItem(STORED_EMAIL_KEY);
-  }
-  
-  // Очищаем сохраненную авторизацию
-  function clearStoredAuth() {
-    localStorage.removeItem(STORED_EMAIL_KEY);
-  }
-  
-  // Функция входа пользователя
-  function loginUser(userData) {
-    currentUser = userData;
-    saveAuthorizedEmail(userData.email);
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'block';
-    initAppAfterAuth();
-  }
-  
-  // Попытка автоматического входа по сохраненному email
-  async function tryAutoLogin() {
-    const savedEmail = getStoredEmail();
-    if (!savedEmail) return false;
+  // Функция добавления кнопки выхода
+  function addLogoutButton() {
+    // Удаляем старую, если есть
+    const oldBtn = document.getElementById('dynamicLogoutBtn');
+    if (oldBtn) oldBtn.remove();
     
-    try {
-      showLoadingOverlay(true);
-      const checkResult = await checkEmailInSheet(savedEmail);
-      if (checkResult.found) {
-        currentUser = {
-          email: savedEmail,
-          name: checkResult.name || savedEmail.split('@')[0],
-          role: checkResult.role || ''
-        };
-        showLoadingOverlay(false);
-        return true;
-      } else {
-        // Email больше не в списке разрешенных
-        clearStoredAuth();
-        showLoadingOverlay(false);
-        return false;
+    const logoutBtn = document.createElement('button');
+    logoutBtn.id = 'dynamicLogoutBtn';
+    logoutBtn.textContent = '🚪 Выйти';
+    logoutBtn.className = 'logout-btn';
+    logoutBtn.onclick = () => {
+      if (confirm('Вы уверены, что хотите выйти из системы?')) {
+        clearStoredSession();
+        currentUser = null;
+        document.getElementById('mainContent').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'flex';
+        // Очищаем выбранные интервалы
+        if (typeof intervalsByLane !== 'undefined') {
+          for(let l in intervalsByLane) intervalsByLane[l] = [];
+          if (typeof updateTableSelection === 'function') updateTableSelection();
+        }
       }
-    } catch (e) {
-      console.error('Auto login error:', e);
-      showLoadingOverlay(false);
-      return false;
-    }
+    };
+    document.body.appendChild(logoutBtn);
   }
   
   window.handleCredentialResponse = async function(response) {
@@ -902,10 +962,14 @@
           role: checkResult.role || '',
           picture: payload.picture
         };
-        saveAuthorizedEmail(email);
+        // Сохраняем в localStorage
+        saveUserToStorage(currentUser);
+        
+        // Успешный вход
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('mainContent').style.display = 'block';
         showLoadingOverlay(false);
+        addLogoutButton(); // добавляем кнопку выхода
         initAppAfterAuth();
       } else {
         showLoadingOverlay(false);
@@ -919,18 +983,22 @@
     }
   };
   
-  // Функция выхода
-  window.logout = function() {
-    clearStoredAuth();
-    currentUser = null;
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('mainContent').style.display = 'none';
-    // Очищаем данные таблицы
-    if (typeof intervalsByLane !== 'undefined') {
-      for (let l in intervalsByLane) delete intervalsByLane[l];
-      if (typeof updateTableSelection === 'function') updateTableSelection();
+  // Проверка сохраненной сессии при загрузке страницы
+  function tryRestoreSession() {
+    const savedUser = getUserFromStorage();
+    if (savedUser && savedUser.email) {
+      currentUser = savedUser;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      addLogoutButton();
+      // Небольшая задержка для инициализации DOM
+      setTimeout(() => {
+        initAppAfterAuth();
+      }, 100);
+      return true;
     }
-  };
+    return false;
+  }
   
   // ==================== ОСНОВНАЯ ЛОГИКА БРОНИРОВАНИЯ ====================
   
@@ -1076,21 +1144,13 @@
   document.getElementById("openImage").onclick = () => { document.getElementById("imagePopup").style.display = "flex"; };
   window.closeImagePopup = function() { document.getElementById("imagePopup").style.display = "none"; }
   
-  // ==================== ЗАПУСК: ПРОВЕРЯЕМ СОХРАНЕННУЮ АВТОРИЗАЦИЮ ====================
-  (async function() {
-    const autoLogged = await tryAutoLogin();
-    if (autoLogged && currentUser) {
-      // Автоматический вход успешен
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('mainContent').style.display = 'block';
-      initAppAfterAuth();
-    } else {
-      // Показываем экран входа
-      document.getElementById('loginScreen').style.display = 'flex';
-      document.getElementById('mainContent').style.display = 'none';
-    }
-  })();
+  // Пытаемся восстановить сессию при загрузке страницы
+  if (!tryRestoreSession()) {
+    // Если сессии нет, показываем экран логина (он уже показан по умолчанию)
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
   
+  // Подгружаем FontAwesome для иконок (опционально, но не ломает)
   const faLink = document.createElement('link');
   faLink.rel = 'stylesheet';
   faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';

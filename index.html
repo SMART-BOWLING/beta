@@ -7,6 +7,8 @@
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png" />
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Google API Client для Sheets -->
+  <script src="https://apis.google.com/js/api.js"></script>
   <style>
     :root {
       --cell-size: 50px;
@@ -89,15 +91,6 @@
         width: var(--cell-size);
       }
       
-      /* Адаптация панели пользователя */
-      .user-bar {
-        padding: 4px 12px !important;
-      }
-      
-      .user-email {
-        display: none;
-      }
-      
       .nav {
         padding: 0 12px !important;
         height: 56px !important;
@@ -105,10 +98,6 @@
       
       .nav-title {
         font-size: 16px !important;
-      }
-      
-      .nav-title i {
-        font-size: 18px !important;
       }
     }
 
@@ -123,7 +112,7 @@
       min-height: 100vh;
     }
 
-    /* Панель навигации с авторизацией */
+    /* Панель навигации */
     .nav {
       position: sticky;
       top: 0;
@@ -713,7 +702,7 @@
     .loading-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(0, 0, 0, 0.7);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -784,8 +773,7 @@
   <div id="g_id_onload" 
        data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com" 
        data-callback="handleCredentialResponse" 
-       data-auto_prompt="false"
-       data-auto_select="false">
+       data-auto_prompt="false">
   </div>
   <div class="g_id_signin" 
        data-type="standard" 
@@ -799,12 +787,11 @@
 
 <!-- Основной контент (скрыт до авторизации) -->
 <div id="mainContent" style="display: none; width: 100%;">
-  <!-- Панель пользователя -->
   <div class="nav">
     <div class="nav-title">
       <i class="fas fa-table-tennis"></i> LUCKY STRIKE
     </div>
-    <div id="userInfo" class="user-bar" style="display: flex;">
+    <div id="userInfo" class="user-bar">
       <img id="userPic" class="user-pic" src="" alt="">
       <span id="userEmail" class="user-email"></span>
       <button id="logoutButton" class="logout-btn" onclick="signOut()"><i class="fas fa-sign-out-alt"></i> Выйти</button>
@@ -821,10 +808,10 @@
             <th class="time-col">
               <button id="openImage" style="padding:6px 12px; border:1px solid white; background:#1a2f40; color:white; cursor:pointer; font-weight:bold; border-radius:8px;">СТОЛЫ</button>
             </th>
-           </tr>
+          </tr>
         </thead>
         <tbody id="tableBody"></tbody>
-      </table>
+      追赶
       
       <div id="columnMarkers" class="column-markers"></div>
     </div>
@@ -877,13 +864,49 @@
 </div>
 
 <script>
-  // ==================== КОНФИГУРАЦИЯ АВТОРИЗАЦИИ ====================
+  // ==================== КОНФИГУРАЦИЯ ====================
   const AUTH_SPREADSHEET_ID = '1zwi1CInK3NZ8YRAegRMAdjin6XPacVkAkFsjAiqVE0w';
-  const AUTH_SHEET_NAME = '1';
+  const AUTH_SHEET_NAME = 'Sheet1';
   const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxfRLDGA29FrqKS61HmYN_FUnDwOydeCaEdeW4oc4wyroQzvb4h1OnwQ5HeotIHhcj9/exec";
   
   let currentUser = null;
+  let gapiInitialized = false;
+  
+  // Загрузка и инициализация GAPI
+  function initGapi() {
+    return new Promise((resolve, reject) => {
+      if (gapiInitialized) {
+        resolve();
+        return;
+      }
+      
+      gapi.load('client', {
+        callback: async () => {
+          try {
+            await gapi.client.init({
+              apiKey: API_KEY,
+              discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+            });
+            gapiInitialized = true;
+            console.log('GAPI initialized successfully');
+            resolve();
+          } catch (error) {
+            console.error('GAPI init error:', error);
+            reject(error);
+          }
+        },
+        onerror: (err) => {
+          console.error('GAPI load error:', err);
+          reject(err);
+        },
+        timeout: 10000,
+        ontimeout: () => {
+          reject(new Error('GAPI load timeout'));
+        }
+      });
+    });
+  }
   
   function parseJwt(token) {
     try {
@@ -899,28 +922,11 @@
     }
   }
   
-  function loadSheetsAPI() {
-    return new Promise((resolve, reject) => {
-      if (window.gapi && gapi.client) {
-        resolve();
-        return;
-      }
-      gapi.load('client', {
-        callback: () => resolve(),
-        onerror: () => reject('Ошибка загрузки Google API'),
-        timeout: 8000,
-        ontimeout: () => reject('Таймаут загрузки Google API')
-      });
-    });
-  }
-  
   async function checkEmailInSheet(email) {
     try {
-      await loadSheetsAPI();
-      await gapi.client.init({
-        apiKey: API_KEY,
-        discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-      });
+      await initGapi();
+      
+      console.log('Checking email:', email);
       
       const response = await gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: AUTH_SPREADSHEET_ID,
@@ -928,31 +934,48 @@
       });
       
       const rows = response.result.values;
+      console.log('Sheet rows:', rows);
+      
       if (!rows || rows.length === 0) {
+        console.log('Sheet is empty');
         return { found: false };
       }
       
+      // Пропускаем заголовок (первая строка)
       for (let i = 1; i < rows.length; i++) {
-        if (!rows[i][0]) continue;
+        if (!rows[i] || !rows[i][0]) continue;
         const rowEmail = rows[i][0].toLowerCase().trim();
+        console.log(`Comparing: ${rowEmail} with ${email}`);
         if (rowEmail === email) {
+          console.log('Email found in sheet at row', i);
           const userName = rows[i][1] ? rows[i][1].trim() : email.split('@')[0];
           const userRole = rows[i][2] ? rows[i][2].trim() : '';
           return { found: true, name: userName, role: userRole };
         }
       }
+      
+      console.log('Email not found in sheet');
       return { found: false };
+      
     } catch (error) {
       console.error('Sheets API error:', error);
-      return { found: false, error: true };
+      return { found: false, error: true, message: error.message };
     }
+  }
+  
+  function showLoadingOverlay(show) {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.style.display = show ? 'flex' : 'none';
   }
   
   async function handleCredentialResponse(response) {
     try {
       showLoadingOverlay(true);
+      
       const payload = parseJwt(response.credential);
       const email = payload.email.toLowerCase().trim();
+      
+      console.log('User email:', email);
       
       const checkResult = await checkEmailInSheet(email);
       
@@ -972,7 +995,7 @@
     } catch (e) {
       console.error("Error processing Google response:", e);
       showLoadingOverlay(false);
-      alert('Ошибка аутентификации');
+      alert('Ошибка аутентификации: ' + (e.message || 'Неизвестная ошибка'));
     }
   }
   
@@ -994,11 +1017,6 @@
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('mainContent').style.display = 'none';
     currentUser = null;
-  }
-  
-  function showLoadingOverlay(show) {
-    const overlay = document.getElementById('loadingOverlay');
-    if (overlay) overlay.style.display = show ? 'flex' : 'none';
   }
   
   // ==================== ОСНОВНАЯ ЛОГИКА БРОНИРОВАНИЯ ====================
@@ -1065,7 +1083,6 @@
   createMarkers();
 
   window.addEventListener('resize', updateMarkersWidth);
-  window.addEventListener('load', updateMarkersWidth);
   setTimeout(updateMarkersWidth, 100);
 
   let intervalsByLane = {}, currentLane = null, currentStart = null, currentBookingId = null;
@@ -1145,7 +1162,7 @@
   document.getElementById("openImage").onclick = () => { document.getElementById("imagePopup").style.display = "flex"; };
   function closeImagePopup() { document.getElementById("imagePopup").style.display = "none"; }
   
-  // Подгружаем FontAwesome для иконок
+  // Подгружаем FontAwesome
   const faLink = document.createElement('link');
   faLink.rel = 'stylesheet';
   faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';

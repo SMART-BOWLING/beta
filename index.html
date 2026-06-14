@@ -746,7 +746,7 @@
 </div>
 
 <script>
-  // ==================== АВТОРИЗАЦИЯ С СОХРАНЕНИЕМ СЕССИИ ====================
+  // ==================== АВТОРИЗАЦИЯ С АВТОМАТИЧЕСКИМ ВХОДОМ ====================
   const AUTH_SPREADSHEET_ID = '1zwi1CInK3NZ8YRAegRMAdjin6XPacVkAkFsjAiqVE0w';
   const AUTH_SHEET_NAME = '1';
   const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
@@ -755,8 +755,8 @@
   let currentUser = null;
   let gapiInitialized = false;
   
-  // Ключ для хранения сессии в localStorage
-  const SESSION_KEY = 'billiard_user_session';
+  // Ключ для хранения email авторизованного пользователя
+  const STORED_EMAIL_KEY = 'billiard_authorized_email';
   
   function parseJwt(token) {
     try {
@@ -832,68 +832,54 @@
     if (overlay) overlay.style.display = show ? 'flex' : 'none';
   }
   
-  // Сохраняем сессию пользователя
-  function saveUserSession(user) {
-    const sessionData = {
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      picture: user.picture,
-      timestamp: Date.now()
-    };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+  // Сохраняем email авторизованного пользователя
+  function saveAuthorizedEmail(email) {
+    localStorage.setItem(STORED_EMAIL_KEY, email);
   }
   
-  // Загружаем сохраненную сессию
-  function loadUserSession() {
-    const sessionData = localStorage.getItem(SESSION_KEY);
-    if (!sessionData) return null;
-    try {
-      const parsed = JSON.parse(sessionData);
-      // Проверяем, что сессия не старше 30 дней (можно менять)
-      const maxAge = 30 * 24 * 60 * 60 * 1000; // 30 дней
-      if (Date.now() - parsed.timestamp > maxAge) {
-        localStorage.removeItem(SESSION_KEY);
-        return null;
-      }
-      return parsed;
-    } catch (e) {
-      localStorage.removeItem(SESSION_KEY);
-      return null;
-    }
+  // Получаем сохраненный email
+  function getStoredEmail() {
+    return localStorage.getItem(STORED_EMAIL_KEY);
   }
   
-  // Очищаем сессию (выход)
-  function clearUserSession() {
-    localStorage.removeItem(SESSION_KEY);
+  // Очищаем сохраненную авторизацию
+  function clearStoredAuth() {
+    localStorage.removeItem(STORED_EMAIL_KEY);
   }
   
-  // Проверка сохраненной сессии при загрузке страницы
-  async function checkSavedSession() {
-    const savedSession = loadUserSession();
-    if (!savedSession) return false;
+  // Функция входа пользователя
+  function loginUser(userData) {
+    currentUser = userData;
+    saveAuthorizedEmail(userData.email);
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    initAppAfterAuth();
+  }
+  
+  // Попытка автоматического входа по сохраненному email
+  async function tryAutoLogin() {
+    const savedEmail = getStoredEmail();
+    if (!savedEmail) return false;
     
-    // Проверяем, что email все еще в списке разрешенных
     try {
       showLoadingOverlay(true);
-      const checkResult = await checkEmailInSheet(savedSession.email);
+      const checkResult = await checkEmailInSheet(savedEmail);
       if (checkResult.found) {
         currentUser = {
-          email: savedSession.email,
-          name: savedSession.name,
-          role: savedSession.role,
-          picture: savedSession.picture
+          email: savedEmail,
+          name: checkResult.name || savedEmail.split('@')[0],
+          role: checkResult.role || ''
         };
         showLoadingOverlay(false);
         return true;
       } else {
-        // Email больше не в списке — удаляем сессию
-        clearUserSession();
+        // Email больше не в списке разрешенных
+        clearStoredAuth();
         showLoadingOverlay(false);
         return false;
       }
     } catch (e) {
-      console.error('Session check error:', e);
+      console.error('Auto login error:', e);
       showLoadingOverlay(false);
       return false;
     }
@@ -916,9 +902,7 @@
           role: checkResult.role || '',
           picture: payload.picture
         };
-        // Сохраняем сессию
-        saveUserSession(currentUser);
-        
+        saveAuthorizedEmail(email);
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('mainContent').style.display = 'block';
         showLoadingOverlay(false);
@@ -935,15 +919,17 @@
     }
   };
   
-  // Функция для выхода (можно добавить кнопку, но не обязательно)
+  // Функция выхода
   window.logout = function() {
-    clearUserSession();
+    clearStoredAuth();
     currentUser = null;
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('mainContent').style.display = 'none';
     // Очищаем данные таблицы
-    intervalsByLane = {};
-    if (typeof updateTableSelection === 'function') updateTableSelection();
+    if (typeof intervalsByLane !== 'undefined') {
+      for (let l in intervalsByLane) delete intervalsByLane[l];
+      if (typeof updateTableSelection === 'function') updateTableSelection();
+    }
   };
   
   // ==================== ОСНОВНАЯ ЛОГИКА БРОНИРОВАНИЯ ====================
@@ -1090,11 +1076,11 @@
   document.getElementById("openImage").onclick = () => { document.getElementById("imagePopup").style.display = "flex"; };
   window.closeImagePopup = function() { document.getElementById("imagePopup").style.display = "none"; }
   
-  // ==================== ЗАПУСК: ПРОВЕРЯЕМ СОХРАНЕННУЮ СЕССИЮ ====================
+  // ==================== ЗАПУСК: ПРОВЕРЯЕМ СОХРАНЕННУЮ АВТОРИЗАЦИЮ ====================
   (async function() {
-    const hasValidSession = await checkSavedSession();
-    if (hasValidSession && currentUser) {
-      // Автоматически входим по сохраненной сессии
+    const autoLogged = await tryAutoLogin();
+    if (autoLogged && currentUser) {
+      // Автоматический вход успешен
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('mainContent').style.display = 'block';
       initAppAfterAuth();

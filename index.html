@@ -88,14 +88,6 @@
       .marker {
         width: var(--cell-size);
       }
-      
-      /* Адаптация панели входа для мобильных */
-      .login-container {
-        padding: 20px !important;
-      }
-      .login-title {
-        font-size: 24px !important;
-      }
     }
 
     body {
@@ -651,14 +643,12 @@
       z-index: 10000;
     }
     
-    /* Центрируем кнопку, убираем все лишние тексты */
     .login-button-wrapper {
       display: flex;
       justify-content: center;
       align-items: center;
     }
     
-    /* Легкий эффект нажатия для кнопки */
     .g_id_signin {
       transition: transform 0.1s ease;
     }
@@ -756,7 +746,7 @@
 </div>
 
 <script>
-  // ==================== АВТОРИЗАЦИЯ ====================
+  // ==================== АВТОРИЗАЦИЯ С СОХРАНЕНИЕМ СЕССИИ ====================
   const AUTH_SPREADSHEET_ID = '1zwi1CInK3NZ8YRAegRMAdjin6XPacVkAkFsjAiqVE0w';
   const AUTH_SHEET_NAME = '1';
   const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
@@ -764,6 +754,9 @@
   
   let currentUser = null;
   let gapiInitialized = false;
+  
+  // Ключ для хранения сессии в localStorage
+  const SESSION_KEY = 'billiard_user_session';
   
   function parseJwt(token) {
     try {
@@ -839,6 +832,73 @@
     if (overlay) overlay.style.display = show ? 'flex' : 'none';
   }
   
+  // Сохраняем сессию пользователя
+  function saveUserSession(user) {
+    const sessionData = {
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      picture: user.picture,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+  }
+  
+  // Загружаем сохраненную сессию
+  function loadUserSession() {
+    const sessionData = localStorage.getItem(SESSION_KEY);
+    if (!sessionData) return null;
+    try {
+      const parsed = JSON.parse(sessionData);
+      // Проверяем, что сессия не старше 30 дней (можно менять)
+      const maxAge = 30 * 24 * 60 * 60 * 1000; // 30 дней
+      if (Date.now() - parsed.timestamp > maxAge) {
+        localStorage.removeItem(SESSION_KEY);
+        return null;
+      }
+      return parsed;
+    } catch (e) {
+      localStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+  }
+  
+  // Очищаем сессию (выход)
+  function clearUserSession() {
+    localStorage.removeItem(SESSION_KEY);
+  }
+  
+  // Проверка сохраненной сессии при загрузке страницы
+  async function checkSavedSession() {
+    const savedSession = loadUserSession();
+    if (!savedSession) return false;
+    
+    // Проверяем, что email все еще в списке разрешенных
+    try {
+      showLoadingOverlay(true);
+      const checkResult = await checkEmailInSheet(savedSession.email);
+      if (checkResult.found) {
+        currentUser = {
+          email: savedSession.email,
+          name: savedSession.name,
+          role: savedSession.role,
+          picture: savedSession.picture
+        };
+        showLoadingOverlay(false);
+        return true;
+      } else {
+        // Email больше не в списке — удаляем сессию
+        clearUserSession();
+        showLoadingOverlay(false);
+        return false;
+      }
+    } catch (e) {
+      console.error('Session check error:', e);
+      showLoadingOverlay(false);
+      return false;
+    }
+  }
+  
   window.handleCredentialResponse = async function(response) {
     try {
       showLoadingOverlay(true);
@@ -856,7 +916,9 @@
           role: checkResult.role || '',
           picture: payload.picture
         };
-        // Успешный вход
+        // Сохраняем сессию
+        saveUserSession(currentUser);
+        
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('mainContent').style.display = 'block';
         showLoadingOverlay(false);
@@ -871,6 +933,17 @@
       showLoadingOverlay(false);
       alert('Ошибка аутентификации');
     }
+  };
+  
+  // Функция для выхода (можно добавить кнопку, но не обязательно)
+  window.logout = function() {
+    clearUserSession();
+    currentUser = null;
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('mainContent').style.display = 'none';
+    // Очищаем данные таблицы
+    intervalsByLane = {};
+    if (typeof updateTableSelection === 'function') updateTableSelection();
   };
   
   // ==================== ОСНОВНАЯ ЛОГИКА БРОНИРОВАНИЯ ====================
@@ -1017,7 +1090,21 @@
   document.getElementById("openImage").onclick = () => { document.getElementById("imagePopup").style.display = "flex"; };
   window.closeImagePopup = function() { document.getElementById("imagePopup").style.display = "none"; }
   
-  // Подгружаем FontAwesome для иконок (опционально, но не ломает)
+  // ==================== ЗАПУСК: ПРОВЕРЯЕМ СОХРАНЕННУЮ СЕССИЮ ====================
+  (async function() {
+    const hasValidSession = await checkSavedSession();
+    if (hasValidSession && currentUser) {
+      // Автоматически входим по сохраненной сессии
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      initAppAfterAuth();
+    } else {
+      // Показываем экран входа
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('mainContent').style.display = 'none';
+    }
+  })();
+  
   const faLink = document.createElement('link');
   faLink.rel = 'stylesheet';
   faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';

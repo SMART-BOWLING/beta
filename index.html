@@ -29,17 +29,80 @@
         --cell-size: calc((100vw - 20px) / 13);
         --border-spacing: 2px;
       }
-      table { width: auto !important; margin: 0 auto; }
-      td, th { aspect-ratio: 1; width: var(--cell-size) !important; height: var(--cell-size) !important; min-width: auto !important; }
-      body { padding: 5px; }
-      .table-container { padding: 0; width: 100%; }
-      #controls { display: flex; flex-direction: row; justify-content: center; align-items: stretch; gap: 12px; width: 100%; max-width: 480px; margin: 4px auto 0; padding: 0 5px; box-sizing: border-box; }
-      #dateInput, .booking-button { flex: 1; margin: 0; min-width: 0; box-sizing: border-box; }
-      .column-markers { gap: var(--border-spacing); justify-content: center; }
-      .marker { width: var(--cell-size); }
-      .nav { padding: 0 12px !important; height: 56px !important; }
-      .nav-title { font-size: 16px !important; }
-      .user-email { display: none; }
+      
+      table {
+        width: auto !important;
+        margin: 0 auto;
+      }
+      
+      td, th {
+        aspect-ratio: 1;
+        width: var(--cell-size) !important;
+        height: var(--cell-size) !important;
+        min-width: auto !important;
+        max-width: none !important;
+      }
+      
+      body {
+        padding: 5px;
+      }
+      
+      .table-container {
+        padding: 0;
+        width: 100%;
+      }
+      
+      #controls {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: stretch;
+        gap: 12px;
+        width: 100%;
+        max-width: 480px;
+        margin: 4px auto 0;
+        padding: 0 5px;
+        box-sizing: border-box;
+      }
+      
+      #dateInput {
+        flex: 1;
+        margin: 0;
+        min-width: 0;
+        box-sizing: border-box;
+      }
+      
+      .booking-button {
+        flex: 1;
+        margin: 0;
+        min-width: 0;
+        text-align: center;
+        box-sizing: border-box;
+      }
+      
+      .column-markers {
+        gap: var(--border-spacing);
+        justify-content: center;
+      }
+      
+      .marker {
+        width: var(--cell-size);
+      }
+      
+      /* Адаптация панели пользователя под мобильные */
+      .user-bar {
+        padding: 4px 8px !important;
+        gap: 6px !important;
+      }
+      
+      .user-email {
+        display: none;
+      }
+      
+      .logout-btn {
+        padding: 4px 8px !important;
+        font-size: 12px !important;
+      }
     }
 
     body {
@@ -53,37 +116,18 @@
       min-height: 100vh;
     }
 
-    .nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(26, 47, 64, 0.95);
-      backdrop-filter: blur(12px);
+    /* Панель пользователя поверх основного контента (как шапка) */
+    .user-bar-top {
+      display: flex;
+      justify-content: flex-end;
       width: 100%;
       max-width: 100vw;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      height: 60px;
+      padding: 8px 15px;
       box-sizing: border-box;
-      margin-bottom: 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 5px;
     }
     
-    .nav-title {
-      font-size: 20px;
-      font-weight: 600;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      letter-spacing: 1px;
-    }
-    
-    .nav-title i { font-size: 22px; color: #ef4444; }
-    
-    .user-bar {
+    .user-info {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -94,106 +138,640 @@
       border: 0.5px solid rgba(255,255,255,0.2);
     }
     
-    .user-pic { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.3); }
-    .user-email { font-size: 13px; font-weight: 500; color: white; }
-    .logout-btn { background: none; border: none; padding: 6px 10px; cursor: pointer; color: rgba(255,255,255,0.7); font-size: 14px; border-radius: 20px; transition: all 0.2s ease; }
-    .logout-btn:hover { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .user-pic {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    
+    .user-email {
+      font-size: 13px;
+      font-weight: 500;
+      color: white;
+    }
+    
+    .logout-btn {
+      background: none;
+      border: none;
+      padding: 6px 12px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.7);
+      font-size: 13px;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+    }
+    
+    .logout-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
 
-    .table-container { position: relative; width: 100%; max-width: 100vw; overflow-x: auto; margin: 0 auto; display: flex; flex-direction: column; align-items: center; background: transparent; }
-    table { border-collapse: separate; border-spacing: var(--border-spacing); table-layout: fixed; user-select: none; touch-action: manipulation; margin: 0 auto; background: #1a2f40; padding: var(--border-spacing); }
-    .table-wrapper { display: inline-block; position: relative; margin: 0 auto; }
-    thead th { position: sticky; top: 0; color: white; z-index: 2; transition: background-color 0.2s, color 0.2s; font-weight: 600; letter-spacing: 0.5px; }
-    thead th:nth-child(1), thead th:nth-child(2), thead th:nth-child(3), thead th:nth-child(4), thead th:nth-child(5), thead th:nth-child(6), thead th:nth-child(7), thead th:nth-child(8), thead th:nth-child(9), thead th:nth-child(10), thead th:nth-child(11), thead th:nth-child(12), thead th.time-col { background: #1a2f40 !important; }
-    th.time-col, .time-right { background: #1a2f40 !important; color: white; font-weight: bold; cursor: pointer; }
-    th, td { width: var(--cell-size); height: var(--cell-size); border: none; text-align: center; vertical-align: middle; box-sizing: border-box; background: white !important; font-size: 12px; position: relative; }
-    th.highlight-header { background: #1a2f40 !important; color: white !important; }
-    td.vertical-line::before, td.vertical-line::after { content: ""; position: absolute; top: 0; bottom: 0; width: 3px; background-color: var(--highlight-color); z-index: 10; }
+    .table-container {
+      position: relative;
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: auto;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: transparent;
+    }
+
+    table {
+      border-collapse: separate;
+      border-spacing: var(--border-spacing);
+      table-layout: fixed;
+      user-select: none;
+      touch-action: manipulation;
+      margin: 0 auto;
+      background: #1a2f40;
+      padding: var(--border-spacing);
+    }
+
+    .table-wrapper {
+      display: inline-block;
+      position: relative;
+      margin: 0 auto;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      color: white;
+      z-index: 2;
+      transition: background-color 0.2s, color 0.2s;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    thead th:nth-child(1),
+    thead th:nth-child(2),
+    thead th:nth-child(3),
+    thead th:nth-child(4),
+    thead th:nth-child(5),
+    thead th:nth-child(6),
+    thead th:nth-child(7),
+    thead th:nth-child(8),
+    thead th:nth-child(9),
+    thead th:nth-child(10),
+    thead th:nth-child(11),
+    thead th:nth-child(12),
+    thead th.time-col {
+      background: #1a2f40 !important;
+    }
+
+    th.time-col, .time-right {
+      background: #1a2f40 !important;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    th, td {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      border: none;
+      text-align: center;
+      vertical-align: middle;
+      box-sizing: border-box;
+      background: white !important;
+      font-size: 12px;
+      position: relative;
+    }
+
+    th.highlight-header {
+      background: #1a2f40 !important;
+      color: white !important;
+    }
+
+    td.vertical-line::before,
+    td.vertical-line::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background-color: var(--highlight-color);
+      z-index: 10;
+    }
     td.vertical-line::before { left: -1px; }
-    td.vertical-line::after { right: -1px; }
-    td.slot { cursor: pointer; transition: all 0.2s ease; }
-    td.slot:hover { background: #f0f0f0 !important; }
-    td.selected { background: #1a2f40 !important; border: none !important; z-index: 1; color: white; font-weight: 500; }
-    td.start-time-chosen { background: #ef4444 !important; border: none !important; z-index: 2; color: white; }
-    .column-markers { display: flex; gap: var(--border-spacing); margin-top: 5px; padding: 0; }
-    .marker { height: 6px; border-radius: 3px; }
-    .marker.blue { background-color: #3b82f6; box-shadow: 0 0 2px rgba(59,130,246,0.5); }
-    .marker.green { background-color: #22c55e; box-shadow: 0 0 2px rgba(34,197,94,0.5); }
-    .marker.red { background-color: #ef4444; box-shadow: 0 0 2px rgba(239,68,68,0.5); }
-    .marker.empty { background: transparent; }
-    #cardsContainer { margin: 8px auto 6px; padding: 0; max-width: 100vw; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; box-sizing: border-box; }
-    .booking-card { position: relative; background: var(--card-color); border: 1px solid var(--main-color); border-radius: 12px; padding: 12px 45px 12px 15px; color: var(--main-color); font-weight: 600; font-size: 14px; white-space: nowrap; user-select: none; box-shadow: 0 3px 8px rgba(30, 58, 138, 0.15); transition: transform 0.2s; }
-    .booking-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(30, 58, 138, 0.2); }
-    .booking-card .close-btn { position: absolute; top: 0; right: 0; transform: translate(50%, -50%); color: var(--main-color); background: white; border: 1px solid var(--main-color); border-radius: 50%; font-weight: bold; font-size: 18px; line-height: 1; cursor: pointer; user-select: none; padding: 6px 10px; box-shadow: 0 0 8px rgba(30, 58, 138, 0.3); transition: all 0.2s ease; }
-    .booking-card .close-btn:hover { background-color: var(--main-color); color: white; transform: translate(50%, -50%) scale(1.1); }
-    #controls { margin-top: 6px; display: flex; justify-content: center; align-items: stretch; gap: 15px; flex-wrap: wrap; width: 100%; max-width: 500px; }
-    #dateInput, .booking-button { flex: 1 1 0; min-width: 140px; padding: 8px 12px; font-size: 16px; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.2s ease; text-align: center; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    #dateInput { background: white; color: #1e293b; border: 1px solid white; box-shadow: 0 2px 5px rgba(26, 47, 64, 0.1); }
-    #dateInput:hover { background: #f8fafc; border-color: white; transform: translateY(-1px); }
-    .booking-button { background: #1a2f40; color: white; border: 1px solid white; box-shadow: 0 4px 8px rgba(26, 47, 64, 0.2); letter-spacing: 0.5px; }
-    .booking-button:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(26, 47, 64, 0.3); background: #1f3e55; }
-    .booking-button:active, .booking-button.pressed { transform: translateY(1px); background: #1a2f40; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2); }
-    #modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #00000066; justify-content: center; align-items: center; z-index: 1000; }
-    #modal > div { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
-    #modal h3 { margin-top: 0; color: var(--custom-dark); text-align: center; font-size: 1.5rem; }
-    #modal label { display: block; margin-bottom: 15px; color: #334155; font-weight: 500; }
-    #modal input, #modal textarea { width: 100%; padding: 10px 12px; box-sizing: border-box; margin-top: 6px; font-size: 16px; border: 1px solid #cbd5e1; border-radius: 8px; transition: border 0.3s; }
-    #modal input:focus, #modal textarea:focus { outline: none; border-color: var(--custom-dark); box-shadow: 0 0 0 3px rgba(26, 47, 64, 0.1); }
-    #modal button { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: all 0.2s; }
-    #modal button:first-of-type { background: #1a2f40; color: white; }
-    #modal button:first-of-type:hover { transform: translateY(-2px); }
-    #modal button:last-of-type { margin-left: 10px; background: #f1f5f9; color: #64748b; }
-    .image-popup { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; }
-    .image-popup .popup-content { position: relative; background: white; padding: 20px; border-radius: 12px; max-width: 90vw; max-height: 90vh; overflow: auto; }
-    .image-popup .popup-content img { width: 100%; height: auto; border-radius: 8px; }
-    .image-popup .close-popup { position: absolute; top: 10px; right: 10px; background: var(--custom-dark); color: white; border: none; border-radius: 50%; width: 35px; height: 35px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .image-popup .close-popup:hover { background: var(--highlight-color); }
-    #slidersContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
-    .existing-slider { position: absolute; background: #1a2f40; border: none; border-radius: 6px; pointer-events: auto; box-sizing: border-box; cursor: pointer; font-size: 10px; font-weight: bold; padding: 2px 4px; user-select: none; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.2s; }
-    .existing-slider:hover { transform: scale(1.02); z-index: 10; }
-    .existing-slider.confirmed { background: var(--confirmed-color); }
-    .existing-slider.rejected { background: var(--rejected-color); }
-    .existing-slider::before, .existing-slider::after { content: ""; position: absolute; left: 0; right: 0; height: 3px; background-color: #ef4444; z-index: 15; }
-    .existing-slider::before { top: 0; border-radius: 6px 6px 0 0; }
-    .existing-slider::after { bottom: 0; border-radius: 0 0 6px 6px; }
-    .booking-info-popup { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
-    .booking-info-popup .popup-content { position: relative; background: white; padding: 25px; border-radius: 12px; max-width: 90vw; width: 400px; }
-    .booking-info-popup .close-btn { position: absolute; top: 12px; right: 12px; background: var(--custom-dark); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .booking-info-popup .close-btn:hover { background: var(--highlight-color); }
-    .booking-info-popup h3 { margin-top: 0; color: var(--custom-dark); text-align: center; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px; }
-    .info-row { margin-bottom: 15px; display: flex; justify-content: space-between; }
-    .info-label { font-weight: 600; color: var(--custom-dark); min-width: 120px; }
-    .info-value { text-align: right; flex-grow: 1; }
-    .confirmation-buttons { display: flex; justify-content: space-between; margin-top: 25px; gap: 15px; }
-    .confirmation-buttons button { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; flex: 1; transition: 0.2s; }
+    td.vertical-line::after  { right: -1px; }
+
+    td.slot { 
+      cursor: pointer; 
+      transition: all 0.2s ease;
+    }
+    
+    td.slot:hover {
+      background: #f0f0f0 !important;
+    }
+
+    td.selected {
+      background: #1a2f40 !important;
+      border: none !important;
+      z-index: 1;
+      color: white;
+      font-weight: 500;
+    }
+
+    td.start-time-chosen {
+      background: #ef4444 !important;
+      border: none !important;
+      z-index: 2;
+      color: white;
+    }
+
+    .column-markers {
+      display: flex;
+      gap: var(--border-spacing);
+      margin-top: 5px;
+      padding: 0;
+    }
+
+    .marker {
+      height: 6px;
+      border-radius: 3px;
+    }
+
+    .marker.blue {
+      background-color: #3b82f6;
+      box-shadow: 0 0 2px rgba(59,130,246,0.5);
+    }
+
+    .marker.green {
+      background-color: #22c55e;
+      box-shadow: 0 0 2px rgba(34,197,94,0.5);
+    }
+
+    .marker.red {
+      background-color: #ef4444;
+      box-shadow: 0 0 2px rgba(239,68,68,0.5);
+    }
+
+    .marker.empty {
+      background: transparent;
+    }
+
+    #cardsContainer {
+      margin: 8px auto 6px;
+      padding: 0;
+      max-width: 100vw;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+
+    .booking-card {
+      position: relative;
+      background: var(--card-color);
+      border: 1px solid var(--main-color);
+      border-radius: 12px;
+      padding: 12px 45px 12px 15px;
+      color: var(--main-color);
+      font-weight: 600;
+      font-size: 14px;
+      white-space: nowrap;
+      user-select: none;
+      box-shadow: 0 3px 8px rgba(30, 58, 138, 0.15);
+      transition: transform 0.2s;
+    }
+    
+    .booking-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(30, 58, 138, 0.2);
+    }
+    
+    .booking-card .close-btn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      transform: translate(50%, -50%);
+      color: var(--main-color);
+      background: white;
+      border: 1px solid var(--main-color);
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      user-select: none;
+      padding: 6px 10px;
+      box-shadow: 0 0 8px rgba(30, 58, 138, 0.3);
+      transition: all 0.2s ease;
+    }
+    .booking-card .close-btn:hover {
+      background-color: var(--main-color);
+      color: white;
+      transform: translate(50%, -50%) scale(1.1);
+    }
+
+    #controls {
+      margin-top: 6px;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      gap: 15px;
+      flex-wrap: wrap;
+      width: 100%;
+      max-width: 500px;
+    }
+    
+    #dateInput, .booking-button {
+      flex: 1 1 0;
+      min-width: 140px;
+      padding: 8px 12px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    
+    #dateInput {
+      background: white;
+      color: #1e293b;
+      border: 1px solid white;
+      box-shadow: 0 2px 5px rgba(26, 47, 64, 0.1);
+    }
+    
+    #dateInput:hover {
+      background: #f8fafc;
+      border-color: white;
+      transform: translateY(-1px);
+    }
+    
+    .booking-button {
+      background: #1a2f40;
+      color: white;
+      border: 1px solid white;
+      box-shadow: 0 4px 8px rgba(26, 47, 64, 0.2);
+      letter-spacing: 0.5px;
+    }
+    
+    .booking-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(26, 47, 64, 0.3);
+      background: #1f3e55;
+    }
+    
+    .booking-button:active, .booking-button.pressed {
+      transform: translateY(1px);
+      background: #1a2f40;
+      box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+    }
+
+    #modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #00000066;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #modal > div {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    #modal h3 { 
+      margin-top: 0; 
+      color: var(--custom-dark);
+      text-align: center;
+      font-size: 1.5rem;
+    }
+    #modal label { 
+      display: block; 
+      margin-bottom: 15px; 
+      color: #334155;
+      font-weight: 500;
+    }
+    #modal input, #modal textarea {
+      width: 100%;
+      padding: 10px 12px;
+      box-sizing: border-box;
+      margin-top: 6px;
+      font-size: 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      transition: border 0.3s;
+    }
+    #modal input:focus, #modal textarea:focus {
+      outline: none;
+      border-color: var(--custom-dark);
+      box-shadow: 0 0 0 3px rgba(26, 47, 64, 0.1);
+    }
+    #modal button {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    #modal button:first-of-type {
+      background: #1a2f40;
+      color: white;
+    }
+    #modal button:first-of-type:hover {
+      transform: translateY(-2px);
+    }
+    #modal button:last-of-type {
+      margin-left: 10px;
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .image-popup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.8);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+    }
+    .image-popup .popup-content {
+      position: relative;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow: auto;
+    }
+    .image-popup .popup-content img {
+      width: 100%; height: auto; border-radius: 8px;
+    }
+    .image-popup .close-popup {
+      position: absolute;
+      top: 10px; right: 10px;
+      background: var(--custom-dark);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 35px; height: 35px; font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .image-popup .close-popup:hover {
+      background: var(--highlight-color);
+    }
+
+    #slidersContainer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .existing-slider {
+      position: absolute;
+      background: #1a2f40;
+      border: none;
+      border-radius: 6px;
+      pointer-events: auto;
+      box-sizing: border-box;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 2px 4px;
+      user-select: none;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+    .existing-slider:hover {
+      transform: scale(1.02);
+      z-index: 10;
+    }
+    .existing-slider.confirmed {
+      background: var(--confirmed-color);
+    }
+    .existing-slider.rejected {
+      background: var(--rejected-color);
+    }
+    
+    .existing-slider::before,
+    .existing-slider::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: #ef4444;
+      z-index: 15;
+    }
+    
+    .existing-slider::before {
+      top: 0;
+      border-radius: 6px 6px 0 0;
+    }
+    
+    .existing-slider::after {
+      bottom: 0;
+      border-radius: 0 0 6px 6px;
+    }
+
+    .booking-info-popup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .booking-info-popup .popup-content {
+      position: relative;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      max-width: 90vw;
+      width: 400px;
+    }
+    .booking-info-popup .close-btn {
+      position: absolute;
+      top: 12px; right: 12px;
+      background: var(--custom-dark);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 32px; height: 32px; 
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .booking-info-popup .close-btn:hover {
+      background: var(--highlight-color);
+    }
+    .booking-info-popup h3 {
+      margin-top: 0;
+      color: var(--custom-dark);
+      text-align: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 20px;
+    }
+    .info-row {
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .info-label {
+      font-weight: 600;
+      color: var(--custom-dark);
+      min-width: 120px;
+    }
+    .info-value {
+      text-align: right;
+      flex-grow: 1;
+    }
+    .confirmation-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 25px;
+      gap: 15px;
+    }
+    .confirmation-buttons button {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      flex: 1;
+      transition: 0.2s;
+    }
     .confirm-yes { background: var(--confirmed-color); color: white; }
     .confirm-no { background: var(--rejected-color); color: white; }
-    .delete-btn { background: #475569; color: white; padding: 12px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; margin-top: 20px; width: 100%; transition: 0.3s; }
+    .delete-btn {
+      background: #475569;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 20px;
+      width: 100%;
+      transition: 0.3s;
+    }
     .delete-btn:hover { background: #1a2f40; }
-    .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-    .loading-spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--custom-dark); border-radius: 50%; animation: spin 1s linear infinite; }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 255, 255, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid var(--custom-dark);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    #loginScreen { position: fixed; inset: 0; background: #1a2f40; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; z-index: 10000; padding: 32px; }
-    .login-logo { font-size: 48px; font-weight: 600; color: white; text-align: center; }
-    .login-logo i { color: #ef4444; margin: 0 5px; }
-    .login-title { font-size: 28px; font-weight: 600; color: white; letter-spacing: 2px; }
-    .login-sub { font-size: 16px; color: rgba(255,255,255,0.7); }
-    .g_id_signin { margin-top: 20px; }
+    
+    /* Экран входа */
+    #loginScreen {
+      position: fixed;
+      inset: 0;
+      background: #1a2f40;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      z-index: 10000;
+      padding: 32px;
+    }
+    
+    .login-logo {
+      font-size: 48px;
+      font-weight: 600;
+      color: white;
+      text-align: center;
+    }
+    
+    .login-logo i {
+      color: #ef4444;
+      margin: 0 5px;
+    }
+    
+    .login-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: white;
+      letter-spacing: 2px;
+    }
+    
+    .login-sub {
+      font-size: 16px;
+      color: rgba(255,255,255,0.7);
+    }
+    
+    .g_id_signin {
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
 
+<!-- Экран авторизации -->
 <div id="loginScreen">
-  <div class="login-logo"><i class="fas fa-table-tennis"></i> БИЛЬЯРД <i class="fas fa-crown"></i></div>
+  <div class="login-logo">
+    <i class="fas fa-table-tennis"></i> БИЛЬЯРД <i class="fas fa-crown"></i>
+  </div>
   <div class="login-title">LUCKY STRIKE</div>
   <div class="login-sub">Вход по корпоративному аккаунту</div>
-  <div id="g_id_onload" data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-  <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
+  <div id="g_id_onload" 
+       data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com" 
+       data-callback="handleCredentialResponse" 
+       data-auto_prompt="false">
+  </div>
+  <div class="g_id_signin" 
+       data-type="standard" 
+       data-shape="pill" 
+       data-theme="outline" 
+       data-text="signin_with" 
+       data-size="large" 
+       data-logo_alignment="left">
+  </div>
 </div>
 
+<!-- Основной контент (скрыт до авторизации) -->
 <div id="mainContent" style="display: none; width: 100%;">
-  <div class="nav">
-    <div class="nav-title"><i class="fas fa-table-tennis"></i> LUCKY STRIKE</div>
-    <div id="userInfo" class="user-bar">
+  
+  <!-- Панель пользователя (маленькая, незаметная) -->
+  <div class="user-bar-top">
+    <div id="userInfo" class="user-info">
       <img id="userPic" class="user-pic" src="" alt="">
       <span id="userEmail" class="user-email"></span>
       <button id="logoutButton" class="logout-btn" onclick="signOut()"><i class="fas fa-sign-out-alt"></i> Выйти</button>
@@ -203,27 +781,70 @@
   <div class="table-container">
     <div class="table-wrapper">
       <table id="bookingTable">
-        <thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th class="time-col"><button id="openImage" style="padding:6px 12px; border:1px solid white; background:#1a2f40; color:white; cursor:pointer; font-weight:bold; border-radius:8px;">СТОЛЫ</button></th></tr></thead>
+        <thead>
+          <tr>
+            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
+            <th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th>
+            <th class="time-col">
+              <button id="openImage" style="padding:6px 12px; border:1px solid white; background:#1a2f40; color:white; cursor:pointer; font-weight:bold; border-radius:8px;">СТОЛЫ</button>
+            </th>
+          </tr>
+        </thead>
         <tbody id="tableBody"></tbody>
       追赶
+      
       <div id="columnMarkers" class="column-markers"></div>
     </div>
     <div id="slidersContainer"></div>
   </div>
 
   <div id="cardsContainer"></div>
-  <div id="controls"><input type="date" id="dateInput" /><button class="booking-button" onclick="openModal()">ЗАБРОНИРОВАТЬ</button></div>
 
-  <div id="modal"><div><h3>Введите данные</h3><label>Имя:<br><input id="nameInput" autocomplete="off"></label><label>Телефон:<br><input id="phoneInput" type="tel"></label><label>Комментарий:<br><textarea id="commentInput"></textarea></label><div style="text-align: right;"><button onclick="submitForm()">ЗАБРОНИРОВАТЬ</button><button onclick="closeModal()">ОТМЕНА</button></div></div></div>
+  <div id="controls">
+    <input type="date" id="dateInput" />
+    <button class="booking-button" onclick="openModal()">ЗАБРОНИРОВАТЬ</button>
+  </div>
 
-  <div id="imagePopup" class="image-popup"><div class="popup-content"><button class="close-popup" onclick="closeImagePopup()">&times;</button><img src="https://i.postimg.cc/52ZDKDDw/55.png" /></div></div>
+  <div id="modal">
+    <div>
+      <h3>Введите данные</h3>
+      <label>Имя:<br><input id="nameInput" autocomplete="off"></label>
+      <label>Телефон:<br><input id="phoneInput" type="tel" inputmode="tel" autocomplete="tel"></label>
+      <label>Комментарий:<br><textarea id="commentInput"></textarea></label>
+      <div style="text-align: right;">
+        <button onclick="submitForm()">ЗАБРОНИРОВАТЬ</button>
+        <button onclick="closeModal()">ОТМЕНА</button>
+      </div>
+    </div>
+  </div>
 
-  <div id="bookingInfoPopup" class="booking-info-popup"><div class="popup-content"><button class="close-btn" onclick="closeBookingInfoPopup()">&times;</button><h3>Информация о бронировании</h3><div class="info-row"><span class="info-label">Стол:</span> <span id="info-table" class="info-value"></span></div><div class="info-row"><span class="info-label">Дата:</span> <span id="info-date" class="info-value"></span></div><div class="info-row"><span class="info-label">Время:</span> <span id="info-time" class="info-value"></span></div><div class="info-row"><span class="info-label">Имя:</span> <span id="info-name" class="info-value"></span></div><div class="info-row"><span class="info-label">Телефон:</span> <span id="info-phone" class="info-value"></span></div><div class="info-row"><span class="info-label">Комментарий:</span> <span id="info-comment" class="info-value"></span></div><div class="info-row"><span class="info-label">Посещение состоялось?</span><span id="info-confirmed" class="info-value"></span></div><div class="confirmation-buttons"><button class="confirm-yes" onclick="confirmBooking(true)">Да</button><button class="confirm-no" onclick="confirmBooking(false)">Нет</button></div><button class="delete-btn" onclick="deleteBooking()">УДАЛИТЬ БРОНЬ</button></div></div>
+  <div id="imagePopup" class="image-popup">
+    <div class="popup-content">
+      <button class="close-popup" onclick="closeImagePopup()">&times;</button>
+      <img src="https://i.postimg.cc/52ZDKDDw/55.png" />
+    </div>
+  </div>
+
+  <div id="bookingInfoPopup" class="booking-info-popup">
+    <div class="popup-content">
+      <button class="close-btn" onclick="closeBookingInfoPopup()">&times;</button>
+      <h3>Информация о бронировании</h3>
+      <div class="info-row"><span class="info-label">Стол:</span> <span id="info-table" class="info-value"></span></div>
+      <div class="info-row"><span class="info-label">Дата:</span> <span id="info-date" class="info-value"></span></div>
+      <div class="info-row"><span class="info-label">Время:</span> <span id="info-time" class="info-value"></span></div>
+      <div class="info-row"><span class="info-label">Имя:</span> <span id="info-name" class="info-value"></span></div>
+      <div class="info-row"><span class="info-label">Телефон:</span> <span id="info-phone" class="info-value"></span></div>
+      <div class="info-row"><span class="info-label">Комментарий:</span> <span id="info-comment" class="info-value"></span></div>
+      <div class="info-row"><span class="info-label">Посещение состоялось?</span><span id="info-confirmed" class="info-value"></span></div>
+      <div class="confirmation-buttons"><button class="confirm-yes" onclick="confirmBooking(true)">Да</button><button class="confirm-no" onclick="confirmBooking(false)">Нет</button></div>
+      <button class="delete-btn" onclick="deleteBooking()">УДАЛИТЬ БРОНЬ</button>
+    </div>
+  </div>
   <div id="loadingOverlay" class="loading-overlay" style="display: none;"><div class="loading-spinner"></div></div>
 </div>
 
 <script>
-  // ==================== АВТОРИЗАЦИЯ ИЗ РАБОЧЕГО ПРИМЕРА ====================
+  // ==================== АВТОРИЗАЦИЯ (РАБОЧАЯ ИЗ ПРИМЕРА) ====================
   const AUTH_SPREADSHEET_ID = '1zwi1CInK3NZ8YRAegRMAdjin6XPacVkAkFsjAiqVE0w';
   const AUTH_SHEET_NAME = '1';
   const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
@@ -260,6 +881,7 @@
               discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
             });
             gapiInitialized = true;
+            console.log('GAPI initialized');
             resolve();
           } catch (error) {
             reject(error);
@@ -311,6 +933,8 @@
       const payload = parseJwt(response.credential);
       const email = payload.email.toLowerCase().trim();
       
+      console.log('Checking email:', email);
+      
       const checkResult = await checkEmailInSheet(email);
       
       if (checkResult.found) {
@@ -353,7 +977,7 @@
     currentUser = null;
   }
   
-  // ==================== ОСНОВНАЯ ЛОГИКА БРОНИРОВАНИЯ ====================
+  // ==================== ОСНОВНАЯ ЛОГИКА БРОНИРОВАНИЯ (ОРИГИНАЛ) ====================
   
   const dateInput = document.getElementById('dateInput');
   const today = new Date().toISOString().split('T')[0];
@@ -417,6 +1041,7 @@
   createMarkers();
 
   window.addEventListener('resize', updateMarkersWidth);
+  window.addEventListener('load', updateMarkersWidth);
   setTimeout(updateMarkersWidth, 100);
 
   let intervalsByLane = {}, currentLane = null, currentStart = null, currentBookingId = null;
@@ -496,6 +1121,7 @@
   document.getElementById("openImage").onclick = () => { document.getElementById("imagePopup").style.display = "flex"; };
   function closeImagePopup() { document.getElementById("imagePopup").style.display = "none"; }
   
+  // Подгружаем FontAwesome для иконок
   const faLink = document.createElement('link');
   faLink.rel = 'stylesheet';
   faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';

@@ -2,16 +2,12 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>БРОНИ БИЛЬЯРД — интеллектуальный выбор времени</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>БРОНИ БИЛЬЯРД</title>
   <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png" />
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js"></script>
   <style>
-    * {
-      user-select: none; /* предотвращает случайное выделение, но клики работают */
-      touch-action: manipulation;
-    }
     :root {
       --cell-size: 50px;
       --main-color: #1e3a8a;
@@ -33,21 +29,76 @@
         --cell-size: calc((100vw - 20px) / 13);
         --border-spacing: 2px;
       }
-      table { width: auto !important; margin: 0 auto; }
+      
+      table {
+        width: auto !important;
+        margin: 0 auto;
+      }
+      
       td, th {
         aspect-ratio: 1;
         width: var(--cell-size) !important;
         height: var(--cell-size) !important;
+        min-width: auto !important;
+        max-width: none !important;
       }
-      body { padding: 5px; }
-      .table-container { padding: 0; width: 100%; }
-      #controls { display: flex; flex-direction: row; justify-content: center; gap: 12px; max-width: 480px; margin: 4px auto; padding: 0 5px; }
-      .column-markers { gap: var(--border-spacing); justify-content: center; }
-      .marker { width: var(--cell-size); }
+      
+      body {
+        padding: 5px;
+      }
+      
+      .table-container {
+        padding: 0;
+        width: 100%;
+      }
+      
+      #controls {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: stretch;
+        gap: 12px;
+        width: 100%;
+        max-width: 480px;
+        margin: 4px auto 0;
+        padding: 0 5px;
+        box-sizing: border-box;
+      }
+      
+      #dateInput {
+        flex: 1;
+        margin: 0;
+        min-width: 0;
+        box-sizing: border-box;
+      }
+      
+      .booking-button {
+        flex: 1;
+        margin: 0;
+        min-width: 0;
+        text-align: center;
+        box-sizing: border-box;
+      }
+      
+      .column-markers {
+        gap: var(--border-spacing);
+        justify-content: center;
+      }
+      
+      .marker {
+        width: var(--cell-size);
+      }
+      
+      .login-container {
+        padding: 20px !important;
+      }
+      .login-title {
+        font-size: 24px !important;
+      }
     }
 
     body {
-      font-family: 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background: #1a2f40;
       padding: 5px;
       margin: 0;
@@ -73,6 +124,7 @@
       border-collapse: separate;
       border-spacing: var(--border-spacing);
       table-layout: fixed;
+      user-select: none;
       touch-action: manipulation;
       margin: 0 auto;
       background: #1a2f40;
@@ -90,7 +142,24 @@
       top: 0;
       color: white;
       z-index: 2;
+      transition: background-color 0.2s, color 0.2s;
       font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    thead th:nth-child(1),
+    thead th:nth-child(2),
+    thead th:nth-child(3),
+    thead th:nth-child(4),
+    thead th:nth-child(5),
+    thead th:nth-child(6),
+    thead th:nth-child(7),
+    thead th:nth-child(8),
+    thead th:nth-child(9),
+    thead th:nth-child(10),
+    thead th:nth-child(11),
+    thead th:nth-child(12),
+    thead th.time-col {
       background: #1a2f40 !important;
     }
 
@@ -99,7 +168,6 @@
       color: white;
       font-weight: bold;
       cursor: pointer;
-      transition: 0.1s linear;
     }
 
     th, td {
@@ -108,6 +176,7 @@
       border: none;
       text-align: center;
       vertical-align: middle;
+      box-sizing: border-box;
       background: white !important;
       font-size: 12px;
       position: relative;
@@ -115,26 +184,44 @@
 
     th.highlight-header {
       background: #1a2f40 !important;
-      color: #ffd966 !important;
+      color: white !important;
     }
+
+    td.vertical-line::before,
+    td.vertical-line::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background-color: var(--highlight-color);
+      z-index: 10;
+    }
+    td.vertical-line::before { left: -1px; }
+    td.vertical-line::after  { right: -1px; }
 
     td.slot { 
       cursor: pointer; 
-      transition: all 0.1s ease;
+      transition: all 0.2s ease;
     }
-    td.slot:hover { background: #f0f0f0 !important; transform: scale(0.98); }
+    
+    td.slot:hover {
+      background: #f0f0f0 !important;
+    }
 
     td.selected {
       background: #1a2f40 !important;
+      border: none !important;
+      z-index: 1;
       color: white;
       font-weight: 500;
-      box-shadow: inset 0 0 0 1px rgba(255,255,200,0.3);
     }
 
     td.start-time-chosen {
       background: #ef4444 !important;
+      border: none !important;
+      z-index: 2;
       color: white;
-      box-shadow: inset 0 0 0 2px gold;
     }
 
     .column-markers {
@@ -150,18 +237,42 @@
       cursor: pointer;
       transition: transform 0.1s ease;
     }
-    .marker:active { transform: scale(0.97); }
-    .marker.blue { background-color: #3b82f6; }
-    .marker.green { background-color: #22c55e; }
-    .marker.red { background-color: #ef4444; }
-    .marker.empty { background: transparent; cursor: default; }
+    .marker:active {
+      transform: scale(0.97);
+    }
+
+    .marker.blue {
+      background-color: #3b82f6;
+      box-shadow: 0 0 2px rgba(59,130,246,0.5);
+    }
+
+    .marker.green {
+      background-color: #22c55e;
+      box-shadow: 0 0 2px rgba(34,197,94,0.5);
+    }
+
+    .marker.red {
+      background-color: #ef4444;
+      box-shadow: 0 0 2px rgba(239,68,68,0.5);
+    }
+
+    .marker.empty {
+      background: transparent;
+      cursor: default;
+    }
+    .marker.empty:active {
+      transform: none;
+    }
 
     #cardsContainer {
       margin: 8px auto 6px;
+      padding: 0;
+      max-width: 100vw;
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
       justify-content: center;
+      box-sizing: border-box;
     }
 
     .booking-card {
@@ -174,52 +285,105 @@
       font-weight: 600;
       font-size: 14px;
       white-space: nowrap;
+      user-select: none;
       box-shadow: 0 3px 8px rgba(30, 58, 138, 0.15);
+      transition: transform 0.2s;
     }
+    
+    .booking-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(30, 58, 138, 0.2);
+    }
+    
     .booking-card .close-btn {
       position: absolute;
       top: 0;
       right: 0;
       transform: translate(50%, -50%);
+      color: var(--main-color);
       background: white;
       border: 1px solid var(--main-color);
       border-radius: 50%;
       font-weight: bold;
       font-size: 18px;
+      line-height: 1;
       cursor: pointer;
+      user-select: none;
       padding: 6px 10px;
+      box-shadow: 0 0 8px rgba(30, 58, 138, 0.3);
+      transition: all 0.2s ease;
     }
-    .booking-card .close-btn:hover { background-color: var(--main-color); color: white; }
+    .booking-card .close-btn:hover {
+      background-color: var(--main-color);
+      color: white;
+      transform: translate(50%, -50%) scale(1.1);
+    }
 
     #controls {
       margin-top: 6px;
       display: flex;
       justify-content: center;
+      align-items: stretch;
       gap: 15px;
       flex-wrap: wrap;
+      width: 100%;
       max-width: 500px;
     }
+    
     #dateInput, .booking-button {
-      flex: 1;
+      flex: 1 1 0;
+      min-width: 140px;
       padding: 8px 12px;
       font-size: 16px;
       font-weight: 600;
       border-radius: 10px;
       cursor: pointer;
-      background: white;
-      border: 1px solid white;
+      transition: all 0.2s ease;
+      text-align: center;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
     }
+    
+    #dateInput {
+      background: white;
+      color: #1e293b;
+      border: 1px solid white;
+      box-shadow: 0 2px 5px rgba(26, 47, 64, 0.1);
+    }
+    
+    #dateInput:hover {
+      background: #f8fafc;
+      border-color: white;
+      transform: translateY(-1px);
+    }
+    
     .booking-button {
       background: #1a2f40;
       color: white;
       border: 1px solid white;
+      box-shadow: 0 4px 8px rgba(26, 47, 64, 0.2);
+      letter-spacing: 0.5px;
     }
-    .booking-button:hover { background: #1f3e55; transform: translateY(-2px); }
+    
+    .booking-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(26, 47, 64, 0.3);
+      background: #1f3e55;
+    }
+    
+    .booking-button:active, .booking-button.pressed {
+      transform: translateY(1px);
+      background: #1a2f40;
+      box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+    }
 
     #modal {
       display: none;
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background: #00000066;
       justify-content: center;
       align-items: center;
@@ -229,30 +393,136 @@
       background: white;
       padding: 25px;
       border-radius: 12px;
+      width: 90%;
       max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    #modal h3 { 
+      margin-top: 0; 
+      color: var(--custom-dark);
+      text-align: center;
+      font-size: 1.5rem;
+    }
+    #modal label { 
+      display: block; 
+      margin-bottom: 15px; 
+      color: #334155;
+      font-weight: 500;
+    }
+    #modal input, #modal textarea {
+      width: 100%;
+      padding: 10px 12px;
+      box-sizing: border-box;
+      margin-top: 6px;
+      font-size: 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      transition: border 0.3s;
+    }
+    #modal input:focus, #modal textarea:focus {
+      outline: none;
+      border-color: var(--custom-dark);
+      box-shadow: 0 0 0 3px rgba(26, 47, 64, 0.1);
+    }
+    #modal button {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    #modal button:first-of-type {
+      background: #1a2f40;
+      color: white;
+    }
+    #modal button:first-of-type:hover {
+      transform: translateY(-2px);
+    }
+    #modal button:last-of-type {
+      margin-left: 10px;
+      background: #f1f5f9;
+      color: #64748b;
     }
 
-    .existing-slider {
+    .image-popup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.8);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+    }
+    .image-popup .popup-content {
+      position: relative;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow: auto;
+    }
+    .image-popup .popup-content img {
+      width: 100%; height: auto; border-radius: 8px;
+    }
+    .image-popup .close-popup {
       position: absolute;
-      background: #1a2f40;
-      border-radius: 6px;
-      pointer-events: auto;
+      top: 10px; right: 10px;
+      background: var(--custom-dark);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 35px; height: 35px; font-size: 20px;
       cursor: pointer;
-      font-size: 10px;
-      padding: 2px 4px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      transition: 0.1s;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+    }
+    .image-popup .close-popup:hover {
+      background: var(--highlight-color);
+    }
+
+    #slidersContainer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .existing-slider {
+      position: absolute;
+      background: #1a2f40;
+      border: none;
+      border-radius: 6px;
+      pointer-events: auto;
+      box-sizing: border-box;
+      cursor: pointer;
+      font-size: 10px;
       font-weight: bold;
+      padding: 2px 4px;
+      user-select: none;
       overflow: hidden;
       white-space: nowrap;
+      text-overflow: ellipsis;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
     }
-    .existing-slider.confirmed { background: var(--confirmed-color); }
-    .existing-slider.rejected { background: var(--rejected-color); }
-    .existing-slider::before, .existing-slider::after {
+    .existing-slider:hover {
+      transform: scale(1.02);
+      z-index: 10;
+    }
+    .existing-slider.confirmed {
+      background: var(--confirmed-color);
+    }
+    .existing-slider.rejected {
+      background: var(--rejected-color);
+    }
+    
+    .existing-slider::before,
+    .existing-slider::after {
       content: "";
       position: absolute;
       left: 0;
@@ -261,59 +531,111 @@
       background-color: #ef4444;
       z-index: 15;
     }
-    .existing-slider::before { top: 0; border-radius: 6px 6px 0 0; }
-    .existing-slider::after { bottom: 0; border-radius: 0 0 6px 6px; }
+    
+    .existing-slider::before {
+      top: 0;
+      border-radius: 6px 6px 0 0;
+    }
+    
+    .existing-slider::after {
+      bottom: 0;
+      border-radius: 0 0 6px 6px;
+    }
 
     .booking-info-popup {
       display: none;
       position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.6);
       z-index: 1000;
       justify-content: center;
       align-items: center;
     }
     .booking-info-popup .popup-content {
+      position: relative;
       background: white;
       padding: 25px;
       border-radius: 12px;
-      width: 90%;
-      max-width: 400px;
+      max-width: 90vw;
+      width: 400px;
     }
-    .image-popup {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.8);
-      z-index: 10000;
-      justify-content: center;
-      align-items: center;
-    }
-    .login-screen {
-      position: fixed;
-      inset: 0;
-      background: #1a2f40;
+    .booking-info-popup .close-btn {
+      position: absolute;
+      top: 12px; right: 12px;
+      background: var(--custom-dark);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 32px; height: 32px; 
+      font-size: 20px;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 10000;
     }
-    .logout-like-tables-btn {
-      padding: 6px 12px;
-      background: #1a2f40;
-      color: white;
-      border: 1px solid white;
+    .booking-info-popup .close-btn:hover {
+      background: var(--highlight-color);
+    }
+    .booking-info-popup h3 {
+      margin-top: 0;
+      color: var(--custom-dark);
+      text-align: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 20px;
+    }
+    .info-row {
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .info-label {
+      font-weight: 600;
+      color: var(--custom-dark);
+      min-width: 120px;
+    }
+    .info-value {
+      text-align: right;
+      flex-grow: 1;
+    }
+    .confirmation-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 25px;
+      gap: 15px;
+    }
+    .confirmation-buttons button {
+      padding: 10px 20px;
       border-radius: 8px;
+      border: none;
       cursor: pointer;
-      font-weight: bold;
+      font-weight: 600;
+      flex: 1;
+      transition: 0.2s;
     }
+    .confirm-yes { background: var(--confirmed-color); color: white; }
+    .confirm-no { background: var(--rejected-color); color: white; }
+    .delete-btn {
+      background: #475569;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 20px;
+      width: 100%;
+      transition: 0.3s;
+    }
+    .delete-btn:hover { background: #1a2f40; }
+
     .loading-overlay {
       position: fixed;
-      inset: 0;
-      background: rgba(255,255,255,0.8);
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 255, 255, 0.8);
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       z-index: 2000;
     }
     .loading-spinner {
@@ -325,14 +647,73 @@
       animation: spin 1s linear infinite;
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .login-screen {
+      position: fixed;
+      inset: 0;
+      background: #1a2f40;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+    
+    .login-button-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .g_id_signin {
+      transition: transform 0.1s ease;
+    }
+    .g_id_signin:active {
+      transform: scale(0.97);
+    }
+    
+    .logout-like-tables-btn {
+      padding: 6px 12px;
+      border: 1px solid white;
+      background: #1a2f40;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+    .logout-like-tables-btn:hover {
+      background: #2a4a62;
+      transform: scale(1.02);
+    }
+    .logout-like-tables-btn:active {
+      transform: scale(0.98);
+    }
   </style>
 </head>
 <body>
 
 <div id="loginScreen" class="login-screen">
   <div class="login-button-wrapper">
-    <div id="g_id_onload" data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-    <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with" data-size="large"></div>
+    <div id="g_id_onload" 
+         data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com" 
+         data-callback="handleCredentialResponse" 
+         data-auto_prompt="false">
+    </div>
+    <div class="g_id_signin" 
+         data-type="standard" 
+         data-shape="pill" 
+         data-theme="outline" 
+         data-text="signin_with" 
+         data-size="large" 
+         data-logo_alignment="left">
+    </div>
   </div>
 </div>
 
@@ -341,66 +722,271 @@
     <div class="table-wrapper">
       <table id="bookingTable">
         <thead>
-          <tr><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th class="time-col"><button id="logoutButtonHeader" class="logout-like-tables-btn">Выйти</button></th></tr>
+          <tr>
+            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
+            <th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th>
+            <th class="time-col" style="padding: 0;">
+              <button id="logoutButtonHeader" class="logout-like-tables-btn">Выйти</button>
+            </th>
+          </tr>
         </thead>
         <tbody id="tableBody"></tbody>
       </table>
+      
       <div id="columnMarkers" class="column-markers"></div>
     </div>
     <div id="slidersContainer"></div>
   </div>
+
   <div id="cardsContainer"></div>
+
   <div id="controls">
     <input type="date" id="dateInput" />
     <button class="booking-button" onclick="openModal()">ЗАБРОНИРОВАТЬ</button>
   </div>
 
-  <div id="modal"><div><h3>Введите данные</h3><label>Имя:<br><input id="nameInput"></label><label>Телефон:<br><input id="phoneInput" type="tel"></label><label>Комментарий:<br><textarea id="commentInput"></textarea></label><div style="text-align:right"><button onclick="submitForm()">ЗАБРОНИРОВАТЬ</button><button onclick="closeModal()">ОТМЕНА</button></div></div></div>
-  <div id="imagePopup" class="image-popup"><div class="popup-content"><button class="close-popup" onclick="closeImagePopup()">&times;</button><img src="https://i.postimg.cc/52ZDKDDw/55.png" /></div></div>
-  <div id="bookingInfoPopup" class="booking-info-popup"><div class="popup-content"><button class="close-btn" onclick="closeBookingInfoPopup()">&times;</button><h3>Информация</h3><div class="info-row">Стол: <span id="info-table"></span></div><div class="info-row">Время: <span id="info-time"></span></div><div class="info-row">Имя: <span id="info-name"></span></div><div class="info-row">Телефон: <span id="info-phone"></span></div><div class="info-row">Коммент: <span id="info-comment"></span></div><div class="confirmation-buttons"><button class="confirm-yes" onclick="confirmBooking(true)">Да</button><button class="confirm-no" onclick="confirmBooking(false)">Нет</button></div><button class="delete-btn" onclick="deleteBooking()">УДАЛИТЬ</button></div></div>
-  <div id="loadingOverlay" class="loading-overlay" style="display:none"><div class="loading-spinner"></div></div>
+  <div id="modal">
+    <div>
+      <h3>Введите данные</h3>
+      <label>Имя:<br><input id="nameInput" autocomplete="off"></label>
+      <label>Телефон:<br><input id="phoneInput" type="tel" inputmode="tel" autocomplete="tel"></label>
+      <label>Комментарий:<br><textarea id="commentInput"></textarea></label>
+      <div style="text-align: right;">
+        <button onclick="submitForm()">ЗАБРОНИРОВАТЬ</button>
+        <button onclick="closeModal()">ОТМЕНА</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="imagePopup" class="image-popup">
+    <div class="popup-content">
+      <button class="close-popup" onclick="closeImagePopup()">&times;</button>
+      <img src="https://i.postimg.cc/52ZDKDDw/55.png" />
+    </div>
+  </div>
+
+  <div id="bookingInfoPopup" class="booking-info-popup">
+    <div class="popup-content">
+      <button class="close-btn" onclick="closeBookingInfoPopup()">&times;</button>
+      <h3>Информация о бронировании</h3>
+      <div class="info-row"><span class="info-label">Стол:</span> <span id="info-table" class="info-value"></span></div>
+      <div class="info-row"><span class="info-label">Дата:</span> <span id="info-date" class="info-value"></span></div>
+      <div class="info-row"><span class="info-label">Время:</span> <span id="info-time" class="info-value"></span></div>
+      <div class="info-row"><span class="info-label">Имя:</span> <span id="info-name" class="info-value"></span></div>
+      <div class="info-row"><span class="info-label">Телефон:</span> <span id="info-phone" class="info-value"></span></div>
+      <div class="info-row"><span class="info-label">Комментарий:</span> <span id="info-comment" class="info-value"></span></div>
+      <div class="info-row"><span class="info-label">Посещение состоялось?</span><span id="info-confirmed" class="info-value"></span></div>
+      <div class="confirmation-buttons"><button class="confirm-yes" onclick="confirmBooking(true)">Да</button><button class="confirm-no" onclick="confirmBooking(false)">Нет</button></div>
+      <button class="delete-btn" onclick="deleteBooking()">УДАЛИТЬ БРОНЬ</button>
+    </div>
+  </div>
+  <div id="loadingOverlay" class="loading-overlay" style="display: none;"><div class="loading-spinner"></div></div>
 </div>
 
 <script>
-  // ================= AUTH & CONFIG ===================
+  // ==================== АВТОРИЗАЦИЯ С СОХРАНЕНИЕМ СЕССИИ ====================
   const AUTH_SPREADSHEET_ID = '1zwi1CInK3NZ8YRAegRMAdjin6XPacVkAkFsjAiqVE0w';
+  const AUTH_SHEET_NAME = '1';
   const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxfRLDGA29FrqKS61HmYN_FUnDwOydeCaEdeW4oc4wyroQzvb4h1OnwQ5HeotIHhcj9/exec";
+  
   let currentUser = null;
   let gapiInitialized = false;
+  
   const STORAGE_USER_KEY = 'billiard_user_data';
   const STORAGE_EXPIRY_KEY = 'billiard_user_expiry';
   const SESSION_DURATION_DAYS = 7;
-
-  function parseJwt(token) { try { return JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); } catch(e) { return {}; } }
-  function initGapi() { return new Promise((resolve, reject) => { if(gapiInitialized) resolve(); else gapi.load('client', { callback: async () => { try { await gapi.client.init({ apiKey: API_KEY, discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'] }); gapiInitialized = true; resolve(); } catch(e){ reject(e); } }, onerror: reject }); }); }
-  async function checkEmailInSheet(email) { try { await initGapi(); const res = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: AUTH_SPREADSHEET_ID, range: `1!A:C` }); const rows = res.result.values || []; for(let i=1;i<rows.length;i++) if(rows[i][0] && rows[i][0].toLowerCase().trim() === email) return { found: true, name: rows[i][1] || email.split('@')[0], role: rows[i][2] || '' }; return { found: false }; } catch(e){ return { found: false }; } }
-  function saveUserToStorage(u) { localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(u)); localStorage.setItem(STORAGE_EXPIRY_KEY, new Date(Date.now() + SESSION_DURATION_DAYS*864e5).toISOString()); }
-  function getUserFromStorage() { const raw = localStorage.getItem(STORAGE_USER_KEY), exp = localStorage.getItem(STORAGE_EXPIRY_KEY); if(!raw||!exp||new Date(exp) < new Date()) return null; try { return JSON.parse(raw); } catch(e){ return null; } }
-  function clearStoredSession() { localStorage.removeItem(STORAGE_USER_KEY); localStorage.removeItem(STORAGE_EXPIRY_KEY); }
-  function showLoading(show) { document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none'; }
-  function logout() { if(confirm('Выйти?')) { clearStoredSession(); currentUser = null; document.getElementById('mainContent').style.display = 'none'; document.getElementById('loginScreen').style.display = 'flex'; intervalsByLane = {}; updateTableSelection(); } }
-  window.handleCredentialResponse = async function(resp) { try { showLoading(true); const payload = parseJwt(resp.credential); const email = payload.email.toLowerCase().trim(); const check = await checkEmailInSheet(email); if(check.found) { currentUser = { email, name: check.name, role: check.role }; saveUserToStorage(currentUser); document.getElementById('loginScreen').style.display = 'none'; document.getElementById('mainContent').style.display = 'block'; document.getElementById('logoutButtonHeader').onclick = logout; initAppAfterAuth(); } else { alert('Доступ запрещен'); } showLoading(false); } catch(e) { showLoading(false); alert('Ошибка входа'); } };
-  function tryRestoreSession() { const u = getUserFromStorage(); if(u && u.email) { currentUser = u; document.getElementById('loginScreen').style.display = 'none'; document.getElementById('mainContent').style.display = 'block'; document.getElementById('logoutButtonHeader').onclick = logout; setTimeout(() => initAppAfterAuth(), 100); return true; } return false; }
-
-  // =============== ОСНОВНОЙ МОДУЛЬ ВРЕМЕНИ И ИНТЕРВАЛОВ ===============
-  const startHour = 11, endHour = 22, lanes = 12;
+  
+  function parseJwt(token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      console.error('Error parsing JWT:', e);
+      return {};
+    }
+  }
+  
+  function initGapi() {
+    return new Promise((resolve, reject) => {
+      if (gapiInitialized) {
+        resolve();
+        return;
+      }
+      gapi.load('client', {
+        callback: async () => {
+          try {
+            await gapi.client.init({
+              apiKey: API_KEY,
+              discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+            });
+            gapiInitialized = true;
+            console.log('GAPI initialized');
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        },
+        onerror: reject,
+        timeout: 10000,
+        ontimeout: () => reject(new Error('GAPI load timeout'))
+      });
+    });
+  }
+  
+  async function checkEmailInSheet(email) {
+    try {
+      await initGapi();
+      
+      const response = await gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: AUTH_SPREADSHEET_ID,
+        range: `${AUTH_SHEET_NAME}!A:C`,
+      });
+      
+      const rows = response.result.values;
+      if (!rows || rows.length === 0) return { found: false };
+      
+      for (let i = 1; i < rows.length; i++) {
+        if (!rows[i] || !rows[i][0]) continue;
+        const rowEmail = rows[i][0].toLowerCase().trim();
+        if (rowEmail === email) {
+          const userName = rows[i][1] ? rows[i][1].trim() : email.split('@')[0];
+          const userRole = rows[i][2] ? rows[i][2].trim() : '';
+          return { found: true, name: userName, role: userRole };
+        }
+      }
+      return { found: false };
+    } catch (error) {
+      console.error('Sheets API error:', error);
+      return { found: false, error: true };
+    }
+  }
+  
+  function saveUserToStorage(userData) {
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + SESSION_DURATION_DAYS);
+    localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(userData));
+    localStorage.setItem(STORAGE_EXPIRY_KEY, expiryDate.toISOString());
+  }
+  
+  function getUserFromStorage() {
+    const userRaw = localStorage.getItem(STORAGE_USER_KEY);
+    const expiryRaw = localStorage.getItem(STORAGE_EXPIRY_KEY);
+    if (!userRaw || !expiryRaw) return null;
+    
+    const expiryDate = new Date(expiryRaw);
+    if (expiryDate < new Date()) {
+      localStorage.removeItem(STORAGE_USER_KEY);
+      localStorage.removeItem(STORAGE_EXPIRY_KEY);
+      return null;
+    }
+    
+    try {
+      return JSON.parse(userRaw);
+    } catch(e) {
+      return null;
+    }
+  }
+  
+  function clearStoredSession() {
+    localStorage.removeItem(STORAGE_USER_KEY);
+    localStorage.removeItem(STORAGE_EXPIRY_KEY);
+  }
+  
+  function showLoadingOverlay(show) {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.style.display = show ? 'flex' : 'none';
+  }
+  
+  function logout() {
+    if (confirm('Вы уверены, что хотите выйти из системы?')) {
+      clearStoredSession();
+      currentUser = null;
+      document.getElementById('mainContent').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+      for(let l in intervalsByLane) intervalsByLane[l] = [];
+      if (typeof updateTableSelection === 'function') updateTableSelection();
+    }
+  }
+  
+  window.handleCredentialResponse = async function(response) {
+    try {
+      showLoadingOverlay(true);
+      const payload = parseJwt(response.credential);
+      const email = payload.email.toLowerCase().trim();
+      
+      console.log('Checking email:', email);
+      
+      const checkResult = await checkEmailInSheet(email);
+      
+      if (checkResult.found) {
+        currentUser = {
+          email: email,
+          name: checkResult.name || payload.name,
+          role: checkResult.role || '',
+          picture: payload.picture
+        };
+        saveUserToStorage(currentUser);
+        
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+        showLoadingOverlay(false);
+        
+        const logoutBtn = document.getElementById('logoutButtonHeader');
+        if (logoutBtn) {
+          logoutBtn.onclick = logout;
+        }
+        
+        initAppAfterAuth();
+      } else {
+        showLoadingOverlay(false);
+        alert('Доступ запрещен: Ваш email не найден в списке разрешенных');
+        document.getElementById('loginScreen').style.display = 'flex';
+      }
+    } catch (e) {
+      console.error("Error:", e);
+      showLoadingOverlay(false);
+      alert('Ошибка аутентификации');
+    }
+  };
+  
+  function tryRestoreSession() {
+    const savedUser = getUserFromStorage();
+    if (savedUser && savedUser.email) {
+      currentUser = savedUser;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      
+      const logoutBtn = document.getElementById('logoutButtonHeader');
+      if (logoutBtn) {
+        logoutBtn.onclick = logout;
+      }
+      
+      setTimeout(() => {
+        initAppAfterAuth();
+      }, 100);
+      return true;
+    }
+    return false;
+  }
+  
+  // ==================== ОСНОВНАЯ ЛОГИКА БРОНИРОВАНИЯ ====================
+  
   const dateInput = document.getElementById('dateInput');
   const today = new Date().toISOString().split('T')[0];
-  dateInput.min = today; dateInput.value = today;
-  const tableBody = document.getElementById("tableBody");
-  const slidersContainer = document.getElementById("slidersContainer");
-  const cardsContainer = document.getElementById("cardsContainer");
-  const tableContainer = document.querySelector(".table-container");
-  const loadingOverlayEl = document.getElementById("loadingOverlay");
-  
+  dateInput.min = today;
+  dateInput.value = today;
+  const startHour = 11, endHour = 22, lanes = 12;
+  const tableBody = document.getElementById("tableBody"), cardsContainer = document.getElementById("cardsContainer"), slidersContainer = document.getElementById("slidersContainer"), tableContainer = document.querySelector(".table-container"), loadingOverlayEl = document.getElementById("loadingOverlay");
   const timeSlots = [];
   for (let h = startHour; h <= endHour; h++) {
     if (h < endHour) { timeSlots.push({ display: `${h}:00`, key: h }); timeSlots.push({ display: `${h}:30`, key: h + 0.5 }); }
     else timeSlots.push({ display: `${h}:00`, key: h });
   }
-  
-  // Генерация таблицы
   timeSlots.forEach(slot => {
     const row = document.createElement("tr");
     for (let lane = 0; lane < lanes; lane++) {
@@ -417,36 +1003,54 @@
     row.appendChild(timeCell);
     tableBody.appendChild(row);
   });
-  
-  // Маркеры столов и клик по ним (картинка)
-  const columnMarkersDiv = document.getElementById("columnMarkers");
+
+  function updateMarkersWidth() {
+    const headers = document.querySelectorAll('thead th');
+    const markers = document.querySelectorAll('.marker');
+    if (headers.length === markers.length) {
+      for (let i = 0; i < headers.length; i++) {
+        const width = headers[i].offsetWidth;
+        markers[i].style.width = width + 'px';
+      }
+    }
+  }
+
+  const columnMarkers = document.getElementById("columnMarkers");
   function createMarkers() {
-    columnMarkersDiv.innerHTML = "";
+    columnMarkers.innerHTML = "";
     for (let lane = 0; lane < lanes; lane++) {
       const marker = document.createElement("div");
       marker.className = "marker";
-      if (lane === 0 || lane === 1 || lane === 2 || lane === 4 || lane === 5) marker.classList.add("blue");
-      else if (lane === 3) marker.classList.add("green");
-      else if (lane >= 6 && lane <= 11) marker.classList.add("red");
-      marker.onclick = () => { document.getElementById("imagePopup").style.display = "flex"; };
-      columnMarkersDiv.appendChild(marker);
+      if (lane === 0 || lane === 1 || lane === 2 || lane === 4 || lane === 5) {
+        marker.classList.add("blue");
+      } else if (lane === 3) {
+        marker.classList.add("green");
+      } else if (lane >= 6 && lane <= 11) {
+        marker.classList.add("red");
+      }
+      marker.onclick = () => {
+        document.getElementById("imagePopup").style.display = "flex";
+      };
+      columnMarkers.appendChild(marker);
     }
     const timeMarker = document.createElement("div");
     timeMarker.className = "marker empty";
-    columnMarkersDiv.appendChild(timeMarker);
+    columnMarkers.appendChild(timeMarker);
+    setTimeout(updateMarkersWidth, 10);
   }
   createMarkers();
-  
-  // Хранение интервалов пользователя
-  let intervalsByLane = {};   // { "lane": [ { start, end } ] }
-  let currentLane = null;
-  let currentStart = null;
-  
-  function clearStartHighlight() { document.querySelectorAll('td.start-time-chosen').forEach(c => c.classList.remove('start-time-chosen')); }
+
+  window.addEventListener('resize', updateMarkersWidth);
+  window.addEventListener('load', updateMarkersWidth);
+  setTimeout(updateMarkersWidth, 100);
+
+  let intervalsByLane = {}, currentLane = null, currentStart = null, currentBookingId = null;
+  function clearStartTimeHighlight() { document.querySelectorAll('td.start-time-chosen').forEach(c => c.classList.remove('start-time-chosen')); }
   function clearHeaderHighlight() { document.querySelectorAll('thead th.highlight-header').forEach(th => th.classList.remove('highlight-header')); }
-  function highlightHeader(lane) { clearHeaderHighlight(); const headers = document.querySelectorAll('thead th'); if(lane >= 0 && lane < lanes) headers[lane].classList.add('highlight-header'); }
+  function clearVerticalLines() { document.querySelectorAll('td.vertical-line').forEach(td => td.classList.remove('vertical-line')); }
+  function highlightHeader(lane) { clearHeaderHighlight(); const headerCells = document.querySelectorAll('thead th'); if (lane >= 0 && lane < lanes) headerCells[lane].classList.add('highlight-header'); }
+  function highlightColumn(lane) { clearVerticalLines(); document.querySelectorAll(`td.slot[data-lane="${lane}"]`).forEach(td => td.classList.add('vertical-line')); }
   
-  // ОБНОВЛЕНИЕ ВЫДЕЛЕНИЯ ЯЧЕЕК (ВИЗУАЛ)
   function updateTableSelection() {
     document.querySelectorAll("td.selected").forEach(c => c.classList.remove("selected"));
     for (let laneStr in intervalsByLane) {
@@ -455,203 +1059,81 @@
         const end = Math.max(interval.start, interval.end);
         document.querySelectorAll(`td.slot[data-lane="${laneStr}"]`).forEach(cell => {
           const t = parseFloat(cell.dataset.time);
+          // КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: выделяем клетки где t >= start И t < end (конечная клетка НЕ включается)
           if (t >= start && t < end) cell.classList.add("selected");
         });
       });
     }
-    // Обновить карточки
     cardsContainer.innerHTML = "";
     const selDate = dateInput.value.split("-").reverse().join(".");
     for (let laneStr in intervalsByLane) {
       intervalsByLane[laneStr].forEach((interval, idx) => {
-        const s = Math.min(interval.start, interval.end);
-        const e = Math.max(interval.start, interval.end);
-        const formatTime = (t) => `${Math.floor(t)}:${t % 1 === 0.5 ? "30" : "00"}`;
-        const card = document.createElement("div");
-        card.className = "booking-card";
-        card.textContent = `Стол №${+laneStr+1} | ${selDate} | ${formatTime(s)} — ${formatTime(e)}`;
-        const btn = document.createElement("button");
-        btn.className = "close-btn";
-        btn.innerHTML = "&times;";
-        btn.onclick = (ev) => { ev.stopPropagation(); intervalsByLane[laneStr].splice(idx,1); if(intervalsByLane[laneStr].length===0) delete intervalsByLane[laneStr]; updateTableSelection(); };
-        card.appendChild(btn);
-        cardsContainer.appendChild(card);
+        const s = Math.min(interval.start, interval.end), e = Math.max(interval.start, interval.end);
+        const card = document.createElement("div"); card.className = "booking-card"; card.textContent = `Стол № ${+laneStr+1} | ${selDate} | с ${Math.floor(s)}:${s%1===0.5?"30":"00"} по ${Math.floor(e)}:${e%1===0.5?"30":"00"}`;
+        const btn = document.createElement("button"); btn.className = "close-btn"; btn.innerHTML = "&times;"; btn.onclick = ev => { ev.stopPropagation(); intervalsByLane[laneStr].splice(idx,1); updateTableSelection(); };
+        card.appendChild(btn); cardsContainer.appendChild(card);
       });
     }
   }
-  
-  // КЛИК ПО ЯЧЕЙКЕ СТОЛА (выбор линии)
-  tableBody.addEventListener("click", (e) => {
-    if (e.target.classList.contains("slot")) {
-      currentLane = +e.target.dataset.lane;
-      clearStartHighlight();
-      highlightHeader(currentLane);
-      // снимаем вертикальные линии (необязательно) но оставим эффект
-    }
-    // ВАЖНО: КЛИК ПО ВРЕМЕНИ (правый столбец) - задаём ИНТЕРВАЛ "ЧАС" без захвата конечной клетки
+
+  tableBody.addEventListener("click", e => {
+    if (e.target.classList.contains("slot")) { currentLane = +e.target.dataset.lane; clearStartTimeHighlight(); highlightHeader(currentLane); highlightColumn(currentLane); }
     if (e.target.classList.contains("time-right") && currentLane !== null) {
-      const clickedTime = parseFloat(e.target.textContent.replace(":30", ".5").replace(":00", ".0"));
-      // НОВАЯ ЛОГИКА: нажатие на время работает как "начало" или "конец", но интервал всегда формируется как [начало, конец)
-      // причем если это первый клик (currentStart === null) -> устанавливаем начало
-      // иначе завершаем интервал, но при этом конечная точка НЕ включается в выделение (строго меньше)
-      if (currentStart === null) {
-        // начали выбор
-        currentStart = clickedTime;
-        clearStartHighlight();
-        const startCell = document.querySelector(`td.slot[data-lane="${currentLane}"][data-time="${currentStart}"]`);
-        if (startCell) startCell.classList.add("start-time-chosen");
-      } else {
-        // Убедимся, что конец больше начала
-        let endTime = clickedTime;
-        if (endTime <= currentStart) {
-          alert("Время окончания должно быть больше времени начала");
-          // сбросим текущее выделение
-          currentStart = null;
-          clearStartHighlight();
-          return;
-        }
-        // Добавляем интервал [currentStart, endTime) — клетка с endTime НЕ будет выбрана, что и требуется!
+      const time = parseFloat(e.target.textContent.replace(":30",".5").replace(":00",".0"));
+      if (currentStart === null) { currentStart = time; clearStartTimeHighlight(); const sc = document.querySelector(`td.slot[data-lane="${currentLane}"][data-time="${currentStart}"]`); if(sc) sc.classList.add("start-time-chosen"); }
+      else {
+        if (time <= currentStart) return alert("Время конца должно быть больше времени начала.");
         if (!intervalsByLane[currentLane]) intervalsByLane[currentLane] = [];
-        intervalsByLane[currentLane].push({ start: currentStart, end: endTime });
-        // Сбрасываем текущее состояние
-        currentLane = null;
-        currentStart = null;
-        clearStartHighlight();
-        clearHeaderHighlight();
-        updateTableSelection();
+        intervalsByLane[currentLane].push({ start: currentStart, end: time });
+        currentLane = null; currentStart = null; clearStartTimeHighlight(); clearHeaderHighlight(); clearVerticalLines(); updateTableSelection();
       }
     }
   });
-  
-  // Двойной клик для удаления интервала
-  tableBody.addEventListener("dblclick", (e) => {
-    if(!e.target.classList.contains("slot")) return;
-    const lane = +e.target.dataset.lane;
-    const time = parseFloat(e.target.dataset.time);
-    if(intervalsByLane[lane]){
-      const idx = intervalsByLane[lane].findIndex(iv => time >= Math.min(iv.start, iv.end) && time < Math.max(iv.start, iv.end));
-      if(idx !== -1){
-        intervalsByLane[lane].splice(idx,1);
-        if(intervalsByLane[lane].length===0) delete intervalsByLane[lane];
-        updateTableSelection();
-      }
-    }
-  });
-  
-  // Модальное окно
-  window.openModal = function() {
-    if (!Object.values(intervalsByLane).some(arr => arr.length)) return alert("Сначала выберите время (нажмите на стол, затем кликните по времени начала и конца)");
-    document.getElementById("modal").style.display = "flex";
-  }
+  tableBody.addEventListener("dblclick", e => { if(!e.target.classList.contains("slot")) return; const lane = +e.target.dataset.lane, time = parseFloat(e.target.dataset.time); if(intervalsByLane[lane]){ const idx = intervalsByLane[lane].findIndex(iv => time >= Math.min(iv.start, iv.end) && time <= Math.max(iv.start, iv.end)); if(idx !== -1){ intervalsByLane[lane].splice(idx,1); updateTableSelection(); } } });
+
+  window.openModal = function() { if (!Object.values(intervalsByLane).some(a=>a.length)) return alert("Сначала выберите время."); document.getElementById("modal").style.display = "flex"; const btn = document.querySelector('.booking-button'); btn.classList.add('pressed'); setTimeout(()=>btn.classList.remove('pressed'),200); }
   window.closeModal = function() { document.getElementById("modal").style.display = "none"; }
-  
-  // Отправка бронирований
   window.submitForm = async function() {
-    const name = document.getElementById("nameInput").value.trim();
-    const phone = document.getElementById("phoneInput").value.trim();
-    const comment = document.getElementById("commentInput").value.trim();
-    const date = dateInput.value;
-    if (!name || !phone) return alert("Введите имя и телефон");
-    if (!date) return alert("Выберите дату");
-    const bookings = [];
-    for (let lane in intervalsByLane) {
-      intervalsByLane[lane].forEach(iv => {
-        bookings.push({ date, tableNumber: +lane+1, start: iv.start, end: iv.end, name, phone, comment });
-      });
-    }
-    if (!bookings.length) return alert("Нет интервалов");
+    const name = document.getElementById("nameInput").value.trim(), phone = document.getElementById("phoneInput").value.trim(), comment = document.getElementById("commentInput").value.trim(), date = dateInput.value;
+    if (!name || !phone) return alert("Введите имя и телефон."); if (!date) return alert("Выберите дату.");
+    const bookings = []; for (let lane in intervalsByLane) intervalsByLane[lane].forEach(iv => { bookings.push({ date, tableNumber: +lane+1, start: iv.start, end: iv.end, name, phone, comment }); });
+    if (!bookings.length) return alert("Нет выбранных интервалов.");
     try {
       loadingOverlayEl.style.display = 'flex';
       await Promise.all(bookings.map(b => fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ bookings: [b] }) })));
       loadingOverlayEl.style.display = 'none';
-      closeModal();
-      intervalsByLane = {};
-      currentLane = null; currentStart = null;
-      clearStartHighlight(); clearHeaderHighlight();
-      updateTableSelection();
-      document.getElementById("nameInput").value = "";
-      document.getElementById("phoneInput").value = "";
-      document.getElementById("commentInput").value = "";
+      closeModal(); for(let l in intervalsByLane) intervalsByLane[l] = []; currentLane = currentStart = null; clearStartTimeHighlight(); clearHeaderHighlight(); clearVerticalLines(); updateTableSelection();
+      document.getElementById("nameInput").value = ""; document.getElementById("phoneInput").value = ""; document.getElementById("commentInput").value = "";
       await loadExisting();
-    } catch(err) { loadingOverlayEl.style.display = 'none'; alert("Ошибка"); }
+    } catch (error) { loadingOverlayEl.style.display = 'none'; alert("Ошибка при отправке бронирования"); }
   }
-  
-  // Загрузка существующих броней и отрисовка слайдеров
-  let currentBookingId = null;
-  function showBookingInfo(b) {
-    document.getElementById('info-table').innerText = `№${b.table}`;
-    document.getElementById('info-time').innerText = `${Math.floor(b.start)}:${b.start%1===0.5?"30":"00"} — ${Math.floor(b.end)}:${b.end%1===0.5?"30":"00"}`;
-    document.getElementById('info-name').innerText = b.name;
-    document.getElementById('info-phone').innerText = b.phone;
-    document.getElementById('info-comment').innerText = b.comment || '—';
-    document.getElementById('bookingInfoPopup').style.display = 'flex';
-    currentBookingId = b.id;
-  }
-  window.closeBookingInfoPopup = () => { document.getElementById('bookingInfoPopup').style.display = 'none'; currentBookingId = null; }
-  window.confirmBooking = async (confirmed) => { if(!currentBookingId) return; try { loadingOverlayEl.style.display='flex'; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:currentBookingId,confirmed})}); loadingOverlayEl.style.display='none'; closeBookingInfoPopup(); await loadExisting(); } catch(e){ loadingOverlayEl.style.display='none'; alert("Ошибка"); } }
-  window.deleteBooking = async () => { if(!currentBookingId || !confirm("Удалить?")) return; try { loadingOverlayEl.style.display='flex'; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:currentBookingId})}); loadingOverlayEl.style.display='none'; closeBookingInfoPopup(); await loadExisting(); } catch(e){ loadingOverlayEl.style.display='none'; alert("Ошибка"); } }
-  
+  function showBookingInfo(b) { document.getElementById('info-table').textContent = `№${b.table}`; document.getElementById('info-date').textContent = b.date.split('-').reverse().join('.'); document.getElementById('info-time').textContent = `${Math.floor(b.start)}:${b.start%1===0.5?"30":"00"} - ${Math.floor(b.end)}:${b.end%1===0.5?"30":"00"}`; document.getElementById('info-name').textContent = b.name; document.getElementById('info-phone').textContent = b.phone; document.getElementById('info-comment').textContent = b.comment || 'нет комментария'; document.getElementById('info-confirmed').textContent = b.confirmed || ''; document.getElementById('bookingInfoPopup').style.display = 'flex'; currentBookingId = b.id; }
+  window.closeBookingInfoPopup = function() { document.getElementById('bookingInfoPopup').style.display = 'none'; currentBookingId = null; }
+  window.confirmBooking = async function(confirmed) { if(!currentBookingId) return; try{ loadingOverlayEl.style.display='flex'; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:currentBookingId,confirmed})}); loadingOverlayEl.style.display='none'; closeBookingInfoPopup(); await loadExisting(); } catch(e){ loadingOverlayEl.style.display='none'; alert("Ошибка обновления статуса"); } }
+  window.deleteBooking = async function() { if(!currentBookingId || !confirm("Удалить бронь?")) return; try{ loadingOverlayEl.style.display='flex'; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:currentBookingId})}); loadingOverlayEl.style.display='none'; closeBookingInfoPopup(); await loadExisting(); } catch(e){ loadingOverlayEl.style.display='none'; alert("Ошибка удаления"); } }
   async function loadExisting() {
-    try {
-      loadingOverlayEl.style.display = 'flex';
-      slidersContainer.innerHTML = '';
-      const res = await fetch(GAS_URL + "?action=get&date=" + dateInput.value);
-      const data = await res.json();
-      loadingOverlayEl.style.display = 'none';
-      if (!data.bookings?.length) return;
-      const timeCells = Array.from(document.querySelectorAll('th.time-right'));
-      const tableCells = Array.from(document.querySelectorAll('td.slot'));
-      const containerRect = tableContainer.getBoundingClientRect();
-      data.bookings.forEach(b => {
-        if (b.date !== dateInput.value) return;
-        const laneIndex = b.table - 1;
-        const startIdx = timeSlots.findIndex(ts => ts.key === parseFloat(b.start));
-        const endIdx = timeSlots.findIndex(ts => ts.key === parseFloat(b.end));
-        if (startIdx === -1 || endIdx === -1) return;
-        const startCell = tableCells.find(cell => parseInt(cell.dataset.lane) === laneIndex && parseFloat(cell.dataset.time) === parseFloat(b.start));
-        if (!startCell) return;
-        const startTimeCell = timeCells[startIdx];
-        const endTimeCell = timeCells[endIdx];
-        const height = endTimeCell.offsetTop + endTimeCell.offsetHeight - startTimeCell.offsetTop;
-        const left = startCell.getBoundingClientRect().left - containerRect.left;
-        const top = startTimeCell.offsetTop;
-        const slider = document.createElement("div");
-        slider.className = "existing-slider";
-        if (b.confirmed === "Да") slider.classList.add("confirmed");
-        else if (b.confirmed === "Нет") slider.classList.add("rejected");
-        slider.style.top = `${top}px`;
-        slider.style.left = `${left}px`;
-        slider.style.width = `${startCell.offsetWidth}px`;
-        slider.style.height = `${height}px`;
-        slider.innerText = `${b.name}`;
-        slider.addEventListener('click', (e) => { e.stopPropagation(); showBookingInfo(b); });
-        slidersContainer.appendChild(slider);
-      });
-    } catch(e) { loadingOverlayEl.style.display = 'none'; console.error(e); }
+    try{ loadingOverlayEl.style.display='flex'; slidersContainer.innerHTML=""; const res = await fetch(GAS_URL+"?action=get&date="+dateInput.value); const data = await res.json(); loadingOverlayEl.style.display='none'; if(!data.bookings?.length) return; const timeCells = Array.from(document.querySelectorAll('th.time-right')), tableCells = Array.from(document.querySelectorAll('td.slot')), containerRect = tableContainer.getBoundingClientRect();
+      data.bookings.forEach(b => { if(b.date===dateInput.value){ const laneIndex = b.table-1; const startIndex = timeSlots.findIndex(ts => ts.key===parseFloat(b.start)), endIndex = timeSlots.findIndex(ts => ts.key===parseFloat(b.end)); if(startIndex===-1||endIndex===-1) return; const startCell = tableCells.find(cell => parseInt(cell.dataset.lane)===laneIndex && parseFloat(cell.dataset.time)===parseFloat(b.start)); if(!startCell) return; const startCellRect = startCell.getBoundingClientRect(); const startTimeCell = timeCells[startIndex], endTimeCell = timeCells[endIndex]; const height = endTimeCell.offsetTop + endTimeCell.offsetHeight - startTimeCell.offsetTop; const left = startCellRect.left - containerRect.left, top = startTimeCell.offsetTop; const slider = document.createElement("div"); slider.className = "existing-slider"; if (b.confirmed === "Да") slider.classList.add("confirmed"); else if (b.confirmed === "Нет") slider.classList.add("rejected"); slider.style.top = `${top}px`; slider.style.left = `${left}px`; slider.style.width = `${startCellRect.width}px`; slider.style.height = `${height}px`; slider.addEventListener('click', (e) => { e.stopPropagation(); showBookingInfo(b); }); slidersContainer.appendChild(slider); } });
+    } catch(e){ loadingOverlayEl.style.display='none'; console.error(e); }
   }
-  
-  dateInput.addEventListener('change', async () => {
-    intervalsByLane = {};
-    currentLane = null; currentStart = null;
-    clearStartHighlight(); clearHeaderHighlight();
-    updateTableSelection();
-    await loadExisting();
-  });
+  dateInput.addEventListener('change', async () => { await loadExisting(); intervalsByLane = {}; currentLane = currentStart = null; clearStartTimeHighlight(); clearHeaderHighlight(); clearVerticalLines(); updateTableSelection(); });
   
   function initAppAfterAuth() {
-    loadExisting();
-    updateTableSelection();
-    // подпишем маркеры обновления ширины
-    window.dispatchEvent(new Event('resize'));
+    loadExisting(); 
+    updateTableSelection(); 
+    updateMarkersWidth();
   }
   
-  window.closeImagePopup = () => { document.getElementById("imagePopup").style.display = "none"; }
+  window.closeImagePopup = function() { document.getElementById("imagePopup").style.display = "none"; }
   
-  if (!tryRestoreSession()) document.getElementById('loginScreen').style.display = 'flex';
+  if (!tryRestoreSession()) {
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
   
-  // подстройка ширины
-  window.addEventListener('resize', () => { loadExisting(); });
-  setTimeout(() => { if(document.getElementById('mainContent').style.display === 'block') loadExisting(); }, 200);
+  const faLink = document.createElement('link');
+  faLink.rel = 'stylesheet';
+  faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';
+  document.head.appendChild(faLink);
 </script>
 </body>
 </html>

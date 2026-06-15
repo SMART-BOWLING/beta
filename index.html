@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes" />
-  <title>Бильярд Бронь — Умный ползунок времени</title>
-  <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Бильярд — Бронирование с умными интервалами</title>
+  <link rel="icon" type="image/png" href="https://i.postimg.cc/Z5Vszw0h/STATS-GOOGLE-1.png">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js"></script>
   <style>
     * {
       box-sizing: border-box;
-      user-select: none; /* избегаем случайного выделения */
+      user-select: none; /* для более плавного выделения на мобильных, но текст можно выделять */
     }
+
     :root {
-      --cell-size: 50px;
+      --cell-size: 52px;
       --main-color: #1e3a8a;
       --highlight-color: #ef4444;
       --highlight-bg: #1a2f40;
@@ -21,34 +22,19 @@
       --rejected-color: #b91c1c;
       --background-color: #1a2f40;
       --card-color: #e0f2fe;
-      --blue-color: #2563eb;
-      --red-color: #ef4444;
-      --green-color: #22c55e;
-      --custom-dark: #1a2f40;
       --border-spacing: 2px;
     }
 
-    @media (max-width: 768px) {
-      :root { 
-        --cell-size: calc((100vw - 24px) / 13);
-        --border-spacing: 2px;
-      }
-      table { width: auto !important; margin: 0 auto; }
-      td, th {
-        aspect-ratio: 1;
-        width: var(--cell-size) !important;
-        height: var(--cell-size) !important;
-        font-size: 11px;
-      }
-      .booking-card { font-size: 12px; padding: 8px 35px 8px 12px; white-space: normal; word-break: keep-all; }
-      .existing-slider { font-size: 8px; white-space: normal; line-height: 1.2; }
-      #controls { gap: 8px; }
+    @media (max-width: 700px) {
+      :root { --cell-size: clamp(40px, 9vw, 58px); }
+      body { padding: 4px; }
+      .booking-card { font-size: 11px; padding: 8px 36px 8px 10px; white-space: normal; word-break: keep-all; }
+      .booking-card .close-btn { transform: translate(40%, -40%); font-size: 16px; padding: 4px 8px; }
     }
 
     body {
       font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-      background: #1a2f40;
-      padding: 5px;
+      background: #0f212e;
       margin: 0;
       display: flex;
       flex-direction: column;
@@ -56,143 +42,162 @@
       min-height: 100vh;
     }
 
+    /* таблица */
     .table-container {
-      position: relative;
       width: 100%;
       max-width: 100vw;
       overflow-x: auto;
-      margin: 0 auto;
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      justify-content: center;
       background: transparent;
+      padding: 6px 0;
+    }
+
+    .table-wrapper {
+      position: relative;
+      display: inline-block;
     }
 
     table {
       border-collapse: separate;
       border-spacing: var(--border-spacing);
       table-layout: fixed;
-      touch-action: manipulation;
-      margin: 0 auto;
       background: #1a2f40;
-      padding: var(--border-spacing);
-    }
-
-    .table-wrapper {
-      display: inline-block;
-      position: relative;
       margin: 0 auto;
-    }
-
-    thead th {
-      position: sticky;
-      top: 0;
-      color: white;
-      z-index: 2;
-      font-weight: 600;
-      background: #1a2f40 !important;
     }
 
     th, td {
       width: var(--cell-size);
       height: var(--cell-size);
-      border: none;
       text-align: center;
       vertical-align: middle;
-      background: white !important;
-      font-size: 12px;
-      transition: all 0.1s ease;
+      background: white;
+      transition: 0.1s linear;
     }
 
-    td.slot { 
-      cursor: pointer; 
-      transition: background 0.15s, transform 0.05s;
-    }
-    td.slot:active { transform: scale(0.96); }
-
-    td.selected {
-      background: #1a2f40 !important;
-      color: white;
+    td.slot {
+      cursor: pointer;
       font-weight: 500;
     }
-
+    td.slot.selected {
+      background: #1a2f40 !important;
+      color: white;
+      font-weight: bold;
+      position: relative;
+    }
     td.start-time-chosen {
       background: #ef4444 !important;
       color: white;
-      box-shadow: inset 0 0 0 2px white;
+      box-shadow: inset 0 0 0 2px #ffc107;
+    }
+    .time-right {
+      background: #1a2f40 !important;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    thead th {
+      background: #1a2f40 !important;
+      color: white;
+      font-weight: 600;
+    }
+    .vertical-line {
+      position: relative;
+    }
+    .vertical-line::before {
+      content: "";
+      position: absolute;
+      left: -1px;
+      top: 2px;
+      bottom: 2px;
+      width: 3px;
+      background: #ef4444;
+      border-radius: 4px;
     }
 
-    /* маркеры столбцов – клик на них показывает схему столов */
+    /* маркеры (столы) */
     .column-markers {
       display: flex;
       gap: var(--border-spacing);
-      margin-top: 5px;
+      margin-top: 6px;
       justify-content: center;
     }
     .marker {
-      height: 6px;
-      border-radius: 3px;
+      height: 8px;
+      border-radius: 4px;
       cursor: pointer;
       transition: 0.1s;
+      width: var(--cell-size);
     }
-    .marker:active { transform: scale(0.96); }
-    .marker.blue { background-color: #3b82f6; }
-    .marker.green { background-color: #22c55e; }
-    .marker.red { background-color: #ef4444; }
+    .marker.blue { background: #3b82f6; }
+    .marker.green { background: #22c55e; }
+    .marker.red { background: #ef4444; }
     .marker.empty { background: transparent; cursor: default; }
 
+    /* карточки выбранных интервалов */
     #cardsContainer {
-      margin: 8px auto 6px;
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
       justify-content: center;
+      gap: 12px;
+      margin: 10px auto 5px;
+      padding: 0 8px;
     }
     .booking-card {
-      position: relative;
-      background: var(--card-color);
-      border-radius: 12px;
-      padding: 12px 45px 12px 15px;
+      background: #e0f2fe;
+      border-radius: 30px;
+      padding: 6px 40px 6px 16px;
       font-weight: 600;
-      font-size: 14px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-      transition: 0.2s;
+      font-size: 13px;
+      color: #0c4a6e;
+      position: relative;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      backdrop-filter: blur(2px);
+      white-space: nowrap;
     }
     .booking-card .close-btn {
       position: absolute;
-      top: 0;
-      right: 0;
-      transform: translate(50%, -50%);
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
       background: white;
-      border: 1px solid var(--main-color);
-      border-radius: 50%;
-      font-size: 18px;
+      border: none;
+      border-radius: 40px;
+      width: 22px;
+      height: 22px;
+      font-weight: bold;
       cursor: pointer;
-      padding: 5px 9px;
+      color: #b91c1c;
+      line-height: 1;
+      font-size: 18px;
+      padding: 0;
+      transition: 0.2s;
     }
-    .booking-card .close-btn:hover { background: var(--main-color); color: white; }
 
     #controls {
-      margin-top: 6px;
+      margin: 8px auto 16px;
       display: flex;
+      gap: 12px;
       justify-content: center;
-      gap: 15px;
+      flex-wrap: wrap;
       width: 100%;
       max-width: 500px;
     }
     #dateInput, .booking-button {
-      flex: 1;
-      padding: 8px 12px;
-      font-weight: 600;
-      border-radius: 10px;
-      border: 1px solid white;
+      padding: 10px 14px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 40px;
+      border: none;
       background: white;
       cursor: pointer;
+      font-family: inherit;
     }
     .booking-button {
       background: #1a2f40;
       color: white;
-      border: 1px solid white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
     .booking-button:active { transform: scale(0.97); }
 
@@ -201,142 +206,87 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: #00000099;
+      background: rgba(0,0,0,0.7);
       justify-content: center;
       align-items: center;
-      z-index: 1000;
+      z-index: 1200;
     }
-    .popup-content, #modal > div {
+    .modal-card, .popup-content {
       background: white;
-      padding: 20px;
-      border-radius: 20px;
-      max-width: 400px;
+      border-radius: 28px;
+      padding: 22px;
       width: 90%;
+      max-width: 380px;
+      box-shadow: 0 20px 30px rgba(0,0,0,0.3);
     }
-    .close-btn, .close-popup {
-      background: #1a2f40;
-      color: white;
-      border: none;
-      border-radius: 30px;
-      width: 32px;
-      height: 32px;
-      font-size: 20px;
-      cursor: pointer;
-    }
-    .confirmation-buttons { display: flex; gap: 12px; margin: 15px 0; }
+    .popup-content h3 { margin-top: 0; text-align: center; }
+    .info-row { display: flex; justify-content: space-between; margin: 10px 0; }
+    .confirmation-buttons { display: flex; gap: 12px; margin: 20px 0 12px; }
+    button { border-radius: 40px; padding: 8px 16px; font-weight: bold; border: none; cursor: pointer; }
     .confirm-yes { background: #16a34a; color: white; }
     .confirm-no { background: #b91c1c; color: white; }
-    .delete-btn { background: #475569; color: white; width: 100%; padding: 8px; border-radius: 30px; margin-top: 12px; }
+    .delete-btn { width: 100%; background: #334155; color: white; margin-top: 16px; }
 
-    .loading-overlay {
+    .login-screen {
       position: fixed;
       inset: 0;
-      background: rgba(255,255,255,0.8);
+      background: #0f212e;
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 2000;
     }
-    .loading-spinner {
-      width: 45px;
-      height: 45px;
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,240,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2100;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
       border: 5px solid #ccc;
       border-top-color: #1a2f40;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ползунки существующих броней */
-    #slidersContainer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 10;
-    }
-    .existing-slider {
-      position: absolute;
-      background: #1a2f40;
-      border-radius: 6px;
-      pointer-events: auto;
-      cursor: pointer;
-      font-size: 9px;
-      font-weight: bold;
-      padding: 2px 4px;
-      color: white;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: 0.05s linear;
-    }
-    .existing-slider.confirmed { background: #16a34a; }
-    .existing-slider.rejected { background: #b91c1c; }
-    .existing-slider::before, .existing-slider::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: #ef4444;
-    }
-    .existing-slider::before { top: 0; border-radius: 4px 4px 0 0; }
-    .existing-slider::after { bottom: 0; border-radius: 0 0 4px 4px; }
-
-    /* экран входа (только кнопка) */
-    .login-screen {
-      position: fixed;
-      inset: 0;
-      background: #1a2f40;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-    }
     .logout-like-tables-btn {
       background: #1a2f40;
       border: 1px solid white;
       color: white;
-      padding: 6px 10px;
-      border-radius: 30px;
+      border-radius: 40px;
+      padding: 4px 12px;
       font-weight: bold;
-      cursor: pointer;
-      width: 100%;
-      text-align: center;
     }
   </style>
 </head>
 <body>
 
-<!-- ЭКРАН ЛОГИНА -->
 <div id="loginScreen" class="login-screen">
-  <div class="login-button-wrapper">
+  <div>
     <div id="g_id_onload" data-client_id="328749588235-bgfeukqogpoq2ha65j7j0vk840hctiaq.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
     <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with" data-size="large"></div>
   </div>
 </div>
 
-<!-- ОСНОВНОЙ КОНТЕНТ -->
 <div id="mainContent" style="display: none;">
   <div class="table-container">
     <div class="table-wrapper">
       <table id="bookingTable">
         <thead>
-          <tr id="headerRow">
-            <!-- 12 столов -->
-            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
-            <th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th>
-            <th class="time-col" style="padding:0;"><button id="logoutButtonHeader" class="logout-like-tables-btn">Выйти</button></th>
+          <tr><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th>
+            <th><button id="logoutBtnHeader" class="logout-like-tables-btn">Выйти</button></th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
-      </table>
+       </table>
       <div id="columnMarkers" class="column-markers"></div>
     </div>
-    <div id="slidersContainer"></div>
+    <div id="slidersContainer" style="position: relative; pointer-events: none;"></div>
   </div>
 
   <div id="cardsContainer"></div>
@@ -345,78 +295,50 @@
     <button class="booking-button" onclick="openModal()">ЗАБРОНИРОВАТЬ</button>
   </div>
 
-  <!-- Модалка ввода -->
-  <div id="modal">
-    <div>
-      <h3>Введите данные</h3>
-      <label>Имя:<br><input id="nameInput" autocomplete="off"></label>
-      <label>Телефон:<br><input id="phoneInput" type="tel"></label>
-      <label>Комментарий:<br><textarea id="commentInput" rows="2"></textarea></label>
-      <div style="text-align: right; margin-top: 15px;">
-        <button onclick="submitForm()">ЗАБРОНИРОВАТЬ</button>
-        <button onclick="closeModal()">ОТМЕНА</button>
-      </div>
-    </div>
-  </div>
+  <div id="modal"><div class="modal-card"><h3>📋 Данные брони</h3>
+    <label>Имя:<br><input id="nameInput" autocomplete="off"></label><br>
+    <label>Телефон:<br><input id="phoneInput" type="tel"></label><br>
+    <label>Комментарий:<br><textarea id="commentInput" rows="2"></textarea></label>
+    <div style="display:flex; justify-content: flex-end; gap:12px; margin-top:18px"><button onclick="submitForm()">✅ Подтвердить</button><button onclick="closeModal()">Отмена</button></div>
+  </div></div>
 
-  <!-- Схема столов (popup) -->
-  <div id="imagePopup" class="image-popup">
-    <div class="popup-content">
-      <button class="close-popup" onclick="closeImagePopup()">&times;</button>
-      <img src="https://i.postimg.cc/52ZDKDDw/55.png" style="width:100%; border-radius:12px;" />
-    </div>
-  </div>
+  <div id="bookingInfoPopup"><div class="popup-content"><button class="close-btn" style="float:right; background:transparent; font-size:24px;" onclick="closeBookingInfoPopup()">&times;</button>
+    <h3>📌 Бронь</h3><div id="info-details"></div>
+    <div class="confirmation-buttons"><button class="confirm-yes" onclick="confirmBooking(true)">✅ Были</button><button class="confirm-no" onclick="confirmBooking(false)">❌ Не были</button></div>
+    <button class="delete-btn" onclick="deleteBooking()">🗑 Удалить бронь</button>
+  </div></div>
 
-  <!-- Инфо о брони -->
-  <div id="bookingInfoPopup" class="booking-info-popup">
-    <div class="popup-content">
-      <button class="close-btn" onclick="closeBookingInfoPopup()">&times;</button>
-      <h3>Информация</h3>
-      <div class="info-row"><strong>Стол:</strong> <span id="info-table"></span></div>
-      <div class="info-row"><strong>Дата:</strong> <span id="info-date"></span></div>
-      <div class="info-row"><strong>Время:</strong> <span id="info-time"></span></div>
-      <div class="info-row"><strong>Имя:</strong> <span id="info-name"></span></div>
-      <div class="info-row"><strong>Телефон:</strong> <span id="info-phone"></span></div>
-      <div class="info-row"><strong>Коммент:</strong> <span id="info-comment"></span></div>
-      <div class="info-row"><strong>Посещение:</strong> <span id="info-confirmed"></span></div>
-      <div class="confirmation-buttons"><button class="confirm-yes" onclick="confirmBooking(true)">Да, пришли</button><button class="confirm-no" onclick="confirmBooking(false)">Нет, не пришли</button></div>
-      <button class="delete-btn" onclick="deleteBooking()">🗑 УДАЛИТЬ БРОНЬ</button>
-    </div>
-  </div>
-  <div id="loadingOverlay" class="loading-overlay" style="display: none;"><div class="loading-spinner"></div></div>
+  <div id="imagePopup" class="image-popup"><div class="popup-content"><button onclick="closeImagePopup()" style="float:right;">✖</button><img src="https://i.postimg.cc/52ZDKDDw/55.png" style="max-width:100%; border-radius: 20px;"></div></div>
+  <div id="loadingOverlay" class="loading-overlay" style="display: none;"><div class="spinner"></div></div>
 </div>
 
 <script>
-  // ------------------- АВТОРИЗАЦИЯ -------------------
+  // ---------- GOOGLE AUTH + SHEETS ----------
   const AUTH_SPREADSHEET_ID = '1zwi1CInK3NZ8YRAegRMAdjin6XPacVkAkFsjAiqVE0w';
   const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxfRLDGA29FrqKS61HmYN_FUnDwOydeCaEdeW4oc4wyroQzvb4h1OnwQ5HeotIHhcj9/exec";
   let currentUser = null;
-  let gapiInitialized = false;
-  const STORAGE_USER_KEY = 'billiard_user_v2';
-  const STORAGE_EXPIRY_KEY = 'billiard_expiry';
+  let gapiReady = false;
 
   function parseJwt(token) {
     try {
       const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-      return JSON.parse(jsonPayload);
+      const base64 = base64Url.replace(/-/g,'+').replace(/_/g,'/');
+      return JSON.parse(atob(base64));
     } catch(e) { return {}; }
   }
 
   async function initGapi() {
-    if (gapiInitialized) return;
+    if(gapiReady) return;
     return new Promise((resolve, reject) => {
       gapi.load('client', {
         callback: async () => {
           try {
             await gapi.client.init({ apiKey: API_KEY, discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'] });
-            gapiInitialized = true;
+            gapiReady = true;
             resolve();
           } catch(e) { reject(e); }
-        },
-        onerror: reject
+        }, onerror: reject, timeout: 8000
       });
     });
   }
@@ -426,365 +348,408 @@
       await initGapi();
       const res = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: AUTH_SPREADSHEET_ID, range: '1!A:C' });
       const rows = res.result.values || [];
-      for (let i = 1; i < rows.length; i++) {
-        if (rows[i][0] && rows[i][0].toLowerCase().trim() === email) {
-          return { found: true, name: rows[i][1] || email.split('@')[0], role: rows[i][2] || '' };
-        }
+      for(let i=1; i<rows.length; i++) {
+        if(rows[i][0] && rows[i][0].toLowerCase().trim() === email) return { found: true, name: rows[i][1]?.trim() || email.split('@')[0], role: rows[i][2] || '' };
       }
       return { found: false };
     } catch(e) { return { found: false, error: true }; }
   }
 
-  function saveUserToStorage(u) {
-    const exp = new Date(); exp.setDate(exp.getDate() + 7);
-    localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(u));
-    localStorage.setItem(STORAGE_EXPIRY_KEY, exp.toISOString());
+  function saveSession(user) {
+    const exp = new Date(); exp.setDate(exp.getDate()+7);
+    localStorage.setItem('billiard_user', JSON.stringify(user));
+    localStorage.setItem('billiard_exp', exp.toISOString());
   }
-  function getUserFromStorage() {
-    const raw = localStorage.getItem(STORAGE_USER_KEY), expRaw = localStorage.getItem(STORAGE_EXPIRY_KEY);
-    if (!raw || !expRaw) return null;
-    if (new Date(expRaw) < new Date()) { localStorage.removeItem(STORAGE_USER_KEY); localStorage.removeItem(STORAGE_EXPIRY_KEY); return null; }
+  function getStoredUser() {
+    const raw = localStorage.getItem('billiard_user');
+    const exp = localStorage.getItem('billiard_exp');
+    if(!raw || !exp) return null;
+    if(new Date(exp) < new Date()) { localStorage.removeItem('billiard_user'); localStorage.removeItem('billiard_exp'); return null; }
     try { return JSON.parse(raw); } catch(e) { return null; }
   }
-  function clearSession() { localStorage.removeItem(STORAGE_USER_KEY); localStorage.removeItem(STORAGE_EXPIRY_KEY); }
+  function clearSession() { localStorage.removeItem('billiard_user'); localStorage.removeItem('billiard_exp'); }
 
   window.handleCredentialResponse = async (resp) => {
-    const overlay = document.getElementById('loadingOverlay');
-    if(overlay) overlay.style.display = 'flex';
-    try {
-      const payload = parseJwt(resp.credential);
-      const email = payload.email.toLowerCase().trim();
-      const check = await checkEmailInSheet(email);
-      if (check.found) {
-        currentUser = { email, name: check.name, role: check.role, picture: payload.picture };
-        saveUserToStorage(currentUser);
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('mainContent').style.display = 'block';
-        if(overlay) overlay.style.display = 'none';
-        document.getElementById('logoutButtonHeader').onclick = () => { clearSession(); location.reload(); };
-        initAfterAuth();
-      } else {
-        if(overlay) overlay.style.display = 'none';
-        alert('Доступ запрещён: email не найден.');
-      }
-    } catch(e) { if(overlay) overlay.style.display = 'none'; alert('Ошибка входа'); }
-  };
-
-  function tryRestoreSession() {
-    const saved = getUserFromStorage();
-    if (saved && saved.email) {
-      currentUser = saved;
+    const payload = parseJwt(resp.credential);
+    const email = payload.email.toLowerCase();
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    const check = await checkEmailInSheet(email);
+    if(check.found) {
+      currentUser = { email, name: check.name, picture: payload.picture };
+      saveSession(currentUser);
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('mainContent').style.display = 'block';
-      document.getElementById('logoutButtonHeader').onclick = () => { clearSession(); location.reload(); };
-      initAfterAuth();
+      document.getElementById('loadingOverlay').style.display = 'none';
+      initAppAfterLogin();
+    } else {
+      document.getElementById('loadingOverlay').style.display = 'none';
+      alert('❌ Доступ запрещён. Ваш email не найден в списке.');
+    }
+  };
+
+  function tryAutoLogin() {
+    const user = getStoredUser();
+    if(user) {
+      currentUser = user;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      initAppAfterLogin();
       return true;
     }
     return false;
   }
 
-  // ---------- ОСНОВНАЯ БИЗНЕС-ЛОГИКА С УМНЫМ ПОЛЗУНКОМ ----------
-  const dateInput = document.getElementById('dateInput');
-  const today = new Date().toISOString().split('T')[0];
-  dateInput.min = today;
-  dateInput.value = today;
-  const startHour = 11, endHour = 22, lanes = 12;
-  const tableBody = document.getElementById("tableBody");
-  const cardsContainer = document.getElementById("cardsContainer");
-  const slidersContainer = document.getElementById("slidersContainer");
-  const tableContainer = document.querySelector(".table-container");
-  const loadingOverlay = document.getElementById("loadingOverlay");
-
-  // генерация временных слотов (с 11:00 до 22:00 с шагом 30 мин)
-  const timeSlots = [];
-  for (let h = startHour; h <= endHour; h++) {
-    timeSlots.push({ display: `${h}:00`, key: h });
-    if (h < endHour) timeSlots.push({ display: `${h}:30`, key: h + 0.5 });
-  }
-  // построить таблицу
-  function buildTable() {
-    tableBody.innerHTML = "";
-    timeSlots.forEach(slot => {
-      const tr = document.createElement('tr');
-      for (let lane = 0; lane < lanes; lane++) {
-        const td = document.createElement('td');
-        td.className = "slot";
-        td.dataset.lane = lane;
-        td.dataset.time = slot.key;
-        td.dataset.display = slot.display;
-        tr.appendChild(td);
-      }
-      const th = document.createElement('th');
-      th.className = "time-right";
-      th.textContent = slot.display;
-      tr.appendChild(th);
-      tableBody.appendChild(tr);
-    });
-  }
-  buildTable();
-
-  // маркеры столбцов
-  const columnMarkersDiv = document.getElementById("columnMarkers");
-  function createMarkers() {
-    columnMarkersDiv.innerHTML = "";
-    for (let i = 0; i < lanes; i++) {
-      const marker = document.createElement("div");
-      marker.className = "marker";
-      if (i <= 2 || i === 4 || i === 5) marker.classList.add("blue");
-      else if (i === 3) marker.classList.add("green");
-      else if (i >= 6 && i <= 11) marker.classList.add("red");
-      marker.onclick = () => document.getElementById("imagePopup").style.display = "flex";
-      columnMarkersDiv.appendChild(marker);
+  function logout() {
+    if(confirm('Выйти из учётной записи?')) {
+      clearSession();
+      currentUser = null;
+      document.getElementById('mainContent').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
     }
-    const emptyMarker = document.createElement("div");
-    emptyMarker.className = "marker empty";
-    columnMarkersDiv.appendChild(emptyMarker);
   }
-  createMarkers();
 
-  // состояние выбранных интервалов: intervalsByLane[lane] = [{start, end}]
-  let intervalsByLane = {};
+  // ---------- ОСНОВНАЯ ЛОГИКА ВЫБОРА ИНТЕРВАЛОВ (УМНЫЙ ЧАС 12:00-13:00) ----------
+  // Важное требование: ползунок визуально останавливается в 12:30, но бронь считается до 13:00 (занимает часовой блок)
+  // Реализация: мы работаем с ячейками по 30 минут (11:00, 11:30, 12:00, 12:30 ... 22:00)
+  // При выборе интервала: если пользователь выбрал начало "12:00" и конец "12:30" — мы автоматически расширяем до "13:00" (т.е. реальный конец ставим 13:00, визуально выделяем с 12:00 до 13:00)
+  // Правило: любой интервал, который завершается в 12:30 (или любой получас) и начат в целый час, мы трактуем как полный час? 
+  // Но по описанию: ползунок стоит с 12:00 до 13:00, а клетку 13:00 не занимает. Но у нас в таблице каждая клетка — получас.
+  // Чтобы сделать именно так: при выборе начала 12:00 и конца 12:30, мы создаём бронь start=12:00, end=13:00. 
+  // При этом визуально в интервалахByLane запоминаем start=12:00, end=13:00. Подсветка на сетке покроет ячейки 12:00 и 12:30, но не затронет 13:00 (т.к. 13:00 это отдельная ячейка).
+  // Такое поведение идеально: ползунок «остановился на 12:30», но бронь считается до 13:00.
+  
+  const startHour = 11, endHour = 22;
+  const lanes = 12;
+  const timeSlots = [];
+  for(let h = startHour; h <= endHour; h++) {
+    if(h < endHour) {
+      timeSlots.push({ display: `${h}:00`, key: h });
+      timeSlots.push({ display: `${h}:30`, key: h + 0.5 });
+    } else {
+      timeSlots.push({ display: `${h}:00`, key: h });
+    }
+  }
+
+  // строим таблицу
+  const tableBody = document.getElementById("tableBody");
+  timeSlots.forEach(slot => {
+    const tr = document.createElement("tr");
+    for(let l=0; l<lanes; l++) {
+      const td = document.createElement("td");
+      td.className = "slot";
+      td.dataset.lane = l;
+      td.dataset.time = slot.key;
+      td.dataset.display = slot.display;
+      tr.appendChild(td);
+    }
+    const thTime = document.createElement("th");
+    thTime.className = "time-right";
+    thTime.textContent = slot.display;
+    tr.appendChild(thTime);
+    tableBody.appendChild(tr);
+  });
+
+  // структура хранения выбранных интервалов (реальные start/end в часах, всегда часы или половинки)
+  let intervalsByLane = {}; // { lane: [ {start, end} ] }  start и end в формате float 11.0, 11.5 и тд
   let currentLane = null;
-  let currentStart = null;
+  let pendingStart = null; // начало не подтверждённое
 
-  function clearHighlight() {
+  function clearSelectionDecorations() {
     document.querySelectorAll('td.start-time-chosen').forEach(c => c.classList.remove('start-time-chosen'));
     document.querySelectorAll('thead th.highlight-header').forEach(th => th.classList.remove('highlight-header'));
+    document.querySelectorAll('td.vertical-line').forEach(td => td.classList.remove('vertical-line'));
   }
 
-  function highlightColumnAndHeader(lane) {
-    clearHighlight();
+  function highlightLane(lane) {
     const headers = document.querySelectorAll('thead th');
-    if (headers[lane]) headers[lane].classList.add('highlight-header');
-    // визуально показываем вертикальные линии — можно через класс, но для простоты подсветка ячеек
-    document.querySelectorAll(`td.slot`).forEach(td => td.style.outline = 'none');
-    document.querySelectorAll(`td.slot[data-lane="${lane}"]`).forEach(td => td.style.outline = '1px solid #ef4444');
-  }
-  function resetColumnOutline() {
-    document.querySelectorAll(`td.slot`).forEach(td => td.style.outline = '');
+    if(headers[lane]) headers[lane].classList.add('highlight-header');
+    document.querySelectorAll(`td.slot[data-lane="${lane}"]`).forEach(td => td.classList.add('vertical-line'));
   }
 
-  function updateTableSelection() {
-    document.querySelectorAll("td.selected").forEach(c => c.classList.remove("selected"));
-    for (let lane in intervalsByLane) {
-      intervalsByLane[lane].forEach(interval => {
-        const start = Math.min(interval.start, interval.end);
-        const end = Math.max(interval.start, interval.end);
-        document.querySelectorAll(`td.slot[data-lane="${lane}"]`).forEach(cell => {
+  // Обновить отображение выбранных интервалов на таблице + карточки
+  function refreshSelectionUI() {
+    // очищаем класс selected
+    document.querySelectorAll('td.selected').forEach(td => td.classList.remove('selected'));
+    for(let laneStr in intervalsByLane) {
+      intervalsByLane[laneStr].forEach(int => {
+        const start = Math.min(int.start, int.end);
+        const end = Math.max(int.start, int.end);
+        // проходим все ячейки данного столбца и подсвечиваем если время внутри [start, end] ВКЛЮЧИТЕЛЬНО, но не включаем end если end целый час? 
+        // Визуально выделяем все ячейки от начала до ячейки перед конечным временем (т.к end=13:00, ячейка 13:00 не подсвечивается, это нужно)
+        // Решение: подсветка ячеек где time >= start && time < end (строго меньше end)
+        document.querySelectorAll(`td.slot[data-lane="${laneStr}"]`).forEach(cell => {
           const t = parseFloat(cell.dataset.time);
-          if (t >= start && t <= end) cell.classList.add("selected");
+          if(t >= start && t < end) cell.classList.add('selected');
         });
       });
     }
-    // отрисовать карточки
-    cardsContainer.innerHTML = "";
-    const selDate = dateInput.value.split("-").reverse().join(".");
-    for (let lane in intervalsByLane) {
-      intervalsByLane[lane].forEach((interval, idx) => {
-        const s = Math.min(interval.start, interval.end);
-        const e = Math.max(interval.start, interval.end);
-        const startStr = `${Math.floor(s)}:${s % 1 === 0.5 ? "30" : "00"}`;
-        const endStr = `${Math.floor(e)}:${e % 1 === 0.5 ? "30" : "00"}`;
+    // карточки
+    const cardsDiv = document.getElementById("cardsContainer");
+    cardsDiv.innerHTML = "";
+    const selDate = document.getElementById("dateInput").value.split('-').reverse().join('.');
+    for(let laneStr in intervalsByLane) {
+      intervalsByLane[laneStr].forEach((int, idx) => {
+        const s = int.start, e = int.end;
+        const startStr = `${Math.floor(s)}:${s%1===0.5?'30':'00'}`;
+        const endStr = `${Math.floor(e)}:${e%1===0.5?'30':'00'}`;
         const card = document.createElement("div");
         card.className = "booking-card";
-        card.textContent = `Стол ${+lane+1} | ${selDate} | ${startStr} – ${endStr}`;
-        const closeBtn = document.createElement("button");
-        closeBtn.className = "close-btn";
-        closeBtn.innerHTML = "&times;";
-        closeBtn.onclick = (ev) => { ev.stopPropagation(); intervalsByLane[lane].splice(idx,1); updateTableSelection(); };
-        card.appendChild(closeBtn);
-        cardsContainer.appendChild(card);
+        card.textContent = `Стол ${+laneStr+1} | ${selDate} | ${startStr} — ${endStr}`;
+        const delBtn = document.createElement("button");
+        delBtn.className = "close-btn";
+        delBtn.innerHTML = "✕";
+        delBtn.onclick = (ev) => { ev.stopPropagation(); intervalsByLane[laneStr].splice(idx,1); refreshSelectionUI(); };
+        card.appendChild(delBtn);
+        cardsDiv.appendChild(card);
       });
     }
   }
 
-  // --- ГЛАВНОЕ: ползунок останавливается на средней точке (12:30 при интервале 12:00-13:00) ---
-  // Логика: пользователь кликает на ячейку (стол) -> выбирает стол. 
-  // Потом кликает на время (правый столбец) – это либо старт, либо конец.
-  // Для реализации "ползунок останавливается на середине" — при выборе конечной точки, если разница между start и end равна 1 часу (т.е. 60 минут или 1.0),
-  // то мы автоматически меняем конечную точку на start + 0.5 (30 минут), имитируя "ползунок" на 12:30.
-  // По заданию: пользователь ставит 12:00 - 13:00, а ползунок останавливается на 12:30. То есть интервал брони будет с 12:00 до 12:30! 
-  // Сделаем, чтобы при попытке выбрать интервал ровно в 1 час (разница 1.0) — автоматически схлопывалось до получаса (центральный слот).
-  // Это и есть "ползунок сам встает на 12:30"
-  
-  function applySmartSliderCorrection(lane, startTime, endTime) {
-    // если разница ровно 1 час (60 мин), то считаем, что пользователь хотел "ползунок по центру" — ставим бронь ровно 30 минут от старта
-    if (Math.abs(endTime - startTime) === 1.0) {
-      const middle = startTime + 0.5;
-      return { start: startTime, end: middle };
+  // Функция добавления интервала с УМНЫМ ПРАВИЛОМ: если конечная ячейка 12:30, а начальная 12:00, то заменяем end на 13:00 (полный час)
+  // Правило общее: если пользователь выбрал начало в целый час, а конец через 30 минут (т.е. start целый, end = start+0.5), то продлеваем до start+1
+  // иначе стандартное добавление. Но чтобы соответствовать примеру: 12:00-12:30 превращается в 12:00-13:00
+  function addIntervalWithSmartRule(lane, startVal, endVal) {
+    if(!intervalsByLane[lane]) intervalsByLane[lane] = [];
+    let finalStart = startVal;
+    let finalEnd = endVal;
+    // если start целый час (нет .5) и end = start + 0.5 (ровно через полчаса) -> расширяем до конечного часа
+    if(Number.isInteger(finalStart) && (finalEnd === finalStart + 0.5)) {
+      finalEnd = finalStart + 1.0;
     }
-    // иначе стандартный интервал
-    return { start: startTime, end: endTime };
+    // дополнительная проверка, чтобы не выходить за 22:00
+    if(finalEnd > 22.0) finalEnd = 22.0;
+    if(finalStart >= finalEnd) return false;
+    // проверка пересечений с существующими интервалами
+    const exists = intervalsByLane[lane].some(iv => (finalStart < iv.end && finalEnd > iv.start));
+    if(exists) { alert("Это время уже выбрано или пересекается с другим интервалом на этом столе"); return false; }
+    intervalsByLane[lane].push({ start: finalStart, end: finalEnd });
+    refreshSelectionUI();
+    return true;
   }
 
-  // обработка кликов по времени (правый столбец)
-  tableBody.addEventListener("click", (e) => {
-    // клик по ячейке стола
-    if (e.target.classList.contains("slot")) {
-      const lane = parseInt(e.target.dataset.lane);
+  // Обработка кликов
+  const tableEl = document.getElementById("bookingTable");
+  tableEl.addEventListener("click", (e) => {
+    const slot = e.target.closest('.slot');
+    if(slot) {
+      // клик по ячейке — установка текущего стола, подсветка
+      const lane = parseInt(slot.dataset.lane);
       currentLane = lane;
-      currentStart = null;
-      clearHighlight();
-      highlightColumnAndHeader(lane);
-      resetColumnOutline();
-      return;
+      clearSelectionDecorations();
+      highlightLane(currentLane);
+      pendingStart = null; // сбрасываем ожидание старта, т.к начинаем новый выбор с ячейки? Но логика выбора времени через time-right
     }
-    // клик по времени
-    if (e.target.classList.contains("time-right") && currentLane !== null) {
-      const timeValue = parseFloat(e.target.textContent.replace(":30", ".5").replace(":00", ".0"));
-      if (currentStart === null) {
-        // первый клик — установка начала
-        currentStart = timeValue;
-        clearHighlight();
-        const startCell = document.querySelector(`td.slot[data-lane="${currentLane}"][data-time="${currentStart}"]`);
-        if (startCell) startCell.classList.add("start-time-chosen");
+    const timeRight = e.target.closest('.time-right');
+    if(timeRight && currentLane !== null) {
+      const timeVal = parseFloat(timeRight.textContent.replace(":30",".5").replace(":00",".0"));
+      if(pendingStart === null) {
+        // выбираем начало
+        pendingStart = timeVal;
+        clearSelectionDecorations();
+        highlightLane(currentLane);
+        const startCell = document.querySelector(`td.slot[data-lane="${currentLane}"][data-time="${pendingStart}"]`);
+        if(startCell) startCell.classList.add('start-time-chosen');
       } else {
-        // второй клик — конец интервала
-        let start = currentStart;
-        let end = timeValue;
-        if (end <= start) {
-          alert("Конец брони должен быть позже начала.");
-          currentStart = null;
-          clearHighlight();
-          resetColumnOutline();
+        // завершаем интервал
+        let start = pendingStart;
+        let end = timeVal;
+        if(end <= start) {
+          alert("Конец должен быть позже начала");
+          pendingStart = null;
+          clearSelectionDecorations();
+          highlightLane(currentLane);
           return;
         }
-        // ✨ УМНЫЙ ПОЛЗУНОК: если интервал ровно 1 час -> подрезаем до получаса (центр)
-        const corrected = applySmartSliderCorrection(currentLane, start, end);
-        const finalStart = corrected.start;
-        const finalEnd = corrected.end;
-        
-        if (!intervalsByLane[currentLane]) intervalsByLane[currentLane] = [];
-        intervalsByLane[currentLane].push({ start: finalStart, end: finalEnd });
-        
-        // очистка состояния
-        currentLane = null;
-        currentStart = null;
-        clearHighlight();
-        resetColumnOutline();
-        updateTableSelection();
+        const success = addIntervalWithSmartRule(currentLane, start, end);
+        if(success) {
+          pendingStart = null;
+          currentLane = null;
+          clearSelectionDecorations();
+        } else {
+          pendingStart = null;
+          clearSelectionDecorations();
+        }
+      }
+    }
+  });
+  // двойной клик для удаления интервала
+  tableEl.addEventListener("dblclick", (e) => {
+    const slot = e.target.closest('.slot');
+    if(!slot) return;
+    const lane = parseInt(slot.dataset.lane);
+    const time = parseFloat(slot.dataset.time);
+    if(intervalsByLane[lane]) {
+      const idx = intervalsByLane[lane].findIndex(iv => time >= iv.start && time < iv.end);
+      if(idx !== -1) {
+        intervalsByLane[lane].splice(idx,1);
+        refreshSelectionUI();
       }
     }
   });
 
-  // двойной клик для удаления
-  tableBody.addEventListener("dblclick", (e) => {
-    if (!e.target.classList.contains("slot")) return;
-    const lane = parseInt(e.target.dataset.lane);
-    const time = parseFloat(e.target.dataset.time);
-    if (intervalsByLane[lane]) {
-      const idx = intervalsByLane[lane].findIndex(iv => time >= Math.min(iv.start, iv.end) && time <= Math.max(iv.start, iv.end));
-      if (idx !== -1) { intervalsByLane[lane].splice(idx,1); updateTableSelection(); }
-    }
-  });
-
-  // модалки и бронь
-  window.openModal = function() {
-    if (!Object.values(intervalsByLane).some(arr => arr.length)) return alert("Сначала выберите временной интервал (клик на стол, потом на время начала и конца)");
+  function openModal() {
+    let hasAny = false;
+    for(let l in intervalsByLane) if(intervalsByLane[l].length) { hasAny = true; break; }
+    if(!hasAny) { alert("Сначала выберите интервалы на сетке: нажмите на время (справа) для начала, затем ещё раз для конца."); return; }
     document.getElementById("modal").style.display = "flex";
-  };
-  window.closeModal = () => document.getElementById("modal").style.display = "none";
-  window.submitForm = async function() {
+  }
+  function closeModal() { document.getElementById("modal").style.display = "none"; }
+  window.openModal = openModal;
+  window.closeModal = closeModal;
+
+  async function submitForm() {
     const name = document.getElementById("nameInput").value.trim();
     const phone = document.getElementById("phoneInput").value.trim();
     const comment = document.getElementById("commentInput").value.trim();
-    const date = dateInput.value;
-    if (!name || !phone) return alert("Имя и телефон обязательны");
-    const bookings = [];
-    for (let lane in intervalsByLane) {
+    const date = document.getElementById("dateInput").value;
+    if(!name || !phone) { alert("Имя и телефон обязательны"); return; }
+    const bookingsToSend = [];
+    for(let lane in intervalsByLane) {
       intervalsByLane[lane].forEach(iv => {
-        bookings.push({ date, tableNumber: parseInt(lane)+1, start: iv.start, end: iv.end, name, phone, comment });
+        bookingsToSend.push({
+          date, tableNumber: parseInt(lane)+1,
+          start: iv.start, end: iv.end,
+          name, phone, comment
+        });
       });
     }
-    if (!bookings.length) return alert("Нет интервалов");
-    loadingOverlay.style.display = "flex";
+    if(bookingsToSend.length === 0) return;
+    document.getElementById("loadingOverlay").style.display = "flex";
     try {
-      await Promise.all(bookings.map(b => fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ bookings: [b] }) })));
-      intervalsByLane = {};
-      updateTableSelection();
+      await Promise.all(bookingsToSend.map(b => fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ bookings: [b] }) })));
+      document.getElementById("loadingOverlay").style.display = "none";
       closeModal();
+      intervalsByLane = {};
+      pendingStart = null;
+      refreshSelectionUI();
       document.getElementById("nameInput").value = "";
       document.getElementById("phoneInput").value = "";
       document.getElementById("commentInput").value = "";
-      await loadExisting();
-    } catch(e) { alert("Ошибка бронирования"); }
-    finally { loadingOverlay.style.display = "none"; }
-  };
-
-  // загрузка существующих броней
-  async function loadExisting() {
-    try {
-      loadingOverlay.style.display = "flex";
-      slidersContainer.innerHTML = "";
-      const resp = await fetch(GAS_URL + "?action=get&date=" + dateInput.value);
-      const data = await resp.json();
-      if (!data.bookings) return;
-      const timeCells = Array.from(document.querySelectorAll('th.time-right'));
-      const allCells = Array.from(document.querySelectorAll('td.slot'));
-      const containerRect = tableContainer.getBoundingClientRect();
-      data.bookings.forEach(b => {
-        if (b.date === dateInput.value) {
-          const laneIdx = b.table - 1;
-          const startIdx = timeSlots.findIndex(ts => ts.key === parseFloat(b.start));
-          const endIdx = timeSlots.findIndex(ts => ts.key === parseFloat(b.end));
-          if (startIdx === -1 || endIdx === -1) return;
-          const startCell = allCells.find(cell => parseInt(cell.dataset.lane) === laneIdx && parseFloat(cell.dataset.time) === parseFloat(b.start));
-          if (!startCell) return;
-          const startRect = startCell.getBoundingClientRect();
-          const startTimeCell = timeCells[startIdx];
-          const endTimeCell = timeCells[endIdx];
-          const height = endTimeCell.offsetTop + endTimeCell.offsetHeight - startTimeCell.offsetTop;
-          const left = startRect.left - containerRect.left;
-          const top = startTimeCell.offsetTop;
-          const slider = document.createElement("div");
-          slider.className = "existing-slider";
-          if (b.confirmed === "Да") slider.classList.add("confirmed");
-          else if (b.confirmed === "Нет") slider.classList.add("rejected");
-          slider.style.top = `${top}px`;
-          slider.style.left = `${left}px`;
-          slider.style.width = `${startRect.width}px`;
-          slider.style.height = `${height}px`;
-          slider.textContent = `${b.name || ''}`;
-          slider.addEventListener('click', (e) => { e.stopPropagation(); showBookingInfo(b); });
-          slidersContainer.appendChild(slider);
-        }
-      });
-    } catch(e) { console.warn(e); }
-    finally { loadingOverlay.style.display = "none"; }
+      await loadExistingBookings();
+    } catch(err) {
+      document.getElementById("loadingOverlay").style.display = "none";
+      alert("Ошибка отправки");
+    }
   }
+  window.submitForm = submitForm;
 
-  let currentBookingId = null;
-  function showBookingInfo(b) {
-    document.getElementById('info-table').innerText = `№${b.table}`;
-    document.getElementById('info-date').innerText = b.date.split('-').reverse().join('.');
-    document.getElementById('info-time').innerText = `${Math.floor(b.start)}:${b.start%1===0.5?"30":"00"} - ${Math.floor(b.end)}:${b.end%1===0.5?"30":"00"}`;
-    document.getElementById('info-name').innerText = b.name;
-    document.getElementById('info-phone').innerText = b.phone;
-    document.getElementById('info-comment').innerText = b.comment || '—';
-    document.getElementById('info-confirmed').innerText = b.confirmed || 'не указано';
-    document.getElementById('bookingInfoPopup').style.display = 'flex';
-    currentBookingId = b.id;
+  let currentBookingObj = null;
+  async function showBookingInfo(b) {
+    currentBookingObj = b;
+    const infoDiv = document.getElementById("info-details");
+    infoDiv.innerHTML = `
+      <div class="info-row"><strong>Стол:</strong> №${b.table}</div>
+      <div class="info-row"><strong>Дата:</strong> ${b.date.split('-').reverse().join('.')}</div>
+      <div class="info-row"><strong>Время:</strong> ${Math.floor(b.start)}:${b.start%1===0.5?"30":"00"} — ${Math.floor(b.end)}:${b.end%1===0.5?"30":"00"}</div>
+      <div class="info-row"><strong>Имя:</strong> ${b.name}</div>
+      <div class="info-row"><strong>Телефон:</strong> ${b.phone}</div>
+      <div class="info-row"><strong>Комментарий:</strong> ${b.comment || '—'}</div>
+      <div class="info-row"><strong>Посещение:</strong> ${b.confirmed === "Да" ? "✅ состоялось" : (b.confirmed === "Нет" ? "❌ не было" : "не отмечено")}</div>
+    `;
+    document.getElementById("bookingInfoPopup").style.display = "flex";
   }
-  window.closeBookingInfoPopup = () => { document.getElementById('bookingInfoPopup').style.display = 'none'; currentBookingId = null; };
+  window.closeBookingInfoPopup = () => document.getElementById("bookingInfoPopup").style.display = "none";
   window.confirmBooking = async (confirmed) => {
-    if(!currentBookingId) return;
-    try{ loadingOverlay.style.display='flex'; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:currentBookingId,confirmed})}); closeBookingInfoPopup(); await loadExisting(); } catch(e){ alert("Ошибка"); } finally{ loadingOverlay.style.display='none'; }
+    if(!currentBookingObj) return;
+    document.getElementById("loadingOverlay").style.display = "flex";
+    await fetch(GAS_URL, { method:"POST", mode:"no-cors", body: JSON.stringify({ action:"confirm", id: currentBookingObj.id, confirmed }) });
+    document.getElementById("loadingOverlay").style.display = "none";
+    closeBookingInfoPopup();
+    await loadExistingBookings();
   };
   window.deleteBooking = async () => {
-    if(!currentBookingId || !confirm("Удалить бронь?")) return;
-    try{ loadingOverlay.style.display='flex'; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:currentBookingId})}); closeBookingInfoPopup(); await loadExisting(); } catch(e){ alert("Ошибка"); } finally{ loadingOverlay.style.display='none'; }
+    if(!currentBookingObj || !confirm("Удалить бронь?")) return;
+    document.getElementById("loadingOverlay").style.display = "flex";
+    await fetch(GAS_URL, { method:"POST", mode:"no-cors", body: JSON.stringify({ action:"delete", id: currentBookingObj.id }) });
+    document.getElementById("loadingOverlay").style.display = "none";
+    closeBookingInfoPopup();
+    await loadExistingBookings();
   };
-  window.closeImagePopup = () => document.getElementById("imagePopup").style.display = "none";
-  dateInput.addEventListener('change', () => { intervalsByLane = {}; updateTableSelection(); loadExisting(); });
 
-  function initAfterAuth() {
-    loadExisting();
-    updateTableSelection();
+  // загрузка существующих броней (визуальные слайдеры)
+  async function loadExistingBookings() {
+    const date = document.getElementById("dateInput").value;
+    if(!date) return;
+    const slidersContainer = document.getElementById("slidersContainer");
+    slidersContainer.innerHTML = "";
+    try {
+      document.getElementById("loadingOverlay").style.display = "flex";
+      const res = await fetch(GAS_URL + "?action=get&date=" + date);
+      const data = await res.json();
+      document.getElementById("loadingOverlay").style.display = "none";
+      if(!data.bookings) return;
+      const containerRect = document.querySelector(".table-wrapper").getBoundingClientRect();
+      const timeCells = Array.from(document.querySelectorAll('th.time-right'));
+      const tableCells = Array.from(document.querySelectorAll('td.slot'));
+      for(let b of data.bookings) {
+        if(b.date !== date) continue;
+        const laneIdx = b.table-1;
+        const startKey = parseFloat(b.start);
+        const endKey = parseFloat(b.end);
+        const startIdx = timeSlots.findIndex(ts => ts.key === startKey);
+        let endIdx = timeSlots.findIndex(ts => ts.key === endKey);
+        if(endIdx === -1) endIdx = timeSlots.length-1;
+        const startCell = tableCells.find(cell => parseInt(cell.dataset.lane) === laneIdx && parseFloat(cell.dataset.time) === startKey);
+        if(!startCell) continue;
+        const startRect = startCell.getBoundingClientRect();
+        const topOffset = timeCells[startIdx]?.offsetTop || 0;
+        const bottomCell = timeCells[endIdx];
+        const height = (bottomCell ? (bottomCell.offsetTop + bottomCell.offsetHeight) : timeCells[timeCells.length-1].offsetTop + 40) - topOffset;
+        const left = startRect.left - containerRect.left;
+        const slider = document.createElement("div");
+        slider.className = "existing-slider";
+        slider.style.position = "absolute";
+        slider.style.background = b.confirmed === "Да" ? "#16a34a" : (b.confirmed === "Нет" ? "#b91c1c" : "#1a2f40");
+        slider.style.left = `${left}px`;
+        slider.style.top = `${topOffset}px`;
+        slider.style.width = `${startRect.width}px`;
+        slider.style.height = `${height}px`;
+        slider.style.borderRadius = "8px";
+        slider.style.opacity = "0.8";
+        slider.style.pointerEvents = "auto";
+        slider.style.cursor = "pointer";
+        slider.style.border = "1px solid white";
+        slider.addEventListener('click', (e) => { e.stopPropagation(); showBookingInfo(b); });
+        slidersContainer.appendChild(slider);
+      }
+    } catch(e) { document.getElementById("loadingOverlay").style.display = "none"; }
   }
 
-  if (!tryRestoreSession()) document.getElementById('loginScreen').style.display = 'flex';
-  // подключение FontAwesome (для иконок)
-  const fontAwesome = document.createElement('link'); fontAwesome.rel='stylesheet'; fontAwesome.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css'; document.head.appendChild(fontAwesome);
+  function updateMarkersAndButtons() {
+    const headers = document.querySelectorAll('thead th');
+    const markers = document.querySelectorAll('.marker');
+    for(let i=0;i<markers.length-1 && i<headers.length;i++) markers[i].style.width = headers[i].offsetWidth + 'px';
+    const logoutBtn = document.getElementById("logoutBtnHeader");
+    if(logoutBtn) logoutBtn.onclick = logout;
+  }
+
+  function initAppAfterLogin() {
+    refreshSelectionUI();
+    loadExistingBookings();
+    updateMarkersAndButtons();
+    window.addEventListener('resize', () => { updateMarkersAndButtons(); loadExistingBookings(); });
+    document.getElementById("dateInput").addEventListener('change', () => { loadExistingBookings(); intervalsByLane = {}; pendingStart = null; refreshSelectionUI(); });
+    const today = new Date().toISOString().split('T')[0];
+    const datePicker = document.getElementById("dateInput");
+    datePicker.min = today;
+    if(!datePicker.value) datePicker.value = today;
+  }
+
+  // column markers + клик для картинки
+  const markerContainer = document.getElementById("columnMarkers");
+  for(let i=0;i<lanes;i++) {
+    const marker = document.createElement("div");
+    marker.className = "marker";
+    if(i<3 || (i>=4 && i<6)) marker.classList.add("blue");
+    else if(i===3) marker.classList.add("green");
+    else marker.classList.add("red");
+    marker.onclick = () => document.getElementById("imagePopup").style.display = "flex";
+    markerContainer.appendChild(marker);
+  }
+  const dummy = document.createElement("div"); dummy.className = "marker empty"; markerContainer.appendChild(dummy);
+  window.closeImagePopup = () => document.getElementById("imagePopup").style.display = "none";
+
+  if(!tryAutoLogin()) document.getElementById("loginScreen").style.display = "flex";
 </script>
 </body>
 </html>

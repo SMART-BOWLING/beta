@@ -1021,14 +1021,34 @@
   window.closeModal = function() { document.getElementById("modal").style.display = "none"; }
   
   window.submitForm = async function() {
-    const name = document.getElementById("nameInput").value.trim(), phone = document.getElementById("phoneInput").value.trim(), comment = document.getElementById("commentInput").value.trim(), date = dateInput.value;
-    if (!name || !phone) return alert("Введите имя и телефон."); if (!date) return alert("Выберите дату.");
-    const bookings = []; for (let lane in intervalsByLane) intervalsByLane[lane].forEach(iv => { bookings.push({ date, tableNumber: +lane+1, start: iv.start, end: iv.end, name, phone, comment }); });
+    const name = document.getElementById("nameInput").value.trim();
+    const phone = document.getElementById("phoneInput").value.trim();
+    const comment = document.getElementById("commentInput").value.trim();
+    const date = dateInput.value;
+    
+    if (!name || !phone) return alert("Введите имя и телефон.");
+    if (!date) return alert("Выберите дату.");
+    
+    const bookings = [];
+    for (let lane in intervalsByLane) {
+      intervalsByLane[lane].forEach(iv => {
+        bookings.push({ 
+          date: date, 
+          tableNumber: +lane + 1, 
+          start: iv.start, 
+          end: iv.end, 
+          name: name, 
+          phone: phone, 
+          comment: comment 
+        });
+      });
+    }
+    
     if (!bookings.length) return alert("Нет выбранных интервалов.");
+    
     try {
       loadingOverlayEl.style.display = 'flex';
       
-      // Отправляем одним POST-запросом с массивом bookings
       const response = await fetch(GAS_URL, { 
         method: "POST", 
         headers: { 'Content-Type': 'application/json' },
@@ -1041,7 +1061,8 @@
       if (result.success) {
         closeModal(); 
         for(let l in intervalsByLane) intervalsByLane[l] = []; 
-        currentLane = currentStart = null; 
+        currentLane = null; 
+        currentStart = null; 
         clearStartTimeHighlight(); 
         clearHeaderHighlight(); 
         clearVerticalLines(); 
@@ -1060,9 +1081,9 @@
   }
   
   function showBookingInfo(b) { 
-    document.getElementById('info-table').textContent = `№${b.table}`; 
+    document.getElementById('info-table').textContent = '№' + b.table; 
     document.getElementById('info-date').textContent = b.date.split('-').reverse().join('.'); 
-    document.getElementById('info-time').textContent = `${Math.floor(b.start)}:${b.start%1===0.5?"30":"00"} - ${Math.floor(b.end)}:${b.end%1===0.5?"30":"00"}`; 
+    document.getElementById('info-time').textContent = Math.floor(b.start) + ':' + (b.start % 1 === 0.5 ? "30" : "00") + ' - ' + Math.floor(b.end) + ':' + (b.end % 1 === 0.5 ? "30" : "00");
     document.getElementById('info-name').textContent = b.name; 
     document.getElementById('info-phone').textContent = b.phone; 
     document.getElementById('info-comment').textContent = b.comment || 'нет комментария'; 
@@ -1071,19 +1092,22 @@
     currentBookingId = b.id; 
   }
   
-  window.closeBookingInfoPopup = function() { document.getElementById('bookingInfoPopup').style.display = 'none'; currentBookingId = null; }
+  window.closeBookingInfoPopup = function() { 
+    document.getElementById('bookingInfoPopup').style.display = 'none'; 
+    currentBookingId = null; 
+  }
   
   window.confirmBooking = async function(confirmed) { 
     if(!currentBookingId) return; 
     try{ 
-      loadingOverlayEl.style.display='flex'; 
+      loadingOverlayEl.style.display = 'flex'; 
       const response = await fetch(GAS_URL, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: "confirm", id: currentBookingId, confirmed: confirmed })
       });
       const result = await response.json();
-      loadingOverlayEl.style.display='none'; 
+      loadingOverlayEl.style.display = 'none'; 
       if (result.success) {
         closeBookingInfoPopup(); 
         await loadExisting(); 
@@ -1091,7 +1115,7 @@
         alert('Ошибка: ' + (result.message || 'Неизвестная ошибка'));
       }
     } catch(e){ 
-      loadingOverlayEl.style.display='none'; 
+      loadingOverlayEl.style.display = 'none'; 
       alert("Ошибка обновления статуса: " + e.message); 
     } 
   }
@@ -1099,14 +1123,14 @@
   window.deleteBooking = async function() { 
     if(!currentBookingId || !confirm("Удалить бронь?")) return; 
     try{ 
-      loadingOverlayEl.style.display='flex'; 
+      loadingOverlayEl.style.display = 'flex'; 
       const response = await fetch(GAS_URL, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: "delete", id: currentBookingId })
       });
       const result = await response.json();
-      loadingOverlayEl.style.display='none'; 
+      loadingOverlayEl.style.display = 'none'; 
       if (result.success) {
         closeBookingInfoPopup(); 
         await loadExisting(); 
@@ -1114,21 +1138,21 @@
         alert('Ошибка: ' + (result.message || 'Неизвестная ошибка'));
       }
     } catch(e){ 
-      loadingOverlayEl.style.display='none'; 
+      loadingOverlayEl.style.display = 'none'; 
       alert("Ошибка удаления: " + e.message); 
     } 
   }
   
   async function loadExisting() {
     try{ 
-      loadingOverlayEl.style.display='flex'; 
-      slidersContainer.innerHTML="";
+      loadingOverlayEl.style.display = 'flex'; 
+      slidersContainer.innerHTML = "";
       
       const url = GAS_URL + "?action=get&date=" + encodeURIComponent(dateInput.value);
       const response = await fetch(url);
       const data = await response.json();
       
-      loadingOverlayEl.style.display='none'; 
+      loadingOverlayEl.style.display = 'none'; 
       
       if (!data.success) {
         console.error('Error loading bookings:', data.message);
@@ -1137,48 +1161,51 @@
       
       if(!data.bookings || data.bookings.length === 0) return; 
       
-      const timeCells = Array.from(document.querySelectorAll('th.time-right')), 
-            tableCells = Array.from(document.querySelectorAll('td.slot')), 
-            containerRect = tableContainer.getBoundingClientRect();
+      const timeCells = Array.from(document.querySelectorAll('th.time-right')); 
+      const tableCells = Array.from(document.querySelectorAll('td.slot')); 
+      const containerRect = tableContainer.getBoundingClientRect();
       
       data.bookings.forEach(b => { 
         if(b.date === dateInput.value && !b.deleted){ 
           const laneIndex = b.table - 1; 
-          const startIndex = timeSlots.findIndex(ts => ts.key === parseFloat(b.start)), 
-                endIndex = timeSlots.findIndex(ts => ts.key === parseFloat(b.end)); 
+          const startIndex = timeSlots.findIndex(ts => ts.key === parseFloat(b.start)); 
+          const endIndex = timeSlots.findIndex(ts => ts.key === parseFloat(b.end)); 
           if(startIndex === -1 || endIndex === -1) return; 
           
           const startCell = tableCells.find(cell => parseInt(cell.dataset.lane) === laneIndex && parseFloat(cell.dataset.time) === parseFloat(b.start)); 
           if(!startCell) return; 
           
           const startCellRect = startCell.getBoundingClientRect(); 
-          const startTimeCell = timeCells[startIndex], endTimeCell = timeCells[endIndex]; 
+          const startTimeCell = timeCells[startIndex]; 
+          const endTimeCell = timeCells[endIndex]; 
           const height = endTimeCell.offsetTop + endTimeCell.offsetHeight - startTimeCell.offsetTop; 
-          const left = startCellRect.left - containerRect.left, top = startTimeCell.offsetTop; 
+          const left = startCellRect.left - containerRect.left; 
+          const top = startTimeCell.offsetTop; 
           
           const slider = document.createElement("div"); 
           slider.className = "existing-slider"; 
           if (b.confirmed === "Да") slider.classList.add("confirmed"); 
           else if (b.confirmed === "Нет") slider.classList.add("rejected"); 
           
-          slider.style.top = `${top}px`; 
-          slider.style.left = `${left}px`; 
-          slider.style.width = `${startCellRect.width}px`; 
-          slider.style.height = `${height}px`; 
-          slider.addEventListener('click', (e) => { e.stopPropagation(); showBookingInfo(b); }); 
+          slider.style.top = top + 'px'; 
+          slider.style.left = left + 'px'; 
+          slider.style.width = startCellRect.width + 'px'; 
+          slider.style.height = height + 'px'; 
+          slider.addEventListener('click', function(e) { e.stopPropagation(); showBookingInfo(b); }); 
           slidersContainer.appendChild(slider); 
         } 
       });
     } catch(e){ 
-      loadingOverlayEl.style.display='none'; 
+      loadingOverlayEl.style.display = 'none'; 
       console.error('Error loading bookings:', e); 
     }
   }
   
-  dateInput.addEventListener('change', async () => { 
+  dateInput.addEventListener('change', async function() { 
     await loadExisting(); 
     intervalsByLane = {}; 
-    currentLane = currentStart = null; 
+    currentLane = null; 
+    currentStart = null; 
     clearStartTimeHighlight(); 
     clearHeaderHighlight(); 
     clearVerticalLines(); 
@@ -1191,7 +1218,9 @@
     updateMarkersWidth();
   }
   
-  window.closeImagePopup = function() { document.getElementById("imagePopup").style.display = "none"; }
+  window.closeImagePopup = function() { 
+    document.getElementById("imagePopup").style.display = "none"; 
+  }
   
   if (!tryRestoreSession()) {
     document.getElementById('loginScreen').style.display = 'flex';

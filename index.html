@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
@@ -788,7 +788,7 @@
   const AUTH_SPREADSHEET_ID = '1zwi1CInK3NZ8YRAegRMAdjin6XPacVkAkFsjAiqVE0w';
   const AUTH_SHEET_NAME = '1';
   const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbxfRLDGA29FrqKS61HmYN_FUnDwOydeCaEdeW4oc4wyroQzvb4h1OnwQ5HeotIHhcj9/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbwHABy-qFqGLW6qaD_sK2O8IuMBdxtRPUHzdB4Qb-BRUFAfog969UZ11Ba6xC0aAbH_/exec";
   
   let currentUser = null;
   let gapiInitialized = false;
@@ -1059,7 +1059,6 @@
         const end = Math.max(interval.start, interval.end);
         document.querySelectorAll(`td.slot[data-lane="${laneStr}"]`).forEach(cell => {
           const t = parseFloat(cell.dataset.time);
-          // КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: выделяем клетки где t >= start И t < end (конечная клетка НЕ включается)
           if (t >= start && t < end) cell.classList.add("selected");
         });
       });
@@ -1093,30 +1092,199 @@
 
   window.openModal = function() { if (!Object.values(intervalsByLane).some(a=>a.length)) return alert("Сначала выберите время."); document.getElementById("modal").style.display = "flex"; const btn = document.querySelector('.booking-button'); btn.classList.add('pressed'); setTimeout(()=>btn.classList.remove('pressed'),200); }
   window.closeModal = function() { document.getElementById("modal").style.display = "none"; }
+  
+  // ==================== ИСПРАВЛЕННАЯ ФУНКЦИЯ ОТПРАВКИ ====================
   window.submitForm = async function() {
-    const name = document.getElementById("nameInput").value.trim(), phone = document.getElementById("phoneInput").value.trim(), comment = document.getElementById("commentInput").value.trim(), date = dateInput.value;
-    if (!name || !phone) return alert("Введите имя и телефон."); if (!date) return alert("Выберите дату.");
-    const bookings = []; for (let lane in intervalsByLane) intervalsByLane[lane].forEach(iv => { bookings.push({ date, tableNumber: +lane+1, start: iv.start, end: iv.end, name, phone, comment }); });
+    const name = document.getElementById("nameInput").value.trim(), 
+          phone = document.getElementById("phoneInput").value.trim(), 
+          comment = document.getElementById("commentInput").value.trim(), 
+          date = dateInput.value;
+    if (!name || !phone) return alert("Введите имя и телефон."); 
+    if (!date) return alert("Выберите дату.");
+    
+    const bookings = []; 
+    for (let lane in intervalsByLane) {
+      intervalsByLane[lane].forEach(iv => { 
+        bookings.push({ 
+          date, 
+          tableNumber: +lane+1, 
+          start: iv.start, 
+          end: iv.end, 
+          name, 
+          phone, 
+          comment 
+        }); 
+      });
+    }
     if (!bookings.length) return alert("Нет выбранных интервалов.");
+    
     try {
       loadingOverlayEl.style.display = 'flex';
-      await Promise.all(bookings.map(b => fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ bookings: [b] }) })));
+      
+      // Отправляем каждое бронирование отдельно с правильным режимом
+      for (const booking of bookings) {
+        const response = await fetch(GAS_URL, { 
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ bookings: [booking] })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Ошибка HTTP: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        if (!result.success) {
+          throw new Error(result.message || 'Ошибка при сохранении');
+        }
+      }
+      
       loadingOverlayEl.style.display = 'none';
-      closeModal(); for(let l in intervalsByLane) intervalsByLane[l] = []; currentLane = currentStart = null; clearStartTimeHighlight(); clearHeaderHighlight(); clearVerticalLines(); updateTableSelection();
-      document.getElementById("nameInput").value = ""; document.getElementById("phoneInput").value = ""; document.getElementById("commentInput").value = "";
+      closeModal(); 
+      for(let l in intervalsByLane) intervalsByLane[l] = []; 
+      currentLane = currentStart = null; 
+      clearStartTimeHighlight(); 
+      clearHeaderHighlight(); 
+      clearVerticalLines(); 
+      updateTableSelection();
+      document.getElementById("nameInput").value = ""; 
+      document.getElementById("phoneInput").value = ""; 
+      document.getElementById("commentInput").value = "";
       await loadExisting();
-    } catch (error) { loadingOverlayEl.style.display = 'none'; alert("Ошибка при отправке бронирования"); }
+    } catch (error) { 
+      loadingOverlayEl.style.display = 'none'; 
+      alert("Ошибка при отправке бронирования: " + error.message);
+      console.error(error);
+    }
   }
-  function showBookingInfo(b) { document.getElementById('info-table').textContent = `№${b.table}`; document.getElementById('info-date').textContent = b.date.split('-').reverse().join('.'); document.getElementById('info-time').textContent = `${Math.floor(b.start)}:${b.start%1===0.5?"30":"00"} - ${Math.floor(b.end)}:${b.end%1===0.5?"30":"00"}`; document.getElementById('info-name').textContent = b.name; document.getElementById('info-phone').textContent = b.phone; document.getElementById('info-comment').textContent = b.comment || 'нет комментария'; document.getElementById('info-confirmed').textContent = b.confirmed || ''; document.getElementById('bookingInfoPopup').style.display = 'flex'; currentBookingId = b.id; }
+  
+  function showBookingInfo(b) { 
+    document.getElementById('info-table').textContent = `№${b.table}`; 
+    document.getElementById('info-date').textContent = b.date.split('-').reverse().join('.'); 
+    document.getElementById('info-time').textContent = `${Math.floor(b.start)}:${b.start%1===0.5?"30":"00"} - ${Math.floor(b.end)}:${b.end%1===0.5?"30":"00"}`; 
+    document.getElementById('info-name').textContent = b.name; 
+    document.getElementById('info-phone').textContent = b.phone; 
+    document.getElementById('info-comment').textContent = b.comment || 'нет комментария'; 
+    document.getElementById('info-confirmed').textContent = b.confirmed || ''; 
+    document.getElementById('bookingInfoPopup').style.display = 'flex'; 
+    currentBookingId = b.id; 
+  }
+  
   window.closeBookingInfoPopup = function() { document.getElementById('bookingInfoPopup').style.display = 'none'; currentBookingId = null; }
-  window.confirmBooking = async function(confirmed) { if(!currentBookingId) return; try{ loadingOverlayEl.style.display='flex'; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:currentBookingId,confirmed})}); loadingOverlayEl.style.display='none'; closeBookingInfoPopup(); await loadExisting(); } catch(e){ loadingOverlayEl.style.display='none'; alert("Ошибка обновления статуса"); } }
-  window.deleteBooking = async function() { if(!currentBookingId || !confirm("Удалить бронь?")) return; try{ loadingOverlayEl.style.display='flex'; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:currentBookingId})}); loadingOverlayEl.style.display='none'; closeBookingInfoPopup(); await loadExisting(); } catch(e){ loadingOverlayEl.style.display='none'; alert("Ошибка удаления"); } }
-  async function loadExisting() {
-    try{ loadingOverlayEl.style.display='flex'; slidersContainer.innerHTML=""; const res = await fetch(GAS_URL+"?action=get&date="+dateInput.value); const data = await res.json(); loadingOverlayEl.style.display='none'; if(!data.bookings?.length) return; const timeCells = Array.from(document.querySelectorAll('th.time-right')), tableCells = Array.from(document.querySelectorAll('td.slot')), containerRect = tableContainer.getBoundingClientRect();
-      data.bookings.forEach(b => { if(b.date===dateInput.value){ const laneIndex = b.table-1; const startIndex = timeSlots.findIndex(ts => ts.key===parseFloat(b.start)), endIndex = timeSlots.findIndex(ts => ts.key===parseFloat(b.end)); if(startIndex===-1||endIndex===-1) return; const startCell = tableCells.find(cell => parseInt(cell.dataset.lane)===laneIndex && parseFloat(cell.dataset.time)===parseFloat(b.start)); if(!startCell) return; const startCellRect = startCell.getBoundingClientRect(); const startTimeCell = timeCells[startIndex], endTimeCell = timeCells[endIndex]; const height = endTimeCell.offsetTop + endTimeCell.offsetHeight - startTimeCell.offsetTop; const left = startCellRect.left - containerRect.left, top = startTimeCell.offsetTop; const slider = document.createElement("div"); slider.className = "existing-slider"; if (b.confirmed === "Да") slider.classList.add("confirmed"); else if (b.confirmed === "Нет") slider.classList.add("rejected"); slider.style.top = `${top}px`; slider.style.left = `${left}px`; slider.style.width = `${startCellRect.width}px`; slider.style.height = `${height}px`; slider.addEventListener('click', (e) => { e.stopPropagation(); showBookingInfo(b); }); slidersContainer.appendChild(slider); } });
-    } catch(e){ loadingOverlayEl.style.display='none'; console.error(e); }
+  
+  // ==================== ИСПРАВЛЕННЫЕ ФУНКЦИИ ОБНОВЛЕНИЯ ====================
+  window.confirmBooking = async function(confirmed) { 
+    if(!currentBookingId) return; 
+    try{ 
+      loadingOverlayEl.style.display='flex'; 
+      const response = await fetch(GAS_URL,{
+        method:"POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body:JSON.stringify({action:"confirm",id:currentBookingId,confirmed})
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const result = await response.json();
+      if (!result.success) throw new Error(result.message);
+      loadingOverlayEl.style.display='none'; 
+      closeBookingInfoPopup(); 
+      await loadExisting(); 
+    } catch(e){ 
+      loadingOverlayEl.style.display='none'; 
+      alert("Ошибка обновления статуса: " + e.message);
+      console.error(e);
+    } 
   }
-  dateInput.addEventListener('change', async () => { await loadExisting(); intervalsByLane = {}; currentLane = currentStart = null; clearStartTimeHighlight(); clearHeaderHighlight(); clearVerticalLines(); updateTableSelection(); });
+  
+  window.deleteBooking = async function() { 
+    if(!currentBookingId || !confirm("Удалить бронь?")) return; 
+    try{ 
+      loadingOverlayEl.style.display='flex'; 
+      const response = await fetch(GAS_URL,{
+        method:"POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body:JSON.stringify({action:"delete",id:currentBookingId})
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const result = await response.json();
+      if (!result.success) throw new Error(result.message);
+      loadingOverlayEl.style.display='none'; 
+      closeBookingInfoPopup(); 
+      await loadExisting(); 
+    } catch(e){ 
+      loadingOverlayEl.style.display='none'; 
+      alert("Ошибка удаления: " + e.message);
+      console.error(e);
+    } 
+  }
+  
+  // ==================== ИСПРАВЛЕННАЯ ЗАГРУЗКА БРОНЕЙ ====================
+  async function loadExisting() {
+    try{ 
+      loadingOverlayEl.style.display='flex'; 
+      slidersContainer.innerHTML=""; 
+      
+      const url = GAS_URL + "?action=get&date=" + dateInput.value;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      
+      const data = await response.json();
+      loadingOverlayEl.style.display='none'; 
+      
+      if (!data.success) {
+        console.warn('Server error:', data.message);
+        return;
+      }
+      if (!data.bookings?.length) return; 
+      
+      const timeCells = Array.from(document.querySelectorAll('th.time-right')), 
+            tableCells = Array.from(document.querySelectorAll('td.slot')), 
+            containerRect = tableContainer.getBoundingClientRect();
+            
+      data.bookings.forEach(b => { 
+        if(b.date===dateInput.value){ 
+          const laneIndex = b.table-1; 
+          const startIndex = timeSlots.findIndex(ts => ts.key===parseFloat(b.start)), 
+                endIndex = timeSlots.findIndex(ts => ts.key===parseFloat(b.end)); 
+          if(startIndex===-1||endIndex===-1) return; 
+          const startCell = tableCells.find(cell => parseInt(cell.dataset.lane)===laneIndex && parseFloat(cell.dataset.time)===parseFloat(b.start)); 
+          if(!startCell) return; 
+          const startCellRect = startCell.getBoundingClientRect(); 
+          const startTimeCell = timeCells[startIndex], endTimeCell = timeCells[endIndex]; 
+          const height = endTimeCell.offsetTop + endTimeCell.offsetHeight - startTimeCell.offsetTop; 
+          const left = startCellRect.left - containerRect.left, top = startTimeCell.offsetTop; 
+          const slider = document.createElement("div"); 
+          slider.className = "existing-slider"; 
+          if (b.confirmed === "Да") slider.classList.add("confirmed"); 
+          else if (b.confirmed === "Нет") slider.classList.add("rejected"); 
+          slider.style.top = `${top}px`; 
+          slider.style.left = `${left}px`; 
+          slider.style.width = `${startCellRect.width}px`; 
+          slider.style.height = `${height}px`; 
+          slider.addEventListener('click', (e) => { e.stopPropagation(); showBookingInfo(b); }); 
+          slidersContainer.appendChild(slider); 
+        } 
+      });
+    } catch(e){ 
+      loadingOverlayEl.style.display='none'; 
+      console.error('Error loading bookings:', e);
+    } 
+  }
+  
+  dateInput.addEventListener('change', async () => { 
+    await loadExisting(); 
+    intervalsByLane = {}; 
+    currentLane = currentStart = null; 
+    clearStartTimeHighlight(); 
+    clearHeaderHighlight(); 
+    clearVerticalLines(); 
+    updateTableSelection(); 
+  });
   
   function initAppAfterAuth() {
     loadExisting(); 

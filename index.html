@@ -80,15 +80,6 @@
         box-sizing: border-box;
       }
       
-      .column-markers {
-        gap: var(--border-spacing);
-        justify-content: center;
-      }
-      
-      .marker {
-        width: var(--cell-size);
-      }
-      
       .login-container {
         padding: 20px !important;
       }
@@ -145,22 +136,28 @@
       transition: background-color 0.2s, color 0.2s;
       font-weight: 600;
       letter-spacing: 0.5px;
+      border-radius: 4px 4px 0 0;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
 
-    thead th:nth-child(1),
-    thead th:nth-child(2),
-    thead th:nth-child(3),
-    thead th:nth-child(4),
-    thead th:nth-child(5),
-    thead th:nth-child(6),
-    thead th:nth-child(7),
-    thead th:nth-child(8),
-    thead th:nth-child(9),
-    thead th:nth-child(10),
-    thead th:nth-child(11),
-    thead th:nth-child(12),
+    /* Цветные подложки для заголовков столов */
+    thead th:nth-child(1) { background: #3b82f6 !important; } /* синий */
+    thead th:nth-child(2) { background: #3b82f6 !important; }
+    thead th:nth-child(3) { background: #3b82f6 !important; }
+    thead th:nth-child(4) { background: #22c55e !important; } /* зелёный */
+    thead th:nth-child(5) { background: #3b82f6 !important; }
+    thead th:nth-child(6) { background: #3b82f6 !important; }
+    thead th:nth-child(7) { background: #ef4444 !important; } /* красный */
+    thead th:nth-child(8) { background: #ef4444 !important; }
+    thead th:nth-child(9) { background: #ef4444 !important; }
+    thead th:nth-child(10) { background: #ef4444 !important; }
+    thead th:nth-child(11) { background: #ef4444 !important; }
+    thead th:nth-child(12) { background: #ef4444 !important; }
+
+    /* Сброс для time-col */
     thead th.time-col {
       background: #1a2f40 !important;
+      text-shadow: none;
     }
 
     th.time-col, .time-right {
@@ -224,44 +221,9 @@
       color: white;
     }
 
+    /* Маркеры полностью скрыты */
     .column-markers {
-      display: flex;
-      gap: var(--border-spacing);
-      margin-top: 5px;
-      padding: 0;
-    }
-
-    .marker {
-      height: 6px;
-      border-radius: 3px;
-      cursor: pointer;
-      transition: transform 0.1s ease;
-    }
-    .marker:active {
-      transform: scale(0.97);
-    }
-
-    .marker.blue {
-      background-color: #3b82f6;
-      box-shadow: 0 0 2px rgba(59,130,246,0.5);
-    }
-
-    .marker.green {
-      background-color: #22c55e;
-      box-shadow: 0 0 2px rgba(34,197,94,0.5);
-    }
-
-    .marker.red {
-      background-color: #ef4444;
-      box-shadow: 0 0 2px rgba(239,68,68,0.5);
-    }
-
-    .marker.empty {
-      background: transparent;
-      cursor: default;
-    }
-    .marker.empty:active {
-      transform: none;
+      display: none;
     }
 
     #cardsContainer {
@@ -733,6 +695,7 @@
         <tbody id="tableBody"></tbody>
       </table>
       
+      <!-- Маркеры удалены -->
       <div id="columnMarkers" class="column-markers"></div>
     </div>
     <div id="slidersContainer"></div>
@@ -788,7 +751,7 @@
   const AUTH_SPREADSHEET_ID = '1zwi1CInK3NZ8YRAegRMAdjin6XPacVkAkFsjAiqVE0w';
   const AUTH_SHEET_NAME = '1';
   const API_KEY = 'AIzaSyAXL0Hsfxy-g-AgYhnivj4x9gCB2rrtF-0';
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbwHABy-qFqGLW6qaD_sK2O8IuMBdxtRPUHzdB4Qb-BRUFAfog969UZ11Ba6xC0aAbH_/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbxfRLDGA29FrqKS61HmYN_FUnDwOydeCaEdeW4oc4wyroQzvb4h1OnwQ5HeotIHhcj9/exec";
   
   let currentUser = null;
   let gapiInitialized = false;
@@ -1004,45 +967,12 @@
     tableBody.appendChild(row);
   });
 
-  function updateMarkersWidth() {
-    const headers = document.querySelectorAll('thead th');
-    const markers = document.querySelectorAll('.marker');
-    if (headers.length === markers.length) {
-      for (let i = 0; i < headers.length; i++) {
-        const width = headers[i].offsetWidth;
-        markers[i].style.width = width + 'px';
-      }
-    }
-  }
+  // Функция обновления ширины маркеров больше не нужна
+  function updateMarkersWidth() {}
 
+  // Контейнер маркеров очищен и скрыт через CSS
   const columnMarkers = document.getElementById("columnMarkers");
-  function createMarkers() {
-    columnMarkers.innerHTML = "";
-    for (let lane = 0; lane < lanes; lane++) {
-      const marker = document.createElement("div");
-      marker.className = "marker";
-      if (lane === 0 || lane === 1 || lane === 2 || lane === 4 || lane === 5) {
-        marker.classList.add("blue");
-      } else if (lane === 3) {
-        marker.classList.add("green");
-      } else if (lane >= 6 && lane <= 11) {
-        marker.classList.add("red");
-      }
-      marker.onclick = () => {
-        document.getElementById("imagePopup").style.display = "flex";
-      };
-      columnMarkers.appendChild(marker);
-    }
-    const timeMarker = document.createElement("div");
-    timeMarker.className = "marker empty";
-    columnMarkers.appendChild(timeMarker);
-    setTimeout(updateMarkersWidth, 10);
-  }
-  createMarkers();
-
-  window.addEventListener('resize', updateMarkersWidth);
-  window.addEventListener('load', updateMarkersWidth);
-  setTimeout(updateMarkersWidth, 100);
+  columnMarkers.innerHTML = "";
 
   let intervalsByLane = {}, currentLane = null, currentStart = null, currentBookingId = null;
   function clearStartTimeHighlight() { document.querySelectorAll('td.start-time-chosen').forEach(c => c.classList.remove('start-time-chosen')); }
@@ -1092,199 +1022,30 @@
 
   window.openModal = function() { if (!Object.values(intervalsByLane).some(a=>a.length)) return alert("Сначала выберите время."); document.getElementById("modal").style.display = "flex"; const btn = document.querySelector('.booking-button'); btn.classList.add('pressed'); setTimeout(()=>btn.classList.remove('pressed'),200); }
   window.closeModal = function() { document.getElementById("modal").style.display = "none"; }
-  
-  // ==================== ИСПРАВЛЕННАЯ ФУНКЦИЯ ОТПРАВКИ ====================
   window.submitForm = async function() {
-    const name = document.getElementById("nameInput").value.trim(), 
-          phone = document.getElementById("phoneInput").value.trim(), 
-          comment = document.getElementById("commentInput").value.trim(), 
-          date = dateInput.value;
-    if (!name || !phone) return alert("Введите имя и телефон."); 
-    if (!date) return alert("Выберите дату.");
-    
-    const bookings = []; 
-    for (let lane in intervalsByLane) {
-      intervalsByLane[lane].forEach(iv => { 
-        bookings.push({ 
-          date, 
-          tableNumber: +lane+1, 
-          start: iv.start, 
-          end: iv.end, 
-          name, 
-          phone, 
-          comment 
-        }); 
-      });
-    }
+    const name = document.getElementById("nameInput").value.trim(), phone = document.getElementById("phoneInput").value.trim(), comment = document.getElementById("commentInput").value.trim(), date = dateInput.value;
+    if (!name || !phone) return alert("Введите имя и телефон."); if (!date) return alert("Выберите дату.");
+    const bookings = []; for (let lane in intervalsByLane) intervalsByLane[lane].forEach(iv => { bookings.push({ date, tableNumber: +lane+1, start: iv.start, end: iv.end, name, phone, comment }); });
     if (!bookings.length) return alert("Нет выбранных интервалов.");
-    
     try {
       loadingOverlayEl.style.display = 'flex';
-      
-      // Отправляем каждое бронирование отдельно с правильным режимом
-      for (const booking of bookings) {
-        const response = await fetch(GAS_URL, { 
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ bookings: [booking] })
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Ошибка HTTP: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        if (!result.success) {
-          throw new Error(result.message || 'Ошибка при сохранении');
-        }
-      }
-      
+      await Promise.all(bookings.map(b => fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ bookings: [b] }) })));
       loadingOverlayEl.style.display = 'none';
-      closeModal(); 
-      for(let l in intervalsByLane) intervalsByLane[l] = []; 
-      currentLane = currentStart = null; 
-      clearStartTimeHighlight(); 
-      clearHeaderHighlight(); 
-      clearVerticalLines(); 
-      updateTableSelection();
-      document.getElementById("nameInput").value = ""; 
-      document.getElementById("phoneInput").value = ""; 
-      document.getElementById("commentInput").value = "";
+      closeModal(); for(let l in intervalsByLane) intervalsByLane[l] = []; currentLane = currentStart = null; clearStartTimeHighlight(); clearHeaderHighlight(); clearVerticalLines(); updateTableSelection();
+      document.getElementById("nameInput").value = ""; document.getElementById("phoneInput").value = ""; document.getElementById("commentInput").value = "";
       await loadExisting();
-    } catch (error) { 
-      loadingOverlayEl.style.display = 'none'; 
-      alert("Ошибка при отправке бронирования: " + error.message);
-      console.error(error);
-    }
+    } catch (error) { loadingOverlayEl.style.display = 'none'; alert("Ошибка при отправке бронирования"); }
   }
-  
-  function showBookingInfo(b) { 
-    document.getElementById('info-table').textContent = `№${b.table}`; 
-    document.getElementById('info-date').textContent = b.date.split('-').reverse().join('.'); 
-    document.getElementById('info-time').textContent = `${Math.floor(b.start)}:${b.start%1===0.5?"30":"00"} - ${Math.floor(b.end)}:${b.end%1===0.5?"30":"00"}`; 
-    document.getElementById('info-name').textContent = b.name; 
-    document.getElementById('info-phone').textContent = b.phone; 
-    document.getElementById('info-comment').textContent = b.comment || 'нет комментария'; 
-    document.getElementById('info-confirmed').textContent = b.confirmed || ''; 
-    document.getElementById('bookingInfoPopup').style.display = 'flex'; 
-    currentBookingId = b.id; 
-  }
-  
+  function showBookingInfo(b) { document.getElementById('info-table').textContent = `№${b.table}`; document.getElementById('info-date').textContent = b.date.split('-').reverse().join('.'); document.getElementById('info-time').textContent = `${Math.floor(b.start)}:${b.start%1===0.5?"30":"00"} - ${Math.floor(b.end)}:${b.end%1===0.5?"30":"00"}`; document.getElementById('info-name').textContent = b.name; document.getElementById('info-phone').textContent = b.phone; document.getElementById('info-comment').textContent = b.comment || 'нет комментария'; document.getElementById('info-confirmed').textContent = b.confirmed || ''; document.getElementById('bookingInfoPopup').style.display = 'flex'; currentBookingId = b.id; }
   window.closeBookingInfoPopup = function() { document.getElementById('bookingInfoPopup').style.display = 'none'; currentBookingId = null; }
-  
-  // ==================== ИСПРАВЛЕННЫЕ ФУНКЦИИ ОБНОВЛЕНИЯ ====================
-  window.confirmBooking = async function(confirmed) { 
-    if(!currentBookingId) return; 
-    try{ 
-      loadingOverlayEl.style.display='flex'; 
-      const response = await fetch(GAS_URL,{
-        method:"POST",
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body:JSON.stringify({action:"confirm",id:currentBookingId,confirmed})
-      });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const result = await response.json();
-      if (!result.success) throw new Error(result.message);
-      loadingOverlayEl.style.display='none'; 
-      closeBookingInfoPopup(); 
-      await loadExisting(); 
-    } catch(e){ 
-      loadingOverlayEl.style.display='none'; 
-      alert("Ошибка обновления статуса: " + e.message);
-      console.error(e);
-    } 
-  }
-  
-  window.deleteBooking = async function() { 
-    if(!currentBookingId || !confirm("Удалить бронь?")) return; 
-    try{ 
-      loadingOverlayEl.style.display='flex'; 
-      const response = await fetch(GAS_URL,{
-        method:"POST",
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body:JSON.stringify({action:"delete",id:currentBookingId})
-      });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const result = await response.json();
-      if (!result.success) throw new Error(result.message);
-      loadingOverlayEl.style.display='none'; 
-      closeBookingInfoPopup(); 
-      await loadExisting(); 
-    } catch(e){ 
-      loadingOverlayEl.style.display='none'; 
-      alert("Ошибка удаления: " + e.message);
-      console.error(e);
-    } 
-  }
-  
-  // ==================== ИСПРАВЛЕННАЯ ЗАГРУЗКА БРОНЕЙ ====================
+  window.confirmBooking = async function(confirmed) { if(!currentBookingId) return; try{ loadingOverlayEl.style.display='flex'; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"confirm",id:currentBookingId,confirmed})}); loadingOverlayEl.style.display='none'; closeBookingInfoPopup(); await loadExisting(); } catch(e){ loadingOverlayEl.style.display='none'; alert("Ошибка обновления статуса"); } }
+  window.deleteBooking = async function() { if(!currentBookingId || !confirm("Удалить бронь?")) return; try{ loadingOverlayEl.style.display='flex'; await fetch(GAS_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({action:"delete",id:currentBookingId})}); loadingOverlayEl.style.display='none'; closeBookingInfoPopup(); await loadExisting(); } catch(e){ loadingOverlayEl.style.display='none'; alert("Ошибка удаления"); } }
   async function loadExisting() {
-    try{ 
-      loadingOverlayEl.style.display='flex'; 
-      slidersContainer.innerHTML=""; 
-      
-      const url = GAS_URL + "?action=get&date=" + dateInput.value;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      
-      const data = await response.json();
-      loadingOverlayEl.style.display='none'; 
-      
-      if (!data.success) {
-        console.warn('Server error:', data.message);
-        return;
-      }
-      if (!data.bookings?.length) return; 
-      
-      const timeCells = Array.from(document.querySelectorAll('th.time-right')), 
-            tableCells = Array.from(document.querySelectorAll('td.slot')), 
-            containerRect = tableContainer.getBoundingClientRect();
-            
-      data.bookings.forEach(b => { 
-        if(b.date===dateInput.value){ 
-          const laneIndex = b.table-1; 
-          const startIndex = timeSlots.findIndex(ts => ts.key===parseFloat(b.start)), 
-                endIndex = timeSlots.findIndex(ts => ts.key===parseFloat(b.end)); 
-          if(startIndex===-1||endIndex===-1) return; 
-          const startCell = tableCells.find(cell => parseInt(cell.dataset.lane)===laneIndex && parseFloat(cell.dataset.time)===parseFloat(b.start)); 
-          if(!startCell) return; 
-          const startCellRect = startCell.getBoundingClientRect(); 
-          const startTimeCell = timeCells[startIndex], endTimeCell = timeCells[endIndex]; 
-          const height = endTimeCell.offsetTop + endTimeCell.offsetHeight - startTimeCell.offsetTop; 
-          const left = startCellRect.left - containerRect.left, top = startTimeCell.offsetTop; 
-          const slider = document.createElement("div"); 
-          slider.className = "existing-slider"; 
-          if (b.confirmed === "Да") slider.classList.add("confirmed"); 
-          else if (b.confirmed === "Нет") slider.classList.add("rejected"); 
-          slider.style.top = `${top}px`; 
-          slider.style.left = `${left}px`; 
-          slider.style.width = `${startCellRect.width}px`; 
-          slider.style.height = `${height}px`; 
-          slider.addEventListener('click', (e) => { e.stopPropagation(); showBookingInfo(b); }); 
-          slidersContainer.appendChild(slider); 
-        } 
-      });
-    } catch(e){ 
-      loadingOverlayEl.style.display='none'; 
-      console.error('Error loading bookings:', e);
-    } 
+    try{ loadingOverlayEl.style.display='flex'; slidersContainer.innerHTML=""; const res = await fetch(GAS_URL+"?action=get&date="+dateInput.value); const data = await res.json(); loadingOverlayEl.style.display='none'; if(!data.bookings?.length) return; const timeCells = Array.from(document.querySelectorAll('th.time-right')), tableCells = Array.from(document.querySelectorAll('td.slot')), containerRect = tableContainer.getBoundingClientRect();
+      data.bookings.forEach(b => { if(b.date===dateInput.value){ const laneIndex = b.table-1; const startIndex = timeSlots.findIndex(ts => ts.key===parseFloat(b.start)), endIndex = timeSlots.findIndex(ts => ts.key===parseFloat(b.end)); if(startIndex===-1||endIndex===-1) return; const startCell = tableCells.find(cell => parseInt(cell.dataset.lane)===laneIndex && parseFloat(cell.dataset.time)===parseFloat(b.start)); if(!startCell) return; const startCellRect = startCell.getBoundingClientRect(); const startTimeCell = timeCells[startIndex], endTimeCell = timeCells[endIndex]; const height = endTimeCell.offsetTop + endTimeCell.offsetHeight - startTimeCell.offsetTop; const left = startCellRect.left - containerRect.left, top = startTimeCell.offsetTop; const slider = document.createElement("div"); slider.className = "existing-slider"; if (b.confirmed === "Да") slider.classList.add("confirmed"); else if (b.confirmed === "Нет") slider.classList.add("rejected"); slider.style.top = `${top}px`; slider.style.left = `${left}px`; slider.style.width = `${startCellRect.width}px`; slider.style.height = `${height}px`; slider.addEventListener('click', (e) => { e.stopPropagation(); showBookingInfo(b); }); slidersContainer.appendChild(slider); } });
+    } catch(e){ loadingOverlayEl.style.display='none'; console.error(e); }
   }
-  
-  dateInput.addEventListener('change', async () => { 
-    await loadExisting(); 
-    intervalsByLane = {}; 
-    currentLane = currentStart = null; 
-    clearStartTimeHighlight(); 
-    clearHeaderHighlight(); 
-    clearVerticalLines(); 
-    updateTableSelection(); 
-  });
+  dateInput.addEventListener('change', async () => { await loadExisting(); intervalsByLane = {}; currentLane = currentStart = null; clearStartTimeHighlight(); clearHeaderHighlight(); clearVerticalLines(); updateTableSelection(); });
   
   function initAppAfterAuth() {
     loadExisting(); 

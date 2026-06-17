@@ -80,15 +80,6 @@
         box-sizing: border-box;
       }
       
-      .column-markers {
-        gap: var(--border-spacing);
-        justify-content: center;
-      }
-      
-      .marker {
-        width: var(--cell-size);
-      }
-      
       .login-container {
         padding: 20px !important;
       }
@@ -145,7 +136,25 @@
       transition: background-color 0.2s, color 0.2s;
       font-weight: 600;
       letter-spacing: 0.5px;
+      /* цветные подложки для столов */
+      background: #3b82f6 !important; /* базовый синий */
+      border-radius: 4px 4px 0 0;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
+
+    /* Переопределяем цвета для каждого стола (индексы 0-11) */
+    thead th:nth-child(1) { background: #3b82f6 !important; } /* синий */
+    thead th:nth-child(2) { background: #3b82f6 !important; }
+    thead th:nth-child(3) { background: #3b82f6 !important; }
+    thead th:nth-child(4) { background: #22c55e !important; } /* зелёный */
+    thead th:nth-child(5) { background: #3b82f6 !important; }
+    thead th:nth-child(6) { background: #3b82f6 !important; }
+    thead th:nth-child(7) { background: #ef4444 !important; } /* красный */
+    thead th:nth-child(8) { background: #ef4444 !important; }
+    thead th:nth-child(9) { background: #ef4444 !important; }
+    thead th:nth-child(10) { background: #ef4444 !important; }
+    thead th:nth-child(11) { background: #ef4444 !important; }
+    thead th:nth-child(12) { background: #ef4444 !important; }
 
     thead th:nth-child(1),
     thead th:nth-child(2),
@@ -159,6 +168,11 @@
     thead th:nth-child(10),
     thead th:nth-child(11),
     thead th:nth-child(12),
+    thead th.time-col {
+      background: #1a2f40 !important;
+    }
+
+    /* Восстанавливаем цвет для time-col (последний) */
     thead th.time-col {
       background: #1a2f40 !important;
     }
@@ -224,44 +238,9 @@
       color: white;
     }
 
+    /* Маркеры полностью удалены — стили не используются */
     .column-markers {
-      display: flex;
-      gap: var(--border-spacing);
-      margin-top: 5px;
-      padding: 0;
-    }
-
-    .marker {
-      height: 6px;
-      border-radius: 3px;
-      cursor: pointer;
-      transition: transform 0.1s ease;
-    }
-    .marker:active {
-      transform: scale(0.97);
-    }
-
-    .marker.blue {
-      background-color: #3b82f6;
-      box-shadow: 0 0 2px rgba(59,130,246,0.5);
-    }
-
-    .marker.green {
-      background-color: #22c55e;
-      box-shadow: 0 0 2px rgba(34,197,94,0.5);
-    }
-
-    .marker.red {
-      background-color: #ef4444;
-      box-shadow: 0 0 2px rgba(239,68,68,0.5);
-    }
-
-    .marker.empty {
-      background: transparent;
-      cursor: default;
-    }
-    .marker.empty:active {
-      transform: none;
+      display: none;
     }
 
     #cardsContainer {
@@ -733,6 +712,7 @@
         <tbody id="tableBody"></tbody>
       </table>
       
+      <!-- Маркеры полностью удалены — контейнер пуст и скрыт через display:none -->
       <div id="columnMarkers" class="column-markers"></div>
     </div>
     <div id="slidersContainer"></div>
@@ -1004,45 +984,12 @@
     tableBody.appendChild(row);
   });
 
-  function updateMarkersWidth() {
-    const headers = document.querySelectorAll('thead th');
-    const markers = document.querySelectorAll('.marker');
-    if (headers.length === markers.length) {
-      for (let i = 0; i < headers.length; i++) {
-        const width = headers[i].offsetWidth;
-        markers[i].style.width = width + 'px';
-      }
-    }
-  }
+  // Функция updateMarkersWidth больше не нужна, но оставляем заглушку
+  function updateMarkersWidth() {}
 
+  // Контейнер маркеров очищен и скрыт через CSS, но оставляем пустой
   const columnMarkers = document.getElementById("columnMarkers");
-  function createMarkers() {
-    columnMarkers.innerHTML = "";
-    for (let lane = 0; lane < lanes; lane++) {
-      const marker = document.createElement("div");
-      marker.className = "marker";
-      if (lane === 0 || lane === 1 || lane === 2 || lane === 4 || lane === 5) {
-        marker.classList.add("blue");
-      } else if (lane === 3) {
-        marker.classList.add("green");
-      } else if (lane >= 6 && lane <= 11) {
-        marker.classList.add("red");
-      }
-      marker.onclick = () => {
-        document.getElementById("imagePopup").style.display = "flex";
-      };
-      columnMarkers.appendChild(marker);
-    }
-    const timeMarker = document.createElement("div");
-    timeMarker.className = "marker empty";
-    columnMarkers.appendChild(timeMarker);
-    setTimeout(updateMarkersWidth, 10);
-  }
-  createMarkers();
-
-  window.addEventListener('resize', updateMarkersWidth);
-  window.addEventListener('load', updateMarkersWidth);
-  setTimeout(updateMarkersWidth, 100);
+  columnMarkers.innerHTML = ""; // полностью удаляем все маркеры
 
   let intervalsByLane = {}, currentLane = null, currentStart = null, currentBookingId = null;
   function clearStartTimeHighlight() { document.querySelectorAll('td.start-time-chosen').forEach(c => c.classList.remove('start-time-chosen')); }
@@ -1059,7 +1006,6 @@
         const end = Math.max(interval.start, interval.end);
         document.querySelectorAll(`td.slot[data-lane="${laneStr}"]`).forEach(cell => {
           const t = parseFloat(cell.dataset.time);
-          // КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: выделяем клетки где t >= start И t < end (конечная клетка НЕ включается)
           if (t >= start && t < end) cell.classList.add("selected");
         });
       });
